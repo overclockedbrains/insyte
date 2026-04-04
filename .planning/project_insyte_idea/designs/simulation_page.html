@@ -5,13 +5,10 @@
 <head>
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <title>explorium | Hash Table Simulation</title>
+  <title>insyte | Hash Table Simulation</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@600;700;800&amp;display=swap"
-    rel="stylesheet" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Inter:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
     rel="stylesheet" />
   <link
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
@@ -22,59 +19,63 @@
       theme: {
         extend: {
           "colors": {
-            "secondary-container": "#00cbe6",
-            "tertiary": "#bcc7de",
-            "on-secondary-container": "#00515d",
-            "on-primary-fixed": "#21005e",
-            "primary-fixed-dim": "#cebdff",
-            "surface-container-high": "#2a292f",
-            "on-tertiary": "#263143",
-            "primary": "#cebdff",
-            "surface-container-highest": "#35343a",
-            "background": "#131318",
-            "on-surface-variant": "#cac4d4",
-            "surface-variant": "#35343a",
-            "on-tertiary-fixed": "#111c2d",
-            "on-primary-container": "#3c1989",
-            "inverse-primary": "#674bb5",
-            "primary-fixed": "#e8ddff",
-            "surface-container-low": "#1b1b20",
-            "tertiary-fixed": "#d8e3fb",
-            "inverse-surface": "#e4e1e9",
-            "error": "#ffb4ab",
-            "surface-bright": "#39383e",
-            "surface-container": "#1f1f25",
-            "outline": "#948e9d",
-            "surface-container-lowest": "#0e0e13",
-            "inverse-on-surface": "#303036",
-            "on-secondary": "#00363e",
-            "on-primary-fixed-variant": "#4f319c",
-            "on-error-container": "#ffdad6",
-            "secondary-fixed": "#a2eeff",
-            "outline-variant": "#494552",
-            "on-background": "#e4e1e9",
-            "on-surface": "#e4e1e9",
-            "surface": "#131318",
-            "primary-container": "#a78bfa",
-            "on-primary": "#381385",
-            "error-container": "#93000a",
-            "surface-dim": "#131318",
-            "tertiary-fixed-dim": "#bcc7de",
-            "tertiary-container": "#929db3",
-            "on-secondary-fixed-variant": "#004e5a",
-            "secondary": "#5de6ff",
-            "on-tertiary-container": "#2a3547",
-            "surface-tint": "#cebdff",
-            "on-secondary-fixed": "#001f25",
-            "on-error": "#690005",
-            "secondary-fixed-dim": "#2fd9f4",
-            "on-tertiary-fixed-variant": "#3c475a"
+            "background": "#0e0e13",
+            "surface-container-high": "#1f1f26",
+            "secondary-dim": "#1ad0eb",
+            "on-primary-container": "#290070",
+            "outline-variant": "#48474d",
+            "on-error": "#490013",
+            "surface-bright": "#2c2b33",
+            "on-tertiary-fixed-variant": "#1f2a95",
+            "surface-container": "#19191f",
+            "primary": "#b79fff",
+            "on-surface": "#f9f5fd",
+            "tertiary-container": "#818cf8",
+            "on-primary-fixed-variant": "#330b80",
+            "secondary": "#3adffa",
+            "tertiary-fixed-dim": "#919bff",
+            "secondary-fixed-dim": "#29d6f1",
+            "on-secondary-fixed-variant": "#005966",
+            "primary-dim": "#a88cfb",
+            "on-tertiary-fixed": "#00055d",
+            "on-error-container": "#ffb2b9",
+            "error-dim": "#d73357",
+            "surface-container-highest": "#25252d",
+            "tertiary-fixed": "#a2aaff",
+            "surface": "#0e0e13",
+            "on-surface-variant": "#acaab1",
+            "on-secondary-container": "#eafbff",
+            "error": "#ff6e84",
+            "surface-variant": "#25252d",
+            "tertiary-dim": "#8a95ff",
+            "tertiary": "#919bff",
+            "surface-container-low": "#131319",
+            "surface-container-lowest": "#000000",
+            "surface-dim": "#0e0e13",
+            "inverse-surface": "#fcf8ff",
+            "outline": "#76747b",
+            "on-secondary": "#004b56",
+            "on-primary": "#361083",
+            "on-background": "#f9f5fd",
+            "inverse-on-surface": "#55545b",
+            "secondary-container": "#006877",
+            "surface-tint": "#b79fff",
+            "on-secondary-fixed": "#003a43",
+            "on-primary-fixed": "#000000",
+            "error-container": "#a70138",
+            "on-tertiary-container": "#00055a",
+            "on-tertiary": "#000b83",
+            "secondary-fixed": "#48e4ff",
+            "primary-fixed-dim": "#9d81f0",
+            "inverse-primary": "#684cb6",
+            "primary-fixed": "#ab8ffe",
+            "primary-container": "#ab8ffe"
           },
           "borderRadius": {
-            "DEFAULT": "0.125rem",
-            "lg": "0.25rem",
-            "xl": "0.5rem",
-            "full": "0.75rem"
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
           },
           "fontFamily": {
             "headline": ["Manrope"],
@@ -86,382 +87,348 @@
     }
   </script>
   <style>
-    body {
-      background-color: #0a0a0f;
-      color: #e4e1e9;
-      font-family: 'Inter', sans-serif;
-    }
-
-    .dot-grid {
-      background-image: radial-gradient(circle, #494552 1px, transparent 1px);
-      background-size: 24px 24px;
-      opacity: 0.15;
-    }
-
-    .glass-card {
-      background: rgba(53, 52, 58, 0.6);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(206, 189, 255, 0.1);
-    }
-
-    .bezier-path {
-      stroke-dasharray: 5;
-    }
-
     .material-symbols-outlined {
-      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
-      vertical-align: middle;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    .primary-glow-bottom {
+      box-shadow: 0 10px 30px -15px rgba(183, 159, 255, 0.3);
+    }
+
+    .glass-panel {
+      background: rgba(31, 31, 38, 0.6);
+      backdrop-filter: blur(20px);
+    }
+
+    .neon-gradient {
+      background: linear-gradient(135deg, #b79fff 0%, #ab8ffe 100%);
     }
   </style>
 </head>
 
-<body class="overflow-x-hidden">
-  <!-- TopNavBar Shared Component -->
-  <header
-    class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-8 h-16 bg-zinc-950/60 backdrop-blur-xl border-b border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.4),0_0_10px_rgba(167,139,250,0.05)]">
-    <div class="flex items-center gap-8">
-      <span
-        class="text-2xl font-bold text-violet-400 drop-shadow-[0_0_8px_rgba(167,139,250,0.5)] font-headline">explorium</span>
-      <nav class="hidden md:flex gap-6 font-manrope tracking-tight font-semibold">
-        <a class="text-zinc-400 hover:text-zinc-100 transition-colors" href="#">Gallery</a>
-        <a class="text-violet-400 border-b-2 border-violet-400 pb-1" href="#">Learning Paths</a>
-        <a class="text-zinc-400 hover:text-zinc-100 transition-colors" href="#">About</a>
-      </nav>
+<body class="bg-background text-on-surface font-body selection:bg-primary/30">
+  <!-- TopNavBar -->
+  <nav
+    class="fixed top-0 w-full z-50 bg-[#0e0e13]/60 backdrop-blur-xl border-b border-[#b79fff]/20 flex justify-between items-center px-8 h-16 primary-glow-bottom">
+    <div class="text-2xl font-black tracking-tighter text-[#b79fff] uppercase font-headline">insyte</div>
+    <div class="hidden md:flex gap-8 items-center h-full">
+      <a class="text-slate-400 hover:text-slate-200 text-sm font-medium font-label transition-colors"
+        href="#">Curriculum</a>
+      <a class="text-[#b79fff] border-b-2 border-[#b79fff] pb-1 text-sm font-medium font-label" href="#">Simulations</a>
+      <a class="text-slate-400 hover:text-slate-200 text-sm font-medium font-label transition-colors"
+        href="#">Laboratories</a>
+      <a class="text-slate-400 hover:text-slate-200 text-sm font-medium font-label transition-colors"
+        href="#">Glossary</a>
     </div>
     <div class="flex items-center gap-4">
-      <span class="text-zinc-400 text-sm hover:text-zinc-100 transition-all cursor-pointer">GitHub</span>
-      <button class="p-2 hover:bg-white/5 transition-all duration-200 rounded-full active:scale-90">
-        <span class="material-symbols-outlined text-violet-400" data-icon="settings">settings</span>
+      <div
+        class="hidden md:block bg-surface-container-lowest border border-outline-variant/20 rounded-full px-4 py-1.5 text-sm text-on-surface-variant">
+        Search algorithms...
+      </div>
+      <span
+        class="material-symbols-outlined text-slate-400 hover:text-slate-200 cursor-pointer transition-colors">settings</span>
+      <span
+        class="material-symbols-outlined text-slate-400 hover:text-slate-200 cursor-pointer transition-colors">account_circle</span>
+    </div>
+  </nav>
+  <!-- SideNavBar -->
+  <aside
+    class="flex flex-col py-20 fixed left-0 top-0 h-full bg-[#0e0e13] h-screen w-64 border-r border-[#b79fff]/10 z-40 hidden lg:flex">
+    <div class="px-6 mb-8">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
+          <span class="material-symbols-outlined text-primary">functions</span>
+        </div>
+        <div>
+          <div class="text-lg font-headline font-bold text-[#3adffa] leading-tight">Hash Tables</div>
+          <div class="text-[10px] uppercase tracking-widest text-slate-500 font-label">Data Structures 101</div>
+        </div>
+      </div>
+    </div>
+    <nav class="flex-1 space-y-1">
+      <div class="px-3">
+        <a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-300 hover:translate-x-1 duration-200 transition-all rounded-r-full group"
+          href="#">
+          <span class="material-symbols-outlined text-sm">info</span>
+          <span class="text-xs font-medium uppercase tracking-wider">Overview</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 bg-[#b79fff]/10 text-[#b79fff] border-r-4 border-[#3adffa] rounded-r-full group"
+          href="#">
+          <span class="material-symbols-outlined text-sm">functions</span>
+          <span class="text-xs font-medium uppercase tracking-wider">Hashing Logic</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-300 hover:translate-x-1 duration-200 transition-all rounded-r-full group"
+          href="#">
+          <span class="material-symbols-outlined text-sm">rebase_edit</span>
+          <span class="text-xs font-medium uppercase tracking-wider">Collision Handling</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-300 hover:translate-x-1 duration-200 transition-all rounded-r-full group"
+          href="#">
+          <span class="material-symbols-outlined text-sm">speed</span>
+          <span class="text-xs font-medium uppercase tracking-wider">Performance</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-300 hover:translate-x-1 duration-200 transition-all rounded-r-full group"
+          href="#">
+          <span class="material-symbols-outlined text-sm">leaderboard</span>
+          <span class="text-xs font-medium uppercase tracking-wider">Complexity</span>
+        </a>
+      </div>
+    </nav>
+    <div class="p-6 mt-auto">
+      <button
+        class="w-full neon-gradient text-on-primary font-bold py-3 px-4 rounded-xl text-xs uppercase tracking-widest hover:scale-95 transition-all">
+        Run Simulation
       </button>
     </div>
-  </header>
-  <!-- Main Content Canvas -->
-  <main class="pt-16 min-h-screen flex relative">
-    <!-- Background Dot Grid -->
-    <div class="absolute inset-0 dot-grid pointer-events-none"></div>
-    <!-- LEFT SIDE — Guided Explanation Panel (40%) -->
-    <aside
-      class="w-[40%] border-r border-outline-variant/10 bg-surface-container-low/50 backdrop-blur-sm z-10 flex flex-col h-[calc(100vh-64px)]">
-      <div class="p-8 flex-1 overflow-y-auto custom-scrollbar">
-        <!-- Header & Breadcrumbs -->
-        <div class="mb-8">
-          <div
-            class="flex items-center gap-2 text-xs text-on-surface-variant font-medium uppercase tracking-widest mb-4">
-            <span>Home</span> <span class="text-outline-variant">/</span>
-            <span>Algorithms</span> <span class="text-outline-variant">/</span>
-            <span class="text-primary">Hash Tables</span>
-          </div>
-          <h1 class="text-4xl font-headline font-extrabold text-on-surface tracking-tighter mb-4">
-            How does a <span class="text-primary-container">Hash Table</span> work?
-          </h1>
-          <!-- Depth Slider -->
-          <div class="mt-8 space-y-3">
-            <div class="flex justify-between text-xs font-headline font-bold text-outline uppercase tracking-wider">
-              <span>ELI5</span>
-              <span>Expert</span>
-            </div>
-            <div class="relative h-1 bg-surface-container rounded-full overflow-hidden">
-              <div
-                class="absolute top-0 left-0 h-full w-2/3 bg-primary-container shadow-[0_0_8px_rgba(167,139,250,0.5)]">
-              </div>
-              <div
-                class="absolute top-1/2 left-2/3 -translate-y-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-on-surface border-2 border-primary ring-4 ring-primary/20">
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Rich Text Explanation -->
-        <div class="space-y-8 font-body leading-relaxed text-on-surface-variant">
-          <section>
-            <h2 class="text-xl font-headline font-bold text-on-surface mb-3">What is a Hash Table?</h2>
-            <p>A hash table is a data structure that maps keys to values for highly efficient lookup. Think of it like a
-              massive digital library where instead of searching row by row, you have a magic index that tells you the
-              exact shelf and position of any book instantly.</p>
-          </section>
-          <div class="p-4 glass-card border-l-4 border-primary rounded-r-xl bg-primary-container/5">
-            <p class="flex items-center gap-2 text-primary-container font-medium">
-              <span class="material-symbols-outlined" data-icon="lightbulb">lightbulb</span>
-              Try typing a key in the input box →
-            </p>
-          </div>
-          <section>
-            <h2 class="text-xl font-headline font-bold text-on-surface mb-3">What happens on insert?</h2>
-            <ol class="space-y-4 counter-reset-item">
-              <li class="flex gap-4">
-                <span
-                  class="flex-shrink-0 w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center text-xs font-bold text-primary border border-primary/20">1</span>
-                <span>The key (e.g., "alice") is passed into a <strong>Hash Function</strong>.</span>
-              </li>
-              <li class="flex gap-4">
-                <span
-                  class="flex-shrink-0 w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center text-xs font-bold text-primary border border-primary/20">2</span>
-                <span>The function returns an integer called the <strong>hash code</strong>.</span>
-              </li>
-              <li class="flex gap-4">
-                <span
-                  class="flex-shrink-0 w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center text-xs font-bold text-primary border border-primary/20">3</span>
-                <span>This code is mapped to an index in the array (e.g., index 3).</span>
-              </li>
-            </ol>
-          </section>
-          <div class="p-4 glass-card rounded-xl border border-secondary/20 bg-secondary/5">
-            <p class="text-sm italic">
-              "Notice how the same key always produces the same hash. This determinism is the secret sauce of O(1)
-              complexity."
-            </p>
-          </div>
-          <section>
-            <h2 class="text-xl font-headline font-bold text-on-surface mb-3">What about collisions?</h2>
-            <p>Sometimes two different keys map to the same bucket. This is called a <strong>collision</strong>. We
-              handle these using strategies like <span
-                class="text-secondary underline decoration-secondary/30 underline-offset-4">Chaining</span> or <span
-                class="text-secondary underline decoration-secondary/30 underline-offset-4">Open Addressing</span>.</p>
-          </section>
-        </div>
+  </aside>
+  <!-- Main Content -->
+  <main class="lg:ml-64 pt-24 pb-16 px-8 min-h-screen bg-background">
+    <div class="max-w-7xl mx-auto">
+      <!-- Header Section -->
+      <div class="mb-12">
+        <h1 class="text-5xl font-extrabold font-headline tracking-tighter text-on-surface mb-4">How does a Hash Table
+          work?</h1>
+        <p class="text-on-surface-variant max-w-2xl leading-relaxed">Explore the mechanics of high-speed data storage
+          through architectural logic and mathematical mapping.</p>
       </div>
-    </aside>
-    <!-- RIGHT SIDE — Interactive Simulation Panel (60%) -->
-    <section class="w-[60%] relative flex flex-col">
-      <!-- Simulation Canvas -->
-      <div class="flex-1 relative overflow-hidden flex flex-col items-center justify-center p-12">
-        <!-- Input & Hash Function Area -->
-        <div class="w-full max-w-2xl mb-24 z-20">
-          <div
-            class="flex items-center gap-4 bg-surface-container-lowest/80 p-2 rounded-full border border-outline-variant/30 backdrop-blur-xl shadow-2xl">
-            <div class="flex-1 px-6">
+      <!-- Split Screen Layout -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        <!-- Left: Educational Content -->
+        <div class="lg:col-span-5 space-y-10">
+          <section>
+            <h2 class="text-2xl font-bold font-headline text-primary mb-4 flex items-center gap-3">
+              <span class="w-8 h-[2px] bg-primary/30"></span> What is a Hash Table?
+            </h2>
+            <div class="space-y-4 text-on-surface-variant leading-relaxed">
+              <p>A hash table is a data structure that implements an associative array abstract data type, a structure
+                that can map keys to values.</p>
+              <p>It uses a <span class="text-secondary font-semibold">hash function</span> to compute an index, also
+                called a hash code, into an array of buckets or slots, from which the desired value can be found.</p>
+            </div>
+          </section>
+          <section>
+            <h2 class="text-2xl font-bold font-headline text-primary mb-4 flex items-center gap-3">
+              <span class="w-8 h-[2px] bg-primary/30"></span> What happens on insert?
+            </h2>
+            <div class="bg-surface-container p-6 rounded-2xl border-l-4 border-secondary">
+              <ol class="space-y-4 list-decimal list-inside text-on-surface-variant">
+                <li>The <span class="text-on-surface font-medium">Key</span> (e.g., 'alice') is passed to the hash
+                  function.</li>
+                <li>The hash function returns an <span class="text-on-surface font-medium">Integer</span> (e.g., 583).
+                </li>
+                <li>The integer is constrained to the <span class="text-on-surface font-medium">Table Size</span> (index
+                  = 583 % 8 = 3).</li>
+                <li>The <span class="text-on-surface font-medium">Value</span> is stored in bucket 3.</li>
+              </ol>
+            </div>
+          </section>
+          <section>
+            <h2 class="text-2xl font-bold font-headline text-primary mb-4 flex items-center gap-3">
+              <span class="w-8 h-[2px] bg-primary/30"></span> What about collisions?
+            </h2>
+            <p class="text-on-surface-variant leading-relaxed">
+              A collision occurs when two different keys result in the same hash index. For example, 'bob' might also
+              hash to index 3. We handle this using strategies like <span class="text-secondary">Chaining</span> or
+              <span class="text-secondary">Open Addressing</span>.
+            </p>
+          </section>
+        </div>
+        <!-- Right: Simulation Canvas -->
+        <div class="lg:col-span-7 glass-panel rounded-3xl p-8 border border-outline-variant/20 shadow-2xl">
+          <!-- Controls Header -->
+          <div class="flex flex-wrap gap-4 mb-8 items-center justify-between">
+            <div class="flex-1 min-w-[200px] relative">
               <input
-                class="w-full bg-transparent border-none text-on-surface font-mono focus:ring-0 placeholder-outline-variant"
-                placeholder="Enter key..." type="text" value="alice" />
+                class="w-full bg-surface-container-lowest border-none rounded-xl px-4 py-3 text-on-surface focus:ring-1 focus:ring-secondary/50 placeholder:text-slate-600"
+                placeholder="'alice'" type="text" />
+              <button
+                class="absolute right-2 top-2 px-4 py-1.5 bg-secondary text-on-secondary rounded-lg text-xs font-bold font-label hover:brightness-110 transition-all">Insert</button>
             </div>
-            <button
-              class="px-8 py-3 bg-primary-container text-on-primary-container rounded-full font-headline font-bold text-sm tracking-wide shadow-[0_0_20px_rgba(167,139,250,0.4)] hover:scale-105 active:scale-95 transition-transform">
-              Insert
-            </button>
-          </div>
-          <div class="mt-8 flex justify-center">
-            <div class="px-6 py-2 glass-card rounded-full border border-primary/40 flex items-center gap-3">
-              <span class="text-xs font-mono text-outline uppercase tracking-tighter">Processing:</span>
-              <code class="text-primary font-bold">hash('alice') → 3</code>
+            <div class="flex gap-2">
+              <button
+                class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface hover:bg-surface-container-highest transition-colors">
+                <span class="material-symbols-outlined">play_arrow</span>
+              </button>
+              <button
+                class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface hover:bg-surface-container-highest transition-colors">
+                <span class="material-symbols-outlined">pause</span>
+              </button>
+              <button
+                class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface hover:bg-surface-container-highest transition-colors">
+                <span class="material-symbols-outlined">step_over</span>
+              </button>
+              <button
+                class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface hover:bg-surface-container-highest transition-colors">
+                <span class="material-symbols-outlined">restart_alt</span>
+              </button>
             </div>
           </div>
-        </div>
-        <!-- SVG Bezier Connectors (Conceptual) -->
-        <svg class="absolute inset-0 w-full h-full pointer-events-none opacity-40" viewbox="0 0 800 600">
-          <!-- Active Connection -->
-          <path class="bezier-path" d="M400,200 C400,300 300,300 300,400" fill="none" stroke="url(#grad1)"
-            stroke-width="2"></path>
-          <!-- Dots along path -->
-          <circle fill="#cebdff" r="3">
-            <animatemotion dur="2s" path="M400,200 C400,300 300,300 300,400" repeatcount="indefinite"></animatemotion>
-          </circle>
-          <defs>
-            <lineargradient id="grad1" x1="0%" x2="0%" y1="0%" y2="100%">
-              <stop offset="0%" style="stop-color:#cebdff;stop-opacity:1"></stop>
-              <stop offset="100%" style="stop-color:#5de6ff;stop-opacity:1"></stop>
-            </lineargradient>
-          </defs>
-        </svg>
-        <!-- Hash Table Buckets -->
-        <div class="w-full flex justify-between gap-2 max-w-4xl z-20">
-          <!-- Bucket 0 -->
-          <div
-            class="flex-1 h-32 glass-card rounded-xl border border-outline-variant/10 flex flex-col items-center justify-between py-3 group hover:border-primary/30 transition-colors">
-            <span class="text-[10px] font-mono text-outline-variant uppercase">Idx 0</span>
-            <div class="w-8 h-8 rounded-lg bg-surface-container-low/50"></div>
-          </div>
-          <!-- Bucket 1 -->
-          <div
-            class="flex-1 h-32 glass-card rounded-xl border border-outline-variant/10 flex flex-col items-center justify-between py-3 opacity-60">
-            <span class="text-[10px] font-mono text-outline-variant uppercase">Idx 1</span>
-            <div class="w-8 h-8 rounded-lg bg-surface-container-low/50"></div>
-          </div>
-          <!-- Bucket 2 -->
-          <div
-            class="flex-1 h-32 glass-card rounded-xl border border-outline-variant/10 flex flex-col items-center justify-between py-3 opacity-60">
-            <span class="text-[10px] font-mono text-outline-variant uppercase">Idx 2</span>
-            <div class="w-8 h-8 rounded-lg bg-surface-container-low/50"></div>
-          </div>
-          <!-- Bucket 3 (ACTIVE) -->
-          <div
-            class="flex-1 h-32 bg-primary-container/20 border-2 border-primary rounded-xl flex flex-col items-center justify-between py-3 relative shadow-[0_0_30px_rgba(167,139,250,0.2)]">
-            <span class="text-[10px] font-mono text-primary font-bold uppercase">Idx 3</span>
-            <div
-              class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center text-on-primary-container shadow-inner">
-              <span class="text-[10px] font-bold">alice</span>
-            </div>
-            <!-- Floating Popup -->
-            <div
-              class="absolute -top-24 w-48 p-3 glass-card rounded-xl border border-primary/50 text-[11px] leading-tight text-on-surface shadow-2xl">
-              <strong class="text-primary block mb-1">Bucket 3</strong>
-              The hash function mapped 'alice' to index 3. The value is stored here in O(1) time.
+          <!-- Visual Process -->
+          <div class="mb-10 flex flex-col items-center">
+            <div class="flex items-center gap-6 mb-4">
               <div
-                class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 rotate-45 bg-surface-container border-b border-r border-primary/50">
-              </div>
+                class="px-4 py-2 bg-surface-container-highest rounded-lg border border-outline-variant/30 text-xs font-mono text-primary">
+                'alice'</div>
+              <span class="material-symbols-outlined text-outline-variant">arrow_forward</span>
+              <div
+                class="px-6 py-3 bg-primary/20 rounded-xl border border-primary/40 text-sm font-bold text-primary font-headline">
+                hash(key) % 8</div>
+              <span class="material-symbols-outlined text-outline-variant">arrow_forward</span>
+              <div
+                class="w-10 h-10 flex items-center justify-center bg-secondary/20 rounded-full border-2 border-secondary text-secondary font-bold">
+                3</div>
             </div>
+            <div class="text-[10px] text-slate-500 uppercase tracking-tighter">Deterministic mapping process</div>
           </div>
-          <!-- Bucket 4 -->
-          <div
-            class="flex-1 h-32 glass-card rounded-xl border border-outline-variant/10 flex flex-col items-center justify-between py-3 opacity-60">
-            <span class="text-[10px] font-mono text-outline-variant uppercase">Idx 4</span>
-            <div class="w-8 h-8 rounded-lg bg-surface-container-low/50"></div>
-          </div>
-          <!-- Bucket 5 (OCCUPIED) -->
-          <div
-            class="flex-1 h-32 glass-card rounded-xl border border-secondary/30 flex flex-col items-center justify-between py-3 opacity-90">
-            <span class="text-[10px] font-mono text-secondary-container uppercase">Idx 5</span>
+          <!-- The Table Grid -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+            <!-- IDX 0-7 -->
             <div
-              class="w-8 h-8 rounded-lg bg-secondary-container/20 border border-secondary/40 flex items-center justify-center">
-              <span class="text-[10px] font-bold text-secondary">bob</span>
+              class="bg-surface-container-lowest h-24 rounded-2xl border border-outline-variant/10 flex flex-col items-center justify-center relative group hover:border-primary/30 transition-all">
+              <span class="absolute top-2 left-3 text-[10px] font-bold text-slate-600">0</span>
+              <span class="text-xs text-slate-700 italic">Empty</span>
+            </div>
+            <div
+              class="bg-surface-container-lowest h-24 rounded-2xl border border-outline-variant/10 flex flex-col items-center justify-center relative group">
+              <span class="absolute top-2 left-3 text-[10px] font-bold text-slate-600">1</span>
+            </div>
+            <div
+              class="bg-surface-container-lowest h-24 rounded-2xl border border-outline-variant/10 flex flex-col items-center justify-center relative group">
+              <span class="absolute top-2 left-3 text-[10px] font-bold text-slate-600">2</span>
+            </div>
+            <div
+              class="bg-surface-container-high h-24 rounded-2xl border-2 border-secondary/50 shadow-[0_0_20px_rgba(58,223,250,0.15)] flex flex-col items-center justify-center relative group">
+              <span class="absolute top-2 left-3 text-[10px] font-bold text-secondary">3</span>
+              <div class="px-3 py-1 bg-secondary text-on-secondary text-xs font-bold rounded-md">alice</div>
+            </div>
+            <div
+              class="bg-surface-container-lowest h-24 rounded-2xl border border-outline-variant/10 flex flex-col items-center justify-center relative group">
+              <span class="absolute top-2 left-3 text-[10px] font-bold text-slate-600">4</span>
+            </div>
+            <div
+              class="bg-surface-container-lowest h-24 rounded-2xl border border-outline-variant/10 flex flex-col items-center justify-center relative group">
+              <span class="absolute top-2 left-3 text-[10px] font-bold text-slate-600">5</span>
+            </div>
+            <div
+              class="bg-surface-container-lowest h-24 rounded-2xl border border-outline-variant/10 flex flex-col items-center justify-center relative group">
+              <span class="absolute top-2 left-3 text-[10px] font-bold text-slate-600">6</span>
+            </div>
+            <div
+              class="bg-surface-container-lowest h-24 rounded-2xl border border-outline-variant/10 flex flex-col items-center justify-center relative group">
+              <span class="absolute top-2 left-3 text-[10px] font-bold text-slate-600">7</span>
             </div>
           </div>
-          <!-- Bucket 6 -->
-          <div
-            class="flex-1 h-32 glass-card rounded-xl border border-outline-variant/10 flex flex-col items-center justify-between py-3 opacity-60">
-            <span class="text-[10px] font-mono text-outline-variant uppercase">Idx 6</span>
-            <div class="w-8 h-8 rounded-lg bg-surface-container-low/50"></div>
-          </div>
-          <!-- Bucket 7 -->
-          <div
-            class="flex-1 h-32 glass-card rounded-xl border border-outline-variant/10 flex flex-col items-center justify-between py-3 opacity-60">
-            <span class="text-[10px] font-mono text-outline-variant uppercase">Idx 7</span>
-            <div class="w-8 h-8 rounded-lg bg-surface-container-low/50"></div>
-          </div>
-        </div>
-        <!-- Toolbar & Stats Row -->
-        <div class="absolute bottom-12 w-full px-12 flex flex-col gap-6 items-center">
-          <!-- Controls -->
-          <div
-            class="flex items-center gap-1 p-1 bg-surface-container-highest/40 backdrop-blur-md rounded-full border border-white/5 shadow-xl">
-            <button class="p-3 hover:bg-white/10 rounded-full transition-colors text-primary">
-              <span class="material-symbols-outlined" data-icon="play_arrow"
-                style="font-variation-settings: 'FILL' 1;">play_arrow</span>
-            </button>
-            <button class="p-3 hover:bg-white/10 rounded-full transition-colors text-on-surface-variant">
-              <span class="material-symbols-outlined" data-icon="pause">pause</span>
-            </button>
-            <button class="p-3 hover:bg-white/10 rounded-full transition-colors text-on-surface-variant">
-              <span class="material-symbols-outlined" data-icon="skip_next">skip_next</span>
-            </button>
-            <div class="w-px h-6 bg-outline-variant/30 mx-2"></div>
-            <button class="p-3 hover:bg-white/10 rounded-full transition-colors text-on-surface-variant">
-              <span class="material-symbols-outlined" data-icon="refresh">refresh</span>
-            </button>
-          </div>
-          <!-- Settings & Stats Panels -->
-          <div class="w-full flex justify-between gap-6 max-w-4xl">
-            <!-- Parameter Controls -->
-            <div class="flex-1 glass-card p-4 rounded-2xl flex items-center gap-8">
-              <div class="space-y-2">
-                <span class="text-[10px] font-headline font-bold text-outline uppercase tracking-wider block">Table
-                  Size</span>
-                <div class="flex items-center gap-3">
-                  <input class="accent-primary w-24 h-1 bg-surface-container rounded-lg" type="range" />
-                  <span class="text-sm font-mono text-primary">8</span>
+          <!-- Simulation Stats/Settings -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-outline-variant/20">
+            <div class="space-y-6">
+              <div>
+                <div class="flex justify-between text-xs font-bold text-slate-400 uppercase mb-3">
+                  <span>Table Size</span>
+                  <span class="text-secondary">8 Slots</span>
                 </div>
+                <input class="w-full accent-secondary bg-surface-container-lowest rounded-full h-1.5" type="range" />
               </div>
-              <div class="w-px h-10 bg-outline-variant/20"></div>
-              <div class="space-y-2">
-                <span
-                  class="text-[10px] font-headline font-bold text-outline uppercase tracking-wider block">Strategy</span>
-                <div class="flex bg-surface-container p-1 rounded-lg">
+              <div>
+                <div class="text-xs font-bold text-slate-400 uppercase mb-3">Collision Strategy</div>
+                <div class="flex gap-2">
                   <button
-                    class="px-3 py-1 text-[10px] font-bold bg-surface-container-highest text-primary rounded-md">Chaining</button>
+                    class="flex-1 py-2 bg-secondary text-on-secondary rounded-lg text-[10px] font-bold uppercase">Chaining</button>
                   <button
-                    class="px-3 py-1 text-[10px] font-bold text-on-surface-variant hover:text-on-surface">Addressing</button>
+                    class="flex-1 py-2 bg-surface-container-lowest text-slate-500 border border-outline-variant/20 rounded-lg text-[10px] font-bold uppercase hover:text-on-surface transition-colors">Addressing</button>
                 </div>
               </div>
             </div>
-            <!-- Stats Panel -->
-            <div class="flex-1 glass-card p-4 rounded-2xl flex justify-between items-center">
-              <div class="space-y-1">
-                <div class="text-[10px] text-outline-variant font-bold uppercase tracking-widest">Load Factor</div>
-                <div class="text-lg font-headline font-extrabold text-on-surface">0.25</div>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10">
+                <div class="text-[10px] text-slate-500 uppercase font-bold mb-1">Load Factor</div>
+                <div class="text-xl font-headline font-bold text-on-surface">0.125</div>
               </div>
-              <div class="space-y-1">
-                <div class="text-[10px] text-outline-variant font-bold uppercase tracking-widest">Collisions</div>
-                <div class="text-lg font-headline font-extrabold text-error">1</div>
+              <div class="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10">
+                <div class="text-[10px] text-slate-500 uppercase font-bold mb-1">Collisions</div>
+                <div class="text-xl font-headline font-bold text-error">0</div>
               </div>
-              <div class="space-y-1">
-                <div class="text-[10px] text-outline-variant font-bold uppercase tracking-widest">Avg Lookup</div>
-                <div class="text-lg font-headline font-extrabold text-secondary">O(1)</div>
-              </div>
-              <div class="h-10 w-16 bg-surface-container-highest/20 rounded-md overflow-hidden flex items-end">
-                <svg class="w-full h-full" viewbox="0 0 100 40">
-                  <path d="M0,35 Q20,30 40,38 T80,10 L100,5" fill="none" stroke="#5de6ff" stroke-width="2"></path>
-                </svg>
+              <div class="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10 col-span-2">
+                <div class="text-[10px] text-slate-500 uppercase font-bold mb-1">Avg. Lookup Time</div>
+                <div class="text-xl font-headline font-bold text-primary">O(1)</div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </section>
+      <!-- Challenges Section -->
+      <div class="mt-20">
+        <div class="flex items-center gap-4 mb-8">
+          <h2 class="text-3xl font-black font-headline tracking-tight uppercase">Challenges</h2>
+          <div class="flex-1 h-[1px] bg-outline-variant/20"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Challenge 1 -->
+          <div
+            class="group relative overflow-hidden bg-surface-container-low rounded-2xl p-6 border border-outline-variant/20 hover:border-primary/50 transition-all duration-300">
+            <div class="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity">
+              <span class="material-symbols-outlined text-8xl">grid_view</span>
+            </div>
+            <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
+              <span class="material-symbols-outlined text-primary">layers</span>
+            </div>
+            <h3 class="text-lg font-bold font-headline mb-2">Fill the Table</h3>
+            <p class="text-sm text-on-surface-variant mb-6 leading-relaxed">Attempt to fill every slot in the table
+              without a single collision occurring.</p>
+            <button
+              class="text-xs font-bold text-primary uppercase tracking-widest flex items-center gap-2 group-hover:translate-x-2 transition-transform">
+              Launch Experiment <span class="material-symbols-outlined text-xs">arrow_forward</span>
+            </button>
+          </div>
+          <!-- Challenge 2 -->
+          <div
+            class="group relative overflow-hidden bg-surface-container-low rounded-2xl p-6 border border-outline-variant/20 hover:border-secondary/50 transition-all duration-300">
+            <div class="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity">
+              <span class="material-symbols-outlined text-8xl">speed</span>
+            </div>
+            <div class="w-12 h-12 bg-secondary/10 rounded-xl flex items-center justify-center mb-4">
+              <span class="material-symbols-outlined text-secondary">trending_up</span>
+            </div>
+            <h3 class="text-lg font-bold font-headline mb-2">Break the Scale</h3>
+            <p class="text-sm text-on-surface-variant mb-6 leading-relaxed">Observe how the load factor impacts
+              performance as you insert 100+ items.</p>
+            <button
+              class="text-xs font-bold text-secondary uppercase tracking-widest flex items-center gap-2 group-hover:translate-x-2 transition-transform">
+              Launch Experiment <span class="material-symbols-outlined text-xs">arrow_forward</span>
+            </button>
+          </div>
+          <!-- Challenge 3 -->
+          <div
+            class="group relative overflow-hidden bg-surface-container-low rounded-2xl p-6 border border-outline-variant/20 hover:border-tertiary/50 transition-all duration-300">
+            <div class="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity">
+              <span class="material-symbols-outlined text-8xl">warning</span>
+            </div>
+            <div class="w-12 h-12 bg-tertiary/10 rounded-xl flex items-center justify-center mb-4">
+              <span class="material-symbols-outlined text-tertiary">priority_high</span>
+            </div>
+            <h3 class="text-lg font-bold font-headline mb-2">The Worst Case</h3>
+            <p class="text-sm text-on-surface-variant mb-6 leading-relaxed">Construct a key sequence that forces every
+              single entry into a single bucket chain.</p>
+            <button
+              class="text-xs font-bold text-tertiary uppercase tracking-widest flex items-center gap-2 group-hover:translate-x-2 transition-transform">
+              Launch Experiment <span class="material-symbols-outlined text-xs">arrow_forward</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
-  <!-- BOTTOM SECTION — Challenges -->
+  <!-- Footer -->
   <footer
-    class="relative z-20 py-20 px-12 bg-surface-container-lowest/50 backdrop-blur-xl border-t border-outline-variant/10 overflow-hidden">
-    <!-- Subtle Background Element -->
-    <div
-      class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent">
+    class="w-full py-8 mt-auto bg-[#0e0e13] border-t border-[#b79fff]/05 flex flex-col items-center justify-center gap-4">
+    <div class="flex gap-8">
+      <a class="text-slate-600 hover:text-white text-[10px] uppercase tracking-widest font-label transition-colors opacity-80 hover:opacity-100"
+        href="#">© 2024 insyte. THE SYNTHETIC ARCHITECT.</a>
+      <a class="text-slate-600 hover:text-white text-[10px] uppercase tracking-widest font-label transition-colors opacity-80 hover:opacity-100"
+        href="#">© 2024 insyte. THE SYNTHETIC ARCHITECT.</a>
+      <a class="text-slate-600 hover:text-white text-[10px] uppercase tracking-widest font-label transition-colors opacity-80 hover:opacity-100"
+        href="#">© 2024 insyte. THE SYNTHETIC ARCHITECT.</a>
     </div>
-    <div class="max-w-6xl mx-auto">
-      <div class="flex items-end justify-between mb-12">
-        <div>
-          <h2 class="text-3xl font-headline font-extrabold tracking-tight mb-2">🎯 Challenges</h2>
-          <p class="text-on-surface-variant">Master the concepts through interactive tasks.</p>
-        </div>
-        <div class="flex gap-2">
-          <span class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_#cebdff]"></span>
-          <span class="w-2 h-2 rounded-full bg-outline-variant"></span>
-          <span class="w-2 h-2 rounded-full bg-outline-variant"></span>
-        </div>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Challenge 1 -->
-        <div
-          class="group glass-card p-6 rounded-[2rem] hover:bg-surface-variant/40 transition-all duration-300 border border-white/5 flex flex-col justify-between h-48">
-          <div>
-            <h3 class="text-lg font-headline font-bold mb-2 group-hover:text-primary transition-colors">Fill the Table
-            </h3>
-            <p class="text-sm text-on-surface-variant leading-snug">Insert 8 unique keys into a size 8 table and observe
-              the distribution.</p>
-          </div>
-          <button class="flex items-center gap-2 text-primary font-headline font-bold text-sm tracking-wide">
-            Try It <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
-          </button>
-        </div>
-        <!-- Challenge 2 -->
-        <div
-          class="group glass-card p-6 rounded-[2rem] hover:bg-surface-variant/40 transition-all duration-300 border border-white/5 flex flex-col justify-between h-48">
-          <div>
-            <h3 class="text-lg font-headline font-bold mb-2 group-hover:text-primary transition-colors">Break the Scale
-            </h3>
-            <p class="text-sm text-on-surface-variant leading-snug">Make the load factor exceed 1.0 and watch how
-              chaining handles the overflow.</p>
-          </div>
-          <button class="flex items-center gap-2 text-primary font-headline font-bold text-sm tracking-wide">
-            Try It <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
-          </button>
-        </div>
-        <!-- Challenge 3 -->
-        <div
-          class="group glass-card p-6 rounded-[2rem] hover:bg-surface-variant/40 transition-all duration-300 border border-white/5 flex flex-col justify-between h-48">
-          <div>
-            <h3 class="text-lg font-headline font-bold mb-2 group-hover:text-primary transition-colors">The Worst Case
-            </h3>
-            <p class="text-sm text-on-surface-variant leading-snug">Find the worst-case lookup time by creating as many
-              collisions as possible.</p>
-          </div>
-          <button class="flex items-center gap-2 text-primary font-headline font-bold text-sm tracking-wide">
-            Try It <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
-          </button>
-        </div>
-      </div>
-    </div>
-    <!-- Decorative Image in background (low opacity) -->
-    <div class="absolute -right-20 -bottom-20 opacity-5 pointer-events-none">
-      <img class="w-[600px] h-[600px] object-cover rounded-full mix-blend-screen"
-        data-alt="abstract digital connection network with purple and cyan neon nodes and wires on a dark background"
-        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzJTpfpWdRWntw5MwFyB9dlbinwk_C8UbkQjgZKAGnZ2tF98dM0dEyZ9CNaaxikV285FtrEra0tTsptyNuGXhenO2yAc13Q6rHEMFWglMRz8lRSkcNH0cYPp1WPhUFwG0AU5FLMMcpOHoMy1HUsgi7rgjclASLYLsk_elbIEi-fhiQlTw9MYgoG-HAhEXmtJbszhZxqlmL6YKk34hPy8xqQom9RaIOMY9zagmTBF0Wmt8a4dnH3PoqZ76LnGR0_VXMtZiK6Nz0bXM" />
+    <div class="text-[10px] uppercase tracking-widest text-[#b79fff] font-label">© 2024 insyte. THE SYNTHETIC ARCHITECT.
     </div>
   </footer>
 </body>
