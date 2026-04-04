@@ -1,6 +1,10 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Manrope, Inter, JetBrains_Mono } from 'next/font/google'
 import { cn } from '@/lib/utils'
+import { Navbar } from '@/components/layout/Navbar'
+import { Footer } from '@/components/layout/Footer'
+import { GlowEffect } from '@/components/layout/GlowEffect'
+import { DotGridBackground } from '@/components/layout/DotGridBackground'
 import './globals.css'
 
 const manrope = Manrope({
@@ -24,6 +28,10 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
 })
 
+export const viewport: Viewport = {
+  themeColor: '#0e0e13',
+}
+
 export const metadata: Metadata = {
   title: 'insyte — See how it works.',
   description:
@@ -39,14 +47,23 @@ export default function RootLayout({
     <html
       lang="en"
       className={cn(
-        'dark h-full antialiased',
+        'dark',
         manrope.variable,
         inter.variable,
         jetbrainsMono.variable,
       )}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground">
-        {children}
+      <body className="min-h-screen flex flex-col bg-background text-on-surface font-body antialiased relative">
+        {/* Background layers */}
+        <GlowEffect />
+        <DotGridBackground opacity={0.4} />
+
+        {/* Page chrome */}
+        <Navbar />
+        <main className="flex-1 relative z-10">
+          {children}
+        </main>
+        <Footer />
       </body>
     </html>
   )
