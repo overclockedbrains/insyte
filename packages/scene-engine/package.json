@@ -1,0 +1,18 @@
+{
+  "name": "@insyte/scene-engine",
+  "version": "0.0.1",
+  "private": true,
+  "license": "GPL-3.0",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@insyte/tsconfig": "workspace:*",
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "zod": "^3.24.1"
+  }
+}

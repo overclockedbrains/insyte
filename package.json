@@ -3,8 +3,13 @@
   "version": "1.0.0",
   "description": "An AI-powered interactive learning platform for live algorithmic traces and system design simulations.",
   "private": true,
+  "packageManager": "pnpm@10.30.3",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "type-check": "turbo type-check",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "setup-symlinks": "bash scripts/setup-symlinks.sh"
   },
   "repository": {
@@ -16,5 +21,9 @@
   "bugs": {
     "url": "https://github.com/overclockedbrains/insyte/issues"
   },
-  "homepage": "https://github.com/overclockedbrains/insyte#readme"
+  "homepage": "https://github.com/overclockedbrains/insyte#readme",
+  "devDependencies": {
+    "turbo": "^2.3.3",
+    "prettier": "^3.4.2"
+  }
 }

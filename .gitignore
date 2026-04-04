@@ -1,36 +1,47 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
+# ─── Dependencies ─────────────────────────────────────────────────────────────
+node_modules/
+.pnp
 .pnp.js
 
-# testing
-/coverage
+# ─── Build outputs ────────────────────────────────────────────────────────────
+.next/
+out/
+dist/
+build/
 
-# next.js
-/.next/
-/out/
+# ─── Turbo cache ──────────────────────────────────────────────────────────────
+.turbo/
 
-# production
-/build
+# ─── TypeScript ───────────────────────────────────────────────────────────────
+*.tsbuildinfo
+next-env.d.ts
 
-# misc
+# ─── Testing ──────────────────────────────────────────────────────────────────
+coverage/
+
+# ─── Environment variables ────────────────────────────────────────────────────
+.env
+.env*.local
+.env.production
+
+# ─── Vercel / deployment ──────────────────────────────────────────────────────
+.vercel
+
+# ─── OS / Editor ──────────────────────────────────────────────────────────────
 .DS_Store
 *.pem
+Thumbs.db
 
-# debug
+# ─── Debug logs ───────────────────────────────────────────────────────────────
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 
-# local env files
-.env*.local
-.env
+# ─── Pyodide (large WASM files — managed separately) ─────────────────────────
+apps/web/public/pyodide/*.js
+apps/web/public/pyodide/*.wasm
+apps/web/public/pyodide/*.data
 
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# ─── Claude Code settings (local) ───────────────────────────────────────────
+.claude/settings.local.json
