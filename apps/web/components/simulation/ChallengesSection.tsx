@@ -17,11 +17,11 @@ interface ChallengesSectionProps {
 }
 
 export function ChallengesSection({ challenges, onTryChallenge }: ChallengesSectionProps) {
-  // Start closed on both server and client to avoid hydration mismatch.
-  // After mount, open automatically on desktop (≥768px).
+  // Start collapsed on SSR; open on desktop after mount.
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (window.innerWidth >= 768) setIsOpen(true)
   }, [])
 
