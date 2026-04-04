@@ -1,0 +1,121 @@
+{
+  "id": "test-minimal",
+  "title": "Minimal Test Scene",
+  "type": "concept",
+  "layout": "text-left-canvas-right",
+  "description": "A minimal 3-step scene used to verify the Phase 2 scene engine.",
+  "category": "Testing",
+  "tags": ["test", "array"],
+
+  "visuals": [
+    {
+      "id": "arr1",
+      "type": "array",
+      "label": "Input Array",
+      "position": { "x": 50, "y": 80 },
+      "initialState": {
+        "cells": [
+          { "value": 1, "highlight": "default" },
+          { "value": 2, "highlight": "default" },
+          { "value": 3, "highlight": "default" },
+          { "value": 4, "highlight": "default" },
+          { "value": 5, "highlight": "default" }
+        ]
+      }
+    }
+  ],
+
+  "steps": [
+    {
+      "index": 0,
+      "actions": [],
+      "duration": 1200
+    },
+    {
+      "index": 1,
+      "actions": [
+        {
+          "target": "arr1",
+          "action": "highlight",
+          "params": { "field": "cells", "index": 2, "value": "active" }
+        }
+      ],
+      "duration": 1200
+    },
+    {
+      "index": 2,
+      "actions": [
+        {
+          "target": "arr1",
+          "action": "highlight",
+          "params": { "field": "cells", "index": 4, "value": "found" }
+        }
+      ],
+      "duration": 1200
+    }
+  ],
+
+  "controls": [
+    {
+      "id": "speed-ctrl",
+      "type": "slider",
+      "label": "Animation Speed",
+      "config": { "min": 0.5, "max": 2, "step": 0.5, "defaultValue": 1 }
+    }
+  ],
+
+  "explanation": [
+    {
+      "heading": "Step 0 — Initial State",
+      "body": "The array starts with values [1, 2, 3, 4, 5]. No elements are highlighted.",
+      "appearsAtStep": 0
+    },
+    {
+      "heading": "Step 1 — Highlight Middle",
+      "body": "We highlight the middle element (index 2, value 3) as the current focus.",
+      "appearsAtStep": 1,
+      "callout": "Index 2 is now active."
+    },
+    {
+      "heading": "Step 2 — Found!",
+      "body": "The last element (index 4, value 5) is marked as found.",
+      "appearsAtStep": 2,
+      "callout": "Target located at index 4."
+    }
+  ],
+
+  "popups": [
+    {
+      "id": "pop-1",
+      "attachTo": "arr1",
+      "text": "Array initialized with 5 elements",
+      "showAtStep": 0,
+      "hideAtStep": 1,
+      "style": "info"
+    },
+    {
+      "id": "pop-2",
+      "attachTo": "arr1",
+      "text": "Checking index 2",
+      "showAtStep": 1,
+      "hideAtStep": 2,
+      "style": "warning"
+    },
+    {
+      "id": "pop-3",
+      "attachTo": "arr1",
+      "text": "Found at index 4!",
+      "showAtStep": 2,
+      "style": "success"
+    }
+  ],
+
+  "challenges": [
+    {
+      "id": "ch-1",
+      "title": "Predict the next step",
+      "description": "If we continue past step 2, what element would be highlighted next?",
+      "type": "predict"
+    }
+  ]
+}

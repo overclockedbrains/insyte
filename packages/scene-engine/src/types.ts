@@ -1,12 +1,17 @@
 // Scene JSON — Universal Format for insyte
 // All AI-generated and hand-crafted simulations flow through these types.
 
+// ─── Top-level type aliases ───────────────────────────────────────────────────
+
 export type SceneType = 'concept' | 'dsa-trace' | 'lld' | 'hld'
 
-export type LayoutType =
+export type SceneLayout =
   | 'canvas-only'
   | 'code-left-canvas-right'
   | 'text-left-canvas-right'
+
+/** @deprecated Use SceneLayout */
+export type LayoutType = SceneLayout
 
 export type VisualType =
   | 'array'
@@ -24,272 +29,100 @@ export type VisualType =
 
 export type CodeLanguage = 'python' | 'javascript'
 
-// ─── Visual Primitives ────────────────────────────────────────────────────────
+// ─── Condition ────────────────────────────────────────────────────────────────
 
-export interface VisualBase {
+/** Evaluates whether a control matches a specific value — used for showWhen. */
+export interface Condition {
+  /** The id of the Control to evaluate */
+  control: string
+  /** The value the control must equal for the condition to be true */
+  equals: unknown
+}
+
+// ─── Visual ───────────────────────────────────────────────────────────────────
+
+export interface Visual {
   id: string
   type: VisualType
   label?: string
   position?: { x: number; y: number }
+  /** The visual's initial data state before any actions are applied */
+  initialState: unknown
+  /** If present, this visual is only shown when the condition is true */
+  showWhen?: Condition
 }
 
-// Array cell value with optional highlight state
-export interface ArrayCell {
-  value: string | number | null
-  highlight?: 'default' | 'active' | 'found' | 'comparing' | 'done'
+// ─── Action ───────────────────────────────────────────────────────────────────
+
+/** A single mutation instruction applied to a visual at a step. */
+export interface Action {
+  /** ID of the target Visual */
+  target: string
+  /** Action name — e.g. 'set-cells', 'push', 'highlight', 'set-value' */
+  action: string
+  /** Action-specific parameters */
+  params: Record<string, unknown>
 }
 
-export interface ArrayVisual extends VisualBase {
-  type: 'array'
-  cells: ArrayCell[]
-  pointers?: Array<{ index: number; label: string }>
-}
-
-export interface HashMapEntry {
-  key: string
-  value: string | number
-  highlight?: 'default' | 'active' | 'collision' | 'found'
-}
-
-export interface HashMapVisual extends VisualBase {
-  type: 'hashmap'
-  buckets: Array<HashMapEntry[]>
-  capacity?: number
-}
-
-export interface LinkedListNode {
-  id: string
-  value: string | number
-  highlight?: 'default' | 'active' | 'found'
-}
-
-export interface LinkedListVisual extends VisualBase {
-  type: 'linked-list'
-  nodes: LinkedListNode[]
-  headPointer?: string
-}
-
-export interface TreeNode {
-  id: string
-  value: string | number
-  leftId?: string
-  rightId?: string
-  highlight?: 'default' | 'active' | 'visited' | 'found'
-}
-
-export interface TreeVisual extends VisualBase {
-  type: 'tree'
-  nodes: TreeNode[]
-  rootId?: string
-}
-
-export interface GraphNode {
-  id: string
-  label: string
-  x?: number
-  y?: number
-  highlight?: 'default' | 'active' | 'visited' | 'found'
-}
-
-export interface GraphEdge {
-  from: string
-  to: string
-  weight?: number
-  directed?: boolean
-  highlight?: 'default' | 'active' | 'traversed'
-}
-
-export interface GraphVisual extends VisualBase {
-  type: 'graph'
-  nodes: GraphNode[]
-  edges: GraphEdge[]
-  directed?: boolean
-}
-
-export interface StackVisual extends VisualBase {
-  type: 'stack'
-  items: Array<{ value: string | number; highlight?: 'default' | 'active' | 'popped' }>
-}
-
-export interface QueueVisual extends VisualBase {
-  type: 'queue'
-  items: Array<{ value: string | number; highlight?: 'default' | 'active' | 'dequeued' }>
-}
-
-export interface DPTableCell {
-  value: string | number | null
-  highlight?: 'default' | 'active' | 'computed' | 'used'
-}
-
-export interface DPTableVisual extends VisualBase {
-  type: 'dp-table'
-  rows: DPTableCell[][]
-  rowLabels?: string[]
-  colLabels?: string[]
-}
-
-export interface RecursionTreeNode {
-  id: string
-  call: string
-  returnValue?: string | number
-  highlight?: 'default' | 'active' | 'memoized' | 'resolved'
-  children?: string[]
-}
-
-export interface RecursionTreeVisual extends VisualBase {
-  type: 'recursion-tree'
-  nodes: RecursionTreeNode[]
-  rootId?: string
-}
-
-export interface SystemComponent {
-  id: string
-  label: string
-  sublabel?: string
-  x: number
-  y: number
-  highlight?: 'default' | 'active' | 'error' | 'processing'
-}
-
-export interface SystemFlow {
-  from: string
-  to: string
-  label?: string
-  highlight?: 'default' | 'active' | 'error'
-}
-
-export interface SystemDiagramVisual extends VisualBase {
-  type: 'system-diagram'
-  components: SystemComponent[]
-  flows: SystemFlow[]
-}
-
-export interface TextBadgeVisual extends VisualBase {
-  type: 'text-badge'
-  text: string
-  color?: 'default' | 'primary' | 'secondary' | 'tertiary' | 'error'
-}
-
-export interface CounterVisual extends VisualBase {
-  type: 'counter'
-  value: number
-  color?: 'default' | 'primary' | 'secondary' | 'tertiary' | 'error'
-}
-
-export type Visual =
-  | ArrayVisual
-  | HashMapVisual
-  | LinkedListVisual
-  | TreeVisual
-  | GraphVisual
-  | StackVisual
-  | QueueVisual
-  | DPTableVisual
-  | RecursionTreeVisual
-  | SystemDiagramVisual
-  | TextBadgeVisual
-  | CounterVisual
-
-// ─── Steps ────────────────────────────────────────────────────────────────────
-
-// A patch to apply to a visual at a given step
-export interface VisualPatch {
-  visualId: string
-  // Partial update to merge into the visual's current state
-  patch: Record<string, unknown>
-}
+// ─── Step ─────────────────────────────────────────────────────────────────────
 
 export interface Step {
+  /** 0-based step index */
   index: number
-  label: string
-  description?: string
-  patches: VisualPatch[]
-  // Which explanation section to highlight (by id)
-  explanationId?: string
-  // Which code line to highlight (0-based)
-  codeLine?: number
+  /** Actions to apply to visuals at this step */
+  actions: Action[]
+  /** Optional duration hint (ms) for auto-advance */
+  duration?: number
 }
 
-// ─── Controls ─────────────────────────────────────────────────────────────────
+// ─── Control ──────────────────────────────────────────────────────────────────
 
-export type ControlType = 'slider' | 'toggle' | 'button' | 'select'
+export type ControlType = 'slider' | 'toggle' | 'input' | 'button' | 'toggle-group'
 
-export interface SliderControl {
+export interface Control {
   id: string
-  type: 'slider'
+  type: ControlType
   label: string
-  min: number
-  max: number
-  step: number
-  defaultValue: number
+  /** Type-specific configuration (min/max/step/options/etc.) */
+  config: Record<string, unknown>
 }
-
-export interface ToggleControl {
-  id: string
-  type: 'toggle'
-  label: string
-  defaultValue: boolean
-}
-
-export interface ButtonControl {
-  id: string
-  type: 'button'
-  label: string
-  action: string
-}
-
-export interface SelectControl {
-  id: string
-  type: 'select'
-  label: string
-  options: Array<{ value: string; label: string }>
-  defaultValue: string
-}
-
-export type Control = SliderControl | ToggleControl | ButtonControl | SelectControl
 
 // ─── Explanation ──────────────────────────────────────────────────────────────
 
 export interface ExplanationSection {
-  id: string
-  title?: string
+  /** Section heading text */
+  heading: string
+  /** Main body — markdown string */
   body: string
-  // Which step indices this section is active for
-  stepRange?: [number, number]
+  /** Step index at which this section becomes visible */
+  appearsAtStep: number
+  /** Optional highlighted callout text */
+  callout?: string
 }
 
-// ─── Popups ───────────────────────────────────────────────────────────────────
+// ─── Popup ────────────────────────────────────────────────────────────────────
 
 export interface Popup {
   id: string
-  targetVisualId: string
+  /** ID of the Visual this popup is attached to */
+  attachTo: string
   text: string
-  // Which step indices this popup is visible
-  stepRange: [number, number]
-  position?: 'top' | 'bottom' | 'left' | 'right'
+  /** Step at which the popup appears */
+  showAtStep: number
+  /** Step at which the popup disappears (if omitted, stays until end) */
+  hideAtStep?: number
+  /** Conditionally show based on a control value */
+  showWhen?: Condition
+  style?: 'info' | 'success' | 'warning' | 'insight'
 }
 
-// ─── Conditions ───────────────────────────────────────────────────────────────
-
-export interface Condition {
-  id: string
-  expression: string
-  trueLabel: string
-  falseLabel: string
-}
-
-// ─── Challenges ───────────────────────────────────────────────────────────────
-
-export type ChallengeType = 'trace' | 'predict' | 'modify' | 'quiz'
+// ─── Challenge ────────────────────────────────────────────────────────────────
 
 export interface Challenge {
   id: string
-  type: ChallengeType
-  question: string
-  hint?: string
-  // For quiz type
-  options?: string[]
-  correctAnswer?: string | number
+  title: string
+  description: string
+  type: 'predict' | 'break-it' | 'optimize' | 'scenario'
 }
 
 // ─── Code (DSA mode) ──────────────────────────────────────────────────────────
@@ -297,7 +130,7 @@ export interface Challenge {
 export interface SceneCode {
   language: CodeLanguage
   source: string
-  // Line number (0-based) to highlight at each step index
+  /** Line number (0-based) to highlight at each step index */
   highlightByStep: number[]
 }
 
@@ -307,12 +140,12 @@ export interface Scene {
   id: string
   title: string
   type: SceneType
-  layout: LayoutType
+  layout: SceneLayout
   description?: string
   category?: string
   tags?: string[]
 
-  // DSA mode only — the code being traced
+  /** DSA mode only — the code being traced */
   code?: SceneCode
 
   visuals: Visual[]
@@ -321,11 +154,30 @@ export interface Scene {
   explanation: ExplanationSection[]
   popups: Popup[]
   challenges?: Challenge[]
-  conditions?: Condition[]
 
-  // Metadata
   complexity?: {
     time?: string
     space?: string
   }
+}
+
+// ─── VisualState ──────────────────────────────────────────────────────────────
+
+/** The computed state of a visual after applying actions up to a given step. */
+export type VisualState = Record<string, unknown>
+
+// ─── SceneJSON namespace (convenience re-export) ──────────────────────────────
+
+export namespace SceneJSON {
+  export type Root = Scene
+  export type VisualItem = Visual
+  export type StepItem = Step
+  export type ActionItem = Action
+  export type ControlItem = Control
+  export type ExplanationItem = ExplanationSection
+  export type PopupItem = Popup
+  export type ChallengeItem = Challenge
+  export type ConditionItem = Condition
+  export type Layout = SceneLayout
+  export type Type = SceneType
 }
