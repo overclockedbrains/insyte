@@ -1,0 +1,411 @@
+{
+  "id": "js-event-loop",
+  "title": "JavaScript Event Loop",
+  "type": "concept",
+  "layout": "text-left-canvas-right",
+  "description": "See exactly how JavaScript handles async code — call stack, Web APIs, microtask queue, and callback queue all in one visual.",
+  "category": "JavaScript",
+  "tags": ["event-loop", "async", "promises", "setTimeout", "javascript"],
+
+  "visuals": [
+    {
+      "id": "call-stack",
+      "type": "stack",
+      "label": "Call Stack",
+      "position": { "x": 20, "y": 50 },
+      "initialState": {
+        "items": [],
+        "highlight": null
+      }
+    },
+    {
+      "id": "microtask-queue",
+      "type": "queue",
+      "label": "Microtask Queue",
+      "position": { "x": 50, "y": 30 },
+      "initialState": {
+        "items": []
+      }
+    },
+    {
+      "id": "callback-queue",
+      "type": "queue",
+      "label": "Callback Queue (Macrotask)",
+      "position": { "x": 50, "y": 70 },
+      "initialState": {
+        "items": []
+      }
+    },
+    {
+      "id": "current-phase",
+      "type": "text-badge",
+      "label": "Event Loop Phase",
+      "position": { "x": 50, "y": 5 },
+      "initialState": {
+        "text": "Executing script…",
+        "style": "default"
+      }
+    },
+    {
+      "id": "web-apis",
+      "type": "system-diagram",
+      "label": "Web APIs",
+      "position": { "x": 80, "y": 50 },
+      "initialState": {
+        "components": [
+          { "id": "web-api-box", "label": "Web APIs", "icon": "compute", "x": 200, "y": 120, "status": "normal" },
+          { "id": "timer-box", "label": "Timer (0ms)", "icon": "compute", "x": 200, "y": 240, "status": "normal" }
+        ],
+        "connections": []
+      }
+    }
+  ],
+
+  "steps": [
+    {
+      "index": 0,
+      "actions": [
+        {
+          "target": "current-phase",
+          "action": "set",
+          "params": { "text": "Script starts — call stack empty", "style": "default" }
+        }
+      ],
+      "duration": 1600
+    },
+    {
+      "index": 1,
+      "actions": [
+        {
+          "target": "current-phase",
+          "action": "set",
+          "params": { "text": "console.log('start') → pushed to call stack", "style": "highlight" }
+        },
+        {
+          "target": "call-stack",
+          "action": "push",
+          "params": { "field": "items", "item": "console.log('start')" }
+        }
+      ],
+      "duration": 1600
+    },
+    {
+      "index": 2,
+      "actions": [
+        {
+          "target": "current-phase",
+          "action": "set",
+          "params": { "text": "console.log('start') executed → popped", "style": "success" }
+        },
+        {
+          "target": "call-stack",
+          "action": "pop",
+          "params": { "field": "items" }
+        }
+      ],
+      "duration": 1600
+    },
+    {
+      "index": 3,
+      "actions": [
+        {
+          "target": "current-phase",
+          "action": "set",
+          "params": { "text": "setTimeout(fn, 0) → pushed, then handed to Web APIs", "style": "highlight" }
+        },
+        {
+          "target": "call-stack",
+          "action": "push",
+          "params": { "field": "items", "item": "setTimeout(fn, 0)" }
+        },
+        {
+          "target": "web-apis",
+          "action": "set",
+          "params": {
+            "components": [
+              { "id": "web-api-box", "label": "Web APIs", "icon": "compute", "x": 200, "y": 120, "status": "active" },
+              { "id": "timer-box", "label": "Timer (0ms)", "icon": "compute", "x": 200, "y": 240, "status": "active" }
+            ],
+            "connections": [
+              { "from": "web-api-box", "to": "timer-box", "active": true }
+            ]
+          }
+        }
+      ],
+      "duration": 1800
+    },
+    {
+      "index": 4,
+      "actions": [
+        {
+          "target": "current-phase",
+          "action": "set",
+          "params": { "text": "setTimeout registered → popped from stack", "style": "default" }
+        },
+        {
+          "target": "call-stack",
+          "action": "pop",
+          "params": { "field": "items" }
+        }
+      ],
+      "duration": 1400
+    },
+    {
+      "index": 5,
+      "actions": [
+        {
+          "target": "current-phase",
+          "action": "set",
+          "params": { "text": "Promise.resolve().then(fn) → microtask queued immediately", "style": "highlight" }
+        },
+        {
+          "target": "call-stack",
+          "action": "push",
+          "params": { "field": "items", "item": "Promise.resolve().then(fn)" }
+        },
+        {
+          "target": "microtask-queue",
+          "action": "push",
+          "params": { "field": "items", "item": "Promise callback" }
+        }
+      ],
+      "duration": 1800
+    },
+    {
+      "index": 6,
+      "actions": [
+        {
+          "target": "current-phase",
+          "action": "set",
+          "params": { "text": "console.log('end') → pushed and executed", "style": "highlight" }
+        },
+        {
+          "target": "call-stack",
+          "action": "pop",
+          "params": { "field": "items" }
+        },
+        {
+          "target": "call-stack",
+          "action": "push",
+          "params": { "field": "items", "item": "console.log('end')" }
+        }
+      ],
+      "duration": 1600
+    },
+    {
+      "index": 7,
+      "actions": [
+        {
+          "target": "current-phase",
+          "action": "set",
+          "params": { "text": "Call stack empty → event loop checks microtask queue FIRST", "style": "highlight" }
+        },
+        {
+          "target": "call-stack",
+          "action": "pop",
+          "params": { "field": "items" }
+        },
+        {
+          "target": "web-apis",
+          "action": "set",
+          "params": {
+            "components": [
+              { "id": "web-api-box", "label": "Web APIs", "icon": "compute", "x": 200, "y": 120, "status": "normal" },
+              { "id": "timer-box", "label": "Timer done!", "icon": "compute", "x": 200, "y": 240, "status": "normal" }
+            ],
+            "connections": []
+          }
+        },
+        {
+          "target": "callback-queue",
+          "action": "push",
+          "params": { "field": "items", "item": "setTimeout callback" }
+        }
+      ],
+      "duration": 2000
+    },
+    {
+      "index": 8,
+      "actions": [
+        {
+          "target": "current-phase",
+          "action": "set",
+          "params": { "text": "Microtask runs first — Promise callback → call stack", "style": "success" }
+        },
+        {
+          "target": "microtask-queue",
+          "action": "pop",
+          "params": { "field": "items" }
+        },
+        {
+          "target": "call-stack",
+          "action": "push",
+          "params": { "field": "items", "item": "Promise callback" }
+        }
+      ],
+      "duration": 1800
+    },
+    {
+      "index": 9,
+      "actions": [
+        {
+          "target": "current-phase",
+          "action": "set",
+          "params": { "text": "Promise callback completes → now check callback queue", "style": "default" }
+        },
+        {
+          "target": "call-stack",
+          "action": "pop",
+          "params": { "field": "items" }
+        }
+      ],
+      "duration": 1600
+    },
+    {
+      "index": 10,
+      "actions": [
+        {
+          "target": "current-phase",
+          "action": "set",
+          "params": { "text": "Macrotask: setTimeout callback → call stack", "style": "highlight" }
+        },
+        {
+          "target": "callback-queue",
+          "action": "pop",
+          "params": { "field": "items" }
+        },
+        {
+          "target": "call-stack",
+          "action": "push",
+          "params": { "field": "items", "item": "setTimeout callback" }
+        }
+      ],
+      "duration": 1800
+    },
+    {
+      "index": 11,
+      "actions": [
+        {
+          "target": "current-phase",
+          "action": "set",
+          "params": { "text": "Done! Order: 'start' → 'end' → Promise → setTimeout", "style": "success" }
+        },
+        {
+          "target": "call-stack",
+          "action": "pop",
+          "params": { "field": "items" }
+        }
+      ],
+      "duration": 2000
+    }
+  ],
+
+  "controls": [
+    {
+      "id": "snippet-toggle",
+      "type": "toggle-group",
+      "label": "Code Snippet",
+      "config": {
+        "options": ["setTimeout + Promise", "async/await", "Nested Microtasks"],
+        "defaultValue": "setTimeout + Promise"
+      }
+    },
+    {
+      "id": "btn-run",
+      "type": "button",
+      "label": "Run Snippet",
+      "config": { "variant": "primary", "defaultValue": null }
+    }
+  ],
+
+  "explanation": [
+    {
+      "heading": "JavaScript is Single-Threaded",
+      "body": "JS runs on a single thread — only one thing executes at a time. The **call stack** tracks which function is currently executing.\n\nWhen you call a function, it's pushed onto the stack. When it returns, it's popped off.",
+      "appearsAtStep": 0
+    },
+    {
+      "heading": "Synchronous Execution",
+      "body": "`console.log('start')` is synchronous — it runs immediately when the engine reaches it.\n\nIt's pushed onto the call stack, executes, and is immediately popped.",
+      "appearsAtStep": 1
+    },
+    {
+      "heading": "Web APIs Handle Async Work",
+      "body": "`setTimeout` is not actually a JS feature — it's a **Web API** provided by the browser. When called, JS registers the callback with the browser and pops `setTimeout` off the stack immediately.\n\nJS doesn't wait — the browser handles the timer in the background.",
+      "appearsAtStep": 3,
+      "callout": "This is why setTimeout(fn, 0) doesn't mean \"run now\" — it means \"run after the current script finishes\"."
+    },
+    {
+      "heading": "Microtasks vs Macrotasks",
+      "body": "There are **two** task queues:\n- **Microtask queue**: Promise callbacks, `queueMicrotask()` — runs after every task, before the browser paints\n- **Callback queue (macrotask)**: `setTimeout`, `setInterval`, I/O events — runs one per event loop tick\n\nThe event loop always **drains all microtasks before taking one macrotask**.",
+      "appearsAtStep": 5,
+      "callout": "This is why Promise.then() always runs before setTimeout, even setTimeout(fn, 0)."
+    },
+    {
+      "heading": "The Event Loop Tick",
+      "body": "When the call stack is empty, the event loop:\n1. Runs **all** microtasks (until the microtask queue is empty)\n2. Takes **one** macrotask from the callback queue\n3. Renders any UI updates (browser only)\n4. Repeats",
+      "appearsAtStep": 7
+    },
+    {
+      "heading": "Execution Order Confirmed",
+      "body": "Our code outputs:\n```\nstart\nend\nPromise callback  ← microtask\nsetTimeout callback  ← macrotask\n```\nThis holds true regardless of how long the timer delay is — even 0ms.",
+      "appearsAtStep": 11
+    }
+  ],
+
+  "popups": [
+    {
+      "id": "pop-start",
+      "attachTo": "call-stack",
+      "text": "Synchronous — runs immediately",
+      "showAtStep": 1,
+      "hideAtStep": 2,
+      "style": "info"
+    },
+    {
+      "id": "pop-settimeout",
+      "attachTo": "web-apis",
+      "text": "Handed off to browser — JS continues",
+      "showAtStep": 3,
+      "hideAtStep": 5,
+      "style": "info"
+    },
+    {
+      "id": "pop-microtask",
+      "attachTo": "microtask-queue",
+      "text": "Promise callbacks queue instantly",
+      "showAtStep": 5,
+      "hideAtStep": 7,
+      "style": "warning"
+    },
+    {
+      "id": "pop-order",
+      "attachTo": "current-phase",
+      "text": "Microtasks ALWAYS run before macrotasks!",
+      "showAtStep": 8,
+      "hideAtStep": 10,
+      "style": "insight"
+    }
+  ],
+
+  "challenges": [
+    {
+      "id": "ch-predict-order",
+      "title": "Predict the Output",
+      "description": "What does this code print? `console.log(1); setTimeout(() => console.log(2), 0); Promise.resolve().then(() => console.log(3)); console.log(4);`\n\nGuess before stepping through!",
+      "type": "predict"
+    },
+    {
+      "id": "ch-nested-microtask",
+      "title": "Nested Microtasks",
+      "description": "What if a Promise callback itself queues another microtask? Does the event loop drain it before moving to the macrotask? Try: `Promise.resolve().then(() => { Promise.resolve().then(() => console.log('nested')); });`",
+      "type": "predict"
+    },
+    {
+      "id": "ch-starvation",
+      "title": "Starvation Scenario",
+      "description": "If microtasks keep queuing more microtasks (infinite loop of Promises), the macrotask queue (setTimeout callbacks) never runs. How would you fix a real-world bug caused by this?",
+      "type": "scenario"
+    }
+  ]
+}

@@ -1,0 +1,485 @@
+{
+  "id": "git-branching",
+  "title": "Git Branching",
+  "type": "concept",
+  "layout": "text-left-canvas-right",
+  "description": "Visualize how Git branches, merges, rebases, and resets work — from your first commit to cherry-picking and reverting.",
+  "category": "Git",
+  "tags": ["git", "branching", "merge", "rebase", "version-control"],
+
+  "visuals": [
+    {
+      "id": "commit-graph",
+      "type": "graph",
+      "label": "Commit Graph",
+      "position": { "x": 50, "y": 45 },
+      "initialState": {
+        "nodes": [],
+        "edges": []
+      }
+    },
+    {
+      "id": "head-badge",
+      "type": "text-badge",
+      "label": "HEAD",
+      "position": { "x": 50, "y": 5 },
+      "initialState": {
+        "text": "HEAD → (empty repo)",
+        "style": "default"
+      }
+    }
+  ],
+
+  "steps": [
+    {
+      "index": 0,
+      "actions": [
+        {
+          "target": "head-badge",
+          "action": "set",
+          "params": { "text": "git commit → C1 (Initial commit)", "style": "highlight" }
+        },
+        {
+          "target": "commit-graph",
+          "action": "set",
+          "params": {
+            "nodes": [
+              { "id": "c1", "label": "C1", "x": 1, "y": 2 }
+            ],
+            "edges": []
+          }
+        }
+      ],
+      "duration": 1600
+    },
+    {
+      "index": 1,
+      "actions": [
+        {
+          "target": "head-badge",
+          "action": "set",
+          "params": { "text": "git commit → C2 — HEAD → main → C2", "style": "highlight" }
+        },
+        {
+          "target": "commit-graph",
+          "action": "set",
+          "params": {
+            "nodes": [
+              { "id": "c1", "label": "C1", "x": 1, "y": 2 },
+              { "id": "c2", "label": "C2", "x": 3, "y": 2, "color": "#b79fff" }
+            ],
+            "edges": [
+              { "from": "c1", "to": "c2", "directed": true }
+            ]
+          }
+        }
+      ],
+      "duration": 1600
+    },
+    {
+      "index": 2,
+      "actions": [
+        {
+          "target": "head-badge",
+          "action": "set",
+          "params": { "text": "git checkout -b feature — new pointer at C2", "style": "highlight" }
+        },
+        {
+          "target": "commit-graph",
+          "action": "set",
+          "params": {
+            "nodes": [
+              { "id": "c1", "label": "C1", "x": 1, "y": 2 },
+              { "id": "c2", "label": "C2\nmain", "x": 3, "y": 2, "color": "#b79fff" },
+              { "id": "feat-ptr", "label": "feature", "x": 3, "y": 4, "color": "#3adffA" }
+            ],
+            "edges": [
+              { "from": "c1", "to": "c2", "directed": true },
+              { "from": "feat-ptr", "to": "c2", "directed": true, "highlighted": true }
+            ]
+          }
+        }
+      ],
+      "duration": 1800
+    },
+    {
+      "index": 3,
+      "actions": [
+        {
+          "target": "head-badge",
+          "action": "set",
+          "params": { "text": "git commit on feature → C3 — branches diverge", "style": "success" }
+        },
+        {
+          "target": "commit-graph",
+          "action": "set",
+          "params": {
+            "nodes": [
+              { "id": "c1", "label": "C1", "x": 1, "y": 2 },
+              { "id": "c2", "label": "C2", "x": 3, "y": 2, "color": "#b79fff" },
+              { "id": "c3", "label": "C3", "x": 5, "y": 4, "color": "#3adffA" }
+            ],
+            "edges": [
+              { "from": "c1", "to": "c2", "directed": true },
+              { "from": "c2", "to": "c3", "directed": true, "highlighted": true }
+            ]
+          }
+        }
+      ],
+      "duration": 1800
+    },
+    {
+      "index": 4,
+      "actions": [
+        {
+          "target": "head-badge",
+          "action": "set",
+          "params": { "text": "git commit on main → C4 — divergence grows", "style": "highlight" }
+        },
+        {
+          "target": "commit-graph",
+          "action": "set",
+          "params": {
+            "nodes": [
+              { "id": "c1", "label": "C1", "x": 1, "y": 2 },
+              { "id": "c2", "label": "C2", "x": 3, "y": 2 },
+              { "id": "c3", "label": "C3\n(feature)", "x": 5, "y": 4, "color": "#3adffA" },
+              { "id": "c4", "label": "C4\n(main)", "x": 5, "y": 2, "color": "#b79fff" }
+            ],
+            "edges": [
+              { "from": "c1", "to": "c2", "directed": true },
+              { "from": "c2", "to": "c3", "directed": true },
+              { "from": "c2", "to": "c4", "directed": true, "highlighted": true }
+            ]
+          }
+        }
+      ],
+      "duration": 1800
+    },
+    {
+      "index": 5,
+      "actions": [
+        {
+          "target": "head-badge",
+          "action": "set",
+          "params": { "text": "git merge feature — C5 merge commit joins both histories", "style": "success" }
+        },
+        {
+          "target": "commit-graph",
+          "action": "set",
+          "params": {
+            "nodes": [
+              { "id": "c1", "label": "C1", "x": 1, "y": 2 },
+              { "id": "c2", "label": "C2", "x": 3, "y": 2 },
+              { "id": "c3", "label": "C3", "x": 5, "y": 4, "color": "#3adffA" },
+              { "id": "c4", "label": "C4", "x": 5, "y": 2, "color": "#b79fff" },
+              { "id": "c5", "label": "C5\nmerge", "x": 7, "y": 2, "color": "#b79fff" }
+            ],
+            "edges": [
+              { "from": "c1", "to": "c2", "directed": true },
+              { "from": "c2", "to": "c3", "directed": true },
+              { "from": "c2", "to": "c4", "directed": true },
+              { "from": "c4", "to": "c5", "directed": true, "highlighted": true },
+              { "from": "c3", "to": "c5", "directed": true, "highlighted": true }
+            ]
+          }
+        }
+      ],
+      "duration": 2000
+    },
+    {
+      "index": 6,
+      "actions": [
+        {
+          "target": "head-badge",
+          "action": "set",
+          "params": { "text": "Fast-forward merge: no divergence — HEAD just moves forward", "style": "highlight" }
+        },
+        {
+          "target": "commit-graph",
+          "action": "set",
+          "params": {
+            "nodes": [
+              { "id": "c1", "label": "C1", "x": 1, "y": 2 },
+              { "id": "c2", "label": "C2\nmain→", "x": 3, "y": 2, "color": "#b79fff" },
+              { "id": "c3", "label": "C3\nfeature", "x": 5, "y": 2, "color": "#3adffA" }
+            ],
+            "edges": [
+              { "from": "c1", "to": "c2", "directed": true },
+              { "from": "c2", "to": "c3", "directed": true, "highlighted": true }
+            ]
+          }
+        }
+      ],
+      "duration": 1800
+    },
+    {
+      "index": 7,
+      "actions": [
+        {
+          "target": "head-badge",
+          "action": "set",
+          "params": { "text": "Merge conflict: both branches modified the same file", "style": "error" }
+        },
+        {
+          "target": "commit-graph",
+          "action": "set",
+          "params": {
+            "nodes": [
+              { "id": "c1", "label": "C1", "x": 1, "y": 2 },
+              { "id": "c2", "label": "C2", "x": 3, "y": 2 },
+              { "id": "c3", "label": "C3\n⚠ conflict", "x": 5, "y": 4, "color": "#ff6e84" },
+              { "id": "c4", "label": "C4\n⚠ conflict", "x": 5, "y": 2, "color": "#ff6e84" }
+            ],
+            "edges": [
+              { "from": "c1", "to": "c2", "directed": true },
+              { "from": "c2", "to": "c3", "directed": true },
+              { "from": "c2", "to": "c4", "directed": true }
+            ]
+          }
+        }
+      ],
+      "duration": 1800
+    },
+    {
+      "index": 8,
+      "actions": [
+        {
+          "target": "head-badge",
+          "action": "set",
+          "params": { "text": "git rebase main: commits \"replayed\" onto latest main", "style": "highlight" }
+        },
+        {
+          "target": "commit-graph",
+          "action": "set",
+          "params": {
+            "nodes": [
+              { "id": "c1", "label": "C1", "x": 1, "y": 2 },
+              { "id": "c2", "label": "C2", "x": 3, "y": 2 },
+              { "id": "c4", "label": "C4\n(main)", "x": 5, "y": 2, "color": "#b79fff" },
+              { "id": "c3r", "label": "C3'\n(rebased)", "x": 7, "y": 2, "color": "#3adffA" }
+            ],
+            "edges": [
+              { "from": "c1", "to": "c2", "directed": true },
+              { "from": "c2", "to": "c4", "directed": true },
+              { "from": "c4", "to": "c3r", "directed": true, "highlighted": true }
+            ]
+          }
+        }
+      ],
+      "duration": 2000
+    },
+    {
+      "index": 9,
+      "actions": [
+        {
+          "target": "head-badge",
+          "action": "set",
+          "params": { "text": "git cherry-pick C3' — copy just one commit to main", "style": "success" }
+        },
+        {
+          "target": "commit-graph",
+          "action": "set",
+          "params": {
+            "nodes": [
+              { "id": "c1", "label": "C1", "x": 1, "y": 2 },
+              { "id": "c2", "label": "C2", "x": 3, "y": 2 },
+              { "id": "c4", "label": "C4", "x": 5, "y": 2, "color": "#b79fff" },
+              { "id": "c3r", "label": "C3'", "x": 7, "y": 4, "color": "#3adffA" },
+              { "id": "c3cp", "label": "C3''\n(cherry)", "x": 7, "y": 2, "color": "#b79fff" }
+            ],
+            "edges": [
+              { "from": "c1", "to": "c2", "directed": true },
+              { "from": "c2", "to": "c4", "directed": true },
+              { "from": "c4", "to": "c3cp", "directed": true, "highlighted": true },
+              { "from": "c4", "to": "c3r", "directed": true }
+            ]
+          }
+        }
+      ],
+      "duration": 1800
+    },
+    {
+      "index": 10,
+      "actions": [
+        {
+          "target": "head-badge",
+          "action": "set",
+          "params": { "text": "git reset --hard C4 — HEAD moves back, C3'' disappears", "style": "error" }
+        },
+        {
+          "target": "commit-graph",
+          "action": "set",
+          "params": {
+            "nodes": [
+              { "id": "c1", "label": "C1", "x": 1, "y": 2 },
+              { "id": "c2", "label": "C2", "x": 3, "y": 2 },
+              { "id": "c4", "label": "C4\n← HEAD", "x": 5, "y": 2, "color": "#b79fff" },
+              { "id": "c3r", "label": "C3'", "x": 7, "y": 4, "color": "#3adffA" }
+            ],
+            "edges": [
+              { "from": "c1", "to": "c2", "directed": true },
+              { "from": "c2", "to": "c4", "directed": true, "highlighted": true },
+              { "from": "c4", "to": "c3r", "directed": true }
+            ]
+          }
+        }
+      ],
+      "duration": 1800
+    },
+    {
+      "index": 11,
+      "actions": [
+        {
+          "target": "head-badge",
+          "action": "set",
+          "params": { "text": "git revert C4 — new commit C5 that undoes C4's changes", "style": "success" }
+        },
+        {
+          "target": "commit-graph",
+          "action": "set",
+          "params": {
+            "nodes": [
+              { "id": "c1", "label": "C1", "x": 1, "y": 2 },
+              { "id": "c2", "label": "C2", "x": 3, "y": 2 },
+              { "id": "c4", "label": "C4", "x": 5, "y": 2, "color": "#b79fff" },
+              { "id": "c3r", "label": "C3'", "x": 7, "y": 4, "color": "#3adffA" },
+              { "id": "c5rev", "label": "C5\nrevert", "x": 7, "y": 2, "color": "#b79fff" }
+            ],
+            "edges": [
+              { "from": "c1", "to": "c2", "directed": true },
+              { "from": "c2", "to": "c4", "directed": true },
+              { "from": "c4", "to": "c5rev", "directed": true, "highlighted": true },
+              { "from": "c4", "to": "c3r", "directed": true }
+            ]
+          }
+        }
+      ],
+      "duration": 2000
+    }
+  ],
+
+  "controls": [
+    {
+      "id": "btn-commit",
+      "type": "button",
+      "label": "Commit",
+      "config": { "variant": "primary", "defaultValue": null }
+    },
+    {
+      "id": "btn-branch",
+      "type": "button",
+      "label": "Create Branch",
+      "config": { "variant": "secondary", "defaultValue": null }
+    },
+    {
+      "id": "branch-name",
+      "type": "input",
+      "label": "Branch Name",
+      "config": { "placeholder": "e.g. feature/auth", "defaultValue": "" }
+    },
+    {
+      "id": "btn-merge",
+      "type": "button",
+      "label": "Merge",
+      "config": { "variant": "primary", "defaultValue": null }
+    },
+    {
+      "id": "btn-rebase",
+      "type": "button",
+      "label": "Rebase",
+      "config": { "variant": "secondary", "defaultValue": null }
+    }
+  ],
+
+  "explanation": [
+    {
+      "heading": "Commits are Snapshots",
+      "body": "Every `git commit` creates a **snapshot** of your entire project at that moment, identified by a SHA hash.\n\nCommits form a **directed acyclic graph (DAG)** — each commit points to its parent(s). The history is the path from HEAD back to the first commit.",
+      "appearsAtStep": 0
+    },
+    {
+      "heading": "Branches are Just Pointers",
+      "body": "A branch is nothing more than a **lightweight pointer** to a commit. Creating a branch is instant — it just creates a new file with a commit hash in it.\n\n`main`, `feature`, `hotfix` are all just labels. When you commit on a branch, the pointer advances.",
+      "appearsAtStep": 2,
+      "callout": "HEAD is a special pointer — it tells Git which branch (and therefore which commit) you're currently on."
+    },
+    {
+      "heading": "Merge — Joining Histories",
+      "body": "A **3-way merge** happens when the branches have diverged: Git finds the common ancestor commit and combines both sets of changes into a new **merge commit**.\n\nThe merge commit has two parents — both branch tips.",
+      "appearsAtStep": 5
+    },
+    {
+      "heading": "Fast-Forward Merge",
+      "body": "If one branch is directly ahead of the other (no divergence), Git can **fast-forward** — just move the pointer forward. No merge commit needed.\n\nThis is the cleanest case: linear history, no extra nodes.",
+      "appearsAtStep": 6
+    },
+    {
+      "heading": "Rebase — Rewrite History",
+      "body": "Instead of creating a merge commit, `git rebase` **replays** your branch's commits on top of the target branch, one by one.\n\nResult: a clean linear history. But note — rebased commits get **new SHA hashes**. Never rebase shared/public branches.",
+      "appearsAtStep": 8,
+      "callout": "Golden rule: never rebase a branch that others are working on — you rewrite the commits they've based their work on."
+    },
+    {
+      "heading": "Cherry-Pick and Reset vs Revert",
+      "body": "- **Cherry-pick**: copy a specific commit from one branch to another. Useful for backporting fixes.\n- **Reset --hard**: destructively move HEAD back — commits are lost (unless you have the SHA).\n- **Revert**: safe alternative — creates a *new* commit that undoes the changes. History is preserved. Use on shared branches.",
+      "appearsAtStep": 10
+    }
+  ],
+
+  "popups": [
+    {
+      "id": "pop-branch-cheap",
+      "attachTo": "commit-graph",
+      "text": "Creating a branch is O(1) — just a file!",
+      "showAtStep": 2,
+      "hideAtStep": 3,
+      "style": "info"
+    },
+    {
+      "id": "pop-merge-commit",
+      "attachTo": "commit-graph",
+      "text": "Merge commit has 2 parents",
+      "showAtStep": 5,
+      "hideAtStep": 6,
+      "style": "info"
+    },
+    {
+      "id": "pop-rebase-new-sha",
+      "attachTo": "commit-graph",
+      "text": "C3' has a new SHA — it's a copy, not a move",
+      "showAtStep": 8,
+      "hideAtStep": 9,
+      "style": "warning"
+    },
+    {
+      "id": "pop-reset-danger",
+      "attachTo": "commit-graph",
+      "text": "Commits can be recovered with git reflog",
+      "showAtStep": 10,
+      "hideAtStep": 11,
+      "style": "warning"
+    }
+  ],
+
+  "challenges": [
+    {
+      "id": "ch-merge-vs-rebase",
+      "title": "Merge vs Rebase Trade-off",
+      "description": "Your team follows a rule: all PRs must be rebased before merging. What problem does this solve vs. always using merge commits? What's the downside if someone force-pushes a rebased branch that others have checked out?",
+      "type": "predict"
+    },
+    {
+      "id": "ch-detached-head",
+      "title": "Detached HEAD State",
+      "description": "Run `git checkout C2` (a commit hash instead of a branch name). You're now in detached HEAD state. If you commit from here, what happens when you checkout main again? How do you save those commits?",
+      "type": "scenario"
+    },
+    {
+      "id": "ch-recover-reset",
+      "title": "Recover After git reset --hard",
+      "description": "You accidentally ran `git reset --hard HEAD~3` and lost 3 commits. The commits aren't on any branch. How do you recover them? Hint: `git reflog` is your friend.",
+      "type": "break-it"
+    }
+  ]
+}

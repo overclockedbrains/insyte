@@ -1,0 +1,571 @@
+{
+  "id": "hash-tables",
+  "title": "Hash Tables",
+  "type": "concept",
+  "layout": "text-left-canvas-right",
+  "description": "Explore how hash tables work — from hashing keys to handling collisions with chaining and open addressing.",
+  "category": "Data Structures",
+  "tags": ["hash", "collision", "chaining", "open-addressing", "data-structures"],
+
+  "visuals": [
+    {
+      "id": "bucket-array",
+      "type": "array",
+      "label": "Buckets",
+      "position": { "x": 50, "y": 20 },
+      "initialState": {
+        "cells": [
+          { "value": "—", "highlight": "default" },
+          { "value": "—", "highlight": "default" },
+          { "value": "—", "highlight": "default" },
+          { "value": "—", "highlight": "default" }
+        ]
+      }
+    },
+    {
+      "id": "hash-map",
+      "type": "hashmap",
+      "label": "Hash Table",
+      "position": { "x": 50, "y": 55 },
+      "initialState": {
+        "entries": [],
+        "label": "Hash Table"
+      }
+    },
+    {
+      "id": "hash-fn-badge",
+      "type": "text-badge",
+      "label": "Current Operation",
+      "position": { "x": 50, "y": 10 },
+      "initialState": {
+        "text": "Ready — insert a key to begin",
+        "style": "default"
+      }
+    },
+    {
+      "id": "load-factor",
+      "type": "counter",
+      "label": "Load Factor",
+      "position": { "x": 20, "y": 90 },
+      "initialState": {
+        "value": 0,
+        "label": "Load Factor",
+        "color": "primary"
+      }
+    },
+    {
+      "id": "collisions",
+      "type": "counter",
+      "label": "Collisions",
+      "position": { "x": 80, "y": 90 },
+      "initialState": {
+        "value": 0,
+        "label": "Collisions",
+        "color": "secondary"
+      }
+    }
+  ],
+
+  "steps": [
+    {
+      "index": 0,
+      "actions": [],
+      "duration": 1800
+    },
+    {
+      "index": 1,
+      "actions": [
+        {
+          "target": "hash-fn-badge",
+          "action": "set",
+          "params": { "text": "hash(\"alice\") → 5 % 4 = 1", "style": "highlight" }
+        },
+        {
+          "target": "bucket-array",
+          "action": "highlight",
+          "params": { "field": "cells", "index": 1, "value": "insert" }
+        },
+        {
+          "target": "hash-map",
+          "action": "set",
+          "params": {
+            "entries": [
+              { "key": "alice", "value": "28", "highlight": "insert" }
+            ]
+          }
+        },
+        {
+          "target": "bucket-array",
+          "action": "set",
+          "params": {
+            "cells": [
+              { "value": "—", "highlight": "default" },
+              { "value": "alice", "highlight": "insert" },
+              { "value": "—", "highlight": "default" },
+              { "value": "—", "highlight": "default" }
+            ]
+          }
+        },
+        {
+          "target": "load-factor",
+          "action": "set",
+          "params": { "value": 0.25, "label": "Load Factor", "color": "primary" }
+        }
+      ],
+      "duration": 1800
+    },
+    {
+      "index": 2,
+      "actions": [
+        {
+          "target": "hash-fn-badge",
+          "action": "set",
+          "params": { "text": "hash(\"bob\") → 3 % 4 = 3", "style": "highlight" }
+        },
+        {
+          "target": "bucket-array",
+          "action": "set",
+          "params": {
+            "cells": [
+              { "value": "—", "highlight": "default" },
+              { "value": "alice", "highlight": "default" },
+              { "value": "—", "highlight": "default" },
+              { "value": "bob", "highlight": "insert" }
+            ]
+          }
+        },
+        {
+          "target": "hash-map",
+          "action": "set",
+          "params": {
+            "entries": [
+              { "key": "alice", "value": "28" },
+              { "key": "bob", "value": "34", "highlight": "insert" }
+            ]
+          }
+        },
+        {
+          "target": "load-factor",
+          "action": "set",
+          "params": { "value": 0.5, "label": "Load Factor", "color": "primary" }
+        }
+      ],
+      "duration": 1800
+    },
+    {
+      "index": 3,
+      "actions": [
+        {
+          "target": "hash-fn-badge",
+          "action": "set",
+          "params": { "text": "hash(\"carol\") → 5 % 4 = 1  ⚠ COLLISION!", "style": "error" }
+        },
+        {
+          "target": "bucket-array",
+          "action": "set",
+          "params": {
+            "cells": [
+              { "value": "—", "highlight": "default" },
+              { "value": "alice→carol", "highlight": "collision" },
+              { "value": "—", "highlight": "default" },
+              { "value": "bob", "highlight": "default" }
+            ]
+          }
+        },
+        {
+          "target": "hash-map",
+          "action": "set",
+          "params": {
+            "entries": [
+              { "key": "alice", "value": "28" },
+              { "key": "bob", "value": "34" },
+              { "key": "carol", "value": "22", "highlight": "insert" }
+            ]
+          }
+        },
+        {
+          "target": "collisions",
+          "action": "set",
+          "params": { "value": 1, "label": "Collisions", "color": "error" }
+        },
+        {
+          "target": "load-factor",
+          "action": "set",
+          "params": { "value": 0.75, "label": "Load Factor", "color": "primary" }
+        }
+      ],
+      "duration": 2000
+    },
+    {
+      "index": 4,
+      "actions": [
+        {
+          "target": "hash-fn-badge",
+          "action": "set",
+          "params": { "text": "lookup(\"alice\") → bucket 1 → scan chain → HIT ✓", "style": "success" }
+        },
+        {
+          "target": "bucket-array",
+          "action": "set",
+          "params": {
+            "cells": [
+              { "value": "—", "highlight": "default" },
+              { "value": "alice→carol", "highlight": "found" },
+              { "value": "—", "highlight": "default" },
+              { "value": "bob", "highlight": "default" }
+            ]
+          }
+        },
+        {
+          "target": "hash-map",
+          "action": "set",
+          "params": {
+            "entries": [
+              { "key": "alice", "value": "28", "highlight": "hit" },
+              { "key": "bob", "value": "34" },
+              { "key": "carol", "value": "22" }
+            ]
+          }
+        }
+      ],
+      "duration": 1800
+    },
+    {
+      "index": 5,
+      "actions": [
+        {
+          "target": "hash-fn-badge",
+          "action": "set",
+          "params": { "text": "lookup(\"dave\") → bucket 0 → empty → MISS ✗", "style": "error" }
+        },
+        {
+          "target": "bucket-array",
+          "action": "set",
+          "params": {
+            "cells": [
+              { "value": "—", "highlight": "miss" },
+              { "value": "alice→carol", "highlight": "default" },
+              { "value": "—", "highlight": "default" },
+              { "value": "bob", "highlight": "default" }
+            ]
+          }
+        },
+        {
+          "target": "hash-map",
+          "action": "set",
+          "params": {
+            "entries": [
+              { "key": "alice", "value": "28" },
+              { "key": "bob", "value": "34" },
+              { "key": "carol", "value": "22" },
+              { "key": "dave", "value": "???", "highlight": "miss" }
+            ]
+          }
+        }
+      ],
+      "duration": 1800
+    },
+    {
+      "index": 6,
+      "actions": [
+        {
+          "target": "hash-fn-badge",
+          "action": "set",
+          "params": { "text": "Load factor ≥ 0.75 → Rehashing! Doubling table size…", "style": "highlight" }
+        },
+        {
+          "target": "load-factor",
+          "action": "set",
+          "params": { "value": 0.75, "label": "Load Factor", "color": "error" }
+        },
+        {
+          "target": "bucket-array",
+          "action": "set",
+          "params": {
+            "cells": [
+              { "value": "—", "highlight": "active" },
+              { "value": "—", "highlight": "active" },
+              { "value": "—", "highlight": "active" },
+              { "value": "—", "highlight": "active" }
+            ]
+          }
+        }
+      ],
+      "duration": 1800
+    },
+    {
+      "index": 7,
+      "actions": [
+        {
+          "target": "hash-fn-badge",
+          "action": "set",
+          "params": { "text": "Rehashed! New size: 8 — all keys redistributed", "style": "success" }
+        },
+        {
+          "target": "bucket-array",
+          "action": "set",
+          "params": {
+            "cells": [
+              { "value": "—", "highlight": "default" },
+              { "value": "alice", "highlight": "default" },
+              { "value": "—", "highlight": "default" },
+              { "value": "bob", "highlight": "default" },
+              { "value": "—", "highlight": "default" },
+              { "value": "carol", "highlight": "insert" },
+              { "value": "—", "highlight": "default" },
+              { "value": "—", "highlight": "default" }
+            ]
+          }
+        },
+        {
+          "target": "load-factor",
+          "action": "set",
+          "params": { "value": 0.38, "label": "Load Factor", "color": "primary" }
+        },
+        {
+          "target": "collisions",
+          "action": "set",
+          "params": { "value": 0, "label": "Collisions", "color": "secondary" }
+        },
+        {
+          "target": "hash-map",
+          "action": "set",
+          "params": {
+            "entries": [
+              { "key": "alice", "value": "28" },
+              { "key": "bob", "value": "34" },
+              { "key": "carol", "value": "22", "highlight": "insert" }
+            ]
+          }
+        }
+      ],
+      "duration": 2000
+    },
+    {
+      "index": 8,
+      "actions": [
+        {
+          "target": "hash-fn-badge",
+          "action": "set",
+          "params": { "text": "Open Addressing: insert \"dave\" → probe slot 0 → 1 → 2 (empty!)", "style": "highlight" }
+        },
+        {
+          "target": "bucket-array",
+          "action": "set",
+          "params": {
+            "cells": [
+              { "value": "—", "highlight": "miss" },
+              { "value": "alice", "highlight": "miss" },
+              { "value": "dave", "highlight": "insert" },
+              { "value": "bob", "highlight": "default" },
+              { "value": "—", "highlight": "default" },
+              { "value": "carol", "highlight": "default" },
+              { "value": "—", "highlight": "default" },
+              { "value": "—", "highlight": "default" }
+            ]
+          }
+        },
+        {
+          "target": "hash-map",
+          "action": "set",
+          "params": {
+            "entries": [
+              { "key": "alice", "value": "28" },
+              { "key": "bob", "value": "34" },
+              { "key": "carol", "value": "22" },
+              { "key": "dave", "value": "19", "highlight": "insert" }
+            ]
+          }
+        },
+        {
+          "target": "load-factor",
+          "action": "set",
+          "params": { "value": 0.5, "label": "Load Factor", "color": "primary" }
+        }
+      ],
+      "duration": 2000
+    },
+    {
+      "index": 9,
+      "actions": [
+        {
+          "target": "hash-fn-badge",
+          "action": "set",
+          "params": { "text": "delete(\"alice\") → find slot 1 → mark as tombstone", "style": "default" }
+        },
+        {
+          "target": "bucket-array",
+          "action": "set",
+          "params": {
+            "cells": [
+              { "value": "—", "highlight": "default" },
+              { "value": "⌫", "highlight": "delete" },
+              { "value": "dave", "highlight": "default" },
+              { "value": "bob", "highlight": "default" },
+              { "value": "—", "highlight": "default" },
+              { "value": "carol", "highlight": "default" },
+              { "value": "—", "highlight": "default" },
+              { "value": "—", "highlight": "default" }
+            ]
+          }
+        },
+        {
+          "target": "hash-map",
+          "action": "set",
+          "params": {
+            "entries": [
+              { "key": "bob", "value": "34" },
+              { "key": "carol", "value": "22" },
+              { "key": "dave", "value": "19" },
+              { "key": "alice", "value": "deleted", "highlight": "delete" }
+            ]
+          }
+        },
+        {
+          "target": "load-factor",
+          "action": "set",
+          "params": { "value": 0.38, "label": "Load Factor", "color": "primary" }
+        }
+      ],
+      "duration": 1800
+    }
+  ],
+
+  "controls": [
+    {
+      "id": "collision-mode",
+      "type": "toggle-group",
+      "label": "Collision Strategy",
+      "config": { "options": ["Chaining", "Open Addressing"], "defaultValue": "Chaining" }
+    },
+    {
+      "id": "table-size",
+      "type": "slider",
+      "label": "Table Size",
+      "config": { "min": 4, "max": 16, "step": 4, "defaultValue": 4 }
+    },
+    {
+      "id": "insert-key",
+      "type": "input",
+      "label": "Key to Insert",
+      "config": { "placeholder": "e.g. alice", "defaultValue": "" }
+    },
+    {
+      "id": "btn-insert",
+      "type": "button",
+      "label": "Insert",
+      "config": { "variant": "primary", "defaultValue": null }
+    },
+    {
+      "id": "btn-reset",
+      "type": "button",
+      "label": "Reset",
+      "config": { "variant": "secondary", "defaultValue": null }
+    }
+  ],
+
+  "explanation": [
+    {
+      "heading": "What is a Hash Table?",
+      "body": "A hash table stores key-value pairs for near-instant lookup, insertion, and deletion — all **O(1) average case**.\n\nThe core idea: transform a key into an array index using a **hash function**, then store the value there.",
+      "appearsAtStep": 0
+    },
+    {
+      "heading": "Inserting Keys — Hashing",
+      "body": "When you insert `\"alice\"`, the hash function computes `hash(\"alice\") % tableSize = 1`.\n\nThe key-value pair lands in **bucket 1**. Lookup works the same way — hash the key, check that bucket.",
+      "appearsAtStep": 1,
+      "callout": "Notice bucket 1 light up. The hash function is deterministic — same key always hashes to the same bucket."
+    },
+    {
+      "heading": "Collision — Two Keys, One Bucket",
+      "body": "`\"carol\"` also hashes to bucket 1 — the same slot as `\"alice\"`. This is a **collision**.\n\n**Chaining** resolves it by storing a linked list of entries in the bucket. Both `alice` and `carol` coexist as a chain.",
+      "appearsAtStep": 3,
+      "callout": "Real hash tables aim for load factor < 0.75 to keep chains short."
+    },
+    {
+      "heading": "Lookup: HIT vs MISS",
+      "body": "For a **HIT**: hash the key → go to the bucket → scan the chain until a matching key is found.\n\nFor a **MISS**: hash the key → go to the bucket → reach the end of the chain without a match. Returns `null`.",
+      "appearsAtStep": 4
+    },
+    {
+      "heading": "Rehashing — Keeping it Fast",
+      "body": "When load factor (entries ÷ buckets) exceeds **0.75**, the table is **rehashed**: a new array of double the size is allocated and all existing keys are reinserted.\n\nThis keeps average chain length ≤ 1 and maintains O(1) lookup.",
+      "appearsAtStep": 6,
+      "callout": "Rehashing is O(n) but happens rarely — amortized cost per insertion remains O(1)."
+    },
+    {
+      "heading": "Open Addressing — No Chains",
+      "body": "In **open addressing**, there's no chaining. Instead, when a collision occurs, the algorithm **probes** for the next empty slot: `slot = (hash + i) % size` for i = 0, 1, 2…\n\nAll entries live directly in the array — better cache locality, but max load factor must stay lower.",
+      "appearsAtStep": 8
+    },
+    {
+      "heading": "Deletion with Tombstones",
+      "body": "Deleting in open addressing is tricky — you can't just empty the slot, or future probes will stop early (false MISS).\n\nThe solution: mark deleted slots as **tombstones** (⌫). Probes skip tombstones but new insertions can reuse them.",
+      "appearsAtStep": 9
+    }
+  ],
+
+  "popups": [
+    {
+      "id": "pop-hash-alice",
+      "attachTo": "bucket-array",
+      "text": "hash(\"alice\") = 1",
+      "showAtStep": 1,
+      "hideAtStep": 2,
+      "style": "info"
+    },
+    {
+      "id": "pop-collision",
+      "attachTo": "bucket-array",
+      "text": "Collision! Chaining: alice → carol",
+      "showAtStep": 3,
+      "hideAtStep": 4,
+      "style": "warning"
+    },
+    {
+      "id": "pop-hit",
+      "attachTo": "hash-map",
+      "text": "HIT — found alice in chain",
+      "showAtStep": 4,
+      "hideAtStep": 5,
+      "style": "success"
+    },
+    {
+      "id": "pop-miss",
+      "attachTo": "bucket-array",
+      "text": "MISS — bucket 0 is empty",
+      "showAtStep": 5,
+      "hideAtStep": 6,
+      "style": "warning"
+    },
+    {
+      "id": "pop-rehash",
+      "attachTo": "load-factor",
+      "text": "Load factor ≥ 0.75 — rehashing now",
+      "showAtStep": 6,
+      "hideAtStep": 7,
+      "style": "warning"
+    }
+  ],
+
+  "challenges": [
+    {
+      "id": "ch-predict-collision",
+      "title": "Predict a Collision",
+      "description": "With a table of size 4, which other key would collide with \"alice\" (bucket 1)? Try inserting \"eve\" (3 chars → 3%4=3) and \"frank\" (5 chars → 5%4=1) — which one collides?",
+      "type": "predict"
+    },
+    {
+      "id": "ch-break-load",
+      "title": "Break it: overflow the table",
+      "description": "Try to get the load factor above 1.0 using chaining mode with table size 4. How many entries do you need? What happens to lookup performance?",
+      "type": "break-it"
+    },
+    {
+      "id": "ch-open-address-full",
+      "title": "Open Addressing at 100% Load",
+      "description": "Switch to Open Addressing and fill the table completely (load = 1.0). Now try to insert one more key. What happens? Why is open addressing usually capped at 70%?",
+      "type": "optimize"
+    }
+  ]
+}
