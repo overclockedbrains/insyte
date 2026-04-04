@@ -67,16 +67,17 @@ Create `apps/web/src/app/api/generate/route.ts`:
 - [ ] Streams the `streamObject` response back to client via `toDataStreamResponse()`
 - [ ] On completion: saves generated scene to Supabase `scenes` table (Phase 11 completes this; stub with no-op for now)
 - [ ] Rate limiting: check IP-based counter from Supabase (Phase 11 completes; stub with no-op for now)
-- [ ] BYOK case: client sends API key header → server uses provided key instead of its own
-  - **Important:** BYOK keys are sent from client in request header `X-API-Key` ONLY for this endpoint, OR client calls AI SDK directly from browser. Prefer browser-direct for BYOK to avoid key logging.
+- [ ] **BYOK: this route is used only when no BYOK key is configured.** When a BYOK key exists in `settings-store`, generation runs browser-direct via task 7.10 and this route is bypassed entirely. Do NOT accept or forward any API key headers — that would expose keys to Vercel logs.
 - [ ] Error handling: 429 on rate limit, 400 on invalid topic, 500 on AI failure
 
 ### 7.5 — Client-side streaming hook
 Create `apps/web/src/engine/hooks/useStreamScene.ts`:
 - [ ] `useStreamScene(topic: string): { isStreaming, streamedFields, error, retry }`
-- [ ] Calls `/api/generate` via `fetch` with streaming response
+- [ ] Reads `settings-store` to check if a BYOK key is configured for the active provider
+- [ ] **If BYOK key present**: calls `generateScene()` browser-direct (task 7.10) — no server route
+- [ ] **If no BYOK key**: calls `/api/generate` via `fetch` with streaming response
 - [ ] Parses each stream chunk with Vercel AI SDK `parseStreamPart()`
-- [ ] Dispatches to `scene-store`: `setStreaming(true)`, `updateScene(partial)`, `markFieldStreamed(field)`
+- [ ] Dispatches **to `draftScene`** first (not `activeScene`) via `setDraftScene(partial)` — see task 7.10 Draft Store
 - [ ] On completion: `setStreaming(false)`
 - [ ] On validation failure: sets error state + allows retry
 
@@ -119,7 +120,37 @@ Create/update `apps/web/src/stores/detection-store.ts`:
 - [ ] On confirm: navigate to `/s/[slug]` and begin DSA pipeline (Phase 9)
 - [ ] On cancel: re-detect as concept, begin concept generation
 
-### 7.9 — Slug generation + navigation
+### 7.9 — BYOK browser-direct generation
+Create `apps/web/src/ai/generateSceneBrowserDirect.ts`:
+- [ ] Called from `useStreamScene` when `settings-store` has a BYOK key for the active provider
+- [ ] Instantiates the AI provider client-side using the key from `settings-store`:
+  ```typescript
+  const { provider, model, apiKeys } = useSettings()
+  const client = getAIProvider({ provider, model, apiKey: apiKeys[provider]! })
+  ```
+- [ ] Calls `streamObject({ model: client, schema: SceneSchema, prompt })` directly in the browser
+- [ ] No network request to `/api/generate` — the key **never touches our servers**
+- [ ] On completion: calls `saveScene(scene, slug)` to cache in Supabase (the save can go to the server since it carries no key)
+- [ ] This is the only correct BYOK path. The `/api/generate` server route must never receive API keys.
+
+### 7.10 — Draft Store for streaming crash prevention
+Update `apps/web/src/engine/hooks/useStreamScene.ts` and `scene-store` (scene slice from Phase 2):
+
+**Problem:** `streamObject` yields partial objects as JSON arrives. If `SceneRenderer` tries to render a `Visual` with missing required fields (e.g., `type` is still undefined mid-stream), React crashes.
+
+**Solution:** Route all streaming updates through `draftScene` and only promote complete, validated fields to `activeScene`:
+
+- [ ] All stream chunk updates call `setDraftScene(partial)` on the scene slice — never `setScene` or `updateScene` directly during streaming
+- [ ] After each chunk, validate each top-level field independently:
+  - `title`: `typeof draft.title === 'string'` → promote immediately
+  - `visuals[i]`: only promote a visual when it has at minimum `{ id, type, position, initialState }` — validated with a partial Zod check
+  - `steps`: promote only complete `Step` objects (has `index` and `actions` array)
+  - `controls`, `explanation`, `challenges`: promote each array item individually when complete
+- [ ] Promotion via `promoteDraftField('title')`, `promoteDraftField('visuals')` etc. from the scene slice
+- [ ] `SceneRenderer` always reads from `activeScene`, never `draftScene` — rendering is always against validated data
+- [ ] On stream completion: run `safeParseScene(draftScene)` as a full validation; on failure trigger auto-retry
+
+### 7.11 — Slug generation + navigation
 Create `apps/web/src/lib/slug.ts`:
 - [ ] `generateSlug(topic: string): string` — slugifies topic + appends 6-char nanoid for uniqueness
   - `"How does a hash table work?" → "how-does-a-hash-table-work-x7k2p1"`
@@ -132,7 +163,8 @@ Create `apps/web/src/lib/slug.ts`:
 - [ ] Typing "How does a B-Tree work?" in landing textarea → navigates to `/s/how-does-a-b-tree-work-[id]` → streaming skeleton shows → visuals fade in progressively
 - [ ] Generated scene is valid per Zod schema (no validation errors)
 - [ ] Failed validation triggers one auto-retry
-- [ ] BYOK: using a Gemini API key from settings → uses that key instead of server key
+- [ ] BYOK: using an OpenAI/Anthropic/Gemini key from settings → `/api/generate` is NOT called (verify in Network tab — no request to that route)
+- [ ] Streaming a large scene never crashes the renderer mid-stream (partial visuals with missing fields are not passed to `SceneRenderer`)
 - [ ] Rate limit returns 429 after 15 requests from same IP (when Supabase is wired)
 - [ ] `detectMode("def twoSum...")` returns `'dsa'`
 - [ ] `detectMode("How does DNS work?")` returns `'concept'`
@@ -141,8 +173,9 @@ Create `apps/web/src/lib/slug.ts`:
 ---
 
 ## Key Notes
-- **BYOK keys must never be logged server-side.** For BYOK: either client calls AI SDK directly from browser, or key is passed as a header and NOT logged. Prefer browser-direct for BYOK.
+- **BYOK keys must never reach the server.** The `/api/generate` route must never accept or forward API key headers. BYOK always runs browser-direct via `generateSceneBrowserDirect.ts`. This is the only correct path.
 - `streamObject` from Vercel AI SDK handles the streaming JSON parsing — don't reinvent this
+- All streaming updates go to `draftScene` first, not `activeScene` — the renderer only sees `activeScene` which only receives fully validated fields
 - The Zod schema must exactly match what the AI is instructed to generate in the prompt. Any mismatch = guaranteed validation failures.
 - Rate limiting in Phase 7 can be a simple in-memory counter as a stub; Phase 11 replaces it with Supabase-backed IP counters
 - Slug format: pre-built = clean slug, AI-generated = topic-slug + nanoid. This distinction matters for cache lookup in Phase 11.

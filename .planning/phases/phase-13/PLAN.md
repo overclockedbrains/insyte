@@ -94,26 +94,58 @@ Update `apps/web/next.config.ts`:
 ```typescript
 const nextConfig = {
   async headers() {
-    return [{
-      source: '/pyodide/(.*)',
-      headers: [
-        { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
-        { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' }
-      ]
-    }]
+    return [
+      // Pyodide requires COOP/COEP for SharedArrayBuffer — scoped tightly to avoid
+      // breaking external images, fonts, or third-party scripts on other routes
+      {
+        source: '/pyodide/(.*)',
+        headers: [
+          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+          { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' }
+        ]
+      },
+      // Content-Security-Policy for all other routes
+      {
+        source: '/((?!pyodide).*)',  // everything except /pyodide/
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              // 'unsafe-eval' is required for Pyodide WASM compilation and cannot be removed.
+              // Scope risk: only user-pasted code runs in the sandbox; it has no DOM access.
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "font-src 'self' https://fonts.gstatic.com",
+              "img-src 'self' data: blob: https://*.supabase.co",
+              // AI provider API endpoints (for browser-direct BYOK calls)
+              "connect-src 'self' https://*.supabase.co https://generativelanguage.googleapis.com https://api.openai.com https://api.anthropic.com https://api.groq.com",
+              // Web Workers run as blob: URLs (JS sandbox) or self (Pyodide worker)
+              "worker-src 'self' blob:",
+            ].join('; ')
+          }
+        ]
+      }
+    ]
   },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: '*.supabase.co' }  // Supabase Storage OG images
     ]
   },
-  // Webpack: bundle Web Workers
+  // Webpack: bundle Web Workers correctly in Next.js App Router
   webpack(config) {
     config.resolve.extensionAlias = { '.js': ['.ts', '.tsx', '.js'] }
     return config
   }
 }
 ```
+
+**CSP notes:**
+- [ ] `'unsafe-eval'` is unavoidable — Pyodide's WASM compiler requires it. Document this limitation in README.
+- [ ] `'unsafe-inline'` in `script-src` is needed for Next.js inline scripts. This is a known Next.js limitation; mitigate with nonce-based CSP in R2 if needed.
+- [ ] The `connect-src` list enumerates all AI provider endpoints. If adding a new provider in future, this list must be updated.
+- [ ] Test CSP in browser: open DevTools Console and verify zero CSP violation errors on all pages.
 
 ### 13.8 — Environment variables
 Create `apps/web/.env.example`:
@@ -180,6 +212,7 @@ Create `apps/web/README.md` (or root `README.md`):
 ## Exit Criteria
 - [ ] Production URL `https://insyte.dev` (or Vercel preview URL) loads correctly
 - [ ] `pnpm build` completes with no errors or TypeScript errors
+- [ ] DevTools Console shows zero CSP violation errors on `/`, `/explore`, and `/s/hash-tables`
 - [ ] `pnpm validate-scenes` passes for all 24 scene JSON files
 - [ ] Mobile (375px): all pages usable, no horizontal overflow, no overlapping elements
 - [ ] OG image visible when sharing a simulation URL on Twitter/Slack

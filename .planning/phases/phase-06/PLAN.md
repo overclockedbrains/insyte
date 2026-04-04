@@ -60,17 +60,50 @@ Create `apps/web/src/app/explore/page.tsx`:
 - [ ] Page title: "Explore Simulations" (H1 `font-headline`)
 - [ ] `metadata`: title "Explore — insyte", description
 
-### 6.6 — LiveDemo component (landing page hero simulation)
-Create `apps/web/src/components/landing/LiveDemo.tsx`:
-- [ ] Embeds the Hash Table simulation in auto-play mode
-- [ ] Loads `hash-tables.json` scene
-- [ ] `<SceneRenderer scene={hashTableScene} />` with controls disabled
-- [ ] Auto-plays continuously (`isPlaying: true`, loops back to start)
-- [ ] Overlay: "🎮 Try it yourself →" CTA button (links to `/s/hash-tables`)
-- [ ] The canvas shows only the visualization area — no explanation panel in this embed
-- [ ] Scale: roughly 60% of full simulation size, fits in hero right column
+### 6.6 — ScenePlayerProvider (isolated store context)
+Create `apps/web/src/components/engine/ScenePlayerProvider.tsx`:
 
-### 6.7 — UnifiedInput component
+The landing page embeds a live simulation while the full `/s/[slug]` page also uses the same `SceneRenderer`. Without isolation, both instances share the same global `useBoundStore`, causing state collisions (e.g., the demo's `currentStep` and `isPlaying` bleeding into the main simulation store).
+
+The fix is a scoped Zustand store instance per player, using the `ScenePlayerContext` infrastructure built in Phase 2.
+
+- [ ] `ScenePlayerProvider` component:
+  ```typescript
+  export function ScenePlayerProvider({ scene, children }: {
+    scene: Scene;
+    children: React.ReactNode;
+  }) {
+    // Create a new store instance per mount — never shared across instances
+    const storeRef = useRef<PlayerStoreApi | null>(null)
+    if (!storeRef.current) {
+      storeRef.current = createPlayerStore()
+    }
+    // Seed initial scene into the isolated store on mount
+    useEffect(() => {
+      storeRef.current!.getState().setScene(scene)
+    }, [scene])
+    return (
+      <ScenePlayerContext.Provider value={storeRef.current}>
+        {children}
+      </ScenePlayerContext.Provider>
+    )
+  }
+  ```
+- [ ] `usePlayerStore(selector)` (from Phase 2 `stores/player-store.ts`) reads from `ScenePlayerContext` if present, falls back to `useBoundStore` — no changes required to `SceneRenderer` or `PlaybackControls` to support both modes
+- [ ] `<SceneRenderer>` and `<PlaybackControls>` already use `usePlayerStore` instead of `useBoundStore` directly (this is set up in Phase 2 — just verify here)
+
+### 6.7 — LiveDemo component (landing page hero simulation)
+Create `apps/web/src/components/landing/LiveDemo.tsx`:
+- [ ] Loads `hash-tables.json` scene from static file
+- [ ] Wraps everything in `<ScenePlayerProvider scene={hashTableScene}>` — completely isolated state
+- [ ] Inside the provider: `<SceneRenderer />` with explanation panel hidden (canvas-area only)
+- [ ] Auto-plays continuously via the isolated playback store: sets `isPlaying: true` on mount, resets to step 0 when `currentStep === totalSteps`
+- [ ] Playback controls disabled (hidden) — this is a passive demo, not interactive
+- [ ] Overlay: `"Try it yourself →"` CTA button positioned bottom-right of the card (links to `/s/hash-tables`)
+- [ ] Scale: `transform: scale(0.65)` with `transform-origin: top left`, fits in hero right column on desktop
+- [ ] Mobile: hidden on `< md`, single column layout shows input only
+
+### 6.8 — UnifiedInput component
 Create `apps/web/src/components/landing/UnifiedInput.tsx`:
 - [ ] Multi-line `<textarea>` that expands on focus (Framer Motion `animate={{ height }}`)
 - [ ] Placeholder: `"How does a hash table work? Or paste your LeetCode solution..."`
@@ -82,14 +115,14 @@ Create `apps/web/src/components/landing/UnifiedInput.tsx`:
 - [ ] On submit: navigate to `/s/[generated-slug]` (AI generation flow, Phase 7)
 - [ ] For now (Phase 6): submit navigates to `/explore` as fallback
 
-### 6.8 — Popular chips row
+### 6.9 — Popular chips row
 Create `apps/web/src/components/landing/PopularChips.tsx`:
 - [ ] Horizontal row of chip buttons: `"Hash Tables"`, `"DNS Resolution"`, `"Two Sum"`, `"LRU Cache"`, `"Twitter Feed"`
 - [ ] Chip style: `rounded-full border border-outline-variant/30 px-4 py-1.5 text-sm text-on-surface-variant hover:border-primary/40 hover:text-on-surface`
 - [ ] Click: fills the unified input with that topic + detects mode automatically
 - [ ] Label above: `"Popular:"` in muted text
 
-### 6.9 — HowItWorks component
+### 6.10 — HowItWorks component
 Create `apps/web/src/components/landing/HowItWorks.tsx`:
 - [ ] 3-step section: "1. Type · 2. Watch it Come Alive · 3. Master It"
 - [ ] Desktop: 3 columns connected by a bezier path (SVG) flowing between them
@@ -97,20 +130,20 @@ Create `apps/web/src/components/landing/HowItWorks.tsx`:
 - [ ] Bezier path: animated `DataFlowDot` traveling from step 1 → 2 → 3 on loop
 - [ ] `section-heading` style: `text-4xl font-headline font-bold text-center`
 
-### 6.10 — FeatureCards component
+### 6.11 — FeatureCards component
 Create `apps/web/src/components/landing/FeatureCards.tsx`:
 - [ ] 3 cards: `"Interactive"` + `"AI-Powered"` + `"Shareable"`
 - [ ] Each: `glass-panel glow-border rounded-3xl p-6` with icon + title + description
 - [ ] Hover: glow intensifies, slight scale
 
-### 6.11 — FeaturedSimulations component
+### 6.12 — FeaturedSimulations component
 Create `apps/web/src/components/landing/FeaturedSimulations.tsx`:
 - [ ] 4-card preview grid (2×2)
 - [ ] Uses `TopicCard` component
 - [ ] Heading: "Start Exploring" or "Featured Simulations"
 - [ ] "See all →" link to `/explore`
 
-### 6.12 — Landing page (`/`)
+### 6.13 — Landing page (`/`)
 Update `apps/web/src/app/page.tsx`:
 - [ ] Full landing page layout per DECISIONS.md spec:
   ```
@@ -147,7 +180,6 @@ Update `apps/web/src/app/page.tsx`:
 ## Key Notes
 - **Use `ui-ux-pro-max` skill** for hero layout proportions, card sizing, row spacing decisions
 - `LiveDemo` must NOT render Pyodide or fire AI calls — it's purely static scene playback
-- `LiveDemo` should use a separate Zustand store instance or prop-based playback to avoid conflicting with the main scene store (since it's embedded in a page that doesn't have a simulation loaded)
-- Consider using a `ScenePlayerProvider` context to scope the scene + playback state per player instance
+- `LiveDemo` **must** wrap its content in `<ScenePlayerProvider>` (task 6.6) — this is what prevents it from touching the global `useBoundStore` scene/playback state
 - Popular chips are hardcoded — the 5 most visually impressive pre-built simulations
 - The `<Navbar />` from layout.tsx shows on all pages; don't add another nav in page components

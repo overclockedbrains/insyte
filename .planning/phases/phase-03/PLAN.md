@@ -11,9 +11,13 @@
 ### 3.1 — PrimitiveRegistry
 Create `apps/web/src/engine/primitives/index.ts`:
 - [ ] Define `PrimitiveProps` interface: `{ id: string; state: unknown; step: number; onHover?: (id: string) => void }`
-- [ ] Import all 12 primitive components
+- [ ] Import all 13 primitive components (12 original + `GridViz`)
 - [ ] Export `PrimitiveRegistry: Record<string, React.ComponentType<PrimitiveProps>>`
-- [ ] Mapping: `'array' → ArrayViz`, `'hashmap' → HashMapViz`, etc.
+- [ ] Mapping: `'array' → ArrayViz`, `'hashmap' → HashMapViz`, `'grid' → GridViz`, etc.
+
+Also update `packages/scene-engine/src/types.ts` Visual type union to include `'grid'`:
+- [ ] Add `'grid'` to the Visual `type` union string literal
+- [ ] Update the corresponding Zod enum in `packages/scene-engine/src/schema.ts`
 
 ### 3.2 — ArrayViz
 `apps/web/src/engine/primitives/ArrayViz.tsx`:
@@ -117,7 +121,35 @@ Create `apps/web/src/engine/primitives/index.ts`:
 - [ ] State shape: `{ value: number; label: string; color?: 'primary'|'secondary'|'error' }`
 - [ ] Number change: Framer Motion `animate={{ opacity: [0, 1] }}` with number rolling up effect
 
-### 3.14 — Connector components
+### 3.14 — GridViz
+`apps/web/src/engine/primitives/GridViz.tsx`:
+- [ ] Renders a 2D grid of cells for pathfinding and matrix-style visualizations (replaces the GraphViz workaround used in `number-of-islands`)
+- [ ] State shape:
+  ```typescript
+  {
+    rows: number;
+    cols: number;
+    cells: {
+      state: 'empty' | 'wall' | 'visited' | 'path' | 'start' | 'end' | 'active';
+      value?: string | number;
+    }[][];
+    currentCell?: { row: number; col: number };  // highlighted cursor
+  }
+  ```
+- [ ] Each cell: fixed-size square (`w-8 h-8`), color driven by `state`:
+  - `empty`: `bg-surface-container border border-outline-variant/20`
+  - `wall`: `bg-surface-container-highest`
+  - `visited`: `bg-primary/20 border-primary/30`
+  - `path`: `bg-secondary/40 border-secondary` + secondary glow
+  - `start`: `bg-primary border-primary` (solid fill)
+  - `end`: `bg-secondary border-secondary` (solid fill)
+  - `active`: pulsing `bg-primary/60` — the cell being evaluated this step
+- [ ] Cell state transitions: Framer Motion `animate={{ backgroundColor }}` spring
+- [ ] Grid renders inside a scrollable container if rows×cols exceeds canvas bounds
+- [ ] `currentCell` indicator: ring overlay using `motion.div` with `layout` animation
+- [ ] Used by: `number-of-islands` (Phase 9), and any future pathfinding simulations (A*, BFS maze)
+
+### 3.15 — Connector components
 Create `apps/web/src/engine/connectors/`:
 
 **`BezierConnector.tsx`:**
@@ -137,7 +169,7 @@ Create `apps/web/src/engine/connectors/`:
 - [ ] Uses Framer Motion `motion.circle` with `offsetDistance` or `pathLength` animation
 - [ ] Loops continuously when `repeat: true`
 
-### 3.15 — Annotation components
+### 3.16 — Annotation components
 Create `apps/web/src/engine/annotations/`:
 
 **`StepPopup.tsx`:**
@@ -165,8 +197,8 @@ Create `apps/web/src/engine/annotations/`:
 ---
 
 ## Exit Criteria
-- [ ] All 12 primitives render without TypeScript errors when given their expected state shape
-- [ ] `PrimitiveRegistry['array']` resolves to `ArrayViz` component
+- [ ] All 13 primitives render without TypeScript errors when given their expected state shape
+- [ ] `PrimitiveRegistry['array']` resolves to `ArrayViz`, `PrimitiveRegistry['grid']` resolves to `GridViz`
 - [ ] ArrayViz: highlights, pointer arrows, and window highlight all animate correctly
 - [ ] HashMapViz: hit/miss/insert animations fire at correct steps
 - [ ] StepPopup: appears/disappears on step change with correct animation
@@ -183,3 +215,4 @@ Create `apps/web/src/engine/annotations/`:
 - Framer Motion `layout` prop on list containers enables smooth reordering without custom FLIP code
 - For `TreeViz` and `GraphViz`, positions should come from the Scene JSON (pre-computed), not be auto-calculated at runtime — this keeps behavior predictable and testable
 - `CodePanel` requires Shiki to run server-side or be lazy-loaded; use `shiki/bundle/web` for browser compatibility
+- `GridViz` replaces the `GraphViz` workaround for grid-based problems — update `number-of-islands.json` in Phase 9 to use `'grid'` type instead of `'graph'`

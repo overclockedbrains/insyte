@@ -33,14 +33,29 @@ Create `apps/web/src/ai/prompts/live-chat.md`:
 
 ### 8.2 — applyDiff function
 Create `apps/web/src/ai/applyDiff.ts`:
-- [ ] `applyDiff(scene: Scene, patch: ScenePatch): Scene`
+
+**Return type includes a `PlaybackIntent`** to keep playback synchronized after a patch:
+```typescript
+type PlaybackIntent =
+  | { action: 'none' }
+  | { action: 'pause' }
+  | { action: 'rewind'; targetStep: number }
+
+type ApplyDiffResult = { scene: Scene; intent: PlaybackIntent }
+```
+
+- [ ] `applyDiff(scene: Scene, patch: ScenePatch): ApplyDiffResult`
 - [ ] `ScenePatch` type: `{ type: 'add-steps'|'update-popup'|'add-visual'|'update-visual'; payload: unknown }`
-- [ ] `add-steps`: appends `patch.steps` to `scene.steps`, updates `scene.steps.length`
-- [ ] `update-popup`: finds popup by id, updates text
-- [ ] `add-visual`: appends to `scene.visuals`, validates the new visual has required fields
-- [ ] `update-visual`: finds visual by id, merges `initialState`
+- [ ] `add-steps`:
+  - Appends `patch.steps` to `scene.steps`
+  - **Throws `MissingVisualError`** if any action in the new steps references a `target` id that does not exist in `scene.visuals` — prevents silent failures from AI hallucinating IDs
+  - Returns `intent: { action: 'pause' }` — new steps should not auto-play; user should review them
+- [ ] `update-popup`: finds popup by id — **throws `MissingPopupError`** if id not found; returns `intent: { action: 'none' }`
+- [ ] `add-visual`: appends to `scene.visuals`, validates the new visual has at minimum `{ id, type, position, initialState }`; returns `intent: { action: 'none' }`
+- [ ] `update-visual`: finds visual by id — **throws `MissingVisualError`** if id not found; merges `initialState`; returns `intent: { action: 'rewind', targetStep: currentStep }` to re-render the current step with updated state
 - [ ] Returns a new Scene object (immutable — no mutation of input)
-- [ ] Validates the result with `safeParseScene()` before returning
+- [ ] After applying, validates result with `safeParseScene()` — on failure throws `PatchValidationError`
+- [ ] All three error types (`MissingVisualError`, `MissingPopupError`, `PatchValidationError`) extend `Error` and are exported — the chat stream handler catches them and shows an inline error in the chat card instead of crashing
 
 ### 8.3 — liveChat function
 Create `apps/web/src/ai/liveChat.ts`:
@@ -95,8 +110,22 @@ Create `apps/web/src/components/chat/useChatStream.ts`:
 - [ ] Calls `/api/chat` with message + scene context
 - [ ] Reads streaming response, dispatches text chunks to `chat-store.appendToLastMessage()`
 - [ ] Detects `scenePatch` marker in stream
-- [ ] On `scenePatch` received: calls `applyDiff(currentScene, patch)` → `sceneStore.setScene(updatedScene)`
-- [ ] Canvas glow trigger: dispatch `sceneStore.triggerGlow()` — canvas border glows for 600ms via Framer Motion
+- [ ] On `scenePatch` received:
+  ```typescript
+  try {
+    const { scene: patchedScene, intent } = applyDiff(currentScene, patch)
+    useBoundStore.getState().setScene(patchedScene)
+    // Resolve PlaybackIntent atomically (same store, no race condition)
+    if (intent.action === 'pause') useBoundStore.getState().pause()
+    if (intent.action === 'rewind') useBoundStore.getState().jumpToStep(intent.targetStep)
+    useBoundStore.getState().triggerGlow()
+  } catch (err) {
+    // MissingVisualError, MissingPopupError, PatchValidationError
+    // Show inline error in chat card — do NOT crash the simulation
+    chatStore.appendToLastMessage(`\n\n⚠ Could not apply visualization patch: ${err.message}`)
+  }
+  ```
+- [ ] Canvas glow trigger: `triggerGlow()` is called only on successful patch, not on error
 
 ### 8.9 — Canvas patch glow animation
 In `CanvasCard.tsx`:
@@ -121,7 +150,9 @@ In `CanvasCard.tsx`:
 - [ ] Minimize → card hides, `💬` button returns; re-open → history preserved
 - [ ] Close → history cleared
 - [ ] Mobile: bottom sheet slides up to 60% height
-- [ ] `applyDiff({ type: 'add-steps', ... })` correctly appends steps to scene
+- [ ] `applyDiff({ type: 'add-steps', ... })` correctly appends steps and returns `intent: { action: 'pause' }`
+- [ ] `applyDiff` with a patch targeting a non-existent visual ID throws `MissingVisualError` — simulation does not crash, error appears inline in chat
+- [ ] After `add-steps` patch: playback pauses (user sees the new steps at rest, not auto-playing)
 
 ---
 

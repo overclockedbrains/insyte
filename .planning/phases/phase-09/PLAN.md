@@ -30,6 +30,7 @@ interface TraceData {
   steps: TraceStep[];
   finalResult?: unknown;
   error?: string;
+  truncated?: boolean;  // true when step limit was hit — renderer shows a warning
 }
 ```
 
@@ -100,7 +101,16 @@ Create `apps/web/src/ai/prompts/code-instrumentation.md`:
 - [ ] TraceStep format: exactly match the `TraceStep` TypeScript interface
 - [ ] Do NOT modify the logic — only add instrumentation
 - [ ] Include a call to run the function with sample input at the end
-- [ ] Example: shows Two Sum before/after instrumentation
+- [ ] **Step limit guard (required):** Instruct the AI to add this guard at every trace append site:
+  ```python
+  if len(_trace) < 1000:
+      _trace.append({...})
+  elif len(_trace) == 1000:
+      _trace.append({"step": "truncated", "line": 0, "vars": {}, "note": "Trace limit reached (1000 steps). Increase input size may cause OOM."})
+  ```
+  This prevents structured-clone of massive `_trace` arrays from crashing the main thread.
+- [ ] **Delta capture (required):** Each `vars` dict should only include variables that **changed** since the previous step, not a full scope clone. Instruct the AI: "Only include a variable in `vars` if its value differs from the previous step. For the first step, include all variables."
+- [ ] Example: shows Two Sum before/after instrumentation (with step limit + delta vars)
 
 Create `apps/web/src/ai/instrumentCode.ts`:
 - [ ] `instrumentCode(code: string, language: 'python'|'javascript', problemStatement: string): Promise<string>`
@@ -155,7 +165,48 @@ Update `apps/web/src/app/s/[slug]/page.tsx`:
 - [ ] When complete: render `SceneRenderer` with `code-left-canvas-right` layout
 - [ ] "Re-run with custom input" button in `ControlBar` → calls `useDSAPipeline().rerun()`
 
-### 9.11 — 10 pre-built DSA Scene JSONs
+### 9.11 — Pyodide WASM Service Worker caching
+Self-hosting Pyodide in `public/pyodide/` prevents CDN fetches, but without caching, a user revisiting the DSA pipeline re-downloads ~10MB on every session. A service worker caches these files after the first load.
+
+Install and configure `serwist` (the maintained Next.js-compatible fork of next-pwa):
+- [ ] `pnpm add @serwist/next serwist --filter web`
+- [ ] Create `apps/web/src/sw.ts` — the service worker entry point:
+  ```typescript
+  import { defaultCache } from '@serwist/next/worker'
+  import { installSerwist } from 'serwist'
+  
+  installSerwist({
+    precacheEntries: self.__SW_MANIFEST,
+    skipWaiting: true,
+    clientsClaim: true,
+    navigationPreload: true,
+    runtimeCaching: [
+      {
+        // Cache all Pyodide WASM and JS files indefinitely after first load
+        matcher: /^\/pyodide\//,
+        handler: 'CacheFirst',
+        options: {
+          cacheName: 'pyodide-cache',
+          expiration: { maxAgeSeconds: 60 * 60 * 24 * 365 }, // 1 year
+        },
+      },
+      ...defaultCache,
+    ],
+  })
+  ```
+- [ ] Update `apps/web/next.config.ts` to wrap config with `withSerwist`:
+  ```typescript
+  import withSerwist from '@serwist/next'
+  export default withSerwist({
+    swSrc: 'src/sw.ts',
+    swDest: 'public/sw.js',
+  })(nextConfig)
+  ```
+- [ ] Service worker activates only in production (`NODE_ENV === 'production'`) — dev always hits network
+- [ ] Verify: open DevTools → Application → Cache Storage → `pyodide-cache` contains `.wasm` files after first DSA run
+- [ ] Second DSA session: Pyodide loads from cache (~instant), no network requests to `/pyodide/`
+
+### 9.12 — 10 pre-built DSA Scene JSONs
 Create `apps/web/src/content/scenes/dsa/`:
 
 For each, hand-author (or pre-generate with AI + manually verify):
@@ -166,7 +217,7 @@ For each, hand-author (or pre-generate with AI + manually verify):
 - [ ] `climbing-stairs.json` — DPTableViz (1D), 8 steps
 - [ ] `merge-sort.json` — ArrayViz with recursive split visualization, 10 steps
 - [ ] `level-order-bfs.json` — TreeViz + QueueViz, 10 steps
-- [ ] `number-of-islands.json` — GraphViz (grid layout), 8 steps
+- [ ] `number-of-islands.json` — **GridViz** (built in Phase 3, task 3.14) — use `type: 'grid'` visual, not `'graph'`; 8 steps showing BFS/DFS flood-fill coloring cells as visited
 - [ ] `sliding-window-max.json` — ArrayViz + QueueViz (deque), 8 steps
 - [ ] `fibonacci-recursive.json` — RecursionTreeViz with memoization toggle, 10 steps
 
@@ -188,6 +239,9 @@ Each JSON must:
 - [ ] `fibonacci-recursive` shows memoization pruning (memoized nodes appear different)
 - [ ] Code panel active line synced to animation step
 - [ ] `two-sum.json` hash map hit/miss animations fire correctly
+- [ ] `number-of-islands.json` renders a `GridViz` grid (not a force-directed graph)
+- [ ] Pasting a pathological O(n²) algorithm with n=500 produces a `truncated: true` trace — renderer shows "Trace truncated at 1000 steps" warning
+- [ ] Second Pyodide session (production build) loads from service worker cache — no `/pyodide/` network requests in DevTools
 
 ---
 
@@ -197,3 +251,6 @@ Each JSON must:
 - JavaScript sandbox is a Web Worker — ensure `next.config.ts` is configured to bundle worker files correctly (`webWorker` in webpack config)
 - For pre-built DSA JSONs: these can be AI-generated with the `traceToScene` pipeline then manually verified and tweaked — they don't need to be 100% hand-authored from scratch
 - The 10 pre-built DSA JSONs bypass the pipeline entirely — they load as static files exactly like concept simulations
+- `number-of-islands` uses `GridViz` (`type: 'grid'`), not `GraphViz` — this is the clean implementation of the primitive built specifically for grid problems
+- Service worker caching (`serwist`) is production-only — in dev, Pyodide still fetches from disk on every cold start; this is expected
+- The step limit (1000) and delta capture are enforced via the AI instrumentation prompt — they are not enforced in the sandbox execution itself. If an AI generates instrumentation without the guard, the sandbox may still produce large traces. Future hardening: add a post-execution trim in `PyodideRunner.execute()` as a safety net.

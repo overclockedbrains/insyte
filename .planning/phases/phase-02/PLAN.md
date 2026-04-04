@@ -46,43 +46,94 @@ In `packages/scene-engine/src/parser.ts`:
 - [ ] `computeVisualStateAtStep(scene: Scene, visualId: string, stepIndex: number): VisualState` — applies all actions up to stepIndex to the visual's initialState
 - [ ] Export `parseScene` (validates + normalizes in one call)
 
-### 2.4 — Zustand stores
-Create 5 stores in `apps/web/src/stores/`:
+### 2.4 — Zustand combined store (Slice Pattern)
 
-**`scene-store.ts`:**
+All state lives in **one** `useBoundStore` combining five slices. This guarantees atomic cross-slice updates — for example, when chat applies a scene patch that must also pause playback, both state changes happen in one `set()` call, eliminating React race conditions from cross-store subscriptions.
+
+Create `apps/web/src/stores/`:
+
+**`slices/scene-slice.ts`:**
 - [ ] `activeScene: Scene | null`
+- [ ] `draftScene: DeepPartial<Scene> | null` — receives streaming partial chunks before validation (Draft Store pattern — see Phase 7 task 7.10)
 - [ ] `isStreaming: boolean`
-- [ ] `streamedFields: Set<string>` — tracks which top-level fields have arrived during streaming
-- [ ] `setScene(scene: Scene)`, `updateScene(partial: Partial<Scene>)`, `clearScene()`
-- [ ] `setStreaming(val: boolean)`, `markFieldStreamed(field: string)`
+- [ ] `streamedFields: Set<string>`
+- [ ] `isPatchGlowing: boolean`
+- [ ] `setScene(scene)`, `updateScene(partial)`, `clearScene()`
+- [ ] `setDraftScene(partial)`, `promoteDraftField(field: keyof Scene)` — promotes a validated field from draft → activeScene
+- [ ] `setStreaming(val)`, `markFieldStreamed(field)`
+- [ ] `triggerGlow()` — sets `isPatchGlowing: true`, auto-resets after 600ms via `setTimeout`
 
-**`playback-store.ts`:**
+**`slices/playback-slice.ts`:**
 - [ ] `currentStep: number` (0-indexed)
 - [ ] `isPlaying: boolean`
-- [ ] `speed: number` (0.5 | 1 | 1.5 | 2)
-- [ ] `totalSteps: number` (derived from scene)
+- [ ] `speed: 0.5 | 1 | 1.5 | 2`
+- [ ] `totalSteps: number`
 - [ ] `play()`, `pause()`, `stepForward()`, `stepBack()`, `reset()`, `setSpeed(n)`
-- [ ] Auto-advance logic: `usePlaybackTick()` hook in `apps/web/src/engine/hooks/usePlayback.ts` — fires step forward on interval (speed-adjusted)
+- [ ] `jumpToStep(n: number)` — sets `currentStep` directly; used by `PlaybackIntent` resolution in Phase 8
 
-**`settings-store.ts`:**
+**`slices/settings-slice.ts`:**
 - [ ] `provider: 'gemini'|'openai'|'anthropic'|'groq'` (default: `'gemini'`)
 - [ ] `model: string` (provider-specific default)
 - [ ] `apiKeys: Record<Provider, string | null>`
-- [ ] `setApiKey(provider, key)`, `clearApiKey(provider)`, `setProvider(p)`, `setModel(m)`
-- [ ] Backed by localStorage via Zustand persist middleware
-- [ ] **Keys must never be sent to any server route** — this is enforced by only reading from store client-side
+- [ ] `setApiKey(provider, key)`, `clearApiKey(provider)`, `clearAllKeys()`, `setProvider(p)`, `setModel(m)`
+- [ ] **Keys never leave the client** — this slice is consumed client-side only, never read by server routes
 
-**`chat-store.ts`:**
-- [ ] `messages: ChatMessage[]` where `ChatMessage = { role: 'user'|'assistant', content: string, timestamp: number }`
+**`slices/chat-slice.ts`:**
+- [ ] `isOpen: boolean`, `isMinimized: boolean`
+- [ ] `messages: ChatMessage[]` — `ChatMessage = { role: 'user'|'assistant', content: string, timestamp: number }`
 - [ ] `isLoading: boolean`
+- [ ] `openChat()`, `closeChat()`, `minimizeChat()`
 - [ ] `addMessage(msg)`, `setLoading(val)`, `clearHistory()`
-- [ ] Session-scoped (not persisted to localStorage)
+- [ ] `appendToLastMessage(chunk: string)` — appends streaming text chunks to the last assistant message
 
-**`detection-store.ts`:**
+**`slices/detection-slice.ts`:**
 - [ ] `inputText: string`
 - [ ] `detectedMode: 'concept'|'dsa'|'lld'|'hld'|null`
-- [ ] `showConfirmation: boolean` (true when DSA code detected)
+- [ ] `showConfirmation: boolean`
 - [ ] `setInput(text)`, `setMode(mode)`, `confirmDSA()`, `cancelDSA()`
+
+**`store.ts` — the single bound store:**
+- [ ] `type BoundStore = SceneSlice & PlaybackSlice & SettingsSlice & ChatSlice & DetectionSlice`
+- [ ] Each slice creator typed as `StateCreator<BoundStore, [['zustand/immer', never]], [], SliceType>`
+- [ ] Combined with `immer` middleware (clean immutable updates) + `persist` middleware:
+  ```typescript
+  export const useBoundStore = create<BoundStore>()(
+    immer(
+      persist(
+        (...a) => ({
+          ...createSceneSlice(...a),
+          ...createPlaybackSlice(...a),
+          ...createSettingsSlice(...a),
+          ...createChatSlice(...a),
+          ...createDetectionSlice(...a),
+        }),
+        {
+          name: 'insyte-settings',
+          partialize: (state) => ({
+            provider: state.provider,
+            model: state.model,
+            apiKeys: state.apiKeys,
+          }),
+        }
+      )
+    )
+  )
+  ```
+- [ ] Only the settings fields are persisted to localStorage; all other slices are session-only
+
+**`stores/hooks.ts` — convenience selector hooks:**
+- [ ] `useScene()` → `useBoundStore(s => s.activeScene)`
+- [ ] `usePlayback()` → `useBoundStore(s => ({ currentStep, isPlaying, totalSteps, speed, play, pause, stepForward, stepBack, reset, setSpeed, jumpToStep }))`
+- [ ] `useSettings()` → `useBoundStore(s => ({ provider, model, apiKeys, setApiKey, clearApiKey, clearAllKeys, setProvider, setModel }))`
+- [ ] `useChat()` → `useBoundStore(s => ({ messages, isLoading, isOpen, isMinimized, ... }))`
+- [ ] `useDetection()` → `useBoundStore(s => ({ detectedMode, inputText, showConfirmation, ... }))`
+
+**`stores/player-store.ts` — isolated player store factory (used by Phase 6 LiveDemo):**
+- [ ] `createPlayerStore()` — calls `createStore<PlayerState>()` (scene + playback slices only, no persist)
+- [ ] `PlayerStoreApi = ReturnType<typeof createPlayerStore>`
+- [ ] `ScenePlayerContext = React.createContext<PlayerStoreApi | null>(null)`
+- [ ] `usePlayerStore<T>(selector: (s: PlayerState) => T): T` — reads from `ScenePlayerContext` when inside a `ScenePlayerProvider`, otherwise reads from `useBoundStore`
+- [ ] This context-aware hook is used by `SceneRenderer` and `PlaybackControls` so they work in both global and isolated player contexts
 
 ### 2.5 — Engine hooks
 Create `apps/web/src/engine/hooks/`:
@@ -124,17 +175,20 @@ Create `apps/web/src/engine/controls/PlaybackControls.tsx`:
 ## Exit Criteria
 - [ ] `parseScene(validJson)` returns a typed Scene object without TypeScript errors
 - [ ] `safeParseScene(badJson)` returns `{ success: false, error }` without throwing
-- [ ] All 5 Zustand stores importable and settable from any component
+- [ ] `useBoundStore` is the single source of truth — no separate `create()` calls for app state
 - [ ] `usePlayback()` auto-advances step index when `isPlaying: true`
 - [ ] `/s/test` loads the minimal scene and shows playback controls that function
-- [ ] `settings-store` persists API keys to localStorage and rehydrates on reload
-- [ ] TypeScript strict mode — zero `any` in store files
+- [ ] Settings slice persists API keys to localStorage and rehydrates on reload (verify with `localStorage.getItem('insyte-settings')`)
+- [ ] `ScenePlayerContext` and `usePlayerStore` exported from `stores/player-store.ts`, importable by Phase 6
+- [ ] TypeScript strict mode — zero `any` in store/slice files
 
 ---
 
 ## Key Notes
 - `computeVisualStateAtStep` is the most critical function — it applies all actions from step 0..n to build the visual's current state. This must be pure (no side effects).
-- Zustand stores should use the `immer` middleware for complex nested state updates
-- `usePlaybackTick` must use `setInterval` with `useEffect` cleanup — no memory leaks
-- `detection-store` is used exclusively client-side; no SSR concerns
-- The `settings-store` persist key should be `'insyte-settings'` for localStorage namespacing
+- The slice pattern means **one `useBoundStore`** — never call `create()` multiple times for the main app state. Separate `createStore()` is only for the `ScenePlayerProvider` isolated context.
+- `immer` middleware is applied at the top level; individual slice creators do not need their own immer wrapping.
+- Cross-slice actions (e.g., applying a chat patch that also pauses playback) are written in the slice that initiates the action and call `set()` once with changes spanning multiple slices.
+- `usePlaybackTick` must use `setInterval` with `useEffect` cleanup — no memory leaks. It should use the `usePlayerStore` hook (not `useBoundStore` directly) so it works inside `ScenePlayerProvider` too.
+- `detection-store` slice is used exclusively client-side; no SSR concerns.
+- The persist key `'insyte-settings'` namespaces localStorage — only the settings fields are persisted (provider, model, apiKeys). Never persist scene, playback, chat, or detection state.

@@ -57,12 +57,25 @@ CREATE TABLE rate_limits (
 );
 
 CREATE INDEX rate_limits_window_idx ON rate_limits(window_start);
+
+-- Repeat-query deduplication: maps normalized query hash → existing scene slug
+-- Prevents duplicate AI generations for semantically identical queries
+-- e.g., "how does dns work?" and "How does DNS work?" map to the same scene
+CREATE TABLE query_hashes (
+  hash             TEXT PRIMARY KEY,      -- SHA-256 of normalized query
+  normalized_query TEXT NOT NULL,          -- the normalized form (for debugging)
+  scene_slug       TEXT REFERENCES scenes(slug) ON DELETE CASCADE,
+  created_at       TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX query_hashes_slug_idx ON query_hashes(scene_slug);
 ```
 
 - [ ] Row Level Security: enable RLS on all tables
   - `scenes`: allow anon read, service role write
   - `topic_index`: allow anon read, service role write
   - `rate_limits`: service role only (server-side rate limit checks)
+  - `query_hashes`: allow anon read (slug lookup), service role write
 
 ### 11.3 — Supabase client
 Create `apps/web/src/lib/supabase.ts`:
@@ -180,6 +193,39 @@ Update `apps/web/src/app/s/[slug]/page.tsx`:
 - [ ] After scene loads (any source): fire `incrementHitCount(slug)` 
 - [ ] Fire-and-forget: `void incrementHitCount(slug)` (no blocking)
 
+### 11.10 — Repeat-query deduplication (query_hashes)
+Add query deduplication to `apps/web/src/lib/cache.ts` and update `/api/generate`:
+
+**Problem:** `nanoid` slugs mean `"how does consistent hashing work?"` and `"How Does Consistent Hashing Work?"` both trigger separate AI generations, doubling cost and polluting the `scenes` table.
+
+**Fix:** Hash the normalized query and check `query_hashes` before generating.
+
+- [ ] `normalizeQuery(query: string): string`
+  ```typescript
+  // lowercase, trim, collapse multiple spaces, strip trailing punctuation
+  query.toLowerCase().trim().replace(/\s+/g, ' ').replace(/[?.!]+$/, '')
+  ```
+- [ ] `hashQuery(normalized: string): string`
+  ```typescript
+  // SHA-256 via Web Crypto (works in Edge runtime and Node)
+  const buffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(normalized))
+  return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('')
+  ```
+- [ ] `getCachedSlugForQuery(query: string): Promise<string | null>`
+  - Normalizes + hashes the query
+  - Queries `query_hashes` table: `.eq('hash', hash).select('scene_slug').single()`
+  - Returns the slug if found, null if not
+- [ ] `saveQueryHash(query: string, slug: string): Promise<void>`
+  - Normalizes + hashes the query
+  - Upserts `{ hash, normalized_query, scene_slug }` into `query_hashes`
+  - Fire-and-forget (no await)
+
+Update `/api/generate/route.ts`:
+- [ ] Before calling `generateScene()`:
+  1. Call `getCachedSlugForQuery(topic)` — if found, return `{ redirect: existingSlug }` (HTTP 200, not 307)
+  2. Client-side: on receiving `{ redirect }`, navigate to `/s/[existingSlug]` instead of generating
+- [ ] After `generateScene()` completes: call `saveQueryHash(topic, newSlug)` + `saveScene(scene, newSlug)` both fire-and-forget
+
 ---
 
 ## Exit Criteria
@@ -190,6 +236,7 @@ Update `apps/web/src/app/s/[slug]/page.tsx`:
 - [ ] OG image generated for `hash-tables` is available at Supabase Storage URL
 - [ ] `TopicCard` shows real OG image thumbnails (not placeholders)
 - [ ] `hit_count` increments on every simulation page load
+- [ ] Typing "how does dns work?" and "How Does DNS Work?" both navigate to the same slug (query deduplication working)
 - [ ] Gallery page loads topics from Supabase (verify in Network tab)
 
 ---
