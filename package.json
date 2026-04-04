@@ -2,7 +2,7 @@
   "name": "insyte",
   "version": "1.0.0",
   "description": "An AI-powered interactive learning platform for live algorithmic traces and system design simulations.",
-  "main": "index.js",
+  "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "setup-symlinks": "bash scripts/setup-symlinks.sh"

@@ -3,7 +3,7 @@
 echo "Setting up AI tool symlinks..."
 
 TOOLS=(".claude" ".codex" ".gemini" ".agent")
-DIRS=("agents" "skills" "workflows")
+DIRS=("agents" "context" "memory" "prompts" "skills" "tasks" "templates" "tools" "workflows")
 
 for tool in "${TOOLS[@]}"; do
   mkdir -p $tool
