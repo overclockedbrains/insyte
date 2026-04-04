@@ -38,16 +38,4 @@
 
 ---
 
-## Runners Up (For Reference)
-
-| Name | Why It Was Considered | Why insyte Won |
-|------|----------------------|----------------|
-| glassbox | Perfect metaphor (transparent black box) | insyte sounds more premium |
-| vizdom | Visual + wisdom | insyte is easier to spell on first hear |
-| unpack | Action verb, tech people already say it | insyte has broader appeal |
-| grokk | Deep understanding, sci-fi reference | insyte is more accessible to non-nerds |
-| traceit | Action command, great for DSA mode | Too DSA-specific, insyte covers both modes |
-
----
-
 *Decision made: April 4, 2026*
