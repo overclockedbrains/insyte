@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>explorium | Hash Table Simulation</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@600;700;800&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "secondary-container": "#00cbe6",
+            "tertiary": "#bcc7de",
+            "on-secondary-container": "#00515d",
+            "on-primary-fixed": "#21005e",
+            "primary-fixed-dim": "#cebdff",
+            "surface-container-high": "#2a292f",
+            "on-tertiary": "#263143",
+            "primary": "#cebdff",
+            "surface-container-highest": "#35343a",
+            "background": "#131318",
+            "on-surface-variant": "#cac4d4",
+            "surface-variant": "#35343a",
+            "on-tertiary-fixed": "#111c2d",
+            "on-primary-container": "#3c1989",
+            "inverse-primary": "#674bb5",
+            "primary-fixed": "#e8ddff",
+            "surface-container-low": "#1b1b20",
+            "tertiary-fixed": "#d8e3fb",
+            "inverse-surface": "#e4e1e9",
+            "error": "#ffb4ab",
+            "surface-bright": "#39383e",
+            "surface-container": "#1f1f25",
+            "outline": "#948e9d",
+            "surface-container-lowest": "#0e0e13",
+            "inverse-on-surface": "#303036",
+            "on-secondary": "#00363e",
+            "on-primary-fixed-variant": "#4f319c",
+            "on-error-container": "#ffdad6",
+            "secondary-fixed": "#a2eeff",
+            "outline-variant": "#494552",
+            "on-background": "#e4e1e9",
+            "on-surface": "#e4e1e9",
+            "surface": "#131318",
+            "primary-container": "#a78bfa",
+            "on-primary": "#381385",
+            "error-container": "#93000a",
+            "surface-dim": "#131318",
+            "tertiary-fixed-dim": "#bcc7de",
+            "tertiary-container": "#929db3",
+            "on-secondary-fixed-variant": "#004e5a",
+            "secondary": "#5de6ff",
+            "on-tertiary-container": "#2a3547",
+            "surface-tint": "#cebdff",
+            "on-secondary-fixed": "#001f25",
+            "on-error": "#690005",
+            "secondary-fixed-dim": "#2fd9f4",
+            "on-tertiary-fixed-variant": "#3c475a"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "fontFamily": {
+            "headline": ["Manrope"],
+            "body": ["Inter"],
+            "label": ["Inter"]
+          }
+        },
+      },
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0a0a0f;
+      color: #e4e1e9;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .dot-grid {
+      background-image: radial-gradient(circle, #494552 1px, transparent 1px);
+      background-size: 24px 24px;
+      opacity: 0.15;
+    }
+
+    .glass-card {
+      background: rgba(53, 52, 58, 0.6);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(206, 189, 255, 0.1);
+    }
+
+    .bezier-path {
+      stroke-dasharray: 5;
+    }
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+
+<body class="overflow-x-hidden">
+  <!-- TopNavBar Shared Component -->
+  <header
+    class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-8 h-16 bg-zinc-950/60 backdrop-blur-xl border-b border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.4),0_0_10px_rgba(167,139,250,0.05)]">
+    <div class="flex items-center gap-8">
+      <span
+        class="text-2xl font-bold text-violet-400 drop-shadow-[0_0_8px_rgba(167,139,250,0.5)] font-headline">explorium</span>
+      <nav class="hidden md:flex gap-6 font-manrope tracking-tight font-semibold">
+        <a class="text-zinc-400 hover:text-zinc-100 transition-colors" href="#">Gallery</a>
+        <a class="text-violet-400 border-b-2 border-violet-400 pb-1" href="#">Learning Paths</a>
+        <a class="text-zinc-400 hover:text-zinc-100 transition-colors" href="#">About</a>
+      </nav>
+    </div>
+    <div class="flex items-center gap-4">
+      <span class="text-zinc-400 text-sm hover:text-zinc-100 transition-all cursor-pointer">GitHub</span>
+      <button class="p-2 hover:bg-white/5 transition-all duration-200 rounded-full active:scale-90">
+        <span class="material-symbols-outlined text-violet-400" data-icon="settings">settings</span>
+      </button>
+    </div>
+  </header>
+  <!-- Main Content Canvas -->
+  <main class="pt-16 min-h-screen flex relative">
+    <!-- Background Dot Grid -->
+    <div class="absolute inset-0 dot-grid pointer-events-none"></div>
+    <!-- LEFT SIDE — Guided Explanation Panel (40%) -->
+    <aside
+      class="w-[40%] border-r border-outline-variant/10 bg-surface-container-low/50 backdrop-blur-sm z-10 flex flex-col h-[calc(100vh-64px)]">
+      <div class="p-8 flex-1 overflow-y-auto custom-scrollbar">
+        <!-- Header & Breadcrumbs -->
+        <div class="mb-8">
+          <div
+            class="flex items-center gap-2 text-xs text-on-surface-variant font-medium uppercase tracking-widest mb-4">
+            <span>Home</span> <span class="text-outline-variant">/</span>
+            <span>Algorithms</span> <span class="text-outline-variant">/</span>
+            <span class="text-primary">Hash Tables</span>
+          </div>
+          <h1 class="text-4xl font-headline font-extrabold text-on-surface tracking-tighter mb-4">
+            How does a <span class="text-primary-container">Hash Table</span> work?
+          </h1>
+          <!-- Depth Slider -->
+          <div class="mt-8 space-y-3">
+            <div class="flex justify-between text-xs font-headline font-bold text-outline uppercase tracking-wider">
+              <span>ELI5</span>
+              <span>Expert</span>
+            </div>
+            <div class="relative h-1 bg-surface-container rounded-full overflow-hidden">
+              <div
+                class="absolute top-0 left-0 h-full w-2/3 bg-primary-container shadow-[0_0_8px_rgba(167,139,250,0.5)]">
+              </div>
+              <div
+                class="absolute top-1/2 left-2/3 -translate-y-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-on-surface border-2 border-primary ring-4 ring-primary/20">
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Rich Text Explanation -->
+        <div class="space-y-8 font-body leading-relaxed text-on-surface-variant">
+          <section>
+            <h2 class="text-xl font-headline font-bold text-on-surface mb-3">What is a Hash Table?</h2>
+            <p>A hash table is a data structure that maps keys to values for highly efficient lookup. Think of it like a
+              massive digital library where instead of searching row by row, you have a magic index that tells you the
+              exact shelf and position of any book instantly.</p>
+          </section>
+          <div class="p-4 glass-card border-l-4 border-primary rounded-r-xl bg-primary-container/5">
+            <p class="flex items-center gap-2 text-primary-container font-medium">
+              <span class="material-symbols-outlined" data-icon="lightbulb">lightbulb</span>
+              Try typing a key in the input box →
+            </p>
+          </div>
+          <section>
+            <h2 class="text-xl font-headline font-bold text-on-surface mb-3">What happens on insert?</h2>
+            <ol class="space-y-4 counter-reset-item">
+              <li class="flex gap-4">
+                <span
+                  class="flex-shrink-0 w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center text-xs font-bold text-primary border border-primary/20">1</span>
+                <span>The key (e.g., "alice") is passed into a <strong>Hash Function</strong>.</span>
+              </li>
+              <li class="flex gap-4">
+                <span
+                  class="flex-shrink-0 w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center text-xs font-bold text-primary border border-primary/20">2</span>
+                <span>The function returns an integer called the <strong>hash code</strong>.</span>
+              </li>
+              <li class="flex gap-4">
+                <span
+                  class="flex-shrink-0 w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center text-xs font-bold text-primary border border-primary/20">3</span>
+                <span>This code is mapped to an index in the array (e.g., index 3).</span>
+              </li>
+            </ol>
+          </section>
+          <div class="p-4 glass-card rounded-xl border border-secondary/20 bg-secondary/5">
+            <p class="text-sm italic">
+              "Notice how the same key always produces the same hash. This determinism is the secret sauce of O(1)
+              complexity."
+            </p>
+          </div>
+          <section>
+            <h2 class="text-xl font-headline font-bold text-on-surface mb-3">What about collisions?</h2>
+            <p>Sometimes two different keys map to the same bucket. This is called a <strong>collision</strong>. We
+              handle these using strategies like <span
+                class="text-secondary underline decoration-secondary/30 underline-offset-4">Chaining</span> or <span
+                class="text-secondary underline decoration-secondary/30 underline-offset-4">Open Addressing</span>.</p>
+          </section>
+        </div>
+      </div>
+    </aside>
+    <!-- RIGHT SIDE — Interactive Simulation Panel (60%) -->
+    <section class="w-[60%] relative flex flex-col">
+      <!-- Simulation Canvas -->
+      <div class="flex-1 relative overflow-hidden flex flex-col items-center justify-center p-12">
+        <!-- Input & Hash Function Area -->
+        <div class="w-full max-w-2xl mb-24 z-20">
+          <div
+            class="flex items-center gap-4 bg-surface-container-lowest/80 p-2 rounded-full border border-outline-variant/30 backdrop-blur-xl shadow-2xl">
+            <div class="flex-1 px-6">
+              <input
+                class="w-full bg-transparent border-none text-on-surface font-mono focus:ring-0 placeholder-outline-variant"
+                placeholder="Enter key..." type="text" value="alice" />
+            </div>
+            <button
+              class="px-8 py-3 bg-primary-container text-on-primary-container rounded-full font-headline font-bold text-sm tracking-wide shadow-[0_0_20px_rgba(167,139,250,0.4)] hover:scale-105 active:scale-95 transition-transform">
+              Insert
+            </button>
+          </div>
+          <div class="mt-8 flex justify-center">
+            <div class="px-6 py-2 glass-card rounded-full border border-primary/40 flex items-center gap-3">
+              <span class="text-xs font-mono text-outline uppercase tracking-tighter">Processing:</span>
+              <code class="text-primary font-bold">hash('alice') → 3</code>
+            </div>
+          </div>
+        </div>
+        <!-- SVG Bezier Connectors (Conceptual) -->
+        <svg class="absolute inset-0 w-full h-full pointer-events-none opacity-40" viewbox="0 0 800 600">
+          <!-- Active Connection -->
+          <path class="bezier-path" d="M400,200 C400,300 300,300 300,400" fill="none" stroke="url(#grad1)"
+            stroke-width="2"></path>
+          <!-- Dots along path -->
+          <circle fill="#cebdff" r="3">
+            <animatemotion dur="2s" path="M400,200 C400,300 300,300 300,400" repeatcount="indefinite"></animatemotion>
+          </circle>
+          <defs>
+            <lineargradient id="grad1" x1="0%" x2="0%" y1="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#cebdff;stop-opacity:1"></stop>
+              <stop offset="100%" style="stop-color:#5de6ff;stop-opacity:1"></stop>
+            </lineargradient>
+          </defs>
+        </svg>
+        <!-- Hash Table Buckets -->
+        <div class="w-full flex justify-between gap-2 max-w-4xl z-20">
+          <!-- Bucket 0 -->
+          <div
+            class="flex-1 h-32 glass-card rounded-xl border border-outline-variant/10 flex flex-col items-center justify-between py-3 group hover:border-primary/30 transition-colors">
+            <span class="text-[10px] font-mono text-outline-variant uppercase">Idx 0</span>
+            <div class="w-8 h-8 rounded-lg bg-surface-container-low/50"></div>
+          </div>
+          <!-- Bucket 1 -->
+          <div
+            class="flex-1 h-32 glass-card rounded-xl border border-outline-variant/10 flex flex-col items-center justify-between py-3 opacity-60">
+            <span class="text-[10px] font-mono text-outline-variant uppercase">Idx 1</span>
+            <div class="w-8 h-8 rounded-lg bg-surface-container-low/50"></div>
+          </div>
+          <!-- Bucket 2 -->
+          <div
+            class="flex-1 h-32 glass-card rounded-xl border border-outline-variant/10 flex flex-col items-center justify-between py-3 opacity-60">
+            <span class="text-[10px] font-mono text-outline-variant uppercase">Idx 2</span>
+            <div class="w-8 h-8 rounded-lg bg-surface-container-low/50"></div>
+          </div>
+          <!-- Bucket 3 (ACTIVE) -->
+          <div
+            class="flex-1 h-32 bg-primary-container/20 border-2 border-primary rounded-xl flex flex-col items-center justify-between py-3 relative shadow-[0_0_30px_rgba(167,139,250,0.2)]">
+            <span class="text-[10px] font-mono text-primary font-bold uppercase">Idx 3</span>
+            <div
+              class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center text-on-primary-container shadow-inner">
+              <span class="text-[10px] font-bold">alice</span>
+            </div>
+            <!-- Floating Popup -->
+            <div
+              class="absolute -top-24 w-48 p-3 glass-card rounded-xl border border-primary/50 text-[11px] leading-tight text-on-surface shadow-2xl">
+              <strong class="text-primary block mb-1">Bucket 3</strong>
+              The hash function mapped 'alice' to index 3. The value is stored here in O(1) time.
+              <div
+                class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 rotate-45 bg-surface-container border-b border-r border-primary/50">
+              </div>
+            </div>
+          </div>
+          <!-- Bucket 4 -->
+          <div
+            class="flex-1 h-32 glass-card rounded-xl border border-outline-variant/10 flex flex-col items-center justify-between py-3 opacity-60">
+            <span class="text-[10px] font-mono text-outline-variant uppercase">Idx 4</span>
+            <div class="w-8 h-8 rounded-lg bg-surface-container-low/50"></div>
+          </div>
+          <!-- Bucket 5 (OCCUPIED) -->
+          <div
+            class="flex-1 h-32 glass-card rounded-xl border border-secondary/30 flex flex-col items-center justify-between py-3 opacity-90">
+            <span class="text-[10px] font-mono text-secondary-container uppercase">Idx 5</span>
+            <div
+              class="w-8 h-8 rounded-lg bg-secondary-container/20 border border-secondary/40 flex items-center justify-center">
+              <span class="text-[10px] font-bold text-secondary">bob</span>
+            </div>
+          </div>
+          <!-- Bucket 6 -->
+          <div
+            class="flex-1 h-32 glass-card rounded-xl border border-outline-variant/10 flex flex-col items-center justify-between py-3 opacity-60">
+            <span class="text-[10px] font-mono text-outline-variant uppercase">Idx 6</span>
+            <div class="w-8 h-8 rounded-lg bg-surface-container-low/50"></div>
+          </div>
+          <!-- Bucket 7 -->
+          <div
+            class="flex-1 h-32 glass-card rounded-xl border border-outline-variant/10 flex flex-col items-center justify-between py-3 opacity-60">
+            <span class="text-[10px] font-mono text-outline-variant uppercase">Idx 7</span>
+            <div class="w-8 h-8 rounded-lg bg-surface-container-low/50"></div>
+          </div>
+        </div>
+        <!-- Toolbar & Stats Row -->
+        <div class="absolute bottom-12 w-full px-12 flex flex-col gap-6 items-center">
+          <!-- Controls -->
+          <div
+            class="flex items-center gap-1 p-1 bg-surface-container-highest/40 backdrop-blur-md rounded-full border border-white/5 shadow-xl">
+            <button class="p-3 hover:bg-white/10 rounded-full transition-colors text-primary">
+              <span class="material-symbols-outlined" data-icon="play_arrow"
+                style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+            </button>
+            <button class="p-3 hover:bg-white/10 rounded-full transition-colors text-on-surface-variant">
+              <span class="material-symbols-outlined" data-icon="pause">pause</span>
+            </button>
+            <button class="p-3 hover:bg-white/10 rounded-full transition-colors text-on-surface-variant">
+              <span class="material-symbols-outlined" data-icon="skip_next">skip_next</span>
+            </button>
+            <div class="w-px h-6 bg-outline-variant/30 mx-2"></div>
+            <button class="p-3 hover:bg-white/10 rounded-full transition-colors text-on-surface-variant">
+              <span class="material-symbols-outlined" data-icon="refresh">refresh</span>
+            </button>
+          </div>
+          <!-- Settings & Stats Panels -->
+          <div class="w-full flex justify-between gap-6 max-w-4xl">
+            <!-- Parameter Controls -->
+            <div class="flex-1 glass-card p-4 rounded-2xl flex items-center gap-8">
+              <div class="space-y-2">
+                <span class="text-[10px] font-headline font-bold text-outline uppercase tracking-wider block">Table
+                  Size</span>
+                <div class="flex items-center gap-3">
+                  <input class="accent-primary w-24 h-1 bg-surface-container rounded-lg" type="range" />
+                  <span class="text-sm font-mono text-primary">8</span>
+                </div>
+              </div>
+              <div class="w-px h-10 bg-outline-variant/20"></div>
+              <div class="space-y-2">
+                <span
+                  class="text-[10px] font-headline font-bold text-outline uppercase tracking-wider block">Strategy</span>
+                <div class="flex bg-surface-container p-1 rounded-lg">
+                  <button
+                    class="px-3 py-1 text-[10px] font-bold bg-surface-container-highest text-primary rounded-md">Chaining</button>
+                  <button
+                    class="px-3 py-1 text-[10px] font-bold text-on-surface-variant hover:text-on-surface">Addressing</button>
+                </div>
+              </div>
+            </div>
+            <!-- Stats Panel -->
+            <div class="flex-1 glass-card p-4 rounded-2xl flex justify-between items-center">
+              <div class="space-y-1">
+                <div class="text-[10px] text-outline-variant font-bold uppercase tracking-widest">Load Factor</div>
+                <div class="text-lg font-headline font-extrabold text-on-surface">0.25</div>
+              </div>
+              <div class="space-y-1">
+                <div class="text-[10px] text-outline-variant font-bold uppercase tracking-widest">Collisions</div>
+                <div class="text-lg font-headline font-extrabold text-error">1</div>
+              </div>
+              <div class="space-y-1">
+                <div class="text-[10px] text-outline-variant font-bold uppercase tracking-widest">Avg Lookup</div>
+                <div class="text-lg font-headline font-extrabold text-secondary">O(1)</div>
+              </div>
+              <div class="h-10 w-16 bg-surface-container-highest/20 rounded-md overflow-hidden flex items-end">
+                <svg class="w-full h-full" viewbox="0 0 100 40">
+                  <path d="M0,35 Q20,30 40,38 T80,10 L100,5" fill="none" stroke="#5de6ff" stroke-width="2"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <!-- BOTTOM SECTION — Challenges -->
+  <footer
+    class="relative z-20 py-20 px-12 bg-surface-container-lowest/50 backdrop-blur-xl border-t border-outline-variant/10 overflow-hidden">
+    <!-- Subtle Background Element -->
+    <div
+      class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent">
+    </div>
+    <div class="max-w-6xl mx-auto">
+      <div class="flex items-end justify-between mb-12">
+        <div>
+          <h2 class="text-3xl font-headline font-extrabold tracking-tight mb-2">🎯 Challenges</h2>
+          <p class="text-on-surface-variant">Master the concepts through interactive tasks.</p>
+        </div>
+        <div class="flex gap-2">
+          <span class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_#cebdff]"></span>
+          <span class="w-2 h-2 rounded-full bg-outline-variant"></span>
+          <span class="w-2 h-2 rounded-full bg-outline-variant"></span>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Challenge 1 -->
+        <div
+          class="group glass-card p-6 rounded-[2rem] hover:bg-surface-variant/40 transition-all duration-300 border border-white/5 flex flex-col justify-between h-48">
+          <div>
+            <h3 class="text-lg font-headline font-bold mb-2 group-hover:text-primary transition-colors">Fill the Table
+            </h3>
+            <p class="text-sm text-on-surface-variant leading-snug">Insert 8 unique keys into a size 8 table and observe
+              the distribution.</p>
+          </div>
+          <button class="flex items-center gap-2 text-primary font-headline font-bold text-sm tracking-wide">
+            Try It <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+          </button>
+        </div>
+        <!-- Challenge 2 -->
+        <div
+          class="group glass-card p-6 rounded-[2rem] hover:bg-surface-variant/40 transition-all duration-300 border border-white/5 flex flex-col justify-between h-48">
+          <div>
+            <h3 class="text-lg font-headline font-bold mb-2 group-hover:text-primary transition-colors">Break the Scale
+            </h3>
+            <p class="text-sm text-on-surface-variant leading-snug">Make the load factor exceed 1.0 and watch how
+              chaining handles the overflow.</p>
+          </div>
+          <button class="flex items-center gap-2 text-primary font-headline font-bold text-sm tracking-wide">
+            Try It <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+          </button>
+        </div>
+        <!-- Challenge 3 -->
+        <div
+          class="group glass-card p-6 rounded-[2rem] hover:bg-surface-variant/40 transition-all duration-300 border border-white/5 flex flex-col justify-between h-48">
+          <div>
+            <h3 class="text-lg font-headline font-bold mb-2 group-hover:text-primary transition-colors">The Worst Case
+            </h3>
+            <p class="text-sm text-on-surface-variant leading-snug">Find the worst-case lookup time by creating as many
+              collisions as possible.</p>
+          </div>
+          <button class="flex items-center gap-2 text-primary font-headline font-bold text-sm tracking-wide">
+            Try It <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- Decorative Image in background (low opacity) -->
+    <div class="absolute -right-20 -bottom-20 opacity-5 pointer-events-none">
+      <img class="w-[600px] h-[600px] object-cover rounded-full mix-blend-screen"
+        data-alt="abstract digital connection network with purple and cyan neon nodes and wires on a dark background"
+        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzJTpfpWdRWntw5MwFyB9dlbinwk_C8UbkQjgZKAGnZ2tF98dM0dEyZ9CNaaxikV285FtrEra0tTsptyNuGXhenO2yAc13Q6rHEMFWglMRz8lRSkcNH0cYPp1WPhUFwG0AU5FLMMcpOHoMy1HUsgi7rgjclASLYLsk_elbIEi-fhiQlTw9MYgoG-HAhEXmtJbszhZxqlmL6YKk34hPy8xqQom9RaIOMY9zagmTBF0Wmt8a4dnH3PoqZ76LnGR0_VXMtZiK6Nz0bXM" />
+    </div>
+  </footer>
+</body>
+
+</html>
