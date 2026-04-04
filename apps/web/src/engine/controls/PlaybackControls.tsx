@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion'
 import { usePlayerStore } from '@/src/stores/player-store'
-import { usePlaybackTick } from '@/src/engine/hooks/usePlayback'
 import type { PlaybackSpeed } from '@/src/stores/slices/playback-slice'
 
 // ─── Icons (inline SVG to avoid extra dep before Phase 3) ────────────────────
@@ -67,9 +66,6 @@ export function PlaybackControls() {
   const stepBack = usePlayerStore((s) => s.stepBack)
   const reset = usePlayerStore((s) => s.reset)
   const setSpeed = usePlayerStore((s) => s.setSpeed)
-
-  // Drive auto-advance ticks
-  usePlaybackTick()
 
   const disabled = totalSteps === 0
 

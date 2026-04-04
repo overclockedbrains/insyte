@@ -11,6 +11,7 @@ export interface PlaybackSlice {
   isPlaying: boolean
   speed: PlaybackSpeed
   totalSteps: number
+  isExpanded: boolean
 
   // Actions
   play: () => void
@@ -21,6 +22,8 @@ export interface PlaybackSlice {
   setSpeed: (speed: PlaybackSpeed) => void
   jumpToStep: (n: number) => void
   setTotalSteps: (n: number) => void
+  setExpanded: (val: boolean) => void
+  toggleExpanded: () => void
 }
 
 // ─── Slice creator ────────────────────────────────────────────────────────────
@@ -30,11 +33,12 @@ export const createPlaybackSlice: StateCreator<
   [['zustand/immer', never]],
   [],
   PlaybackSlice
-> = (set, get) => ({
+> = (set) => ({
   currentStep: 0,
   isPlaying: false,
   speed: 1,
   totalSteps: 0,
+  isExpanded: false,
 
   play: () =>
     set((state) => {
@@ -88,7 +92,18 @@ export const createPlaybackSlice: StateCreator<
         state.currentStep = Math.max(0, n - 1)
       }
     }),
+
+  setExpanded: (val) =>
+    set((state) => {
+      state.isExpanded = val
+    }),
+
+  toggleExpanded: () =>
+    set((state) => {
+      state.isExpanded = !state.isExpanded
+    }),
 })
 
 // Re-export for convenience
 export type { BoundStore }
+

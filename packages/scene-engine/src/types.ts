@@ -27,6 +27,9 @@ export type VisualType =
   | 'text-badge'
   | 'counter'
   | 'grid'
+  | 'bezier-connector'
+  | 'straight-arrow'
+  | 'data-flow-dot'
 
 export type CodeLanguage = 'python' | 'javascript'
 

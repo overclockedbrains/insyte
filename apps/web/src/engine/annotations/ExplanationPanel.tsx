@@ -22,7 +22,7 @@ export function ExplanationPanel({ sections, currentStep }: ExplanationPanelProp
   }, [currentStep, visibleSections.length])
 
   return (
-    <div className="w-[35%] min-w-0 overflow-y-auto p-6 border-r border-outline-variant/20 flex flex-col gap-6 custom-scrollbar">
+    <div className="w-full h-full overflow-y-auto p-6 flex flex-col gap-6 custom-scrollbar">
       <p className="text-xs uppercase tracking-widest text-on-surface-variant font-bold">
         Explanation
       </p>

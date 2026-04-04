@@ -13,6 +13,9 @@ import { SystemDiagramViz } from './SystemDiagramViz'
 import { TextBadgeViz } from './TextBadgeViz'
 import { CounterViz } from './CounterViz'
 import { GridViz } from './GridViz'
+import { BezierConnectorViz } from './BezierConnectorViz'
+import { StraightArrowViz } from './StraightArrowViz'
+import { DataFlowDotViz } from './DataFlowDotViz'
 
 export interface PrimitiveProps {
   id: string
@@ -35,4 +38,7 @@ export const PrimitiveRegistry: Record<string, React.ComponentType<PrimitiveProp
   'text-badge': TextBadgeViz,
   'counter': CounterViz,
   'grid': GridViz,
+  'bezier-connector': BezierConnectorViz,
+  'straight-arrow': StraightArrowViz,
+  'data-flow-dot': DataFlowDotViz,
 }

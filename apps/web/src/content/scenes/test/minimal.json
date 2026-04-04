@@ -3,7 +3,7 @@
   "title": "Minimal Test Scene",
   "type": "concept",
   "layout": "text-left-canvas-right",
-  "description": "A minimal 3-step scene used to verify the Phase 2 scene engine.",
+  "description": "A 3-step scene used to verify the Phase 4 simulation page layouts, ControlBar, and ChallengesSection.",
   "category": "Testing",
   "tags": ["test", "array"],
 
@@ -61,26 +61,38 @@
       "type": "slider",
       "label": "Animation Speed",
       "config": { "min": 0.5, "max": 2, "step": 0.5, "defaultValue": 1 }
+    },
+    {
+      "id": "show-values-ctrl",
+      "type": "toggle",
+      "label": "Show Values",
+      "config": { "defaultValue": true }
+    },
+    {
+      "id": "search-method-ctrl",
+      "type": "toggle-group",
+      "label": "Search Method",
+      "config": { "options": ["Linear", "Binary"], "defaultValue": "Linear" }
     }
   ],
 
   "explanation": [
     {
       "heading": "Step 0 — Initial State",
-      "body": "The array starts with values [1, 2, 3, 4, 5]. No elements are highlighted.",
+      "body": "The array starts with values [1, 2, 3, 4, 5]. No elements are highlighted. This is the initial state before any search operation begins.",
       "appearsAtStep": 0
     },
     {
       "heading": "Step 1 — Highlight Middle",
-      "body": "We highlight the middle element (index 2, value 3) as the current focus.",
+      "body": "We highlight the **middle element** (index 2, value 3) as the current focus of our search. In Binary Search, this is the pivot point.",
       "appearsAtStep": 1,
-      "callout": "Index 2 is now active."
+      "callout": "Index 2 is now active — check if it matches the target."
     },
     {
       "heading": "Step 2 — Found!",
-      "body": "The last element (index 4, value 5) is marked as found.",
+      "body": "The last element (index 4, value 5) is marked as **found**. The search has successfully located the target value.",
       "appearsAtStep": 2,
-      "callout": "Target located at index 4."
+      "callout": "Target located at index 4. Search complete!"
     }
   ],
 
@@ -114,8 +126,26 @@
     {
       "id": "ch-1",
       "title": "Predict the next step",
-      "description": "If we continue past step 2, what element would be highlighted next?",
+      "description": "If we continue past step 2 with a different target value, what element would be highlighted next in a Linear Search?",
       "type": "predict"
+    },
+    {
+      "id": "ch-2",
+      "title": "Break it: duplicate values",
+      "description": "What happens if the array contains duplicate values [1, 2, 2, 4, 5]? Which index gets returned first in a Linear vs Binary search?",
+      "type": "break-it"
+    },
+    {
+      "id": "ch-3",
+      "title": "Optimize the search",
+      "description": "The array is already sorted. Can you reduce the number of comparisons needed to find element 5? Switch to Binary Search mode above and count the steps.",
+      "type": "optimize"
+    },
+    {
+      "id": "ch-4",
+      "title": "Real-world scenario",
+      "description": "Imagine this array represents sorted user IDs in a database. Which search algorithm would you use for production lookups and why?",
+      "type": "scenario"
     }
   ]
 }

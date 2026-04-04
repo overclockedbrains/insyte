@@ -25,7 +25,7 @@ export function StepPopup({ text, style = 'info', visible }: StepPopupProps) {
           initial={{ opacity: 0, y: 8, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9, y: 0 }}
-          className="absolute z-50 glass-panel glow-border rounded-2xl p-3 text-sm flex items-start gap-2 shadow-2xl max-w-[240px] pointer-events-none"
+          className="glass-panel glow-border rounded-2xl p-3 text-sm flex items-start gap-2 shadow-2xl max-w-[240px] pointer-events-none relative"
           style={{ backgroundColor: cfg.bg, borderColor: cfg.border }}
         >
           <div className="mt-[2px]">

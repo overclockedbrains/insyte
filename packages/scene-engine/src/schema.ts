@@ -25,6 +25,9 @@ export const VisualTypeSchema = z.enum([
   'text-badge',
   'counter',
   'grid',
+  'bezier-connector',
+  'straight-arrow',
+  'data-flow-dot',
 ])
 
 export const ControlTypeSchema = z.enum([
