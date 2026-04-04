@@ -13,7 +13,6 @@ function evaluateCondition(
 ): boolean {
   const val = controlValues[condition.control]
   // Loose equality to handle string/number coercion from config defaults
-  // eslint-disable-next-line eqeqeq
   return val == condition.equals
 }
 

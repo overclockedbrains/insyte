@@ -122,26 +122,7 @@ export function usePlayerStore<T>(selector: (s: PlayerState) => T): T {
     return useStore(playerStoreApi, selector)
   }
 
-  // Global context — map PlayerState fields from useBoundStore
+  // Global context — state fields match PlayerState directly
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  return useBoundStore((globalState) => {
-    const playerState: PlayerState = {
-      activeScene: globalState.activeScene,
-      setScene: globalState.setScene,
-      clearScene: globalState.clearScene,
-      currentStep: globalState.currentStep,
-      isPlaying: globalState.isPlaying,
-      speed: globalState.speed,
-      totalSteps: globalState.totalSteps,
-      play: globalState.play,
-      pause: globalState.pause,
-      stepForward: globalState.stepForward,
-      stepBack: globalState.stepBack,
-      reset: globalState.reset,
-      setSpeed: globalState.setSpeed,
-      jumpToStep: globalState.jumpToStep,
-      setTotalSteps: globalState.setTotalSteps,
-    }
-    return selector(playerState)
-  })
+  return useBoundStore((globalState) => selector(globalState as unknown as PlayerState))
 }

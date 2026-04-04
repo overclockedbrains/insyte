@@ -26,6 +26,7 @@ export type VisualType =
   | 'system-diagram'
   | 'text-badge'
   | 'counter'
+  | 'grid'
 
 export type CodeLanguage = 'python' | 'javascript'
 

@@ -5,21 +5,25 @@ import { usePlayerStore } from '@/src/stores/player-store'
 
 // ─── usePlayback ──────────────────────────────────────────────────────────────
 
+import { useShallow } from 'zustand/react/shallow'
+
 export function usePlayback() {
-  return usePlayerStore((s) => ({
-    currentStep: s.currentStep,
-    isPlaying: s.isPlaying,
-    totalSteps: s.totalSteps,
-    speed: s.speed,
-    play: s.play,
-    pause: s.pause,
-    stepForward: s.stepForward,
-    stepBack: s.stepBack,
-    reset: s.reset,
-    setSpeed: s.setSpeed,
-    jumpToStep: s.jumpToStep,
-    setTotalSteps: s.setTotalSteps,
-  }))
+  return usePlayerStore(
+    useShallow((s) => ({
+      currentStep: s.currentStep,
+      isPlaying: s.isPlaying,
+      totalSteps: s.totalSteps,
+      speed: s.speed,
+      play: s.play,
+      pause: s.pause,
+      stepForward: s.stepForward,
+      stepBack: s.stepBack,
+      reset: s.reset,
+      setSpeed: s.setSpeed,
+      jumpToStep: s.jumpToStep,
+      setTotalSteps: s.setTotalSteps,
+    }))
+  )
 }
 
 // ─── usePlaybackTick ──────────────────────────────────────────────────────────
@@ -36,7 +40,9 @@ export function usePlaybackTick() {
 
   // Keep stepForward stable in the interval callback via a ref
   const stepForwardRef = useRef(stepForward)
-  stepForwardRef.current = stepForward
+  useEffect(() => {
+    stepForwardRef.current = stepForward
+  }, [stepForward])
 
   useEffect(() => {
     if (!isPlaying) return
