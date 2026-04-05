@@ -15,10 +15,9 @@ import { SimulationLayout } from '@/src/engine/SimulationLayout'
 
 interface ScenePageClientProps {
   scene: Scene
-  slug: string
 }
 
-export function ScenePageClient({ scene, slug }: ScenePageClientProps) {
+export function ScenePageClient({ scene }: ScenePageClientProps) {
   const setScene = useBoundStore((s) => s.setScene)
   const clearScene = useBoundStore((s) => s.clearScene)
   const setTotalSteps = useBoundStore((s) => s.setTotalSteps)

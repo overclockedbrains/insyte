@@ -57,5 +57,5 @@ export default async function SimulationPage({ params }: Props) {
     notFound()
   }
 
-  return <ScenePageClient scene={scene} slug={slug} />
+  return <ScenePageClient scene={scene} />
 }
