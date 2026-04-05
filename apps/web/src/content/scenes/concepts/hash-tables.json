@@ -28,8 +28,7 @@
       "label": "Hash Table",
       "position": { "x": 50, "y": 55 },
       "initialState": {
-        "entries": [],
-        "label": "Hash Table"
+        "entries": []
       }
     },
     {

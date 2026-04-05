@@ -422,19 +422,19 @@
       "id": "btn-kill-s2",
       "type": "button",
       "label": "Kill Server 2",
-      "config": { "variant": "destructive", "defaultValue": null }
+      "config": { "variant": "destructive", "defaultValue": null, "goToStep": 6 }
     },
     {
       "id": "btn-add-server",
       "type": "button",
       "label": "Add Server",
-      "config": { "variant": "primary", "defaultValue": null }
+      "config": { "variant": "primary", "defaultValue": null, "goToStep": 7 }
     },
     {
       "id": "btn-spike",
       "type": "button",
       "label": "Traffic Spike",
-      "config": { "variant": "destructive", "defaultValue": null }
+      "config": { "variant": "destructive", "defaultValue": null, "goToStep": 9 }
     }
   ],
 

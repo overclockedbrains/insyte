@@ -71,11 +71,11 @@ export function RecursionTreeViz({ state }: PrimitiveProps) {
           let shadow = 'none'
 
           if (isComputing) {
-            bgColor = 'color-mix(in srgb, var(--color-primary) 20%, transparent)'
+            bgColor = 'rgba(183, 159, 255, 0.2)' // primary/20
             borderColor = 'var(--color-primary)'
-            shadow = '0 0 16px color-mix(in srgb, var(--color-primary) 40%, transparent)'
+            shadow = '0 0 16px rgba(183, 159, 255, 0.4)'
           } else if (isComplete) {
-            bgColor = 'color-mix(in srgb, var(--color-secondary) 15%, transparent)'
+            bgColor = 'rgba(58, 223, 250, 0.15)' // secondary/15
             borderColor = 'var(--color-secondary)'
           } else if (isMemoized) {
             bgColor = 'var(--color-surface-container-highest)'

@@ -70,7 +70,7 @@ export function PlaybackControls() {
   const disabled = totalSteps === 0
 
   return (
-    <div className="bg-surface-container border border-outline-variant/20 rounded-2xl px-4 py-2 flex items-center gap-3 flex-wrap">
+    <div className="relative overflow-hidden bg-surface-container border border-outline-variant/20 rounded-2xl px-4 py-2 flex items-center gap-3 flex-wrap">
       {/* Transport buttons */}
       <div className="flex items-center gap-1">
         <PlaybackButton onClick={reset} disabled={disabled} title="Reset">
@@ -124,6 +124,17 @@ export function PlaybackControls() {
           </motion.button>
         ))}
       </div>
+
+      {/* Step progress bar — sweeps 0→100% during auto-play */}
+      {isPlaying && !disabled && (
+        <motion.div
+          key={`progress-${currentStep}`}
+          className="absolute bottom-0 left-0 h-[2px] bg-secondary/60 rounded-full"
+          initial={{ width: '0%' }}
+          animate={{ width: '100%' }}
+          transition={{ duration: 1 / speed, ease: 'linear' }}
+        />
+      )}
     </div>
   )
 }

@@ -2,10 +2,16 @@
   "id": "js-event-loop",
   "title": "JavaScript Event Loop",
   "type": "concept",
-  "layout": "text-left-canvas-right",
+  "layout": "code-left-canvas-right",
   "description": "See exactly how JavaScript handles async code — call stack, Web APIs, microtask queue, and callback queue all in one visual.",
   "category": "JavaScript",
   "tags": ["event-loop", "async", "promises", "setTimeout", "javascript"],
+
+  "code": {
+    "language": "javascript",
+    "source": "console.log('start');\n\nsetTimeout(() => {\n  console.log('setTimeout');\n}, 0);\n\nPromise.resolve()\n  .then(() => {\n    console.log('Promise');\n  });\n\nconsole.log('end');",
+    "highlightByStep": [0, 0, 0, 2, 4, 6, 11, 11, 8, 8, 3, 3]
+  },
 
   "visuals": [
     {
@@ -314,7 +320,7 @@
       "id": "btn-run",
       "type": "button",
       "label": "Run Snippet",
-      "config": { "variant": "primary", "defaultValue": null }
+      "config": { "variant": "primary", "defaultValue": null, "goToStep": 0 }
     }
   ],
 

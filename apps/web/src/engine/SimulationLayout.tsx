@@ -3,7 +3,6 @@
 import { useEffect, useCallback } from 'react'
 import type { Scene } from '@insyte/scene-engine'
 import { useBoundStore } from '@/src/stores/store'
-import { SimulationNav } from '@/components/simulation/SimulationNav'
 import { ChallengesSection } from '@/components/simulation/ChallengesSection'
 import { TextLeftCanvasRight } from './layouts/TextLeftCanvasRight'
 import { CodeLeftCanvasRight } from './layouts/CodeLeftCanvasRight'
@@ -21,7 +20,6 @@ import { usePlaybackTick } from './hooks/usePlayback'
 
 interface SimulationLayoutProps {
   scene: Scene
-  slug: string
 }
 
 // ─── Layout selector ──────────────────────────────────────────────────────────
@@ -61,7 +59,7 @@ function ChatButtonStub() {
 
 // ─── SimulationLayout ─────────────────────────────────────────────────────────
 
-export function SimulationLayout({ scene, slug }: SimulationLayoutProps) {
+export function SimulationLayout({ scene }: SimulationLayoutProps) {
   // Drive auto-advance ticks at the orchestrator level (exactly once)
   usePlaybackTick()
 
@@ -90,16 +88,13 @@ export function SimulationLayout({ scene, slug }: SimulationLayoutProps) {
   return (
     // Root is a plain flex-col — height determined by its children, page scrolls.
     <div className="flex flex-col">
-      {/* ── Sticky simulation nav (below global Navbar at sticky top-14) ── */}
-      <SimulationNav title={scene.title} category={scene.category} slug={slug} />
-
       {/* ── Canvas area ─────────────────────────────────────────────────────
-           Fixed height = 100vh − global nav (3.5rem) − sim nav (3rem) = 6.5rem
-           This keeps the canvas in-viewport regardless of what renders below.
+           Fixed height = 100vh − global Navbar (3.5rem = h-14).
+           Scene title/share/expand live in the Navbar when activeScene is set.
            When expanded, pointer-events disabled so clicks pass to the overlay. ── */}
       <div
         className={[
-          'h-[calc(100vh-6.5rem)] flex-shrink-0',
+          'h-[calc(100vh-3.5rem)] flex-shrink-0',
           'flex flex-col min-h-0',
           isExpanded ? 'pointer-events-none' : '',
         ].join(' ')}

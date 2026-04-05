@@ -21,6 +21,7 @@ export interface PrimitiveProps {
   id: string
   state: unknown
   step: number
+  label?: string
   onHover?: (id: string) => void
 }
 

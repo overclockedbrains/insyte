@@ -27,7 +27,7 @@ export function GridViz({ id, state }: PrimitiveProps) {
               const value = cell?.value
 
               let bgColor = 'var(--color-surface-container)' // empty (surface-container)
-              let borderColor = 'color-mix(in srgb, var(--color-outline-variant) 20%, transparent)'
+              let borderColor = 'rgba(127, 127, 145, 0.2)'
               let shadow = 'none'
               let textColor = 'var(--color-on-surface-variant)'
 
@@ -36,13 +36,13 @@ export function GridViz({ id, state }: PrimitiveProps) {
                 borderColor = 'var(--color-outline-variant)'
                 textColor = 'var(--color-outline-variant)'
               } else if (cellState === 'visited') {
-                bgColor = 'color-mix(in srgb, var(--color-primary) 20%, transparent)' // primary/20
-                borderColor = 'color-mix(in srgb, var(--color-primary) 30%, transparent)'
+                bgColor = 'rgba(183, 159, 255, 0.2)' // primary/20
+                borderColor = 'rgba(183, 159, 255, 0.3)'
                 textColor = 'var(--color-primary)'
               } else if (cellState === 'path') {
-                bgColor = 'color-mix(in srgb, var(--color-secondary) 40%, transparent)' // secondary/40
+                bgColor = 'rgba(58, 223, 250, 0.4)' // secondary/40
                 borderColor = 'var(--color-secondary)'
-                shadow = '0 0 10px color-mix(in srgb, var(--color-secondary) 60%, transparent)'
+                shadow = '0 0 10px rgba(58, 223, 250, 0.6)'
                 textColor = 'var(--color-inverse-surface)'
               } else if (cellState === 'start') {
                 bgColor = 'var(--color-primary)' // primary
@@ -53,7 +53,7 @@ export function GridViz({ id, state }: PrimitiveProps) {
                 borderColor = 'var(--color-secondary-dim)'
                 textColor = 'var(--color-on-secondary)' // on-secondary
               } else if (cellState === 'active') {
-                bgColor = 'color-mix(in srgb, var(--color-primary) 60%, transparent)' // pulsing primary
+                bgColor = 'rgba(183, 159, 255, 0.6)' // primary/60
                 borderColor = 'var(--color-primary)'
                 textColor = 'var(--color-on-surface)'
               }

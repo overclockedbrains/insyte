@@ -10,7 +10,7 @@ export function QueueViz({ id, state }: PrimitiveProps) {
   const { items = [], highlight } = state as QueueState
 
   return (
-    <div className="flex items-center justify-center p-8 w-full min-h-[160px]">
+    <div className="flex items-center justify-center p-4 w-full min-h-[160px]">
       <div className="text-xs font-mono font-bold text-secondary mr-4 tracking-widest uppercase flex flex-col items-center">
         <span>FRONT</span>
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="rotate-180 mt-1" stroke="currentColor">
@@ -18,7 +18,7 @@ export function QueueViz({ id, state }: PrimitiveProps) {
         </svg>
       </div>
 
-      <div className="flex flex-row items-center justify-end border-y-4 border-outline-variant/30 w-full max-w-[600px] h-16 min-w-[64px] bg-surface-container-lowest overflow-hidden shadow-inner">
+      <div className="flex flex-row items-center justify-end border-y-2 border-outline-variant/30 w-full max-w-[600px] h-16 min-w-[64px] bg-surface-container-lowest overflow-hidden shadow-inner">
         <AnimatePresence>
           {items.map((item, idx) => {
             const isHighlight = highlight === idx
@@ -31,8 +31,8 @@ export function QueueViz({ id, state }: PrimitiveProps) {
                   opacity: 1,
                   scale: 1,
                   x: 0,
-                  backgroundColor: isHighlight ? 'color-mix(in srgb, var(--color-secondary) 20%, transparent)' : 'var(--color-surface-container)',
-                  boxShadow: isHighlight ? '0 0 12px rgba(58,223,250,0.6)' : 'none',
+                  backgroundColor: isHighlight ? 'rgba(58, 223, 250, 0.2)' : '#19191f',
+                  boxShadow: isHighlight ? '0 0 8px rgba(58, 223, 250, 0.35)' : 'none',
                 }}
                 exit={{ opacity: 0, x: -40, scale: 0.5, transition: { duration: 0.2 } }}
                 transition={{ type: 'spring', stiffness: 300, damping: 25 }}

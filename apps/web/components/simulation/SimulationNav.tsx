@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Share2, Maximize2, Minimize2, Check } from 'lucide-react'
+import { ArrowLeft, Share2, Maximize2, Minimize2, Check, Settings } from 'lucide-react'
 import { useBoundStore } from '@/src/stores/store'
 import { Pill } from '@/components/ui/Pill'
 
@@ -46,9 +46,9 @@ export function SimulationNav({ title, category }: SimulationNavProps) {
   return (
     <header
       className={[
-        // Position: below global Navbar (h-14 = 3.5rem → sticky top-14)
+        // Position: top of viewport — global Navbar is hidden on scene pages
         // When canvas is expanded, nav sits behind the overlay (z-40 < z-60)
-        'sticky z-40 top-14 w-full',
+        'sticky z-40 top-0 w-full',
         'backdrop-blur-md bg-background/85',
         'border-b border-outline-variant/20',
       ].join(' ')}
@@ -102,6 +102,16 @@ export function SimulationNav({ title, category }: SimulationNavProps) {
             )}
             <span className="hidden sm:inline">{copied ? 'Copied!' : 'Share'}</span>
           </motion.button>
+
+          {/* Settings link */}
+          <Link
+            href="/settings"
+            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-150 cursor-pointer"
+            title="Settings"
+            aria-label="Settings"
+          >
+            <Settings className="h-3.5 w-3.5" />
+          </Link>
 
           {/* Expand / Collapse button (hidden on mobile) */}
           <motion.button

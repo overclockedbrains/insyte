@@ -33,9 +33,13 @@ export function SystemDiagramViz({ state }: PrimitiveProps) {
 
   const getComponent = (cId: string) => components.find((c) => c.id === cId)
 
+  const maxCompY = components.length > 0
+    ? Math.max(...components.map(c => c.y)) + 80
+    : 300
+
   // Use raw coordinates as pixels directly for HLD (flexible canvas)
   return (
-    <div className="relative w-full h-full min-h-[600px] overflow-visible">
+    <div className="relative w-full overflow-visible" style={{ minHeight: maxCompY }}>
       {/* Connections Layer */}
       <svg className="absolute inset-0 pointer-events-none w-full h-full z-0 overflow-visible">
         <defs>
@@ -87,10 +91,9 @@ export function SystemDiagramViz({ state }: PrimitiveProps) {
 
         if (isActive) {
           borderColor = 'var(--color-primary)'
-          shadow = '0 0 20px color-mix(in srgb, var(--color-primary) 15%, transparent)'
+          shadow = '0 0 12px rgba(183, 159, 255, 0.2)'
         } else if (isOverloaded) {
           borderColor = 'var(--color-error)'
-          shadow = '0 0 20px color-mix(in srgb, var(--color-error) 30%, transparent)'
         }
 
         const IconToUse = comp.icon && IconMap[comp.icon] ? IconMap[comp.icon] : Server
@@ -134,7 +137,7 @@ export function SystemDiagramViz({ state }: PrimitiveProps) {
               </div>
             )}
             {isActive && (
-              <div className="absolute -top-3 -right-3 bg-primary text-on-primary rounded-full p-1 shadow-[0_0_10px_var(--color-primary)]">
+              <div className="absolute -top-3 -right-3 bg-primary text-on-primary rounded-full p-1">
                 <Activity size={14} />
               </div>
             )}

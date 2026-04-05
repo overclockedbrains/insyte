@@ -29,6 +29,9 @@ interface CanvasCardProps {
 
 // ─── Inner canvas visualization ───────────────────────────────────────────────
 
+// Toggle to visualise each primitive's bounding box during development
+const DEV_BORDERS = process.env.NODE_ENV === 'development'
+
 function CanvasVisualization({ scene }: { scene: Scene }) {
   const { currentStep } = usePlayback()
 
@@ -38,45 +41,162 @@ function CanvasVisualization({ scene }: { scene: Scene }) {
       (p.hideAtStep === undefined || currentStep < p.hideAtStep),
   )
 
+  const textBadges = scene.visuals.filter((v) => v.type === 'text-badge')
+  const counters = scene.visuals.filter((v) => v.type === 'counter')
+  const canvasVisuals = scene.visuals.filter(
+    (v) => v.type !== 'text-badge' && v.type !== 'counter',
+  )
+
+  const hasHud = textBadges.length > 0 || counters.length > 0
+  const useAbsoluteLayout = canvasVisuals.some((v) => v.position != null)
+
+  function getPopupAnchor(popup: typeof visiblePopups[number]): { x: number; y: number } {
+    if (popup.anchor) return popup.anchor
+    const visual = canvasVisuals.find((v) => v.id === popup.attachTo)
+    if (visual?.position) return { x: visual.position.x, y: visual.position.y + 18 }
+    return { x: 50, y: 75 }
+  }
+
+  function getMaxWidth(type: string): string {
+    if (type === 'system-diagram') return '460px'
+    if (type === 'queue') return '320px'
+    if (type === 'graph') return '480px'
+    return '260px'
+  }
+
   return (
-    <div className="relative flex-1 min-h-0 overflow-auto">
-      {/* Dot grid background */}
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+      {/* Dot grid spans the full area */}
       <div className="absolute inset-0 pointer-events-none">
         <DotGridBackground opacity={0.3} />
       </div>
 
-      {/* Content in normal flex flow: popups first (above), then primitives */}
-      <div className="relative z-10 w-full min-h-full p-6 flex flex-col items-center gap-4 justify-start">
-        {/* Step popups — in flow so they push primitives down, no overlap */}
-        {visiblePopups.map((popup) => (
-          <StepPopup
-            key={popup.id}
-            text={popup.text}
-            style={popup.style}
-            visible={true}
-          />
-        ))}
+      {/* ── HUD zone: badges + counters, fixed at top, never overlaps canvas ── */}
+      {hasHud && (
+        <>
+          <div className="relative z-20 flex flex-wrap items-center gap-x-4 gap-y-2.5 px-4 pt-3 pb-2 pointer-events-none flex-shrink-0">
+            {textBadges.map((visual) => {
+              const PrimitiveComponent = PrimitiveRegistry[visual.type]
+              if (!PrimitiveComponent) return null
+              const state = computeVisualStateAtStep(scene, visual.id, currentStep)
+              return (
+                <PrimitiveComponent
+                  key={visual.id}
+                  id={visual.id}
+                  state={state}
+                  step={currentStep}
+                  label={visual.label}
+                />
+              )
+            })}
+            {counters.length > 0 && (
+              <div className="flex items-center gap-4 flex-shrink-0 ml-auto">
+                {counters.map((visual) => {
+                  const PrimitiveComponent = PrimitiveRegistry[visual.type]
+                  if (!PrimitiveComponent) return null
+                  const state = computeVisualStateAtStep(scene, visual.id, currentStep)
+                  return (
+                    <PrimitiveComponent
+                      key={visual.id}
+                      id={visual.id}
+                      state={state}
+                      step={currentStep}
+                      label={visual.label}
+                    />
+                  )
+                })}
+              </div>
+            )}
+          </div>
+          {/* Divider */}
+          <div className="relative z-20 flex-shrink-0 px-6">
+            <div className="h-px bg-outline-variant/20" />
+          </div>
+        </>
+      )}
 
-        {/* Primitives */}
-        {scene.visuals.map((visual) => {
-          const PrimitiveComponent = PrimitiveRegistry[visual.type]
-          if (!PrimitiveComponent) return null
-          const state = computeVisualStateAtStep(scene, visual.id, currentStep)
-          return (
-            <PrimitiveComponent
-              key={visual.id}
-              id={visual.id}
-              state={state}
-              step={currentStep}
-            />
-          )
-        })}
-
-        {scene.visuals.length === 0 && (
-          <p className="text-sm text-on-surface-variant italic mt-10">
+      {/* ── Canvas zone: fills remaining space, positions relative to this area ── */}
+      <div className="relative flex-1 min-h-0 overflow-auto z-10">
+        {canvasVisuals.length === 0 && (
+          <p className="absolute inset-0 flex items-center justify-center text-sm text-on-surface-variant italic">
             No visuals defined in this scene.
           </p>
         )}
+
+        {useAbsoluteLayout ? (
+          <div className="relative w-full h-full min-h-[300px]">
+            {canvasVisuals.map((visual) => {
+              const PrimitiveComponent = PrimitiveRegistry[visual.type]
+              if (!PrimitiveComponent) return null
+              const state = computeVisualStateAtStep(scene, visual.id, currentStep)
+              const pos = visual.position ?? { x: 50, y: 50 }
+              const maxW = getMaxWidth(visual.type)
+              return (
+                <div
+                  key={visual.id}
+                  className={`absolute flex flex-col items-center${DEV_BORDERS ? ' border border-dashed border-primary/30' : ''}`}
+                  style={{
+                    left: `${pos.x}%`,
+                    top: `${pos.y}%`,
+                    transform: 'translate(-50%, -50%)',
+                    maxWidth: maxW,
+                    width: '100%',
+                  }}
+                >
+                  {visual.label && (
+                    <div className="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant/60 mb-1 text-center select-none">
+                      {visual.label}
+                    </div>
+                  )}
+                  <PrimitiveComponent
+                    id={visual.id}
+                    state={state}
+                    step={currentStep}
+                    label={visual.label}
+                  />
+                </div>
+              )
+            })}
+          </div>
+        ) : (
+          <div className="relative w-full h-full p-4 flex flex-col items-center justify-center gap-4">
+            {canvasVisuals.map((visual) => {
+              const PrimitiveComponent = PrimitiveRegistry[visual.type]
+              if (!PrimitiveComponent) return null
+              const state = computeVisualStateAtStep(scene, visual.id, currentStep)
+              return (
+                <div key={visual.id} className={`flex flex-col items-center w-full${DEV_BORDERS ? ' border border-dashed border-primary/30' : ''}`}>
+                  {visual.label && (
+                    <div className="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant/60 mb-1 text-center select-none">
+                      {visual.label}
+                    </div>
+                  )}
+                  <PrimitiveComponent
+                    id={visual.id}
+                    state={state}
+                    step={currentStep}
+                    label={visual.label}
+                  />
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Popup annotations — simple absolute label near the attached visual */}
+        {visiblePopups.map((popup) => {
+          const pos = getPopupAnchor(popup)
+          return (
+            <div
+              key={popup.id}
+              className="absolute z-30 pointer-events-none"
+              style={{ left: `${pos.x}%`, top: `${pos.y}%`, transform: 'translate(-50%, -50%)' }}
+            >
+              <StepPopup text={popup.text} style={popup.style} visible={true} />
+            </div>
+          )
+        })}
+
       </div>
     </div>
   )

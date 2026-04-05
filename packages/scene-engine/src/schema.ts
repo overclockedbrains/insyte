@@ -100,6 +100,8 @@ export const PopupSchema = z.object({
   hideAtStep: z.number().int().nonnegative().optional(),
   showWhen: ConditionSchema.optional(),
   style: z.enum(['info', 'success', 'warning', 'insight']).optional(),
+  anchor: z.object({ x: z.number(), y: z.number() }).optional(),
+  targetPoint: z.object({ x: z.number(), y: z.number() }).optional(),
 })
 
 // ─── Challenge ────────────────────────────────────────────────────────────────

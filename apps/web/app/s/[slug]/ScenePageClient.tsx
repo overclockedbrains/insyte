@@ -39,5 +39,5 @@ export function ScenePageClient({ scene, slug }: ScenePageClientProps) {
     }
   }, [scene, setScene, clearScene, setTotalSteps, reset, setExpanded])
 
-  return <SimulationLayout scene={scene} slug={slug} />
+  return <SimulationLayout scene={scene} />
 }

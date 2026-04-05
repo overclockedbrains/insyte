@@ -27,34 +27,34 @@ function getCellStyle(highlight?: string): {
     case 'active':
     case 'insert':
       return {
-        bg: 'color-mix(in srgb, var(--color-primary) 20%, transparent)',
-        shadow: '0 0 12px color-mix(in srgb, var(--color-primary) 40%, transparent)',
+        bg: 'rgba(183, 159, 255, 0.2)',
+        shadow: '0 0 6px rgba(183, 159, 255, 0.3)',
         borderColor: 'var(--color-primary)',
       }
     case 'found':
     case 'hit':
       return {
-        bg: 'color-mix(in srgb, var(--color-secondary) 20%, transparent)',
-        shadow: '0 0 12px color-mix(in srgb, var(--color-secondary) 40%, transparent)',
+        bg: 'rgba(58, 223, 250, 0.2)',
+        shadow: '0 0 6px rgba(58, 223, 250, 0.3)',
         borderColor: 'var(--color-secondary)',
       }
     case 'miss':
     case 'collision':
     case 'delete':
       return {
-        bg: 'color-mix(in srgb, var(--color-error) 20%, transparent)',
-        shadow: '0 0 12px color-mix(in srgb, var(--color-error) 40%, transparent)',
+        bg: 'rgba(255, 110, 132, 0.2)',
+        shadow: '0 0 6px rgba(255, 110, 132, 0.3)',
         borderColor: 'var(--color-error)',
       }
     case 'compare':
       return {
-        bg: 'color-mix(in srgb, var(--color-tertiary, #cf9fff) 20%, transparent)',
-        shadow: '0 0 12px color-mix(in srgb, var(--color-tertiary, #cf9fff) 40%, transparent)',
+        bg: 'rgba(145, 155, 255, 0.2)',
+        shadow: '0 0 6px rgba(145, 155, 255, 0.3)',
         borderColor: 'var(--color-tertiary, #cf9fff)',
       }
     default:
       return {
-        bg: 'var(--color-surface-container-highest)',
+        bg: '#25252d',
         shadow: 'none',
         borderColor: 'var(--color-outline-variant)',
       }
@@ -67,7 +67,7 @@ export function ArrayViz({ id, state }: PrimitiveProps) {
   const { cells = [], pointers = [], windowHighlight } = state as ArrayState
 
   return (
-    <div className="relative flex flex-col items-center justify-center p-8 w-full">
+    <div className="relative flex flex-col items-center justify-center p-4 w-full">
 
       {/* Window highlight bracket */}
       {windowHighlight && (

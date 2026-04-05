@@ -7,28 +7,31 @@ interface CounterState {
   color?: 'primary' | 'secondary' | 'error'
 }
 
+const COLOR_MAP = {
+  primary: '#b79fff',
+  secondary: '#3adffa',
+  error: '#ff6e84',
+}
+
 export function CounterViz({ state }: PrimitiveProps) {
   const { value, label, color = 'primary' } = state as CounterState
-
-  let numColor = 'var(--color-primary)'
-  if (color === 'secondary') numColor = 'var(--color-secondary)'
-  if (color === 'error') numColor = 'var(--color-error)'
+  const numColor = COLOR_MAP[color] ?? COLOR_MAP.primary
 
   return (
-    <div className="flex flex-col items-center justify-center p-4 bg-surface-container-lowest rounded-2xl border border-outline-variant/10 min-w-[100px]">
-      <span className="text-[10px] text-on-surface-variant uppercase font-bold tracking-widest mb-1">
+    <div className="flex items-center gap-1.5">
+      <span className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant/55">
         {label}
       </span>
-      <div className="relative h-8 overflow-hidden inline-flex justify-center items-center">
+      <div className="relative h-4 overflow-hidden inline-flex justify-center items-center min-w-[20px]">
         <AnimatePresence mode="popLayout">
           <motion.span
             key={value}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="text-2xl font-headline font-bold"
-            style={{ color: numColor, textShadow: `0 0 10px ${numColor}50` }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+            className="text-[13px] font-mono font-semibold"
+            style={{ color: numColor }}
           >
             {value}
           </motion.span>

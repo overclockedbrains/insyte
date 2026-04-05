@@ -1,16 +1,16 @@
 # Manual Regression Bugs and Improvements
 
-- [ ] The table design is not so good very round , everything is too round not good.
-- [ ] Many warnings on console to use color code instead.
-- [ ] Everything should have a lable in the visualization currently its all so much info and not able to understand type info.
-- [ ] Too much of shadows we should consider going clean on the animations so its not hard to read them like in stitch design for canvas - keep it simple most of the times just have shadows when required not for everything - ![exec_canvas_img](exec_canvas_img.png).
-- [ ] All objects are very scattered not at correct positions to look professional.
+- [x] The table design is not so good very round , everything is too round not good.
+- [x] Many warnings on console to use color code instead.
+- [x] Everything should have a lable in the visualization currently its all so much info and not able to understand type info.
+- [x] Too much of shadows we should consider going clean on the animations so its not hard to read them like in stitch design for canvas - keep it simple most of the times just have shadows when required not for everything - ![exec_canvas_img](exec_canvas_img.png).
+- [-] All objects are very scattered not at correct positions to look professional. -> very compact now
 - [ ] We should tell users about what these colors are indicating etc.
 - [ ] Website is a little slow ? Need optimizations for these objects and react nodes ? Why didn't we use canvas for this purpose for visualization why did we go with react nodes ?
 - [ ] Does canvas bottom controls even work ?
-- [ ] Are animations too fast to follow ? And there isn't an indicator to show that step will move forward, like a visual que.
+- [x] Are animations too fast to follow ? And there isn't an indicator to show that step will move forward, like a visual que.
 - [ ] Animations overflowing the canvas , canvas becomes vertically scrollable which is not ideal for many not complicated things, we should try to manage the elements more better on the canvas.
-- [ ] Colors are off may be due to all those warnings.
+- [x] Colors are off may be due to all those warnings.
 - [ ] `/s/js-event-loop` doesn't have very readable animations not at all good.
 - [ ] Noticed in dns-resolution not enough gaps between servers.
 - [ ] how about draggable nodes to manual arrange or overkill ?
@@ -21,4 +21,4 @@
 - [ ] Canvas elements should have hover effects to show descriptions etc.
 - [ ] Right click on canvas ?
 - [ ] StackViz is very unreadable.
-- [ ] How about a code visualization side by side - as js-event-loop very imcomplete without it.
+- [x] How about a code visualization side by side - as js-event-loop very imcomplete without it.

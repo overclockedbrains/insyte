@@ -118,6 +118,17 @@ export interface Popup {
   /** Conditionally show based on a control value */
   showWhen?: Condition
   style?: 'info' | 'success' | 'warning' | 'insight'
+  /**
+   * Explicit canvas-zone anchor in % units (x: 0–100, y: 0–100).
+   * When set, overrides the default attachTo-visual-center positioning.
+   * Use this to pin the annotation text near a specific node inside a visual.
+   */
+  anchor?: { x: number; y: number }
+  /**
+   * Canvas-zone % coordinate the connecting line terminates at (the node tip).
+   * Defaults to the attachTo visual's center if not set.
+   */
+  targetPoint?: { x: number; y: number }
 }
 
 // ─── Challenge ────────────────────────────────────────────────────────────────

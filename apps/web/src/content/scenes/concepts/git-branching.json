@@ -12,7 +12,7 @@
       "id": "commit-graph",
       "type": "graph",
       "label": "Commit Graph",
-      "position": { "x": 50, "y": 45 },
+      "position": { "x": 50, "y": 50 },
       "initialState": {
         "nodes": [],
         "edges": []
@@ -364,13 +364,13 @@
       "id": "btn-commit",
       "type": "button",
       "label": "Commit",
-      "config": { "variant": "primary", "defaultValue": null }
+      "config": { "variant": "primary", "defaultValue": null, "goToStep": 0 }
     },
     {
       "id": "btn-branch",
       "type": "button",
       "label": "Create Branch",
-      "config": { "variant": "secondary", "defaultValue": null }
+      "config": { "variant": "primary", "defaultValue": null, "goToStep": 2 }
     },
     {
       "id": "branch-name",
@@ -382,13 +382,13 @@
       "id": "btn-merge",
       "type": "button",
       "label": "Merge",
-      "config": { "variant": "primary", "defaultValue": null }
+      "config": { "variant": "primary", "defaultValue": null, "goToStep": 5 }
     },
     {
       "id": "btn-rebase",
       "type": "button",
       "label": "Rebase",
-      "config": { "variant": "secondary", "defaultValue": null }
+      "config": { "variant": "secondary", "defaultValue": null, "goToStep": 8 }
     }
   ],
 
@@ -434,7 +434,9 @@
       "text": "Creating a branch is O(1) — just a file!",
       "showAtStep": 2,
       "hideAtStep": 3,
-      "style": "info"
+      "style": "info",
+      "anchor": { "x": 30, "y": 82 },
+      "targetPoint": { "x": 52, "y": 65 }
     },
     {
       "id": "pop-merge-commit",
@@ -442,7 +444,9 @@
       "text": "Merge commit has 2 parents",
       "showAtStep": 5,
       "hideAtStep": 6,
-      "style": "info"
+      "style": "info",
+      "anchor": { "x": 82, "y": 22 },
+      "targetPoint": { "x": 76, "y": 42 }
     },
     {
       "id": "pop-rebase-new-sha",
@@ -450,7 +454,9 @@
       "text": "C3' has a new SHA — it's a copy, not a move",
       "showAtStep": 8,
       "hideAtStep": 9,
-      "style": "warning"
+      "style": "warning",
+      "anchor": { "x": 30, "y": 30 },
+      "targetPoint": { "x": 68, "y": 48 }
     },
     {
       "id": "pop-reset-danger",
@@ -458,7 +464,9 @@
       "text": "Commits can be recovered with git reflog",
       "showAtStep": 10,
       "hideAtStep": 11,
-      "style": "warning"
+      "style": "warning",
+      "anchor": { "x": 25, "y": 22 },
+      "targetPoint": { "x": 60, "y": 42 }
     }
   ],
 

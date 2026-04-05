@@ -49,7 +49,7 @@ export function DPTableViz({ state }: PrimitiveProps) {
                 const val = cellData?.value ?? ''
                 const highlight = cellData?.highlight
 
-                let bgColor = 'transparent'
+                let bgColor = 'rgba(0, 0, 0, 0)'
                 let color = 'var(--color-on-surface)' // on-surface
                 let scaleIn = false
                 let shadow = 'none'

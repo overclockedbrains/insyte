@@ -22,13 +22,21 @@ export function GraphViz({ state }: PrimitiveProps) {
 
   const getNode = (nodeId: string) => nodes.find((n) => n.id === nodeId)
 
-  const SCALE_X = 60
-  const SCALE_Y = 60
+  const SCALE_X = 70
+  const SCALE_Y = 70
+
+  const maxX = nodes.length > 0 ? Math.max(...nodes.map(n => n.x)) : 1
+  const maxY = nodes.length > 0 ? Math.max(...nodes.map(n => n.y)) : 1
+  const containerWidth = maxX * SCALE_X + 96
+  const containerHeight = maxY * SCALE_Y + 96
 
   return (
-    <div className="relative flex items-center justify-center p-8 w-full min-h-[300px]">
-      <div className="relative">
-        <svg className="absolute inset-0 pointer-events-none overflow-visible z-0">
+    <div className="flex items-center justify-center p-4 w-full overflow-visible">
+      <div className="relative flex-shrink-0" style={{ width: containerWidth, height: containerHeight }}>
+        <svg
+          style={{ width: containerWidth, height: containerHeight }}
+          className="absolute inset-0 pointer-events-none z-0 overflow-visible"
+        >
           <defs>
             <marker id="arrow" markerWidth="10" markerHeight="7" refX="24" refY="3.5" orient="auto">
               <polygon points="0 0, 10 3.5, 0 7" fill="var(--color-secondary-fixed)" />
@@ -73,10 +81,10 @@ export function GraphViz({ state }: PrimitiveProps) {
           return (
             <motion.div
               key={node.id}
-              className="absolute w-12 h-12 flex items-center justify-center rounded-full border-2 text-sm font-bold font-mono z-10"
+              className="absolute w-14 h-14 flex items-center justify-center rounded-full border-2 font-bold font-mono z-10"
               style={{
-                top: `${node.y * SCALE_Y - 24}px`,
-                left: `${node.x * SCALE_X - 24}px`,
+                top: `${node.y * SCALE_Y - 28}px`,
+                left: `${node.x * SCALE_X - 28}px`,
               }}
               initial={{ opacity: 0, scale: 0 }}
               animate={{
@@ -89,7 +97,9 @@ export function GraphViz({ state }: PrimitiveProps) {
               }}
               transition={{ type: 'spring', stiffness: 300, damping: 25 }}
             >
-              {node.label}
+              <span style={{ whiteSpace: 'pre-wrap', fontSize: '9px', lineHeight: '1.2', textAlign: 'center' }}>
+                {node.label}
+              </span>
             </motion.div>
           )
         })}

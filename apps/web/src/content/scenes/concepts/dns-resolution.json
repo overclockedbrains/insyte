@@ -15,11 +15,11 @@
       "position": { "x": 50, "y": 40 },
       "initialState": {
         "components": [
-          { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 200, "status": "normal" },
-          { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 220, "y": 200, "status": "normal" },
-          { "id": "root-ns", "label": "Root NS", "icon": "database", "x": 380, "y": 80, "status": "normal" },
-          { "id": "tld-ns", "label": ".dev TLD NS", "icon": "database", "x": 380, "y": 200, "status": "normal" },
-          { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 380, "y": 320, "status": "normal" }
+          { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 240, "status": "normal" },
+          { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 250, "y": 240, "status": "normal" },
+          { "id": "root-ns", "label": "Root NS", "icon": "database", "x": 450, "y": 80, "status": "normal" },
+          { "id": "tld-ns", "label": ".dev TLD NS", "icon": "database", "x": 450, "y": 240, "status": "normal" },
+          { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 450, "y": 400, "status": "normal" }
         ],
         "connections": [
           { "from": "browser", "to": "resolver", "active": false },
@@ -59,11 +59,11 @@
           "action": "set",
           "params": {
             "components": [
-              { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 200, "status": "active" },
-              { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 220, "y": 200, "status": "normal" },
-              { "id": "root-ns", "label": "Root NS", "icon": "database", "x": 380, "y": 80, "status": "normal" },
-              { "id": "tld-ns", "label": ".dev TLD NS", "icon": "database", "x": 380, "y": 200, "status": "normal" },
-              { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 380, "y": 320, "status": "normal" }
+              { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 240, "status": "active" },
+              { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 250, "y": 240, "status": "normal" },
+              { "id": "root-ns", "label": "Root NS", "icon": "database", "x": 450, "y": 80, "status": "normal" },
+              { "id": "tld-ns", "label": ".dev TLD NS", "icon": "database", "x": 450, "y": 240, "status": "normal" },
+              { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 450, "y": 400, "status": "normal" }
             ],
             "connections": [
               { "from": "browser", "to": "resolver", "active": false },
@@ -89,11 +89,11 @@
           "action": "set",
           "params": {
             "components": [
-              { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 200, "status": "active" },
-              { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 220, "y": 200, "status": "active" },
-              { "id": "root-ns", "label": "Root NS", "icon": "database", "x": 380, "y": 80, "status": "normal" },
-              { "id": "tld-ns", "label": ".dev TLD NS", "icon": "database", "x": 380, "y": 200, "status": "normal" },
-              { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 380, "y": 320, "status": "normal" }
+              { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 240, "status": "active" },
+              { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 250, "y": 240, "status": "active" },
+              { "id": "root-ns", "label": "Root NS", "icon": "database", "x": 450, "y": 80, "status": "normal" },
+              { "id": "tld-ns", "label": ".dev TLD NS", "icon": "database", "x": 450, "y": 240, "status": "normal" },
+              { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 450, "y": 400, "status": "normal" }
             ],
             "connections": [
               { "from": "browser", "to": "resolver", "active": true },
@@ -124,11 +124,11 @@
           "action": "set",
           "params": {
             "components": [
-              { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 200, "status": "normal" },
-              { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 220, "y": 200, "status": "active" },
-              { "id": "root-ns", "label": "Root NS", "icon": "database", "x": 380, "y": 80, "status": "active" },
-              { "id": "tld-ns", "label": ".dev TLD NS", "icon": "database", "x": 380, "y": 200, "status": "normal" },
-              { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 380, "y": 320, "status": "normal" }
+              { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 240, "status": "normal" },
+              { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 250, "y": 240, "status": "active" },
+              { "id": "root-ns", "label": "Root NS", "icon": "database", "x": 450, "y": 80, "status": "active" },
+              { "id": "tld-ns", "label": ".dev TLD NS", "icon": "database", "x": 450, "y": 240, "status": "normal" },
+              { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 450, "y": 400, "status": "normal" }
             ],
             "connections": [
               { "from": "browser", "to": "resolver", "active": false },
@@ -159,11 +159,11 @@
           "action": "set",
           "params": {
             "components": [
-              { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 200, "status": "normal" },
-              { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 220, "y": 200, "status": "active" },
-              { "id": "root-ns", "label": "Root NS ✓", "icon": "database", "x": 380, "y": 80, "status": "normal" },
-              { "id": "tld-ns", "label": ".dev TLD NS", "icon": "database", "x": 380, "y": 200, "status": "active" },
-              { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 380, "y": 320, "status": "normal" }
+              { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 240, "status": "normal" },
+              { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 250, "y": 240, "status": "active" },
+              { "id": "root-ns", "label": "Root NS ✓", "icon": "database", "x": 450, "y": 80, "status": "normal" },
+              { "id": "tld-ns", "label": ".dev TLD NS", "icon": "database", "x": 450, "y": 240, "status": "active" },
+              { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 450, "y": 400, "status": "normal" }
             ],
             "connections": [
               { "from": "browser", "to": "resolver", "active": false },
@@ -194,11 +194,11 @@
           "action": "set",
           "params": {
             "components": [
-              { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 200, "status": "normal" },
-              { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 220, "y": 200, "status": "active" },
-              { "id": "root-ns", "label": "Root NS ✓", "icon": "database", "x": 380, "y": 80, "status": "normal" },
-              { "id": "tld-ns", "label": ".dev TLD NS ✓", "icon": "database", "x": 380, "y": 200, "status": "normal" },
-              { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 380, "y": 320, "status": "active" }
+              { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 240, "status": "normal" },
+              { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 250, "y": 240, "status": "active" },
+              { "id": "root-ns", "label": "Root NS ✓", "icon": "database", "x": 450, "y": 80, "status": "normal" },
+              { "id": "tld-ns", "label": ".dev TLD NS ✓", "icon": "database", "x": 450, "y": 240, "status": "normal" },
+              { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 450, "y": 400, "status": "active" }
             ],
             "connections": [
               { "from": "browser", "to": "resolver", "active": false },
@@ -229,11 +229,11 @@
           "action": "set",
           "params": {
             "components": [
-              { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 200, "status": "active" },
-              { "id": "resolver", "label": "Recursive Resolver ✓", "icon": "compute", "x": 220, "y": 200, "status": "active" },
-              { "id": "root-ns", "label": "Root NS ✓", "icon": "database", "x": 380, "y": 80, "status": "normal" },
-              { "id": "tld-ns", "label": ".dev TLD NS ✓", "icon": "database", "x": 380, "y": 200, "status": "normal" },
-              { "id": "auth-ns", "label": "Auth NS ✓", "icon": "database", "x": 380, "y": 320, "status": "normal" }
+              { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 240, "status": "active" },
+              { "id": "resolver", "label": "Recursive Resolver ✓", "icon": "compute", "x": 250, "y": 240, "status": "active" },
+              { "id": "root-ns", "label": "Root NS ✓", "icon": "database", "x": 450, "y": 80, "status": "normal" },
+              { "id": "tld-ns", "label": ".dev TLD NS ✓", "icon": "database", "x": 450, "y": 240, "status": "normal" },
+              { "id": "auth-ns", "label": "Auth NS ✓", "icon": "database", "x": 450, "y": 400, "status": "normal" }
             ],
             "connections": [
               { "from": "browser", "to": "resolver", "active": true },
@@ -264,11 +264,11 @@
           "action": "set",
           "params": {
             "components": [
-              { "id": "browser", "label": "Browser (cached)", "icon": "web", "x": 60, "y": 200, "status": "active" },
-              { "id": "resolver", "label": "Resolver (cached)", "icon": "compute", "x": 220, "y": 200, "status": "active" },
-              { "id": "root-ns", "label": "Root NS", "icon": "database", "x": 380, "y": 80, "status": "normal" },
-              { "id": "tld-ns", "label": ".dev TLD NS", "icon": "database", "x": 380, "y": 200, "status": "normal" },
-              { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 380, "y": 320, "status": "normal" }
+              { "id": "browser", "label": "Browser (cached)", "icon": "web", "x": 60, "y": 240, "status": "active" },
+              { "id": "resolver", "label": "Resolver (cached)", "icon": "compute", "x": 250, "y": 240, "status": "active" },
+              { "id": "root-ns", "label": "Root NS", "icon": "database", "x": 450, "y": 80, "status": "normal" },
+              { "id": "tld-ns", "label": ".dev TLD NS", "icon": "database", "x": 450, "y": 240, "status": "normal" },
+              { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 450, "y": 400, "status": "normal" }
             ],
             "connections": [
               { "from": "browser", "to": "resolver", "active": false },
@@ -299,11 +299,11 @@
           "action": "set",
           "params": {
             "components": [
-              { "id": "browser", "label": "Browser ✓ HIT", "icon": "web", "x": 60, "y": 200, "status": "active" },
-              { "id": "resolver", "label": "Resolver (skipped)", "icon": "compute", "x": 220, "y": 200, "status": "normal" },
-              { "id": "root-ns", "label": "Root NS (skipped)", "icon": "database", "x": 380, "y": 80, "status": "normal" },
-              { "id": "tld-ns", "label": ".dev TLD (skipped)", "icon": "database", "x": 380, "y": 200, "status": "normal" },
-              { "id": "auth-ns", "label": "Auth NS (skipped)", "icon": "database", "x": 380, "y": 320, "status": "normal" }
+              { "id": "browser", "label": "Browser ✓ HIT", "icon": "web", "x": 60, "y": 240, "status": "active" },
+              { "id": "resolver", "label": "Resolver (skipped)", "icon": "compute", "x": 250, "y": 240, "status": "normal" },
+              { "id": "root-ns", "label": "Root NS (skipped)", "icon": "database", "x": 450, "y": 80, "status": "normal" },
+              { "id": "tld-ns", "label": ".dev TLD (skipped)", "icon": "database", "x": 450, "y": 240, "status": "normal" },
+              { "id": "auth-ns", "label": "Auth NS (skipped)", "icon": "database", "x": 450, "y": 400, "status": "normal" }
             ],
             "connections": [
               { "from": "browser", "to": "resolver", "active": false },
@@ -334,11 +334,11 @@
           "action": "set",
           "params": {
             "components": [
-              { "id": "browser", "label": "Browser (expired)", "icon": "web", "x": 60, "y": 200, "status": "normal" },
-              { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 220, "y": 200, "status": "normal" },
-              { "id": "root-ns", "label": "Root NS", "icon": "database", "x": 380, "y": 80, "status": "normal" },
-              { "id": "tld-ns", "label": ".dev TLD NS", "icon": "database", "x": 380, "y": 200, "status": "normal" },
-              { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 380, "y": 320, "status": "normal" }
+              { "id": "browser", "label": "Browser (expired)", "icon": "web", "x": 60, "y": 240, "status": "normal" },
+              { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 250, "y": 240, "status": "normal" },
+              { "id": "root-ns", "label": "Root NS", "icon": "database", "x": 450, "y": 80, "status": "normal" },
+              { "id": "tld-ns", "label": ".dev TLD NS", "icon": "database", "x": 450, "y": 240, "status": "normal" },
+              { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 450, "y": 400, "status": "normal" }
             ],
             "connections": [
               { "from": "browser", "to": "resolver", "active": false },
@@ -369,11 +369,11 @@
           "action": "set",
           "params": {
             "components": [
-              { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 200, "status": "active" },
-              { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 220, "y": 200, "status": "active" },
-              { "id": "root-ns", "label": "Root NS", "icon": "database", "x": 380, "y": 80, "status": "active" },
-              { "id": "tld-ns", "label": ".dev TLD NS", "icon": "database", "x": 380, "y": 200, "status": "active" },
-              { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 380, "y": 320, "status": "active" }
+              { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 240, "status": "active" },
+              { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 250, "y": 240, "status": "active" },
+              { "id": "root-ns", "label": "Root NS", "icon": "database", "x": 450, "y": 80, "status": "active" },
+              { "id": "tld-ns", "label": ".dev TLD NS", "icon": "database", "x": 450, "y": 240, "status": "active" },
+              { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 450, "y": 400, "status": "active" }
             ],
             "connections": [
               { "from": "browser", "to": "resolver", "active": true },

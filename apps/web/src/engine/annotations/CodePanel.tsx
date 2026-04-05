@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from 'react'
 import type { SceneCode } from '@insyte/scene-engine'
-// Dynamically imported so it runs properly in browser
 import { createHighlighter } from 'shiki/bundle/web'
 import { Copy, Check } from 'lucide-react'
 
@@ -29,36 +28,29 @@ export function CodePanel({ code, currentStep }: CodePanelProps) {
           langs: ['javascript', 'python', 'typescript'],
         })
       }
-
       const rawHtml = highlighterInstance.codeToHtml(code.source, {
         lang: code.language,
         theme: 'vitesse-dark',
       })
       setHtml(rawHtml)
     }
-
     initAndHighlight()
   }, [code.source, code.language])
 
-  // Scroll active line into view when html is ready or active changes
   useEffect(() => {
     if (activeLine >= 0 && containerRef.current && html) {
-      // Shiki places lines in <span class="line"> elements
       const lines = containerRef.current.querySelectorAll('.line')
+      lines.forEach((l) => {
+        ;(l as HTMLElement).style.backgroundColor = 'transparent'
+        ;(l as HTMLElement).style.boxShadow = 'none'
+        ;(l as HTMLElement).style.display = 'inline-block'
+        ;(l as HTMLElement).style.width = '100%'
+      })
       if (lines[activeLine]) {
-        // Clear old highlights
-        lines.forEach((l) => {
-          ;(l as HTMLElement).style.backgroundColor = 'transparent'
-          ;(l as HTMLElement).style.boxShadow = 'none'
-          ;(l as HTMLElement).style.width = '100%'
-          ;(l as HTMLElement).style.display = 'inline-block'
-        })
         const activeNode = lines[activeLine] as HTMLElement
-        // Highlight current
-        activeNode.style.backgroundColor = 'color-mix(in srgb, var(--color-primary) 12%, transparent)' // primary glow
-        activeNode.style.boxShadow = 'inset 3px 0 0 var(--color-primary)'
-        
-        activeNode.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        activeNode.style.backgroundColor = 'rgba(183, 159, 255, 0.1)'
+        activeNode.style.boxShadow = 'inset 2px 0 0 #b79fff'
+        activeNode.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
       }
     }
   }, [activeLine, html])
@@ -70,47 +62,53 @@ export function CodePanel({ code, currentStep }: CodePanelProps) {
   }
 
   return (
-    <div className="w-[35%] min-w-0 overflow-y-auto p-6 border-r border-outline-variant/20 bg-[var(--color-surface)] flex flex-col relative custom-scrollbar">
-      <div className="flex items-center justify-between mb-4 sticky top-0 bg-[var(--color-surface)] z-10 pb-2 border-b border-outline-variant/10">
-        <p className="text-xs uppercase tracking-widest text-on-surface-variant font-bold">
+    <div className="flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 pt-4 pb-2">
+        <span className="text-[11px] font-mono uppercase tracking-widest text-on-surface-variant font-semibold">
           Code
-        </p>
+        </span>
         <button
           onClick={copyCode}
-          className="p-1.5 rounded-md hover:bg-surface-container-high transition-colors text-on-surface-variant hover:text-on-surface"
+          className="p-1 rounded hover:bg-surface-container transition-colors text-on-surface-variant/50 hover:text-on-surface-variant"
           aria-label="Copy code"
         >
-          {copied ? <Check size={14} className="text-secondary" /> : <Copy size={14} />}
+          {copied ? <Check size={12} className="text-secondary" /> : <Copy size={12} />}
         </button>
       </div>
 
-      <div className="font-mono text-sm leading-relaxed" ref={containerRef}>
+      {/* Code block */}
+      <div
+        ref={containerRef}
+        className="px-1 pb-3 overflow-x-auto"
+      >
         {html ? (
-          <div dangerouslySetInnerHTML={{ __html: html }} className="shiki-container w-full" />
+          <div dangerouslySetInnerHTML={{ __html: html }} className="shiki-wrap" />
         ) : (
-          <div className="flex animate-pulse flex-col gap-2 opacity-50">
-            <div className="h-4 bg-outline-variant w-3/4 rounded" />
-            <div className="h-4 bg-outline-variant w-1/2 rounded" />
-            <div className="h-4 bg-outline-variant w-5/6 rounded" />
+          <div className="px-4 flex flex-col gap-2 opacity-30 animate-pulse">
+            <div className="h-3 bg-outline-variant rounded w-3/4" />
+            <div className="h-3 bg-outline-variant rounded w-1/2" />
+            <div className="h-3 bg-outline-variant rounded w-5/6" />
           </div>
         )}
       </div>
-      
-      {/* Add global styles to fix shiki display block for full-width highlights */}
+
       <style>{`
-        .shiki-container pre {
-          overflow-x: auto;
+        .shiki-wrap pre {
           margin: 0;
-          padding-bottom: 2rem;
+          padding: 0;
           background: transparent !important;
+          font-size: 11px;
+          line-height: 1.7;
+          overflow-x: auto;
         }
-        .shiki-container code {
+        .shiki-wrap code {
           display: block;
           min-width: max-content;
         }
-        .shiki-container .line {
-          padding-left: 12px;
-          padding-right: 12px;
+        .shiki-wrap .line {
+          padding-left: 16px;
+          padding-right: 16px;
         }
       `}</style>
     </div>

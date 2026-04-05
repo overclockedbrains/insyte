@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import type { Scene } from '@insyte/scene-engine'
 import { useBoundStore } from '@/src/stores/store'
 import { CodePanel } from '../annotations/CodePanel'
+import { ExplanationPanel } from '../annotations/ExplanationPanel'
 import { CanvasCard } from './CanvasCard'
 import { usePlayback } from '../hooks/usePlayback'
 
@@ -20,7 +21,7 @@ interface Props {
 export function CodeLeftCanvasRight({ scene }: Props) {
   const isExpanded = useBoundStore((s) => s.isExpanded)
   const { currentStep } = usePlayback()
-  const [mobileTab, setMobileTab] = useState<'code' | 'visual'>('visual')
+  const [mobileTab, setMobileTab] = useState<'code' | 'visual' | 'explain'>('visual')
 
   return (
     <div className="flex flex-col md:flex-row h-full w-full min-h-0">
@@ -36,15 +37,27 @@ export function CodeLeftCanvasRight({ scene }: Props) {
               animate={{ width: '35%', opacity: 1 }}
               exit={{ width: 0, opacity: 0, overflow: 'hidden' }}
               transition={{ type: 'spring', stiffness: 350, damping: 35 }}
-              className="flex-shrink-0 overflow-hidden"
+              className="flex-shrink-0 overflow-hidden border-r border-outline-variant/20 min-h-0"
             >
-              {scene.code ? (
-                <CodePanel code={scene.code} currentStep={currentStep} />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center p-6">
-                  <p className="text-sm text-on-surface-variant">No code attached to this scene.</p>
-                </div>
-              )}
+              <div className="h-full flex flex-col min-h-0">
+                {/* Code — fixed portion, scrolls horizontally only */}
+                {scene.code && (
+                  <div className="flex-shrink-0 max-h-[45%] overflow-y-auto border-b border-outline-variant/20 custom-scrollbar">
+                    <CodePanel code={scene.code} currentStep={currentStep} />
+                  </div>
+                )}
+                {/* Explanation — takes remaining space, scrolls independently */}
+                {scene.explanation && scene.explanation.length > 0 && (
+                  <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+                    <ExplanationPanel sections={scene.explanation} currentStep={currentStep} />
+                  </div>
+                )}
+                {!scene.code && (!scene.explanation || scene.explanation.length === 0) && (
+                  <div className="flex items-center justify-center h-full p-6 text-sm text-on-surface-variant">
+                    No content for this scene.
+                  </div>
+                )}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -60,7 +73,7 @@ export function CodeLeftCanvasRight({ scene }: Props) {
         {/* Tab bar */}
         <div className="flex-shrink-0 px-4 pt-3 pb-0 border-b border-outline-variant/20">
           <div className="flex gap-1 p-0.5 bg-surface-container-lowest rounded-xl border border-outline-variant/20 w-fit">
-            {(['visual', 'code'] as const).map((tab) => {
+            {(['visual', 'code', 'explain'] as const).map((tab) => {
               const isActive = mobileTab === tab
               return (
                 <motion.button
@@ -89,7 +102,7 @@ export function CodeLeftCanvasRight({ scene }: Props) {
         {/* Tab content */}
         <div className="flex-1 min-h-0 relative">
           <AnimatePresence mode="wait">
-            {mobileTab === 'visual' ? (
+            {mobileTab === 'visual' && (
               <motion.div
                 key="visual-tab"
                 initial={{ opacity: 0, x: 20 }}
@@ -100,7 +113,8 @@ export function CodeLeftCanvasRight({ scene }: Props) {
               >
                 <CanvasCard scene={scene} />
               </motion.div>
-            ) : (
+            )}
+            {mobileTab === 'code' && (
               <motion.div
                 key="code-tab"
                 initial={{ opacity: 0, x: 20 }}
@@ -116,6 +130,18 @@ export function CodeLeftCanvasRight({ scene }: Props) {
                     <p className="text-sm text-on-surface-variant">No code attached to this scene.</p>
                   </div>
                 )}
+              </motion.div>
+            )}
+            {mobileTab === 'explain' && (
+              <motion.div
+                key="explain-tab"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2 }}
+                className="absolute inset-0 overflow-y-auto"
+              >
+                <ExplanationPanel sections={scene.explanation} currentStep={currentStep} />
               </motion.div>
             )}
           </AnimatePresence>
