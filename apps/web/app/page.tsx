@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { SITE } from '@/src/lib/config'
 import { HowItWorks } from '@/components/landing/HowItWorks'
 import { FeatureCards } from '@/components/landing/FeatureCards'
 import { FeaturedSimulations } from '@/components/landing/FeaturedSimulations'
@@ -9,18 +10,16 @@ import { LiveDemoLoader } from '@/components/landing/LiveDemoLoader'
 // ─── Metadata ─────────────────────────────────────────────────────────────────
 
 export const metadata: Metadata = {
-  title: 'insyte — See how it works.',
-  description:
-    'AI-powered platform that turns any tech concept into a live, interactive simulation you can play with. Not a video. Not text. A playground.',
+  title: SITE.title,
+  description: `${SITE.description} Not a video. Not text. A playground.`,
   openGraph: {
-    title: 'insyte — See how it works.',
-    description:
-      'Turn any tech concept into an interactive simulation you can play with.',
+    title: SITE.title,
+    description: `Turn any tech concept into an interactive simulation you can play with.`,
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'insyte — See how it works.',
+    title: SITE.title,
     description: 'Turn any tech concept into an interactive simulation.',
   },
 }

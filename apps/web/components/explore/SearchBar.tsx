@@ -7,7 +7,7 @@ import { SearchIcon, XIcon } from 'lucide-react'
 import { searchTopics } from '@/src/content/topic-index'
 import type { TopicEntry } from '@/src/content/topic-index'
 
-// ─── Type badge colors ────────────────────────────────────────────────────────
+// ─── Type badge labels ────────────────────────────────────────────────────────
 
 const TYPE_LABEL: Record<string, string> = {
   concept: 'Concept',

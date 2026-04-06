@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Manrope, Inter, JetBrains_Mono } from 'next/font/google'
 import { cn } from '@/lib/utils'
+import { SITE } from '@/src/lib/config'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
 import { GlowEffect } from '@/components/layout/GlowEffect'
@@ -33,9 +34,8 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'insyte — See how it works.',
-  description:
-    'AI-powered platform that turns any tech concept into a live, interactive simulation you can play with.',
+  title: SITE.title,
+  description: SITE.description,
 }
 
 export default function RootLayout({

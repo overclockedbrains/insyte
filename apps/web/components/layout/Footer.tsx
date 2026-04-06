@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { StarIcon } from 'lucide-react'
-
-const GITHUB_URL = 'https://github.com/Aman-Arya/insyte'
+import { SITE, GITHUB_URL } from '@/src/lib/config'
 
 export function Footer() {
   return (
@@ -11,10 +10,10 @@ export function Footer() {
           {/* Left */}
           <div className="flex flex-col gap-1">
             <p className="font-headline font-bold text-on-surface">
-              insyte <span className="text-on-surface-variant font-normal">· See how it works.</span>
+              {SITE.name} <span className="text-on-surface-variant font-normal">· {SITE.tagline}</span>
             </p>
             <p className="text-xs text-on-surface-variant">
-              © {new Date().getFullYear()} insyte. Open source.
+              © {new Date().getFullYear()} {SITE.name}. Open source.
             </p>
           </div>
 

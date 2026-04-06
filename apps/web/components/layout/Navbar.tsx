@@ -11,13 +11,7 @@ import {
 } from '@/components/ui/sheet'
 import { useBoundStore } from '@/src/stores/store'
 import { Pill } from '@/components/ui/Pill'
-
-const GITHUB_URL = 'https://github.com/Aman-Arya/insyte'
-
-const navLinks = [
-  { label: 'Explore', href: '/explore' },
-  { label: 'Gallery', href: '/explore' },
-]
+import { GITHUB_URL, NAV_LINKS } from '@/src/lib/config'
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -131,7 +125,7 @@ export function Navbar() {
           <>
             {/* Normal nav links (non-scene pages) */}
             <div className="hidden md:flex items-center gap-1">
-              {navLinks.map((link) => (
+              {NAV_LINKS.map((link) => (
                 <Link
                   key={link.label}
                   href={link.href}
@@ -172,7 +166,7 @@ export function Navbar() {
                   className="w-64 bg-surface-container-low border-outline-variant/20 pt-12"
                 >
                   <nav className="flex flex-col gap-1 p-4">
-                    {navLinks.map((link) => (
+                    {NAV_LINKS.map((link) => (
                       <Link
                         key={link.label}
                         href={link.href}
