@@ -12,6 +12,55 @@ import {
 import { useBoundStore } from '@/src/stores/store'
 import { Pill } from '@/components/ui/Pill'
 import { GITHUB_URL, NAV_LINKS } from '@/src/lib/config'
+import type { Provider } from '@/src/stores/slices/settings-slice'
+
+// ─── Provider indicator tooltip labels ───────────────────────────────────────
+
+const PROVIDER_LABELS: Record<Provider, string> = {
+  gemini: 'Gemini',
+  openai: 'OpenAI',
+  anthropic: 'Anthropic',
+  groq: 'Groq',
+}
+
+function SettingsLink({
+  className,
+  showLabel = false,
+  onClick,
+}: {
+  className?: string
+  showLabel?: boolean
+  onClick?: () => void
+}) {
+  const provider = useBoundStore((s) => s.provider)
+  const apiKeys = useBoundStore((s) => s.apiKeys)
+  const hasByok = Boolean(apiKeys[provider])
+
+  const tooltipLabel = hasByok
+    ? `Using ${PROVIDER_LABELS[provider]} key`
+    : 'Using free tier'
+
+  return (
+    <Link
+      href="/settings"
+      className={className}
+      title={tooltipLabel}
+      onClick={onClick}
+    >
+      <span className="relative flex items-center">
+        <SettingsIcon className={showLabel ? 'h-4 w-4' : 'h-3.5 w-3.5'} />
+        {/* Provider indicator dot */}
+        <span
+          className={[
+            'absolute -top-0.5 -right-1 h-1.5 w-1.5 rounded-full',
+            hasByok ? 'bg-secondary' : 'bg-outline',
+          ].join(' ')}
+        />
+      </span>
+      {showLabel && <span>Settings</span>}
+    </Link>
+  )
+}
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -112,13 +161,7 @@ export function Navbar() {
                 <span className="hidden md:inline">{isExpanded ? 'Collapse' : 'Expand'}</span>
               </motion.button>
 
-              <Link
-                href="/settings"
-                className="hidden sm:flex items-center px-2.5 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-150"
-                title="Settings"
-              >
-                <SettingsIcon className="h-3.5 w-3.5" />
-              </Link>
+              <SettingsLink className="hidden sm:flex items-center px-2.5 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-150" />
             </div>
           </>
         ) : (
@@ -143,13 +186,10 @@ export function Navbar() {
                 <StarIcon className="h-3.5 w-3.5" />
                 GitHub
               </a>
-              <Link
-                href="/settings"
+              <SettingsLink
+                showLabel
                 className="ml-2 flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors rounded-md hover:bg-surface-container-high"
-              >
-                <SettingsIcon className="h-3.5 w-3.5" />
-                Settings
-              </Link>
+              />
             </div>
 
             {/* Mobile hamburger */}
@@ -185,14 +225,11 @@ export function Navbar() {
                       <StarIcon className="h-4 w-4" />
                       GitHub
                     </a>
-                    <Link
-                      href="/settings"
+                    <SettingsLink
+                      showLabel
                       onClick={() => setMobileOpen(false)}
                       className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-on-surface-variant hover:text-on-surface rounded-md hover:bg-surface-container-high transition-colors"
-                    >
-                      <SettingsIcon className="h-4 w-4" />
-                      Settings
-                    </Link>
+                    />
                   </nav>
                 </SheetContent>
               </Sheet>

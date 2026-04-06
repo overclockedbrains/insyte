@@ -178,7 +178,7 @@ export async function saveScene(slug: string, scene: Scene): Promise<void> {
 
 // ─── Rate limiting ────────────────────────────────────────────────────────────
 
-const RATE_LIMIT_MAX = 15
+export const RATE_LIMIT_MAX = 15
 const RATE_LIMIT_WINDOW_SECS = 3600 // 1 hour
 
 /**
@@ -194,6 +194,37 @@ const RATE_LIMIT_WINDOW_SECS = 3600 // 1 hour
  *     PRIMARY KEY (ip, window_start)
  *   );
  */
+/**
+ * Read-only rate-limit check for a given IP.
+ * Returns `{ remaining, resetAt }` without incrementing the counter.
+ */
+export async function getRateLimitStatus(
+  ip: string,
+): Promise<{ remaining: number; resetAt: string }> {
+  const windowMs = RATE_LIMIT_WINDOW_SECS * 1000
+  const windowStartMs = Math.floor(Date.now() / windowMs) * windowMs
+  const resetAt = new Date(windowStartMs + windowMs).toISOString()
+
+  const supabase = getServerSupabase()
+  if (!supabase) return { remaining: RATE_LIMIT_MAX, resetAt }
+
+  const windowStart = new Date(windowStartMs).toISOString()
+
+  try {
+    const { data } = await supabase
+      .from('rate_limits')
+      .select('count')
+      .eq('ip', ip)
+      .eq('window_start', windowStart)
+      .single()
+
+    const used = data?.count ?? 0
+    return { remaining: Math.max(0, RATE_LIMIT_MAX - used), resetAt }
+  } catch {
+    return { remaining: RATE_LIMIT_MAX, resetAt }
+  }
+}
+
 export async function checkAndIncrementRateLimit(ip: string): Promise<boolean> {
   const supabase = getServerSupabase()
   if (!supabase) return true
