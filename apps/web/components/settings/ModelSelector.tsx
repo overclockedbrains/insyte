@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useSettings } from '@/src/stores/hooks'
 import type { Provider } from '@/src/stores/slices/settings-slice'
@@ -52,19 +52,18 @@ export function ModelSelector() {
 
   // Default the custom text input to the model if it's custom
   const [customModel, setCustomModel] = useState(!isKnownModel ? model : '')
+  const [prevModel, setPrevModel] = useState(model)
 
-  useEffect(() => {
-    // When the global model changes (e.g. from preset click or provider change)
-    // and it matches a preset, we'll clear the custom input block.
-    // We only sync customModel to model here if it's genuinely external, 
-    // to avoid interrupting keystrokes during normal typing.
+  // Sync customModel when the external model changes (e.g., from preset click or provider change)
+  if (model !== prevModel) {
+    setPrevModel(model)
     const isNowKnown = options.some(opt => opt.id === model)
     if (isNowKnown) {
       setCustomModel('')
     } else if (model && model !== customModel) {
       setCustomModel(model)
     }
-  }, [model, options, customModel])
+  }
 
   const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value
