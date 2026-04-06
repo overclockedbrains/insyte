@@ -188,24 +188,18 @@ Ship a fully functional, publicly accessible platform where:
 
 ---
 
-### Phase 9 — DSA Pipeline
-**Goal:** Full DSA trace pipeline working end-to-end: paste code → sandbox execute → Scene JSON.
+### Phase 9 — Settings + BYOK
+**Goal:** `/settings` page fully functional — users can add API keys, select models, and control AI behaviour.
 
 **Deliverables:**
-- `apps/web/src/sandbox/PyodideRunner.ts` — lazy-load Pyodide, execute with trace capture
-- `apps/web/src/sandbox/JSRunner.ts` — Web Worker JS sandbox
-- `apps/web/src/sandbox/workers/js-sandbox.worker.ts`
-- `apps/web/src/sandbox/SandboxManager.ts` — `execute(code, lang) → TraceStep[]`
-- `apps/web/src/sandbox/types.ts` — TraceStep, TraceData interfaces
-- Pyodide progress indicator ("Initializing Python runtime... ~10MB")
-- `apps/web/src/ai/prompts/code-instrumentation.md`
-- `apps/web/src/ai/instrumentCode.ts`
-- `/api/instrument` route
-- `apps/web/src/ai/prompts/trace-to-scene.md`
-- `apps/web/src/ai/traceToScene.ts`
-- `/api/visualize-trace` route
-- "Re-run with custom input" flow (sandbox re-execute + AI re-annotate)
-- 10 pre-built DSA Scene JSONs in `src/content/scenes/dsa/`
+- `/settings` page with glass-panel sections
+- API key input per provider (OpenAI, Anthropic, Gemini, Groq) — password inputs, never logged
+- Model selector per provider (e.g. GPT-4o, Claude Sonnet 4.5, Gemini Flash, Llama-3.1-70b)
+- Keys stored in `settings-store.ts` backed by localStorage
+- Provider switching wired into AI client (`apps/web/src/ai/client.ts`) — affects both generation + chat
+- "Clear all keys" button with confirmation
+- Status indicator: which provider is currently active + token budget indicator
+- Navbar settings icon linking to `/settings`
 
 **Plan:** [→ phases/phase-09/PLAN.md](phases/phase-09/PLAN.md)
 
@@ -226,57 +220,98 @@ Ship a fully functional, publicly accessible platform where:
 
 ---
 
-### Phase 11 — Supabase Integration
-**Goal:** Scene caching, topic index, OG images, rate limiting all live on Supabase.
+### Phase 11 — Supabase Integration + User Accounts
+**Goal:** Full Supabase backend live — scene caching, auth, user profiles, saved simulations, rate limiting, and OG images.
 
 **Deliverables:**
-- `apps/web/src/lib/supabase.ts` — Supabase client
-- Supabase project: `scenes` table + `topic_index` table seeded with 24 pre-built entries
+
+_Backend & Data_
+- `apps/web/src/lib/supabase.ts` — Supabase client (server + browser variants)
+- Supabase project: `scenes`, `topic_index`, `users`, `saved_scenes` tables
+- `topic_index` seeded with all 24 pre-built entries
 - `apps/web/src/lib/cache.ts` — `getCachedScene(slug)`, `saveScene(scene)`, `incrementHit(slug)`
-- `apps/web/src/lib/rateLimit.ts` — IP-based counter (10-15 interactions/user/day)
-- OG image generation: `apps/web/src/app/api/og/route.tsx` using `@vercel/og` (Satori)
-- OG images generated for all 24 pre-built simulations, stored in Supabase Storage
+- `apps/web/src/lib/rateLimit.ts` — IP-based counter for anonymous (10/day), unlimited for signed-in users with BYOK
 - Scene load flow: check Supabase → static file → AI generate (priority order)
 - `hit_count` incremented on every simulation page load
+
+_Auth_
+- Supabase Auth with email + Google OAuth
+- `apps/web/src/lib/auth.ts` — session helpers, `getUser()`, `requireAuth()`
+- Sign-in / sign-up modal (glass morphism, reusable across entry points)
+- Auth state in Zustand `auth-store.ts` — user, session, loading
+- Navbar avatar dropdown: profile link, sign out, usage stats
+
+_User Profile & Dashboard_
+- `/profile` page — avatar, display name, joined date, total simulations generated
+- Saved simulations grid: scenes the user explicitly bookmarked
+- Generated history: last 20 AI-generated scenes linked to the user's account
+- "Save" bookmark button on every `/s/[slug]` page (heart/bookmark icon, Framer Motion toggle)
+- Delete from history / unsave flow
+
+_OG Images_
+- `apps/web/app/api/og/route.tsx` using `@vercel/og` (Satori)
+- OG images for all 24 pre-built simulations stored in Supabase Storage
+- `og:image`, `og:title`, `og:description` meta tags on all `/s/[slug]` pages
 
 **Plan:** [→ phases/phase-11/PLAN.md](phases/phase-11/PLAN.md)
 
 ---
 
-### Phase 12 — Settings + BYOK
-**Goal:** `/settings` page fully functional — users can add API keys and select models.
-
-**Deliverables:**
-- `/settings` page with glass-panel sections
-- API key input per provider (OpenAI, Anthropic, Gemini, Groq) — password inputs, never logged
-- Model selector per provider (e.g. GPT-4o, Claude 3.5 Sonnet, Gemini Pro, Llama-3.1-70b)
-- Keys stored in `settings-store.ts` backed by localStorage
-- Provider switching wired into AI client (`apps/web/src/ai/client.ts`)
-- "Clear all keys" button
-- Status indicator: which provider is currently active
-
-**Plan:** [→ phases/phase-12/PLAN.md](phases/phase-12/PLAN.md)
-
----
-
-### Phase 13 — Polish + Responsive + Deploy
-**Goal:** Production-ready: mobile-first, all loading/error states, Vercel deployed, OG tags live.
+### Phase 12 — Polish + Responsive
+**Goal:** Core product (concept + LLD/HLD) is mobile-first, pixel-perfect, and production-quality before DSA lands.
 
 **Deliverables:**
 - Full mobile responsive pass (320px minimum): all pages, simulation layouts, chat card
 - Tablet (768–1024px) layout adjustments
 - `<Suspense>` boundaries + skeleton components for all async data paths
 - Error boundaries on SceneRenderer + API routes
-- Pyodide loading progress UX (progress bar, percentage)
 - Share button (copy URL to clipboard, toast confirmation)
-- `og:image`, `og:title`, `og:description` meta tags on all `/s/[slug]` pages
-- `next.config.ts` — WASM headers for Pyodide, image domains for OG
-- Environment variables: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `GEMINI_API_KEY`
-- Vercel deployment (production + preview branches)
-- README with setup instructions, architecture overview, contribution guide
-- `scripts/validate-scenes.ts` — validates all 24 scene JSON files against Zod schema
+- Empty states and loading states for profile / saved scenes pages
+- Accessibility pass: keyboard nav, focus rings, aria labels on interactive elements
+- Performance pass: image optimization, lazy loading, bundle analysis
+
+**Plan:** [→ phases/phase-12/PLAN.md](phases/phase-12/PLAN.md)
+
+---
+
+### Phase 13 — DSA Pipeline
+**Goal:** Full DSA trace pipeline working end-to-end: paste code → sandbox execute → Scene JSON.
+
+**Deliverables:**
+- `apps/web/src/sandbox/PyodideRunner.ts` — lazy-load Pyodide, execute with trace capture
+- `apps/web/src/sandbox/JSRunner.ts` — Web Worker JS sandbox
+- `apps/web/src/sandbox/workers/js-sandbox.worker.ts`
+- `apps/web/src/sandbox/SandboxManager.ts` — `execute(code, lang) → TraceStep[]`
+- `apps/web/src/sandbox/types.ts` — TraceStep, TraceData interfaces
+- Pyodide progress indicator ("Initializing Python runtime... ~10MB") — progress bar, percentage
+- `apps/web/src/ai/prompts/code-instrumentation.md`
+- `apps/web/src/ai/instrumentCode.ts`
+- `/api/instrument` route
+- `apps/web/src/ai/prompts/trace-to-scene.md`
+- `apps/web/src/ai/traceToScene.ts`
+- `/api/visualize-trace` route
+- "Re-run with custom input" flow (sandbox re-execute + AI re-annotate)
+- 10 pre-built DSA Scene JSONs in `src/content/scenes/dsa/`
+- `next.config.ts` — WASM headers for Pyodide
+- Mobile DSA layout: stacked canvas top, explanation below, tab switcher
 
 **Plan:** [→ phases/phase-13/PLAN.md](phases/phase-13/PLAN.md)
+
+---
+
+### Phase 14 — Complete Deploy
+**Goal:** Production deploy on Vercel, all environment variables live, README complete, scenes validated.
+
+**Deliverables:**
+- Environment variables configured: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `GEMINI_API_KEY`, `NEXTAUTH_SECRET`
+- Vercel deployment (production + preview branches)
+- Custom domain `insyte.dev` wired to Vercel
+- README with setup instructions, architecture overview, BYOK guide, contribution guide
+- `scripts/validate-scenes.ts` — validates all 24 scene JSON files against Zod schema
+- Smoke test checklist: landing → generate → simulate → chat → settings → profile → save
+- Analytics: Vercel Analytics + basic event tracking (scene generated, chat sent, BYOK activated)
+
+**Plan:** [→ phases/phase-14/PLAN.md](phases/phase-14/PLAN.md)
 
 ---
 
@@ -304,16 +339,16 @@ Ship a fully functional, publicly accessible platform where:
 | 3 | `load-balancer` | How does Load Balancing work? | concept | 5 |
 | 4 | `dns-resolution` | How does DNS Resolution work? | concept | 5 |
 | 5 | `git-branching` | How does Git Branching work? | concept | 5 |
-| 6 | `two-sum` | Two Sum | dsa | 9 |
-| 7 | `valid-parentheses` | Valid Parentheses | dsa | 9 |
-| 8 | `binary-search` | Binary Search | dsa | 9 |
-| 9 | `reverse-linked-list` | Reverse Linked List | dsa | 9 |
-| 10 | `climbing-stairs` | Climbing Stairs DP | dsa | 9 |
-| 11 | `merge-sort` | Merge Sort | dsa | 9 |
-| 12 | `level-order-bfs` | Binary Tree Level Order | dsa | 9 |
-| 13 | `number-of-islands` | Number of Islands | dsa | 9 |
-| 14 | `sliding-window-max` | Sliding Window Maximum | dsa | 9 |
-| 15 | `fibonacci-recursive` | Fibonacci (memoization) | dsa | 9 |
+| 6 | `two-sum` | Two Sum | dsa | 13 |
+| 7 | `valid-parentheses` | Valid Parentheses | dsa | 13 |
+| 8 | `binary-search` | Binary Search | dsa | 13 |
+| 9 | `reverse-linked-list` | Reverse Linked List | dsa | 13 |
+| 10 | `climbing-stairs` | Climbing Stairs DP | dsa | 13 |
+| 11 | `merge-sort` | Merge Sort | dsa | 13 |
+| 12 | `level-order-bfs` | Binary Tree Level Order | dsa | 13 |
+| 13 | `number-of-islands` | Number of Islands | dsa | 13 |
+| 14 | `sliding-window-max` | Sliding Window Maximum | dsa | 13 |
+| 15 | `fibonacci-recursive` | Fibonacci (memoization) | dsa | 13 |
 | 16 | `lru-cache` | LRU Cache | lld | 10 |
 | 17 | `rate-limiter` | Rate Limiter (Token Bucket) | lld | 10 |
 | 18 | `min-stack` | MinStack | lld | 10 |
