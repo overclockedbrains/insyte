@@ -30,7 +30,7 @@ interface CanvasCardProps {
 // ─── Inner canvas visualization ───────────────────────────────────────────────
 
 // Toggle to visualise each primitive's bounding box during development
-const DEV_BORDERS = process.env.NODE_ENV === 'development'
+const DEV_BORDERS = process.env.NEXT_PUBLIC_DEV_BORDERS === 'true'
 
 function CanvasVisualization({ scene }: { scene: Scene }) {
   const { currentStep } = usePlayback()
@@ -228,6 +228,7 @@ function CardContent({ scene }: { scene: Scene }) {
 export function CanvasCard({ scene }: CanvasCardProps) {
   const isExpanded = useBoundStore((s) => s.isExpanded)
   const setExpanded = useBoundStore((s) => s.setExpanded)
+  const isPatchGlowing = useBoundStore((s) => s.isPatchGlowing)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -259,40 +260,52 @@ export function CanvasCard({ scene }: CanvasCardProps) {
   return (
     <>
       {/* ── Normal card (always in flow; invisible when expanded) ── */}
-      <div
+      <motion.div
         className={[
           'bg-surface-container rounded-3xl border border-outline-variant/20 overflow-hidden',
           'flex flex-col flex-1 min-h-0',
           isExpanded ? 'invisible' : '',
         ].join(' ')}
         aria-hidden={isExpanded}
+        animate={{
+          boxShadow: isPatchGlowing
+            ? '0 0 40px rgba(183,159,255,0.4), 0 0 80px rgba(183,159,255,0.15)'
+            : '0 0 0px rgba(183,159,255,0)',
+        }}
+        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       >
         <CardContent scene={scene} />
-      </div>
+      </motion.div>
 
       {/* ── Expanded overlay (fixed, above everything) ── */}
       {mounted
         ? createPortal(
-            <AnimatePresence>
-              {isExpanded && (
-                <motion.div
-                  key="canvas-expanded"
-                  initial={{ opacity: 0, scale: 0.97 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.97 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 35 }}
-                  className={[
-                    'fixed inset-0 z-[60]',
-                    'bg-surface-container border-0 rounded-none',
-                    'flex flex-col',
-                  ].join(' ')}
-                >
-                  <CardContent scene={scene} />
-                </motion.div>
-              )}
-            </AnimatePresence>,
-            document.body,
-          )
+          <AnimatePresence>
+            {isExpanded && (
+              <motion.div
+                key="canvas-expanded"
+                initial={{ opacity: 0, scale: 0.97 }}
+                animate={{
+                  opacity: 1,
+                  scale: 1,
+                  boxShadow: isPatchGlowing
+                    ? '0 0 60px rgba(183,159,255,0.35)'
+                    : '0 0 0px rgba(183,159,255,0)',
+                }}
+                exit={{ opacity: 0, scale: 0.97 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+                className={[
+                  'fixed inset-0 z-[60]',
+                  'bg-surface-container border-0 rounded-none',
+                  'flex flex-col',
+                ].join(' ')}
+              >
+                <CardContent scene={scene} />
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body,
+        )
         : null}
     </>
   )

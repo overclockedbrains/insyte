@@ -95,6 +95,6 @@ export const createSceneSlice: StateCreator<
       set((state) => {
         state.isPatchGlowing = false
       })
-    }, 600)
+    }, 1000)
   },
 })

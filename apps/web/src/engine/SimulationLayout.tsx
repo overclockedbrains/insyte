@@ -4,6 +4,8 @@ import { useEffect, useCallback } from 'react'
 import type { Scene } from '@insyte/scene-engine'
 import { useBoundStore } from '@/src/stores/store'
 import { ChallengesSection } from '@/components/simulation/ChallengesSection'
+import { ChatButton } from '@/components/chat/ChatButton'
+import { ChatCard } from '@/components/chat/ChatCard'
 import { TextLeftCanvasRight } from './layouts/TextLeftCanvasRight'
 import { CodeLeftCanvasRight } from './layouts/CodeLeftCanvasRight'
 import { CanvasOnly } from './layouts/CanvasOnly'
@@ -34,27 +36,6 @@ function LayoutComponent({ scene }: { scene: Scene }) {
     default:
       return <CanvasOnly scene={scene} />
   }
-}
-
-// ─── Chat FAB stub (Phase 8) ──────────────────────────────────────────────────
-
-function ChatButtonStub() {
-  return (
-    <div
-      className="fixed bottom-6 right-6 z-30 h-12 w-12 rounded-full
-        bg-surface-container-high border border-outline-variant/30
-        flex items-center justify-center
-        shadow-lg cursor-pointer
-        hover:border-primary/30 hover:bg-surface-container-highest
-        transition-all duration-200"
-      title="AI Chat (coming soon)"
-      aria-label="AI Chat (coming soon)"
-    >
-      <span className="text-lg select-none" role="img" aria-label="chat">
-        💬
-      </span>
-    </div>
-  )
 }
 
 // ─── SimulationLayout ─────────────────────────────────────────────────────────
@@ -107,8 +88,9 @@ export function SimulationLayout({ scene }: SimulationLayoutProps) {
         <ChallengesSection challenges={scene.challenges} />
       )}
 
-      {/* ── AI Chat FAB (stub — Phase 8 replaces this) ── */}
-      <ChatButtonStub />
+      {/* ── AI Chat FAB + card ── */}
+      <ChatButton />
+      <ChatCard />
     </div>
   )
 }

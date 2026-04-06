@@ -22,9 +22,15 @@ export interface ChatSlice {
   minimizeChat: () => void
 
   addMessage: (msg: ChatMessage) => void
+  /** Convenience: push a user message with current timestamp */
+  addUserMessage: (text: string) => void
+  /** Convenience: push an empty assistant message (content filled by appendToLastMessage) */
+  addAssistantMessage: (text?: string) => void
   setLoading: (val: boolean) => void
   clearHistory: () => void
   appendToLastMessage: (chunk: string) => void
+  /** Replace the full content of the last assistant message (used to strip patch block) */
+  setLastMessageContent: (content: string) => void
 }
 
 // ─── Slice creator ────────────────────────────────────────────────────────────
@@ -50,6 +56,8 @@ export const createChatSlice: StateCreator<
     set((state) => {
       state.isOpen = false
       state.isMinimized = false
+      // Clear history on close — minimize preserves it
+      state.messages = []
     }),
 
   minimizeChat: () =>
@@ -60,6 +68,16 @@ export const createChatSlice: StateCreator<
   addMessage: (msg) =>
     set((state) => {
       state.messages.push(msg)
+    }),
+
+  addUserMessage: (text) =>
+    set((state) => {
+      state.messages.push({ role: 'user', content: text, timestamp: Date.now() })
+    }),
+
+  addAssistantMessage: (text = '') =>
+    set((state) => {
+      state.messages.push({ role: 'assistant', content: text, timestamp: Date.now() })
     }),
 
   setLoading: (val) =>
@@ -77,6 +95,14 @@ export const createChatSlice: StateCreator<
       const last = state.messages[state.messages.length - 1]
       if (last && last.role === 'assistant') {
         last.content += chunk
+      }
+    }),
+
+  setLastMessageContent: (content) =>
+    set((state) => {
+      const last = state.messages[state.messages.length - 1]
+      if (last && last.role === 'assistant') {
+        last.content = content
       }
     }),
 })
