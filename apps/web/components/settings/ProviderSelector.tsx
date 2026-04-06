@@ -2,62 +2,17 @@
 
 import { motion } from 'framer-motion'
 import { useSettings } from '@/src/stores/hooks'
-import type { Provider } from '@/src/stores/slices/settings-slice'
-
-// ─── Provider metadata ────────────────────────────────────────────────────────
-
-interface ProviderMeta {
-  id: Provider
-  name: string
-  subtitle: string
-  badge?: string
-  color: string
-}
-
-const PROVIDERS: ProviderMeta[] = [
-  {
-    id: 'gemini',
-    name: 'Gemini',
-    subtitle: 'Google',
-    badge: 'Default · Free',
-    color: 'text-blue-400',
-  },
-  {
-    id: 'openai',
-    name: 'OpenAI',
-    subtitle: 'GPT models',
-    color: 'text-emerald-400',
-  },
-  {
-    id: 'anthropic',
-    name: 'Anthropic',
-    subtitle: 'Claude models',
-    color: 'text-orange-400',
-  },
-  {
-    id: 'groq',
-    name: 'Groq',
-    subtitle: 'Llama / Mixtral',
-    color: 'text-rose-400',
-  },
-]
-
-const INITIALS: Record<Provider, string> = {
-  gemini: 'G',
-  openai: '⊕',
-  anthropic: 'A',
-  groq: 'Q',
-}
+import { PROVIDER_LIST } from '@/src/ai/registry'
 
 // ─── Provider logo — avatar circle with optional "key saved" badge ────────────
 
 function ProviderLogo({
-  provider,
   color,
+  initials,
   hasKey,
 }: {
-  provider: Provider
   color: string
+  initials: string
   hasKey: boolean
 }) {
   return (
@@ -69,7 +24,7 @@ function ProviderLogo({
           color,
         ].join(' ')}
       >
-        {INITIALS[provider]}
+        {initials}
       </div>
 
       {/* BYOK key-saved badge — bottom-right of avatar, like a status dot */}
@@ -87,7 +42,7 @@ export function ProviderSelector() {
 
   return (
     <div className="grid grid-cols-2 gap-3">
-      {PROVIDERS.map((p) => {
+      {PROVIDER_LIST.map((p) => {
         const isActive = provider === p.id
         const hasKey = Boolean(apiKeys[p.id])
 
@@ -104,12 +59,16 @@ export function ProviderSelector() {
                 : 'border-outline-variant/20 bg-surface-container-low hover:border-outline-variant/40 hover:bg-surface-container',
             ].join(' ')}
           >
-            <ProviderLogo provider={p.id} color={p.color} hasKey={hasKey} />
+            <ProviderLogo
+              color={p.color}
+              initials={p.initials}
+              hasKey={hasKey}
+            />
 
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-semibold text-on-surface">
-                  {p.name}
+                  {p.shortName}
                 </span>
                 {p.badge && (
                   <span className="hidden sm:inline text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-secondary/10 text-secondary">

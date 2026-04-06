@@ -3,49 +3,14 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useSettings } from '@/src/stores/hooks'
-import type { Provider } from '@/src/stores/slices/settings-slice'
-
-// ─── Model catalogue ──────────────────────────────────────────────────────────
-
-interface ModelOption {
-  id: string
-  label: string
-  badge?: string // e.g. "free", "fast"
-}
-
-const MODELS_BY_PROVIDER: Record<Provider, ModelOption[]> = {
-  gemini: [
-    { id: 'gemini-2.5-flash', label: 'Flash 2.5', badge: 'fast' },
-    { id: 'gemini-2.5-pro', label: 'Pro 2.5' },
-    { id: 'gemini-2.0-flash', label: 'Flash 2.0' },
-    { id: 'gemini-3-flash-preview', label: 'Flash 3.0', badge: 'new' },
-    { id: 'gemini-3.1-pro-preview', label: 'Pro 3.1', badge: 'new' }
-  ],
-  openai: [
-    { id: 'gpt-4o-mini', label: 'GPT-4o mini', badge: 'fast' },
-    { id: 'gpt-5.4', label: 'GPT-5.4', badge: 'new' },
-    { id: 'gpt-4.1', label: 'GPT-4.1' },
-    { id: 'gpt-4o', label: 'GPT-4o' },
-    { id: 'o3-mini', label: 'o3-mini' },
-    { id: 'o1', label: 'o1' },
-  ],
-  anthropic: [
-    { id: 'claude-opus-4-6', label: 'Opus 4.6', badge: 'new' },
-    { id: 'claude-sonnet-4-6', label: 'Sonnet 4.6' },
-    { id: 'claude-haiku-4-5-20251001', label: 'Haiku 4.5', badge: 'fast' },
-  ],
-  groq: [
-    { id: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B' },
-    { id: 'llama-3.1-8b-instant', label: 'Llama 8B', badge: 'fast' },
-    { id: 'openai/gpt-oss-120b', label: 'GPT OSS 120B', badge: 'new' },
-  ],
-}
+import { REGISTRY } from '@/src/ai/registry'
+import type { Provider } from '@/src/ai/registry'
 
 // ─── ModelSelector ────────────────────────────────────────────────────────────
 
 export function ModelSelector() {
   const { provider, model, setModel } = useSettings()
-  const options = MODELS_BY_PROVIDER[provider] || []
+  const options = REGISTRY[provider as Provider]?.models ?? []
 
   // Track if current model is a known preset
   const isKnownModel = options.some(opt => opt.id === model)

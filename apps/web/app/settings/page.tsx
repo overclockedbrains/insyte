@@ -182,7 +182,7 @@ export default function SettingsPage() {
         {/* ── 2. API Keys ── */}
         <SectionCard
           title="API Keys"
-          description="Your keys are stored locally in your browser and never sent to our servers."
+          description="Your keys are stored locally in your browser and only forwarded to the AI provider — never stored on our servers."
         >
           {/* Security note */}
           <div className="flex items-start gap-3 rounded-xl border border-outline-variant/20 bg-surface-container-low px-4 py-3">
@@ -191,8 +191,7 @@ export default function SettingsPage() {
               <span className="font-semibold text-on-surface">
                 Your key is stored locally in your browser.
               </span>{' '}
-              It is never sent to our servers. When you use a BYOK key, AI requests
-              go directly from your browser to the provider.
+              It is forwarded to the AI provider through our servers only to process your request — it is never logged, stored, or retained beyond the request.
             </p>
           </div>
 

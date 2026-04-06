@@ -4,23 +4,8 @@ import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Eye, EyeOff, Check, X } from 'lucide-react'
 import { useSettings } from '@/src/stores/hooks'
-import type { Provider } from '@/src/stores/slices/settings-slice'
-
-// ─── Provider placeholders ────────────────────────────────────────────────────
-
-const PLACEHOLDERS: Record<Provider, string> = {
-  gemini: 'AIza...',
-  openai: 'sk-...',
-  anthropic: 'sk-ant-...',
-  groq: 'gsk_...',
-}
-
-const PROVIDER_LABELS: Record<Provider, string> = {
-  gemini: 'Gemini',
-  openai: 'OpenAI',
-  anthropic: 'Anthropic',
-  groq: 'Groq',
-}
+import { REGISTRY } from '@/src/ai/registry'
+import type { Provider } from '@/src/ai/registry'
 
 const MIN_KEY_LENGTH = 20
 
@@ -32,6 +17,7 @@ interface ApiKeyInputProps {
 
 export function ApiKeyInput({ provider }: ApiKeyInputProps) {
   const { apiKeys, setApiKey, clearApiKey } = useSettings()
+  const { shortName, keyPlaceholder } = REGISTRY[provider]
 
   const savedKey = apiKeys[provider]
   const hasKey = Boolean(savedKey)
@@ -76,7 +62,7 @@ export function ApiKeyInput({ provider }: ApiKeyInputProps) {
             <div className="flex items-center gap-2">
               <Check className="h-4 w-4 text-secondary shrink-0" />
               <span className="text-sm font-medium text-secondary">
-                {PROVIDER_LABELS[provider]} key saved
+                {shortName} key saved
               </span>
               <span className="text-xs text-on-surface-variant font-mono">
                 ···{savedKey!.slice(-4)}
@@ -114,7 +100,7 @@ export function ApiKeyInput({ provider }: ApiKeyInputProps) {
                     setInputValue(e.target.value)
                     if (validationError) setValidationError('')
                   }}
-                  placeholder={PLACEHOLDERS[provider]}
+                  placeholder={keyPlaceholder}
                   autoComplete="off"
                   spellCheck={false}
                   className={[

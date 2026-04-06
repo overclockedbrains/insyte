@@ -2,14 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useSettings } from '@/src/stores/hooks'
-import type { Provider } from '@/src/stores/slices/settings-slice'
-
-const PROVIDER_LABELS: Record<Provider, string> = {
-  gemini: 'Gemini',
-  openai: 'OpenAI',
-  anthropic: 'Anthropic',
-  groq: 'Groq',
-}
+import { REGISTRY } from '@/src/ai/registry'
+import type { Provider } from '@/src/ai/registry'
 
 interface RateLimitStatus {
   remaining: number
@@ -22,6 +16,7 @@ export function ActiveProviderStatus() {
   const { provider, model, apiKeys } = useSettings()
   const activeKey = apiKeys[provider]
   const hasByok = Boolean(activeKey)
+  const providerName = REGISTRY[provider as Provider].shortName
 
   // null  = not yet fetched  |  RateLimitStatus = fetched
   const [rateLimitStatus, setRateLimitStatus] = useState<RateLimitStatus | null>(null)
@@ -67,7 +62,7 @@ export function ActiveProviderStatus() {
           <p className="text-sm text-on-surface">
             Using your{' '}
             <span className="font-semibold text-secondary">
-              {PROVIDER_LABELS[provider]}
+              {providerName}
             </span>{' '}
             key ·{' '}
             <span className="text-on-surface-variant text-xs font-mono truncate">

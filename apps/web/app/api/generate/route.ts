@@ -1,6 +1,8 @@
 import type { NextRequest } from 'next/server'
-// removed getGeminiProvider since we instantiate getServerModel natively inline here
+import { Agent, fetch as undiciFetch } from 'undici'
 import { generateScene } from '@/src/ai/generateScene'
+import { resolveModel } from '@/src/ai/providers'
+import type { Provider } from '@/src/ai/registry'
 import { checkAndIncrementRateLimit, saveScene } from '@/lib/supabase'
 import { generateSlug } from '@/src/lib/slug'
 import { safeParseScene } from '@insyte/scene-engine'
@@ -9,35 +11,26 @@ import { aiLog } from '@/lib/ai-logger'
 // Allow streaming for up to 5 minutes
 export const maxDuration = 300
 
-import { createGoogleGenerativeAI } from '@ai-sdk/google'
-import { Agent, fetch as undiciFetch } from 'undici'
-
+// Custom HTTP agent with extended timeouts for long-running AI generation.
+// Used by all providers in this route — generation can take several minutes.
 const longRunningAgent = new Agent({
   headersTimeout: 10 * 60 * 1000, // 10 minutes
-  bodyTimeout: 10 * 60 * 1000, // 10 minutes
+  bodyTimeout: 10 * 60 * 1000,    // 10 minutes
 })
 
-// Generate using Gemini Flash server key with custom timeout agent
-function getServerModel() {
-  const google = createGoogleGenerativeAI({
-    apiKey: process.env.GEMINI_API_KEY,
-    fetch: (url, options) =>
-      // Cast to un-confuse TS between undici's Response and global Response
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      undiciFetch(url as any, { ...options, dispatcher: longRunningAgent } as any) as unknown as Promise<Response>,
-  })
-  return google('gemini-2.5-flash')
-}
+// Cast undici's fetch to the global fetch type expected by AI SDKs.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const longRunningFetch = (url: any, options?: any) =>
+  undiciFetch(url, { ...options, dispatcher: longRunningAgent }) as unknown as Promise<Response>
 
 // ─── POST /api/generate ───────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
-  // Block any attempt to pass API keys through this route
-  if (req.headers.get('authorization') || req.headers.get('x-api-key')) {
-    return new Response('Forbidden: API keys must not be sent to this route', {
-      status: 403,
-    })
-  }
+  // BYOK headers — present when the user has configured their own API key.
+  // Keys are never logged and never stored server-side.
+  const byokKey = req.headers.get('x-api-key')
+  const byokProvider = req.headers.get('x-provider') as Provider | null
+  const byokModel = req.headers.get('x-model')
 
   // Parse body
   let topic: string
@@ -58,26 +51,30 @@ export async function POST(req: NextRequest) {
     return new Response('topic is too long (max 500 chars)', { status: 400 })
   }
 
-  // Rate limit check (15 requests / IP / hour via Supabase)
-  const ip =
-    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
-
-  const allowed = await checkAndIncrementRateLimit(ip)
-  aiLog.server.rateLimit(ip, allowed)
-  if (!allowed) {
-    return new Response(
-      JSON.stringify({ error: 'Rate limit exceeded. Try again later.' }),
-      { status: 429, headers: { 'Content-Type': 'application/json' } },
-    )
+  // Rate limit only applies to the free tier (our server key).
+  // BYOK users consume their own quota — no limit imposed.
+  if (!byokKey) {
+    const ip =
+      req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
+    const allowed = await checkAndIncrementRateLimit(ip)
+    aiLog.server.rateLimit(ip, allowed)
+    if (!allowed) {
+      return new Response(
+        JSON.stringify({ error: 'Rate limit exceeded. Try again later.' }),
+        { status: 429, headers: { 'Content-Type': 'application/json' } },
+      )
+    }
   }
 
-  const model = getServerModel()
-  aiLog.server.request(topic, 'gemini-2.5-flash')
+  const provider = byokProvider ?? 'gemini'
+  const model = resolveModel(provider, byokModel, byokKey, longRunningFetch)
+  const modelId = byokModel ?? (byokKey ? provider : 'gemini-2.5-flash')
+  aiLog.server.request(topic, modelId)
 
   try {
-    const result = generateScene(topic, model)
+    const result = generateScene(topic, model, provider)
 
-    // Fire-and-forget: perform background logging once generation finishes.
+    // Fire-and-forget: background logging + scene persistence once generation finishes.
     void (async () => {
       try {
         const usage = await result.usage

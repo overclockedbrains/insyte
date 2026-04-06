@@ -6,7 +6,6 @@ import type { DeepPartial } from 'ai'
 import type { Scene } from '@insyte/scene-engine'
 import { SceneSchema, VisualSchema, StepSchema, ControlSchema, ExplanationSectionSchema, ChallengeSchema, PopupSchema } from '@insyte/scene-engine'
 import { useBoundStore } from '@/src/stores/store'
-import { generateSceneBrowserDirect } from '@/src/ai/generateSceneBrowserDirect'
 import { validateGeneratedScene } from '@/src/ai/generateScene'
 import { aiLog } from '@/lib/ai-logger'
 
@@ -80,8 +79,6 @@ export function useStreamScene(): UseStreamSceneResult {
   const loggedPromotionsRef = useRef(new Set<keyof Scene>())
   // Ref so retry callbacks always see the latest runStream without circular deps
   const runStreamRef = useRef<(topic: string, slug?: string) => void>(() => { })
-  // AbortController for the BYOK browser-direct path
-  const byokAbortRef = useRef<AbortController | null>(null)
 
   const setScene = useBoundStore((s) => s.setScene)
   const clearScene = useBoundStore((s) => s.clearScene)
@@ -90,15 +87,8 @@ export function useStreamScene(): UseStreamSceneResult {
   const setStreaming = useBoundStore((s) => s.setStreaming)
   const isStreaming = useBoundStore((s) => s.isStreaming)
   const streamedFields = useBoundStore((s) => s.streamedFields)
-  const provider = useBoundStore((s) => s.provider)
-  const model = useBoundStore((s) => s.model)
-  const apiKeys = useBoundStore((s) => s.apiKeys)
-
-  const hasByokKey = Boolean(apiKeys[provider])
 
   // ─── Core stream logic ────────────────────────────────────────────────────
-  // These functions are identical to the previous implementation — only
-  // how they are wired to the stream source changes.
 
   const handlePartial = useCallback(
     (partial: DeepPartial<Scene>) => {
@@ -171,13 +161,14 @@ export function useStreamScene(): UseStreamSceneResult {
   useEffect(() => { handlePartialRef.current = handlePartial }, [handlePartial])
   useEffect(() => { handleCompleteRef.current = handleComplete }, [handleComplete])
 
-  // ─── useObject (server-route path) ────────────────────────────────────────
+  // ─── useObject ────────────────────────────────────────────────────────────
   // experimental_useObject consumes the toTextStreamResponse() stream from
   // /api/generate and progressively parses it into a typed DeepPartial<Scene>.
   //
-  // We use stable ref callbacks (handlePartialRef / handleCompleteRef) so the
-  // useObject config object never changes — this prevents the hook from
-  // resetting its internal state on re-renders.
+  // headers is a function — called at submit() time — so it always reads the
+  // latest settings from the store without re-initialising the hook.
+  // BYOK keys are forwarded as x-api-key / x-provider / x-model headers;
+  // the route uses them if present, otherwise falls back to the server key.
   //
   // IMPORTANT: toTextStreamResponse() is what useObject expects.
   // Do NOT change the server to toDataStreamResponse() — that is for useChat.
@@ -185,9 +176,13 @@ export function useStreamScene(): UseStreamSceneResult {
   const { submit, stop } = useObject({
     api: '/api/generate',
     schema: SceneSchema,
+    headers: (): Record<string, string> => {
+      const { provider, model, apiKeys } = useBoundStore.getState()
+      const key = apiKeys[provider]
+      if (!key) return {}
+      return { 'x-api-key': key, 'x-provider': provider, 'x-model': model }
+    },
     onFinish: ({ object }) => {
-      // Called by useObject when the stream ends cleanly.
-      // Uses a ref so this stable callback always sees the latest handleComplete.
       handleCompleteRef.current(object, lastTopicRef.current)
     },
     onError: (err) => {
@@ -226,38 +221,14 @@ export function useStreamScene(): UseStreamSceneResult {
       aiLog.stream.start(topic, slug)
       setError(null)
       setDraftScene({})
+      setStreaming(true)
+      aiLog.store.setStreaming(true)
 
-      if (hasByokKey) {
-        setStreaming(true)
-        aiLog.store.setStreaming(true)
-
-        const abortController = new AbortController()
-        byokAbortRef.current = abortController
-
-        void generateSceneBrowserDirect(
-          topic,
-          { provider, model, apiKeys },
-          {
-            onPartial: (partial) => handlePartialRef.current(partial),
-            onComplete: (scene) => handleCompleteRef.current(scene, topic),
-            onError: (err: Error) => {
-              setStreaming(false)
-              aiLog.store.setStreaming(false)
-              aiLog.stream.error(err.message)
-              setError(err.message)
-            },
-          },
-          abortController.signal,
-        )
-      } else {
-        setStreaming(true)
-        aiLog.store.setStreaming(true)
-        // Server route: useObject fires the POST, handles SSE parsing.
-        // Body matches the server's expected { topic, slug } shape.
-        submit({ topic, slug })
-      }
+      // All generation goes through /api/generate.
+      // BYOK headers are injected via the headers function above.
+      submit({ topic, slug })
     },
-    [hasByokKey, provider, model, apiKeys, setDraftScene, setStreaming, submit],
+    [setDraftScene, setStreaming, submit],
   )
 
   useEffect(() => {
@@ -283,14 +254,10 @@ export function useStreamScene(): UseStreamSceneResult {
 
   const abort = useCallback(() => {
     aiLog.stream.abort()
-    if (hasByokKey) {
-      byokAbortRef.current?.abort()
-    } else {
-      stop()
-    }
+    stop()
     setStreaming(false)
     aiLog.store.setStreaming(false)
-  }, [hasByokKey, stop, setStreaming])
+  }, [stop, setStreaming])
 
   return { isStreaming, streamedFields, error, startStreaming, retry, abort }
 }

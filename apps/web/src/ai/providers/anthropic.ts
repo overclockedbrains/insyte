@@ -1,11 +1,15 @@
 import { createAnthropic } from '@ai-sdk/anthropic'
 import type { LanguageModel } from 'ai'
+import { REGISTRY } from '../registry'
 
-/** BYOK only — no server fallback for Anthropic. */
 export function getAnthropicProvider(
   apiKey: string,
-  model = 'claude-3-5-haiku-20241022',
+  model?: string,
+  customFetch?: typeof fetch,
 ): LanguageModel {
-  const anthropic = createAnthropic({ apiKey })
-  return anthropic(model)
+  const anthropic = createAnthropic({
+    apiKey,
+    ...(customFetch && { fetch: customFetch }),
+  })
+  return anthropic(model ?? REGISTRY.anthropic.defaultModel)
 }

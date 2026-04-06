@@ -3,6 +3,8 @@ import type { LanguageModel, FinishReason, LanguageModelUsage } from 'ai'
 import { SceneSchema, safeParseScene } from '@insyte/scene-engine'
 import type { Scene } from '@insyte/scene-engine'
 import { SCENE_SYSTEM_PROMPT, buildSceneUserMessage } from './prompts/scene-generation'
+import { REGISTRY } from './registry'
+import type { Provider } from './registry'
 
 // ─── Error types ──────────────────────────────────────────────────────────────
 
@@ -47,24 +49,21 @@ export interface SceneFinishEvent {
  *   - result.output for the final typed Scene
  *   - result.usage / result.finishReason for logging
  *
- * The optional onFinish callback replaces the fire-and-forget IIFE in route.ts,
- * providing a clean lifecycle hook for side effects (logging, DB saves).
+ * provider — used to look up per-provider options from the registry
+ * (e.g. Gemini's thinking budget). Defaults to 'gemini' when omitted.
  */
-export function generateScene(topic: string, model: LanguageModel): SceneStreamResult {
+export function generateScene(
+  topic: string,
+  model: LanguageModel,
+  provider: Provider = 'gemini',
+): SceneStreamResult {
   return streamText({
     model,
     output: Output.object({ schema: SceneSchema }),
     system: SCENE_SYSTEM_PROMPT,
     prompt: buildSceneUserMessage(topic),
-    // By providing a fixed thinking budget (e.g., 2048 tokens), we allow Gemini
-    // to reason about complex scenes without spending 20+ seconds in silence
-    // (which causes retries) and without eating up the entire output token limit
-    // (which causes clipped JSONs).
-    providerOptions: {
-      google: {
-        thinkingConfig: { thinkingBudget: 2048 },
-      },
-    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    providerOptions: REGISTRY[provider].providerOptions as any,
     maxOutputTokens: 32768,
     maxRetries: 0,
   })

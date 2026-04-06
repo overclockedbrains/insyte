@@ -1,38 +1,46 @@
+// ─── resolveModel ─────────────────────────────────────────────────────────────
+//
+// Server-side helper used by both /api/chat and /api/generate.
+// Instantiates the correct provider SDK based on the request parameters and
+// returns a LanguageModel ready for streamText / generateText.
+//
+// customFetch — optional: pass the undici long-timeout agent for /api/generate.
+
 import type { LanguageModel } from 'ai'
-import type { Provider } from '@/src/stores/slices/settings-slice'
+import { REGISTRY, SERVER_PROVIDER } from '../registry'
+import type { Provider } from '../registry'
 import { getGeminiProvider } from './gemini'
 import { getOpenAIProvider } from './openai'
 import { getAnthropicProvider } from './anthropic'
 import { getGroqProvider } from './groq'
 
-export interface ProviderSettings {
-  provider: Provider
-  model: string
-  apiKeys: Record<Provider, string | null>
-}
+export function resolveModel(
+  provider: string,
+  model: string | null | undefined,
+  apiKey: string | null | undefined,
+  customFetch?: typeof fetch,
+): LanguageModel {
+  const resolvedProvider = (
+    provider in REGISTRY ? provider : SERVER_PROVIDER
+  ) as Provider
 
-/**
- * Returns the correct LanguageModel based on the settings state.
- * BYOK: uses the key stored in settings (keys never leave the client when used browser-direct).
- * Falls back to Gemini Flash server key when no BYOK key is configured.
- */
-export function getAIProvider(settings: ProviderSettings): LanguageModel {
-  const { provider, model, apiKeys } = settings
-  const key = apiKeys[provider]
+  const resolvedModel = model || REGISTRY[resolvedProvider].defaultModel
 
-  if (key) {
-    switch (provider) {
+  // BYOK path: use the supplied key with the requested provider
+  if (apiKey) {
+    switch (resolvedProvider) {
       case 'openai':
-        return getOpenAIProvider(key, model)
+        return getOpenAIProvider(apiKey, resolvedModel, customFetch)
       case 'anthropic':
-        return getAnthropicProvider(key, model)
+        return getAnthropicProvider(apiKey, resolvedModel, customFetch)
       case 'groq':
-        return getGroqProvider(key, model)
+        return getGroqProvider(apiKey, resolvedModel, customFetch)
       case 'gemini':
-        return getGeminiProvider(key)
+      default:
+        return getGeminiProvider(apiKey, resolvedModel, customFetch)
     }
   }
 
-  // No BYOK key for the selected provider → fall back to Gemini Flash (server key)
-  return getGeminiProvider()
+  // Core path: server Gemini key, ignores requested provider
+  return getGeminiProvider(undefined, REGISTRY[SERVER_PROVIDER].defaultModel, customFetch)
 }

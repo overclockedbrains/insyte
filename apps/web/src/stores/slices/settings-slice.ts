@@ -1,16 +1,12 @@
 import type { StateCreator } from 'zustand'
 import type { BoundStore } from '../store'
+import { DEFAULT_MODELS } from '@/src/ai/registry'
+import type { Provider } from '@/src/ai/registry'
+
+// Re-export Provider so existing imports of it from this file keep working.
+export type { Provider }
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-
-export type Provider = 'gemini' | 'openai' | 'anthropic' | 'groq'
-
-const DEFAULT_MODELS: Record<Provider, string> = {
-  gemini: 'gemini-2.0-flash',
-  openai: 'gpt-4o',
-  anthropic: 'claude-3-5-sonnet-20241022',
-  groq: 'llama-3.1-70b-versatile',
-}
 
 export interface SettingsSlice {
   // State
