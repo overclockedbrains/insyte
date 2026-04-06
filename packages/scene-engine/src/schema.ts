@@ -47,22 +47,62 @@ export const ConditionSchema = z.object({
 
 // ─── Visual ───────────────────────────────────────────────────────────────────
 
+// A permissive type trick to allow dynamic structured values without structured generation dropping them
+const DynamicObjectSchema = z.record(z.string(), z.any())
+
 export const VisualSchema = z.object({
   id: z.string(),
   type: VisualTypeSchema,
   label: z.string().optional(),
   position: z.object({ x: z.number(), y: z.number() }).optional(),
-  initialState: z.unknown(),
+  initialState: DynamicObjectSchema.optional().describe('Visual-specific initial configuration, e.g. { "entries": [] } or { "text": "foo" }'),
   showWhen: ConditionSchema.optional(),
-})
+}).describe('A visual primitive representing a core data structure or graphic element on the canvas (e.g. array, hashmap, tree, text-badge).')
 
 // ─── Action ───────────────────────────────────────────────────────────────────
 
-export const ActionSchema = z.object({
+const BaseActionSchema = z.object({
   target: z.string(),
-  action: z.string(),
-  params: z.record(z.unknown()),
 })
+
+// Typed state shapes for the "set" action, one per visual type.
+// Using a union means the JSON Schema becomes anyOf with required fields —
+// the model cannot emit {} because it satisfies none of the branches.
+export const ActionSchema = z.discriminatedUnion('action', [
+  BaseActionSchema.extend({
+    action: z.literal('set'),
+    // z.record keeps the schema simple enough for Gemini's constrained decoding.
+    // Content correctness is enforced by the system prompt + post-generation validation.
+    params: z.record(z.string(), z.any()).describe('Visual state object. Must include the required field for the target visual type: text-badge→text, hashmap→entries[], linked-list→nodes[], array→cells[], stack/queue→items[], counter→value, tree→root, graph→nodes[]+edges[].'),
+  }),
+  BaseActionSchema.extend({
+    action: z.literal('set-value'),
+    params: z.object({
+      value: z.any().describe('The primitive scalar value to set (e.g. text string, counter number, or boolean).'),
+    }),
+  }),
+  BaseActionSchema.extend({
+    action: z.literal('push'),
+    params: z.object({
+      field: z.string().optional().describe('Target array field name (e.g. "items", "cells", "entries")'),
+      item: z.any().describe('The item to append to the array'),
+    }),
+  }),
+  BaseActionSchema.extend({
+    action: z.literal('pop'),
+    params: z.object({
+      field: z.string().optional(),
+    }),
+  }),
+  BaseActionSchema.extend({
+    action: z.literal('highlight'),
+    params: z.object({
+      field: z.string().optional(),
+      index: z.number().describe('Array index to target'),
+      value: z.any().optional().describe('The highlight payload (e.g. "hit", "miss", "active", or full object)'),
+    }),
+  }),
+]).describe('A mutation or animation mapping to a specific visual on the canvas during a particular step.')
 
 // ─── Step ─────────────────────────────────────────────────────────────────────
 
@@ -70,16 +110,50 @@ export const StepSchema = z.object({
   index: z.number().int().nonnegative(),
   actions: z.array(ActionSchema),
   duration: z.number().positive().optional(),
-})
+}).describe('A sequential animation step representing one meaningful moment in the execution. Contains multiple synchronous actions.')
 
 // ─── Control ──────────────────────────────────────────────────────────────────
 
-export const ControlSchema = z.object({
+const BaseControlSchema = z.object({
   id: z.string(),
-  type: ControlTypeSchema,
   label: z.string(),
-  config: z.record(z.unknown()),
 })
+
+export const ControlSchema = z.discriminatedUnion('type', [
+  BaseControlSchema.extend({
+    type: z.literal('slider'),
+    config: z.object({
+      min: z.number().optional(),
+      max: z.number().optional(),
+      step: z.number().optional(),
+      defaultValue: z.number(),
+    }).describe('Slider config. Must include defaultValue.'),
+  }),
+  BaseControlSchema.extend({
+    type: z.literal('toggle'),
+    config: z.object({
+      defaultValue: z.boolean(),
+    }).describe('Toggle config. Must include defaultValue.'),
+  }),
+  BaseControlSchema.extend({
+    type: z.literal('input'),
+    config: z.object({
+      placeholder: z.string().optional(),
+      defaultValue: z.string(),
+    }).describe('Input config. Must include defaultValue.'),
+  }),
+  BaseControlSchema.extend({
+    type: z.literal('toggle-group'),
+    config: z.object({
+      options: z.array(z.string()),
+      defaultValue: z.string(),
+    }).describe('Toggle-group config. Must include options and defaultValue.'),
+  }),
+  BaseControlSchema.extend({
+    type: z.literal('button'),
+    config: z.record(z.string(), z.any()).optional().describe('Button config (usually empty).'),
+  }),
+]).describe('An interactive, user-facing UI control (slider, toggle, input) that allows users to mutate or explore sandbox states.')
 
 // ─── Explanation ──────────────────────────────────────────────────────────────
 
@@ -88,7 +162,7 @@ export const ExplanationSectionSchema = z.object({
   body: z.string(),
   appearsAtStep: z.number().int().nonnegative(),
   callout: z.string().optional(),
-})
+}).describe('A single narrative block teaching the user about what is happening on screen, mapped chronologically to a specific step.')
 
 // ─── Popup ────────────────────────────────────────────────────────────────────
 
@@ -102,7 +176,7 @@ export const PopupSchema = z.object({
   style: z.enum(['info', 'success', 'warning', 'insight']).optional(),
   anchor: z.object({ x: z.number(), y: z.number() }).optional(),
   targetPoint: z.object({ x: z.number(), y: z.number() }).optional(),
-})
+}).describe('A transient, contextual annotation popup that briefly attaches to a visual element to warn or inform the user mid-animation.')
 
 // ─── Challenge ────────────────────────────────────────────────────────────────
 
@@ -111,7 +185,7 @@ export const ChallengeSchema = z.object({
   title: z.string(),
   description: z.string(),
   type: z.enum(['predict', 'break-it', 'optimize', 'scenario']),
-})
+}).describe('An engaging thought-exercise or mini-puzzle requiring the user to apply knowledge they learned.')
 
 // ─── Code (DSA mode) ─────────────────────────────────────────────────────────
 
@@ -119,29 +193,37 @@ export const SceneCodeSchema = z.object({
   language: z.enum(['python', 'javascript']),
   source: z.string(),
   highlightByStep: z.array(z.number().int().nonnegative()),
-})
+}).describe('Source code block shown on the left panel when using code-left-canvas-right mode, tracking execution line-by-line via steps.')
 
 // ─── Scene (root) ─────────────────────────────────────────────────────────────
+
+// Helper: accepts T | null | undefined, outputs T | undefined.
+// Gemini sometimes emits explicit `null` for optional fields; Zod's .optional()
+// rejects null (only accepts undefined), so we coerce null → undefined here.
+const nullish = <T extends z.ZodTypeAny>(schema: T) =>
+  schema.optional().or(z.null().transform((): undefined => undefined))
 
 export const SceneSchema = z.object({
   id: z.string(),
   title: z.string(),
   type: SceneTypeSchema,
   layout: SceneLayoutSchema,
-  description: z.string().optional(),
-  category: z.string().optional(),
-  tags: z.array(z.string()).optional(),
-  code: SceneCodeSchema.optional(),
+  description: nullish(z.string()),
+  category: nullish(z.string()),
+  tags: nullish(z.array(z.string())),
+  code: nullish(SceneCodeSchema),
   visuals: z.array(VisualSchema),
   steps: z.array(StepSchema),
   controls: z.array(ControlSchema),
   explanation: z.array(ExplanationSectionSchema),
   popups: z.array(PopupSchema),
-  challenges: z.array(ChallengeSchema).optional(),
-  complexity: z
-    .object({ time: z.string().optional(), space: z.string().optional() })
-    .optional(),
-})
+  challenges: nullish(z.array(ChallengeSchema)),
+  complexity: nullish(
+    z.object({ time: z.string().optional(), space: z.string().optional() }),
+  ),
+}).describe(
+  'A complete Insyte scene representing an interactive, playback-based educational visualization. Contains declarations for UI controls, layout nodes, explanations, actions, and the full timeline of steps required to animate it.',
+)
 
 // ─── Parse helpers ────────────────────────────────────────────────────────────
 
