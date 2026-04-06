@@ -1,6 +1,6 @@
-# Phase 11 — Supabase Integration
+# Phase 11 — Supabase Integration + User Accounts
 
-**Goal:** Scene caching, topic index seeding, OG image generation, and IP-based rate limiting all live on Supabase.
+**Goal:** Full Supabase backend live — scene caching, auth, user profiles, saved simulations, rate limiting, and OG images. Signed-in users get unlimited free-tier AI usage with BYOK.
 
 **Entry criteria:** Phase 10 complete. All 24 simulations working. Supabase project created.
 
@@ -59,23 +59,45 @@ CREATE TABLE rate_limits (
 CREATE INDEX rate_limits_window_idx ON rate_limits(window_start);
 
 -- Repeat-query deduplication: maps normalized query hash → existing scene slug
--- Prevents duplicate AI generations for semantically identical queries
--- e.g., "how does dns work?" and "How does DNS work?" map to the same scene
 CREATE TABLE query_hashes (
-  hash             TEXT PRIMARY KEY,      -- SHA-256 of normalized query
-  normalized_query TEXT NOT NULL,          -- the normalized form (for debugging)
+  hash             TEXT PRIMARY KEY,
+  normalized_query TEXT NOT NULL,
   scene_slug       TEXT REFERENCES scenes(slug) ON DELETE CASCADE,
   created_at       TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE INDEX query_hashes_slug_idx ON query_hashes(scene_slug);
+
+-- User saved simulations
+CREATE TABLE saved_scenes (
+  id         UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id    UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  scene_slug TEXT REFERENCES scenes(slug) ON DELETE CASCADE NOT NULL,
+  saved_at   TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE (user_id, scene_slug)
+);
+
+CREATE INDEX saved_scenes_user_idx ON saved_scenes(user_id);
+
+-- User generated history
+CREATE TABLE user_generated_scenes (
+  id         UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id    UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  scene_slug TEXT REFERENCES scenes(slug) ON DELETE SET NULL,
+  query      TEXT,
+  generated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX user_generated_user_idx ON user_generated_scenes(user_id);
 ```
 
 - [ ] Row Level Security: enable RLS on all tables
   - `scenes`: allow anon read, service role write
   - `topic_index`: allow anon read, service role write
-  - `rate_limits`: service role only (server-side rate limit checks)
-  - `query_hashes`: allow anon read (slug lookup), service role write
+  - `rate_limits`: service role only
+  - `query_hashes`: allow anon read, service role write
+  - `saved_scenes`: users can read/write their own rows only
+  - `user_generated_scenes`: users can read their own rows, service role insert
 
 ### 11.3 — Supabase client
 Create `apps/web/src/lib/supabase.ts`:
@@ -155,6 +177,7 @@ export async function checkRateLimit(ip: string, endpoint: string): Promise<{
 - [ ] Hash IP with `crypto.createHash('sha256').update(ip).digest('hex')` (no raw IP storage)
 - [ ] Window resets every 24 hours from first request in that window
 - [ ] Rate limit header: `X-RateLimit-Remaining`, `X-RateLimit-Reset` in response
+- [ ] Signed-in users with BYOK key bypass rate limiting entirely
 
 Update `/api/generate` and `/api/chat` routes:
 - [ ] Extract client IP from `request.headers.get('x-forwarded-for')` or `request.ip`
@@ -164,7 +187,7 @@ Update `/api/generate` and `/api/chat` routes:
 ### 11.7 — OG image generation
 Create `apps/web/src/app/api/og/route.tsx`:
 - [ ] Uses `@vercel/og` (Satori) to generate a 1200×630 image
-- [ ] URL: `/api/og?slug=hash-tables` (or called internally)
+- [ ] URL: `/api/og?slug=hash-tables`
 - [ ] Design: dark `#0e0e13` background + glow blobs (SVG) + simulation title (Manrope) + type badge + "insyte" logo + tagline
 - [ ] Generates PNG, returns with `Content-Type: image/png` headers
 - [ ] Download font files (Manrope + Inter) for Satori (can't use Google Fonts CDN)
@@ -181,50 +204,76 @@ Update `TopicCard.tsx`:
 - [ ] `next/image` with `fill` mode and `object-cover`
 
 ### 11.8 — Update AI generation to save to Supabase
-Update `/api/generate/route.ts` (from Phase 7 stub):
-- [ ] After `streamObject` completes:
-  - Get the final accumulated Scene JSON
-  - Validate with `safeParseScene()`
-  - If valid: call `saveScene(scene, slug)`
-- [ ] `saveScene` runs in background (no `await` blocking response)
+Update `/api/generate/route.ts`:
+- [ ] After `streamObject` completes, validate + `saveScene(scene, slug)` fire-and-forget
+- [ ] If user is signed in: also insert into `user_generated_scenes`
 
 ### 11.9 — Hit count tracking
 Update `apps/web/src/app/s/[slug]/page.tsx`:
-- [ ] After scene loads (any source): fire `incrementHitCount(slug)` 
-- [ ] Fire-and-forget: `void incrementHitCount(slug)` (no blocking)
+- [ ] After scene loads (any source): fire `incrementHitCount(slug)` fire-and-forget
 
-### 11.10 — Repeat-query deduplication (query_hashes)
-Add query deduplication to `apps/web/src/lib/cache.ts` and update `/api/generate`:
-
-**Problem:** `nanoid` slugs mean `"how does consistent hashing work?"` and `"How Does Consistent Hashing Work?"` both trigger separate AI generations, doubling cost and polluting the `scenes` table.
-
-**Fix:** Hash the normalized query and check `query_hashes` before generating.
-
-- [ ] `normalizeQuery(query: string): string`
-  ```typescript
-  // lowercase, trim, collapse multiple spaces, strip trailing punctuation
-  query.toLowerCase().trim().replace(/\s+/g, ' ').replace(/[?.!]+$/, '')
-  ```
-- [ ] `hashQuery(normalized: string): string`
-  ```typescript
-  // SHA-256 via Web Crypto (works in Edge runtime and Node)
-  const buffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(normalized))
-  return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('')
-  ```
+### 11.10 — Repeat-query deduplication
+Add to `apps/web/src/lib/cache.ts`:
+- [ ] `normalizeQuery(query: string): string` — lowercase, trim, collapse spaces, strip trailing punctuation
+- [ ] `hashQuery(normalized: string): string` — SHA-256 via Web Crypto
 - [ ] `getCachedSlugForQuery(query: string): Promise<string | null>`
-  - Normalizes + hashes the query
-  - Queries `query_hashes` table: `.eq('hash', hash).select('scene_slug').single()`
-  - Returns the slug if found, null if not
-- [ ] `saveQueryHash(query: string, slug: string): Promise<void>`
-  - Normalizes + hashes the query
-  - Upserts `{ hash, normalized_query, scene_slug }` into `query_hashes`
-  - Fire-and-forget (no await)
+- [ ] `saveQueryHash(query: string, slug: string): Promise<void>` — fire-and-forget
 
 Update `/api/generate/route.ts`:
-- [ ] Before calling `generateScene()`:
-  1. Call `getCachedSlugForQuery(topic)` — if found, return `{ redirect: existingSlug }` (HTTP 200, not 307)
-  2. Client-side: on receiving `{ redirect }`, navigate to `/s/[existingSlug]` instead of generating
-- [ ] After `generateScene()` completes: call `saveQueryHash(topic, newSlug)` + `saveScene(scene, newSlug)` both fire-and-forget
+- [ ] Check `getCachedSlugForQuery(topic)` before generating — return redirect slug if found
+- [ ] After generation: call `saveQueryHash` + `saveScene` both fire-and-forget
+
+### 11.11 — Supabase Auth setup
+- [ ] Enable Email + Google OAuth providers in Supabase Auth dashboard
+- [ ] Configure redirect URLs: `https://insyte.dev/auth/callback`, `http://localhost:3000/auth/callback`
+- [ ] Create `apps/web/src/app/auth/callback/route.ts` — handles OAuth code exchange
+- [ ] Create `apps/web/src/lib/auth.ts`:
+  - `getUser(): Promise<User | null>` — reads session from Supabase
+  - `signInWithGoogle(): Promise<void>`
+  - `signInWithEmail(email, password): Promise<void>`
+  - `signUpWithEmail(email, password): Promise<void>`
+  - `signOut(): Promise<void>`
+
+### 11.12 — Auth store
+Create `apps/web/src/stores/slices/auth-slice.ts`:
+- [ ] State: `user: User | null`, `session: Session | null`, `loading: boolean`
+- [ ] Actions: `setUser`, `setSession`, `setLoading`
+- [ ] `initAuth()`: calls `supabase.auth.getSession()` on app mount, subscribes to `onAuthStateChange`
+- [ ] Wire into `useBoundStore`
+
+### 11.13 — Sign-in / sign-up modal
+Create `apps/web/src/components/auth/AuthModal.tsx`:
+- [ ] Glass morphism modal (Dialog component)
+- [ ] Two tabs: "Sign In" / "Sign Up"
+- [ ] Email + password fields
+- [ ] "Continue with Google" button (OAuth)
+- [ ] Error message display (invalid credentials, email taken, etc.)
+- [ ] Loading spinner during auth
+- [ ] Auto-close on successful auth
+- [ ] Trigger: `auth-store.openAuthModal()` — usable from any component
+
+### 11.14 — Navbar auth UI
+Update `Navbar.tsx`:
+- [ ] If signed out: "Sign In" text button → opens AuthModal
+- [ ] If signed in: avatar circle (initials or Google profile photo) with dropdown:
+  - "Profile" → `/profile`
+  - "Sign Out" → calls `signOut()`
+
+### 11.15 — User profile page
+Create `apps/web/src/app/profile/page.tsx`:
+- [ ] Protected route — redirect to `/` with AuthModal open if not signed in
+- [ ] Sections:
+  1. **Profile header**: avatar (initials circle), display name, email, joined date
+  2. **Saved Simulations**: grid of `TopicCard` (compact) for bookmarked scenes — fetched from `saved_scenes`
+  3. **Generated History**: list of last 20 AI-generated scenes from `user_generated_scenes` — title, date, link
+
+### 11.16 — Bookmark button on simulation pages
+Update `apps/web/src/app/s/[slug]/page.tsx` (or `SimulationNav`):
+- [ ] Bookmark icon button (heart or bookmark icon) in simulation nav
+- [ ] If not signed in: clicking opens AuthModal
+- [ ] If signed in: toggles save state — upserts/deletes from `saved_scenes`
+- [ ] Optimistic UI: immediately toggles icon, reverts on error
+- [ ] Framer Motion scale animation on toggle
 
 ---
 
@@ -234,17 +283,22 @@ Update `/api/generate/route.ts`:
 - [ ] Second user visiting the same AI-generated slug loads from Supabase (no AI cost)
 - [ ] Rate limit returns 429 after 15 API calls from same IP within 24 hours
 - [ ] OG image generated for `hash-tables` is available at Supabase Storage URL
-- [ ] `TopicCard` shows real OG image thumbnails (not placeholders)
+- [ ] `TopicCard` shows real OG image thumbnails
 - [ ] `hit_count` increments on every simulation page load
-- [ ] Typing "how does dns work?" and "How Does DNS Work?" both navigate to the same slug (query deduplication working)
+- [ ] Typing "how does dns work?" and "How Does DNS Work?" both navigate to the same slug
 - [ ] Gallery page loads topics from Supabase (verify in Network tab)
+- [ ] Google OAuth sign-in flow completes and user appears in navbar
+- [ ] Email sign-up creates user in Supabase Auth dashboard
+- [ ] `/profile` redirects to `/` with auth modal when not signed in
+- [ ] Saving a simulation appears in `/profile` Saved section
+- [ ] Generated history shows last 20 AI-generated scenes for the user
 
 ---
 
 ## Key Notes
 - **Never store raw IPs** — always hash before storing in rate_limits table
 - Supabase RLS is important — anon key must not be able to write to scenes or topic_index (only service key can write)
-- OG image generation with Satori has a 5MB edge function memory limit — keep the React component simple, don't load complex fonts
+- OG image generation with Satori has a 5MB edge function memory limit — keep the component simple, don't load complex fonts
 - The `og-images` Supabase Storage bucket should be public (no auth required to read images)
-- Phase 11 can be done in parallel with Phase 12 if desired — they have no shared dependencies
-- After seeding, the gallery's `searchTopics()` can be enhanced to use Supabase full-text search (`tsquery`) instead of client-side filtering
+- Auth modal should be reusable and triggerable from anywhere — don't hardcode it to specific pages
+- Signed-in users with BYOK bypass rate limiting — check session in `/api/generate` and `/api/chat` before the rate limit check

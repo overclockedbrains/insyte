@@ -1,130 +1,130 @@
-# Phase 12 — Settings + BYOK
+# Phase 12 — Polish + Responsive
 
-**Goal:** `/settings` page fully functional. Users can add API keys for 4 providers, select models, and all AI calls use their key instead of the server default.
+**Goal:** Core product (concept + LLD/HLD + auth) is mobile-first, pixel-perfect, and production-quality. All loading/error states handled. DSA-specific polish is deferred to Phase 13.
 
-**Entry criteria:** Phase 11 complete. AI generation and chat working with server Gemini key.
+**Entry criteria:** Phase 11 complete. All core features (generation, chat, auth, profiles) functional.
 
 ---
 
 ## Tasks
 
-### 12.1 — Settings page layout
-Create `apps/web/src/app/settings/page.tsx`:
-- [ ] Page title: "Settings" (`font-headline`)
-- [ ] Subtitle: "Customize your AI experience"
-- [ ] Layout: single column, max-w-2xl centered
-- [ ] Sections (glass-panel cards):
-  1. **AI Provider** — provider selection + model selection
-  2. **API Keys** — one input per provider
-  3. **Preferences** — animation speed default (future use)
-  4. **About** — version, GitHub link, open source note
-- [ ] `metadata`: title "Settings — insyte"
+### 12.1 — Mobile responsive pass (320px minimum)
 
-### 12.2 — Provider + model selector UI
-Create `apps/web/src/components/settings/ProviderSelector.tsx`:
-- [ ] 4 provider cards in a 2×2 grid:
-  - Gemini (Google) — with Google logo
-  - OpenAI — with OpenAI logo
-  - Anthropic — with Anthropic logo
-  - Groq — with Groq logo
-- [ ] Active provider: `border-primary/60 bg-surface-container-high`
-- [ ] Inactive: `border-outline-variant/20 bg-surface-container-low`
-- [ ] "Default (Free)" badge on Gemini card
-- [ ] Click: `settings-store.setProvider(provider)`
+**Landing page (`/`):**
+- [ ] Single column at `< md`: headline stack → input → popular chips → live demo below → how it works → features
+- [ ] LiveDemo: compact size (full-width, ~200px height), autoplay still visible
+- [ ] Headline font: reduce from `text-7xl` to `text-4xl` on mobile
+- [ ] Unified input: full-width, no expand animation needed (already full-width)
+- [ ] Popular chips: horizontal scroll (hide scrollbar), no wrapping
 
-Create `apps/web/src/components/settings/ModelSelector.tsx`:
-- [ ] Shows available models for the currently selected provider
-- [ ] Model options per provider:
-  - Gemini: `gemini-2.0-flash` (free), `gemini-1.5-pro`
-  - OpenAI: `gpt-4o-mini`, `gpt-4o`, `gpt-4-turbo`
-  - Anthropic: `claude-3-5-haiku-20241022`, `claude-3-5-sonnet-20241022`, `claude-opus-4-6`
-  - Groq: `llama-3.1-70b-versatile`, `llama-3.1-8b-instant`, `mixtral-8x7b-32768`
-- [ ] Pill button group: active = `bg-secondary text-on-secondary`
-- [ ] `settings-store.setModel(model)` on select
+**Gallery page (`/explore`):**
+- [ ] Search bar: full-width
+- [ ] TopicRow: horizontal scroll works on touch, no scroll arrows (use native scroll)
+- [ ] TopicCard: min-width `160px`, height proportional
 
-### 12.3 — API key inputs
-Create `apps/web/src/components/settings/ApiKeyInput.tsx`:
-- [ ] Props: `provider: Provider`, `hasKey: boolean`
-- [ ] Password input (`type="password"`) for key entry
-- [ ] Show/hide toggle button (eye icon)
-- [ ] Placeholder: `"sk-..." | "AIza..." | "claude-..." | "gsk_..."`
-- [ ] If `hasKey: true`: show "✓ Key saved" badge + "Clear" button instead of input
-- [ ] Save button: `settings-store.setApiKey(provider, key)`
-- [ ] Clear button: `settings-store.clearApiKey(provider)` + clears input
-- [ ] Validation: minimum length check before saving (e.g. 20+ chars)
-- [ ] Security note: `"Your key is stored locally in your browser. It is never sent to our servers."`
+**Simulation page (`/s/[slug]`):**
+- [ ] Mobile layout: `[SimulationNav] [Canvas: 100% width, 55vh] [CompactPlaybackBar] [Explanation/Code] [Challenges]`
+- [ ] Canvas: fixed 55vh on mobile, scrollable explanation below
+- [ ] `CompactPlaybackBar`: `[◀ ▶/⏸ ▶ • speed]` all in one horizontal bar, `py-2` compact height
+- [ ] `TextLeftCanvasRight` on mobile: canvas at top, ExplanationPanel scrolls below
+- [ ] `CodeLeftCanvasRight` on mobile: tab switcher `["Code" | "Visual"]` — only one panel visible at a time
+- [ ] `CanvasOnly` on mobile: canvas full-width, floating explanation card moves to bottom of page
 
-### 12.4 — Active provider indicator
-Create `apps/web/src/components/settings/ActiveProviderStatus.tsx`:
-- [ ] Shows which provider is currently active
-- [ ] If BYOK key set for selected provider: "Using your [Provider] key · Unlimited requests"
-- [ ] If no BYOK key, using Gemini default: "Using insyte's Gemini key · [N] requests remaining today"
-  - Fetches remaining count from a simple `/api/rate-limit-status` endpoint (returns remaining count for current IP)
-- [ ] Live green dot when active, grey dot when no key configured
+**Auth modal on mobile:**
+- [ ] Full-screen sheet on `< sm`
+- [ ] Input fields large enough for touch (min 44px tap target)
 
-### 12.5 — `/api/rate-limit-status` endpoint
-Create `apps/web/src/app/api/rate-limit-status/route.ts`:
-- [ ] GET handler
-- [ ] Returns `{ remaining: number, resetAt: string }` for current IP
-- [ ] Uses same `checkRateLimit` logic (read-only, no increment)
+**Chat on mobile:**
+- [ ] `ChatButton`: `bottom-4 right-4` (slightly inset from edge)
+- [ ] Chat opens as bottom sheet (Sheet component, 60% height)
+- [ ] Input area stays above keyboard (use `env(safe-area-inset-bottom)` CSS)
 
-### 12.6 — Wire BYOK into AI client
-Update `apps/web/src/ai/providers/index.ts`:
-- [ ] `getAIProvider(settings: SettingsState): { model: LanguageModel }`
-- [ ] Logic:
-  ```typescript
-  const { provider, model, apiKeys } = settings
-  const key = apiKeys[provider]
-  
-  if (provider === 'gemini') {
-    // BYOK key or server key (server key only available server-side)
-    return getGeminiProvider(key || undefined)
-  }
-  if (provider === 'openai' && key) return getOpenAIProvider(key)
-  if (provider === 'anthropic' && key) return getAnthropicProvider(key)
-  if (provider === 'groq' && key) return getGroqProvider(key)
-  
-  // Fallback: Gemini Flash server default
-  return getGeminiProvider()
-  ```
+**Profile page on mobile:**
+- [ ] Saved grid: 2 columns
+- [ ] Generated history: full-width list
 
-**BYOK flow (browser-direct for non-Gemini):**
-- [ ] When user has BYOK key for OpenAI/Anthropic/Groq:
-  - AI generation runs **client-side** directly (no server route)
-  - `streamObject` called from browser with user's key
-  - Scene JSON generated client-side, then `saveScene()` called to cache it
-- [ ] For Gemini: can use server route (key stays server-side) or browser-direct with user's key
+### 12.2 — Tablet layout (768–1024px)
+- [ ] Simulation page: same as desktop but left panel 40% instead of 35%
+- [ ] Gallery: 2-column grid for TopicCards in each row (instead of horizontal scroll)
+- [ ] Landing: two-column hero maintained, but spacing reduced
+- [ ] Profile: 3-column saved grid
 
-### 12.7 — "Clear all keys" button
-In settings page:
-- [ ] `"Clear All Keys"` button at bottom of API Keys section
-- [ ] Confirmation dialog: "Are you sure? This will remove all saved API keys."
-- [ ] On confirm: `settings-store.clearAllKeys()` (call `clearApiKey` for each provider)
+### 12.3 — Loading states
 
-### 12.8 — Navbar indicator for active provider
-In `Navbar.tsx`:
-- [ ] Small indicator dot next to Settings icon: 
-  - Green = BYOK key active
-  - Grey = using default free tier
-- [ ] Tooltip on hover: "Using [provider] key" or "Using free tier"
+**Suspense boundaries:**
+- [ ] `apps/web/src/app/s/[slug]/loading.tsx` — skeleton: shimmer nav, shimmer canvas card, shimmer left panel
+- [ ] `apps/web/src/app/explore/loading.tsx` — skeleton: search bar placeholder + 2 row skeletons with card shimmer
+- [ ] `apps/web/src/app/profile/loading.tsx` — skeleton: avatar placeholder, grid skeletons
+
+**Skeleton components:**
+- [ ] `SkeletonCard.tsx`: shimmer placeholder matching TopicCard dimensions
+- [ ] `SkeletonSimulation.tsx`: full simulation layout skeleton
+- [ ] `SkeletonText.tsx`: multiple lines of shimmer text with variable widths
+- [ ] All skeletons: `animate-pulse bg-surface-container-high rounded`
+
+**Loading states in components:**
+- [ ] `PlaybackControls`: disabled + grayed out when `totalSteps === 0`
+- [ ] `ControlBar`: disabled state when scene streaming
+- [ ] `ChallengesSection`: skeleton while scene streaming
+- [ ] `ChatCard`: disabled send button while AI responding
+- [ ] `UnifiedInput`: loading spinner while navigating after submit
+
+**Empty states:**
+- [ ] `/profile` saved section empty state: "No saved simulations yet. Bookmark one to see it here."
+- [ ] `/profile` history empty state: "No simulations generated yet. Try typing a concept on the home page."
+
+### 12.4 — Error boundaries
+Create `apps/web/src/components/ErrorBoundary.tsx`:
+- [ ] React class component (required for error boundary)
+- [ ] Catches render errors in SceneRenderer + all primitive components
+- [ ] Fallback UI: glass-panel card with "Simulation failed to render" + retry button + error details (collapsible, dev-only)
+- [ ] `apps/web/src/app/s/[slug]/error.tsx` — Next.js error page for route-level errors
+- [ ] API route error handling:
+  - `/api/generate`: catch AI errors, return 500 with `{ error: 'Generation failed', retryable: true }`
+  - `/api/chat`: catch errors, return 500
+
+### 12.5 — Share button
+Update `SimulationNav.tsx`:
+- [ ] Share button: copies `window.location.href` to clipboard on click
+- [ ] Success feedback: button text changes to "✓ Copied!" for 2 seconds (Framer Motion)
+- [ ] On devices without clipboard API: shows URL in a modal for manual copy
+
+### 12.6 — OG meta tags on simulation pages
+Update `apps/web/src/app/s/[slug]/page.tsx` `generateMetadata`:
+- [ ] `title`: `"[Simulation Title] — insyte"`
+- [ ] `description`: first sentence of first explanation section
+- [ ] `openGraph.image`: `og_image_url` from Supabase record, fallback to `/og-image.png`
+- [ ] `openGraph.url`: `https://insyte.dev/s/[slug]`
+- [ ] `twitter.card`: `summary_large_image`
+
+### 12.7 — Accessibility pass
+- [ ] Keyboard navigation: all interactive elements reachable via Tab
+- [ ] Focus rings: visible on all focusable elements (`focus-visible:ring-2 ring-primary`)
+- [ ] Aria labels: on all icon-only buttons (share, expand, bookmark, chat toggle)
+- [ ] Modal focus trap: auth modal and chat card trap focus correctly
+- [ ] Screen reader test: VoiceOver/NVDA pass on landing + simulation page
+
+### 12.8 — Performance pass
+- [ ] Bundle analysis: `pnpm build && pnpm analyze` — identify any unexpectedly large chunks
+- [ ] Lazy load heavy components: `ChatCard`, `ChallengesSection` with `dynamic(() => import(...))`
+- [ ] Image optimization: all `<img>` tags replaced with `<Image>` from `next/image`
+- [ ] Font optimization: verify `display: swap` on all font imports
 
 ---
 
 ## Exit Criteria
-- [ ] `/settings` page renders with all 4 provider cards, model selector, and API key inputs
-- [ ] Pasting an OpenAI key → "✓ Key saved" badge appears
-- [ ] Selecting OpenAI provider + saved key → AI generation uses that key (verify in Network tab: no server call for key usage)
-- [ ] Clear button removes key from localStorage and resets to server default
-- [ ] `settings-store` persists across page refreshes (localStorage)
-- [ ] Active provider status shows correct remaining count when using free tier
-- [ ] Rate limit status endpoint returns correct remaining count
-- [ ] BYOK user: no rate limit messages (unlimited)
+- [ ] Mobile (375px): all pages usable, no horizontal overflow, no overlapping elements
+- [ ] Tablet (768px): all pages functional with appropriate layout adjustments
+- [ ] All loading skeletons appear correctly before data arrives
+- [ ] Error boundary shows fallback UI on render errors (test by temporarily throwing in a primitive)
+- [ ] Share button copies URL on mobile Safari
+- [ ] Empty states appear correctly on `/profile` for new users
+- [ ] No console errors in production build
+- [ ] Lighthouse score: Performance > 80, Accessibility > 90
 
 ---
 
 ## Key Notes
-- **Keys are NEVER logged** — the key input should have `autocomplete="off"`. Server routes that receive an `X-API-Key` header should never log headers.
-- The `show/hide toggle` on API key input is important UX — developers are used to password managers autofilling API keys
-- For the BYOK client-direct approach: Vercel AI SDK works client-side when the key is passed directly. No special server setup needed.
-- The "Security note" about local storage is important for user trust — make it prominent
-- Test that clearing a key actually removes it from localStorage (not just from React state)
+- DSA-specific responsive work (Pyodide loader, code/visual tab switcher) is handled in Phase 13
+- The chat bottom sheet on mobile must account for iOS safe area insets — test on real device or Safari simulator
+- `CodeLeftCanvasRight` tab switcher is the trickiest mobile layout — build it as a controlled component driven by local `activeTab` state, not media query display hacks
