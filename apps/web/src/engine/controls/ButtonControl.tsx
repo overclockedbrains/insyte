@@ -20,7 +20,7 @@ export function ButtonControl({ control, onChange }: ButtonControlProps) {
     variant = 'primary',
     actionValue = 'triggered',
     goToStep,
-  } = control.config as {
+  } = (control.config || {}) as {
     variant?: 'primary' | 'destructive' | 'secondary'
     actionValue?: string
     goToStep?: number

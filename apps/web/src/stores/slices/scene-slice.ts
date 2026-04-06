@@ -70,9 +70,10 @@ export const createSceneSlice: StateCreator<
   promoteDraftField: (field) =>
     set((state) => {
       if (!state.draftScene || state.draftScene[field] === undefined) return
-      if (!state.activeScene) return
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ;(state.activeScene as any)[field] = state.draftScene[field]
+      if (state.activeScene) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ;(state.activeScene as any)[field] = state.draftScene[field]
+      }
       state.streamedFields.add(field as string)
     }),
 

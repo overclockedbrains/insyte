@@ -58,7 +58,7 @@ export function ControlBar({ controls }: ControlBarProps) {
       {statControls.length > 0 && (
         <div className="flex items-center gap-3 ml-auto flex-wrap">
           {statControls.map((control) => {
-            const cfg = control.config as Record<string, unknown>
+            const cfg = (control.config || {}) as Record<string, unknown>
             return (
               <StatCard
                 key={control.id}

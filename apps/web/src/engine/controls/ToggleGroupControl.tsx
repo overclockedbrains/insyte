@@ -13,7 +13,7 @@ interface ToggleGroupControlProps {
 }
 
 export function ToggleGroupControl({ control, value, onChange }: ToggleGroupControlProps) {
-  const { options = [] } = control.config as { options?: string[]; defaultValue?: string }
+  const { options = [] } = (control.config || {}) as { options?: string[]; defaultValue?: string }
   const activeOption = typeof value === 'string' ? value : (options[0] ?? '')
 
   return (

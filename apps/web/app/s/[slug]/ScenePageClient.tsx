@@ -1,23 +1,29 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useCallback } from 'react'
 import type { Scene } from '@insyte/scene-engine'
 import { useBoundStore } from '@/src/stores/store'
 import { SimulationLayout } from '@/src/engine/SimulationLayout'
+import { StreamingView } from '@/components/simulation/StreamingView'
 
 // ─── ScenePageClient ──────────────────────────────────────────────────────────
 // Client boundary for the simulation page.
-// Responsibilities:
-//   1. Load the scene into the global store on mount
-//   2. Set totalSteps so PlaybackControls knows the range
-//   3. Clean up (clearScene + reset expand) on unmount
-//   4. Render SimulationLayout (the Phase 4 orchestrator)
+//
+// Two modes:
+//   1. scene provided  → load into store, render SimulationLayout immediately
+//   2. scene = null    → start AI streaming, show skeleton → fill-in → SimulationLayout
 
 interface ScenePageClientProps {
-  scene: Scene
+  scene: Scene | null
+  /** Original topic text — used as the AI generation prompt (streaming mode only) */
+  topic?: string
+  /** The URL slug — passed through for context (streaming mode only) */
+  slug?: string
 }
 
-export function ScenePageClient({ scene }: ScenePageClientProps) {
+// ─── Static mode (pre-built or cached scene) ──────────────────────────────────
+
+function StaticScene({ scene }: { scene: Scene }) {
   const setScene = useBoundStore((s) => s.setScene)
   const clearScene = useBoundStore((s) => s.clearScene)
   const setTotalSteps = useBoundStore((s) => s.setTotalSteps)
@@ -27,16 +33,49 @@ export function ScenePageClient({ scene }: ScenePageClientProps) {
   useEffect(() => {
     setScene(scene)
     setTotalSteps(scene.steps.length)
-    reset()         // reset currentStep → 0, isPlaying → false
+    reset()
     setExpanded(false)
 
     return () => {
       clearScene()
-      setTotalSteps(0)  // show "— / —" immediately after unmount
+      setTotalSteps(0)
       reset()
       setExpanded(false)
     }
   }, [scene, setScene, clearScene, setTotalSteps, reset, setExpanded])
 
   return <SimulationLayout scene={scene} />
+}
+
+// ─── ScenePageClient ──────────────────────────────────────────────────────────
+
+export function ScenePageClient({ scene, topic, slug }: ScenePageClientProps) {
+  const clearScene = useBoundStore((s) => s.clearScene)
+  const reset = useBoundStore((s) => s.reset)
+  const setExpanded = useBoundStore((s) => s.setExpanded)
+  const setTotalSteps = useBoundStore((s) => s.setTotalSteps)
+
+  // Clean up store on unmount regardless of mode
+  const cleanup = useCallback(() => {
+    clearScene()
+    setTotalSteps(0)
+    reset()
+    setExpanded(false)
+  }, [clearScene, setTotalSteps, reset, setExpanded])
+
+  useEffect(() => {
+    return cleanup
+  }, [cleanup])
+
+  if (scene) {
+    return <StaticScene scene={scene} />
+  }
+
+  // Streaming mode: topic is the AI prompt, slug is the URL slug
+  return (
+    <StreamingView
+      topic={topic ?? slug ?? 'unknown topic'}
+      slug={slug ?? ''}
+    />
+  )
 }

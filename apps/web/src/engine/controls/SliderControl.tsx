@@ -13,7 +13,7 @@ interface SliderControlProps {
 }
 
 export function SliderControl({ control, value, onChange }: SliderControlProps) {
-  const { min = 0, max = 100, step = 1 } = control.config as {
+  const { min = 0, max = 100, step = 1 } = (control.config || {}) as {
     min?: number
     max?: number
     step?: number

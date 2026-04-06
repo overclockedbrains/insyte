@@ -13,7 +13,7 @@ interface InputControlProps {
 }
 
 export function InputControl({ control, value, onChange }: InputControlProps) {
-  const { placeholder = 'Enter value...' } = control.config as { placeholder?: string }
+  const { placeholder = 'Enter value...' } = (control.config || {}) as { placeholder?: string }
   const [draft, setDraft] = useState<string>(String(value ?? ''))
 
   const handleCommit = () => {

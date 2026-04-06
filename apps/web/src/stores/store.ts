@@ -1,6 +1,9 @@
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 import { persist } from 'zustand/middleware'
+import { enableMapSet } from 'immer'
+
+enableMapSet()
 
 import { createSceneSlice, type SceneSlice } from './slices/scene-slice'
 import { createPlaybackSlice, type PlaybackSlice } from './slices/playback-slice'
