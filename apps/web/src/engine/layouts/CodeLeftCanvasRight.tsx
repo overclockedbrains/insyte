@@ -16,12 +16,13 @@ import { usePlayback } from '../hooks/usePlayback'
 
 interface Props {
   scene: Scene
+  onRerunWithCustomInput?: (() => void) | null
 }
 
-export function CodeLeftCanvasRight({ scene }: Props) {
+export function CodeLeftCanvasRight({ scene, onRerunWithCustomInput = null }: Props) {
   const isExpanded = useBoundStore((s) => s.isExpanded)
   const { currentStep } = usePlayback()
-  const [mobileTab, setMobileTab] = useState<'code' | 'visual' | 'explain'>('visual')
+  const [mobileTab, setMobileTab] = useState<'code' | 'visual'>('visual')
 
   return (
     <div className="flex flex-col md:flex-row h-full w-full min-h-0">
@@ -64,7 +65,7 @@ export function CodeLeftCanvasRight({ scene }: Props) {
 
         {/* Right: canvas */}
         <motion.div layout className="flex-1 min-w-0 min-h-0 flex flex-col p-4">
-          <CanvasCard scene={scene} />
+          <CanvasCard scene={scene} onRerunWithCustomInput={onRerunWithCustomInput} />
         </motion.div>
       </div>
 
@@ -73,7 +74,7 @@ export function CodeLeftCanvasRight({ scene }: Props) {
         {/* Tab bar */}
         <div className="flex-shrink-0 px-4 pt-3 pb-0 border-b border-outline-variant/20">
           <div className="flex gap-1 p-0.5 bg-surface-container-lowest rounded-xl border border-outline-variant/20 w-fit">
-            {(['visual', 'code', 'explain'] as const).map((tab) => {
+            {(['visual', 'code'] as const).map((tab) => {
               const isActive = mobileTab === tab
               return (
                 <motion.button
@@ -111,7 +112,7 @@ export function CodeLeftCanvasRight({ scene }: Props) {
                 transition={{ duration: 0.2 }}
                 className="absolute inset-0 flex flex-col p-3"
               >
-                <CanvasCard scene={scene} />
+                <CanvasCard scene={scene} onRerunWithCustomInput={onRerunWithCustomInput} />
               </motion.div>
             )}
             {mobileTab === 'code' && (
@@ -121,27 +122,24 @@ export function CodeLeftCanvasRight({ scene }: Props) {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.2 }}
-                className="absolute inset-0 overflow-hidden"
+                className="absolute inset-0 overflow-y-auto custom-scrollbar"
               >
                 {scene.code ? (
-                  <CodePanel code={scene.code} currentStep={currentStep} />
+                  <div className="h-full flex flex-col min-h-0">
+                    <div className="flex-shrink-0 border-b border-outline-variant/20">
+                      <CodePanel code={scene.code} currentStep={currentStep} />
+                    </div>
+                    {scene.explanation && scene.explanation.length > 0 && (
+                      <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+                        <ExplanationPanel sections={scene.explanation} currentStep={currentStep} />
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <div className="flex items-center justify-center h-full p-6">
                     <p className="text-sm text-on-surface-variant">No code attached to this scene.</p>
                   </div>
                 )}
-              </motion.div>
-            )}
-            {mobileTab === 'explain' && (
-              <motion.div
-                key="explain-tab"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.2 }}
-                className="absolute inset-0 overflow-y-auto"
-              >
-                <ExplanationPanel sections={scene.explanation} currentStep={currentStep} />
               </motion.div>
             )}
           </AnimatePresence>

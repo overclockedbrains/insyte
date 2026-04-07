@@ -16,7 +16,7 @@ export function generateStaticParams() {
 
 interface Props {
   params: Promise<{ slug: string }>
-  searchParams: Promise<{ topic?: string }>
+  searchParams: Promise<{ topic?: string; mode?: string; lang?: string }>
 }
 
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
@@ -70,7 +70,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 
 export default async function SimulationPage({ params, searchParams }: Props) {
   const { slug } = await params
-  const { topic: topicParam } = await searchParams
+  const { topic: topicParam, mode, lang } = await searchParams
 
   // 1. Try pre-built static scene
   const staticScene = await loadStaticScene(slug)
@@ -86,6 +86,19 @@ export default async function SimulationPage({ params, searchParams }: Props) {
     // Fire hit count increment for cached scenes
     incrementHitCount(slug)
     return <ScenePageClient scene={cachedScene} slug={slug} />
+  }
+
+  if (mode === 'dsa') {
+    const dsaLanguage: 'python' | 'javascript' =
+      lang === 'javascript' ? 'javascript' : 'python'
+    return (
+      <ScenePageClient
+        scene={null}
+        slug={slug}
+        isDSAMode
+        dsaLanguage={dsaLanguage}
+      />
+    )
   }
 
   // 3. AI-generated slug — extract topic and start streaming on the client

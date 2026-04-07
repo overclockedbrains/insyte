@@ -1,0 +1,222 @@
+{
+  "id": "sliding-window-max",
+  "title": "Sliding Window Maximum",
+  "type": "dsa-trace",
+  "layout": "code-left-canvas-right",
+  "description": "Use a monotonic deque to track max of each window.",
+  "category": "Data Structures & Algorithms",
+  "tags": ["sliding-window", "deque", "array"],
+  "code": {
+    "language": "python",
+    "source": "from collections import deque\n\ndef max_sliding_window(nums, k):\n    dq = deque()  # stores indices\n    out = []\n    for i, num in enumerate(nums):\n        while dq and dq[0] <= i - k:\n            dq.popleft()\n        while dq and nums[dq[-1]] <= num:\n            dq.pop()\n        dq.append(i)\n        if i >= k - 1:\n            out.append(nums[dq[0]])\n    return out\n\nfinalResult = max_sliding_window([1, 3, -1, -3, 5, 3, 6, 7], 3)\n",
+    "highlightByStep": [0, 5, 8, 9, 10, 6, 8, 11]
+  },
+  "visuals": [
+    {
+      "id": "nums",
+      "type": "array",
+      "label": "nums",
+      "position": { "x": 50, "y": 34 },
+      "initialState": {
+        "cells": [
+          { "value": 1, "highlight": "default" },
+          { "value": 3, "highlight": "default" },
+          { "value": -1, "highlight": "default" },
+          { "value": -3, "highlight": "default" },
+          { "value": 5, "highlight": "default" },
+          { "value": 3, "highlight": "default" },
+          { "value": 6, "highlight": "default" },
+          { "value": 7, "highlight": "default" }
+        ],
+        "windowHighlight": { "start": 0, "end": 2 }
+      }
+    },
+    {
+      "id": "dq",
+      "type": "queue",
+      "label": "Monotonic deque (indices)",
+      "position": { "x": 50, "y": 70 },
+      "initialState": { "items": [] }
+    },
+    {
+      "id": "op",
+      "type": "text-badge",
+      "label": "Operation",
+      "position": { "x": 50, "y": 12 },
+      "initialState": { "text": "Build first window", "style": "default" }
+    }
+  ],
+  "steps": [
+    { "index": 0, "actions": [], "duration": 900 },
+    {
+      "index": 1,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "i=0 add index 0", "style": "highlight" } },
+        { "target": "dq", "action": "set", "params": { "items": ["0"], "highlight": 0 } },
+        {
+          "target": "nums",
+          "action": "set",
+          "params": {
+            "cells": [
+              { "value": 1, "highlight": "active" },
+              { "value": 3, "highlight": "default" },
+              { "value": -1, "highlight": "default" },
+              { "value": -3, "highlight": "default" },
+              { "value": 5, "highlight": "default" },
+              { "value": 3, "highlight": "default" },
+              { "value": 6, "highlight": "default" },
+              { "value": 7, "highlight": "default" }
+            ],
+            "windowHighlight": { "start": 0, "end": 2 }
+          }
+        }
+      ],
+      "duration": 900
+    },
+    {
+      "index": 2,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "i=1 pop smaller 1, push 1", "style": "highlight" } },
+        { "target": "dq", "action": "set", "params": { "items": ["1"], "highlight": 0 } },
+        {
+          "target": "nums",
+          "action": "set",
+          "params": {
+            "cells": [
+              { "value": 1, "highlight": "miss" },
+              { "value": 3, "highlight": "active" },
+              { "value": -1, "highlight": "default" },
+              { "value": -3, "highlight": "default" },
+              { "value": 5, "highlight": "default" },
+              { "value": 3, "highlight": "default" },
+              { "value": 6, "highlight": "default" },
+              { "value": 7, "highlight": "default" }
+            ],
+            "windowHighlight": { "start": 0, "end": 2 }
+          }
+        }
+      ],
+      "duration": 1000
+    },
+    {
+      "index": 3,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "i=2 push -1, first max = 3", "style": "success" } },
+        { "target": "dq", "action": "set", "params": { "items": ["1", "2"], "highlight": 0 } },
+        {
+          "target": "nums",
+          "action": "set",
+          "params": {
+            "cells": [
+              { "value": 1, "highlight": "default" },
+              { "value": 3, "highlight": "hit" },
+              { "value": -1, "highlight": "active" },
+              { "value": -3, "highlight": "default" },
+              { "value": 5, "highlight": "default" },
+              { "value": 3, "highlight": "default" },
+              { "value": 6, "highlight": "default" },
+              { "value": 7, "highlight": "default" }
+            ],
+            "windowHighlight": { "start": 0, "end": 2 }
+          }
+        }
+      ],
+      "duration": 1000
+    },
+    {
+      "index": 4,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Slide to window [1..3], keep deque monotonic", "style": "highlight" } },
+        { "target": "dq", "action": "set", "params": { "items": ["1", "2", "3"], "highlight": 0 } },
+        { "target": "nums", "action": "set", "params": { "windowHighlight": { "start": 1, "end": 3 } } }
+      ],
+      "duration": 900
+    },
+    {
+      "index": 5,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "i=4 value=5 pops 3,-1 and 3 from deque", "style": "highlight" } },
+        { "target": "dq", "action": "set", "params": { "items": ["4"], "highlight": 0 } },
+        {
+          "target": "nums",
+          "action": "set",
+          "params": {
+            "cells": [
+              { "value": 1, "highlight": "default" },
+              { "value": 3, "highlight": "default" },
+              { "value": -1, "highlight": "miss" },
+              { "value": -3, "highlight": "miss" },
+              { "value": 5, "highlight": "active" },
+              { "value": 3, "highlight": "default" },
+              { "value": 6, "highlight": "default" },
+              { "value": 7, "highlight": "default" }
+            ],
+            "windowHighlight": { "start": 2, "end": 4 }
+          }
+        }
+      ],
+      "duration": 1100
+    },
+    {
+      "index": 6,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "i=6 value=6 becomes new max", "style": "highlight" } },
+        { "target": "dq", "action": "set", "params": { "items": ["6"], "highlight": 0 } },
+        { "target": "nums", "action": "set", "params": { "windowHighlight": { "start": 4, "end": 6 } } }
+      ],
+      "duration": 1000
+    },
+    {
+      "index": 7,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "i=7 value=7 final max list: [3,3,5,5,6,7]", "style": "success" } },
+        { "target": "dq", "action": "set", "params": { "items": ["7"], "highlight": 0 } },
+        { "target": "nums", "action": "set", "params": { "windowHighlight": { "start": 5, "end": 7 } } }
+      ],
+      "duration": 1000
+    }
+  ],
+  "controls": [],
+  "explanation": [
+    {
+      "heading": "Monotonic Deque",
+      "body": "Deque stores candidate indices in decreasing value order.",
+      "appearsAtStep": 0
+    },
+    {
+      "heading": "Drop Out-of-window and Smaller Values",
+      "body": "Before appending current index, pop expired front and pop smaller values from back.",
+      "appearsAtStep": 4
+    },
+    {
+      "heading": "Front Is Window Max",
+      "body": "At each full window, `nums[dq[0]]` is the maximum.",
+      "appearsAtStep": 7
+    }
+  ],
+  "popups": [
+    { "id": "swm-1", "attachTo": "dq", "text": "Deque keeps max candidate at front", "showAtStep": 2, "hideAtStep": 7, "style": "info" },
+    { "id": "swm-2", "attachTo": "nums", "text": "Window max output grows each slide", "showAtStep": 3, "hideAtStep": 8, "style": "success" }
+  ],
+  "challenges": [
+    {
+      "id": "swm-c1",
+      "title": "Edge k=1",
+      "description": "What should output be when window size is 1?",
+      "type": "predict"
+    },
+    {
+      "id": "swm-c2",
+      "title": "All Equal Values",
+      "description": "How does deque behavior change when all values are equal?",
+      "type": "scenario"
+    },
+    {
+      "id": "swm-c3",
+      "title": "Heap Alternative",
+      "description": "Compare deque approach with a max-heap implementation.",
+      "type": "optimize"
+    }
+  ],
+  "complexity": { "time": "O(n)", "space": "O(k)" }
+}

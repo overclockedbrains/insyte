@@ -28,6 +28,18 @@ const SCENE_MODULES: Record<string, () => Promise<{ default: unknown }>> = {
   'twitter-feed': () => import('@/src/content/scenes/hld/twitter-feed.json'),
   'consistent-hashing': () => import('@/src/content/scenes/hld/consistent-hashing.json'),
   'chat-system': () => import('@/src/content/scenes/hld/chat-system.json'),
+
+  // Phase 12 — DSA simulations
+  'two-sum': () => import('@/src/content/scenes/dsa/two-sum.json'),
+  'valid-parentheses': () => import('@/src/content/scenes/dsa/valid-parentheses.json'),
+  'binary-search': () => import('@/src/content/scenes/dsa/binary-search.json'),
+  'reverse-linked-list': () => import('@/src/content/scenes/dsa/reverse-linked-list.json'),
+  'climbing-stairs': () => import('@/src/content/scenes/dsa/climbing-stairs.json'),
+  'merge-sort': () => import('@/src/content/scenes/dsa/merge-sort.json'),
+  'level-order-bfs': () => import('@/src/content/scenes/dsa/level-order-bfs.json'),
+  'number-of-islands': () => import('@/src/content/scenes/dsa/number-of-islands.json'),
+  'sliding-window-max': () => import('@/src/content/scenes/dsa/sliding-window-max.json'),
+  'fibonacci-recursive': () => import('@/src/content/scenes/dsa/fibonacci-recursive.json'),
 }
 
 // ─── Public API ───────────────────────────────────────────────────────────────

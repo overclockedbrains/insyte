@@ -22,16 +22,23 @@ import { usePlaybackTick } from './hooks/usePlayback'
 
 interface SimulationLayoutProps {
   scene: Scene
+  onRerunWithCustomInput?: (() => void) | null
 }
 
 // ─── Layout selector ──────────────────────────────────────────────────────────
 
-function LayoutComponent({ scene }: { scene: Scene }) {
+function LayoutComponent({
+  scene,
+  onRerunWithCustomInput,
+}: {
+  scene: Scene
+  onRerunWithCustomInput?: (() => void) | null
+}) {
   switch (scene.layout) {
     case 'text-left-canvas-right':
       return <TextLeftCanvasRight scene={scene} />
     case 'code-left-canvas-right':
-      return <CodeLeftCanvasRight scene={scene} />
+      return <CodeLeftCanvasRight scene={scene} onRerunWithCustomInput={onRerunWithCustomInput} />
     case 'canvas-only':
     default:
       return <CanvasOnly scene={scene} />
@@ -40,7 +47,10 @@ function LayoutComponent({ scene }: { scene: Scene }) {
 
 // ─── SimulationLayout ─────────────────────────────────────────────────────────
 
-export function SimulationLayout({ scene }: SimulationLayoutProps) {
+export function SimulationLayout({
+  scene,
+  onRerunWithCustomInput = null,
+}: SimulationLayoutProps) {
   // Drive auto-advance ticks at the orchestrator level (exactly once)
   usePlaybackTick()
 
@@ -80,7 +90,7 @@ export function SimulationLayout({ scene }: SimulationLayoutProps) {
           isExpanded ? 'pointer-events-none' : '',
         ].join(' ')}
       >
-        <LayoutComponent scene={scene} />
+        <LayoutComponent scene={scene} onRerunWithCustomInput={onRerunWithCustomInput} />
       </div>
 
       {/* ── Challenges section (below the canvas fold, page scrolls to reach) ── */}

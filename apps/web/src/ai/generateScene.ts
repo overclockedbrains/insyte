@@ -59,7 +59,8 @@ export function generateScene(
 ): SceneStreamResult {
   return streamText({
     model,
-    output: Output.object({ schema: SceneSchema }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    output: Output.object({ schema: SceneSchema as any }),
     system: SCENE_SYSTEM_PROMPT,
     prompt: buildSceneUserMessage(topic),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

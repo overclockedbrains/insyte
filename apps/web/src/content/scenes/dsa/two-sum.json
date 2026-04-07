@@ -1,0 +1,187 @@
+{
+  "id": "two-sum",
+  "title": "Two Sum",
+  "type": "dsa-trace",
+  "layout": "code-left-canvas-right",
+  "description": "Trace the O(n) hashmap solution for Two Sum.",
+  "category": "Data Structures & Algorithms",
+  "tags": ["array", "hashmap", "two-sum"],
+  "code": {
+    "language": "python",
+    "source": "def two_sum(nums, target):\n    seen = {}\n    for i, num in enumerate(nums):\n        need = target - num\n        if need in seen:\n            return [seen[need], i]\n        seen[num] = i\n    return []\n\nfinalResult = two_sum([2, 7, 11, 15], 9)\n",
+    "highlightByStep": [0, 2, 4, 5, 10]
+  },
+  "visuals": [
+    {
+      "id": "nums",
+      "type": "array",
+      "label": "nums",
+      "position": { "x": 50, "y": 30 },
+      "initialState": {
+        "cells": [
+          { "value": 2, "highlight": "default" },
+          { "value": 7, "highlight": "default" },
+          { "value": 11, "highlight": "default" },
+          { "value": 15, "highlight": "default" }
+        ]
+      }
+    },
+    {
+      "id": "seen-map",
+      "type": "hashmap",
+      "label": "seen",
+      "position": { "x": 50, "y": 62 },
+      "initialState": { "entries": [] }
+    },
+    {
+      "id": "op",
+      "type": "text-badge",
+      "label": "Operation",
+      "position": { "x": 50, "y": 12 },
+      "initialState": { "text": "Start scan from left", "style": "default" }
+    }
+  ],
+  "steps": [
+    { "index": 0, "actions": [], "duration": 900 },
+    {
+      "index": 1,
+      "actions": [
+        {
+          "target": "op",
+          "action": "set",
+          "params": { "text": "i=0, num=2, need=7, miss -> store 2:0", "style": "highlight" }
+        },
+        {
+          "target": "nums",
+          "action": "set",
+          "params": {
+            "cells": [
+              { "value": 2, "highlight": "active" },
+              { "value": 7, "highlight": "default" },
+              { "value": 11, "highlight": "default" },
+              { "value": 15, "highlight": "default" }
+            ]
+          }
+        },
+        {
+          "target": "seen-map",
+          "action": "set",
+          "params": {
+            "entries": [{ "key": "2", "value": "0", "highlight": "insert" }]
+          }
+        }
+      ],
+      "duration": 1200
+    },
+    {
+      "index": 2,
+      "actions": [
+        {
+          "target": "op",
+          "action": "set",
+          "params": { "text": "i=1, num=7, need=2, hit in seen", "style": "success" }
+        },
+        {
+          "target": "nums",
+          "action": "set",
+          "params": {
+            "cells": [
+              { "value": 2, "highlight": "hit" },
+              { "value": 7, "highlight": "active" },
+              { "value": 11, "highlight": "default" },
+              { "value": 15, "highlight": "default" }
+            ]
+          }
+        },
+        {
+          "target": "seen-map",
+          "action": "set",
+          "params": {
+            "entries": [{ "key": "2", "value": "0", "highlight": "hit" }]
+          }
+        }
+      ],
+      "duration": 1200
+    },
+    {
+      "index": 3,
+      "actions": [
+        {
+          "target": "op",
+          "action": "set",
+          "params": { "text": "Return indices [0, 1]", "style": "success" }
+        }
+      ],
+      "duration": 900
+    },
+    {
+      "index": 4,
+      "actions": [
+        {
+          "target": "op",
+          "action": "set",
+          "params": { "text": "Done in one pass with hashmap", "style": "default" }
+        }
+      ],
+      "duration": 900
+    }
+  ],
+  "controls": [],
+  "explanation": [
+    {
+      "heading": "Core Idea",
+      "body": "Use a hashmap to store numbers seen so far and their indices.",
+      "appearsAtStep": 0
+    },
+    {
+      "heading": "Lookup Before Insert",
+      "body": "For each number, check whether the complement is already in `seen` before inserting the current value.",
+      "appearsAtStep": 1,
+      "callout": "Lookup-first avoids reusing the same element."
+    },
+    {
+      "heading": "Hit Means Answer",
+      "body": "At `i=1`, complement `2` is present, so we immediately return the pair of indices.",
+      "appearsAtStep": 2
+    }
+  ],
+  "popups": [
+    {
+      "id": "p1",
+      "attachTo": "seen-map",
+      "text": "Store values we've seen",
+      "showAtStep": 1,
+      "hideAtStep": 2,
+      "style": "info"
+    },
+    {
+      "id": "p2",
+      "attachTo": "seen-map",
+      "text": "Complement found -> early return",
+      "showAtStep": 2,
+      "hideAtStep": 4,
+      "style": "success"
+    }
+  ],
+  "challenges": [
+    {
+      "id": "two-sum-c1",
+      "title": "Duplicate Values",
+      "description": "What changes when `nums = [3, 3]` and `target = 6`?",
+      "type": "predict"
+    },
+    {
+      "id": "two-sum-c2",
+      "title": "No Solution Case",
+      "description": "How should the trace and return value look when no pair exists?",
+      "type": "scenario"
+    },
+    {
+      "id": "two-sum-c3",
+      "title": "Space Tradeoff",
+      "description": "Compare this O(n) hashmap approach with O(n^2) brute force.",
+      "type": "optimize"
+    }
+  ],
+  "complexity": { "time": "O(n)", "space": "O(n)" }
+}

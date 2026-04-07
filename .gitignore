@@ -43,6 +43,12 @@ pnpm-debug.log*
 apps/web/public/pyodide/*.js
 apps/web/public/pyodide/*.wasm
 apps/web/public/pyodide/*.data
+!apps/web/public/pyodide/pyodide.js
+!apps/web/public/pyodide/pyodide.asm.js
+!apps/web/public/pyodide/pyodide.asm.wasm
+!apps/web/public/pyodide/pyodide-lock.json
+!apps/web/public/pyodide/python_stdlib.zip
+!apps/web/public/pyodide/pyodide.mjs
 
 # ─── Claude Code settings (local) ───────────────────────────────────────────
 .claude/settings.local.json

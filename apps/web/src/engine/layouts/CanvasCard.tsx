@@ -27,6 +27,7 @@ import ReactMarkdown from 'react-markdown'
 
 interface CanvasCardProps {
   scene: Scene
+  onRerunWithCustomInput?: (() => void) | null
 }
 
 // ─── Inner canvas visualization ───────────────────────────────────────────────
@@ -252,7 +253,13 @@ function CanvasVisualization({ scene, controlValues }: { scene: Scene; controlVa
 
 // ─── Shared card content ──────────────────────────────────────────────────────
 
-function CardContent({ scene }: { scene: Scene }) {
+function CardContent({
+  scene,
+  onRerunWithCustomInput,
+}: {
+  scene: Scene
+  onRerunWithCustomInput?: (() => void) | null
+}) {
   // Lift control values here so both CanvasVisualization and ControlBar share state.
   // This enables showWhen conditions to filter visuals based on current control values.
   const { values, setControlValue } = useControlValues(scene.controls)
@@ -269,7 +276,12 @@ function CardContent({ scene }: { scene: Scene }) {
 
       {/* Bottom: ControlBar */}
       <div className="flex-shrink-0">
-        <ControlBar controls={scene.controls} values={values} onChange={setControlValue} />
+        <ControlBar
+          controls={scene.controls}
+          values={values}
+          onChange={setControlValue}
+          onRerunWithCustomInput={onRerunWithCustomInput}
+        />
       </div>
     </>
   )
@@ -277,7 +289,7 @@ function CardContent({ scene }: { scene: Scene }) {
 
 // ─── CanvasCard ────────────────────────────────────────────────────────────────
 
-export function CanvasCard({ scene }: CanvasCardProps) {
+export function CanvasCard({ scene, onRerunWithCustomInput = null }: CanvasCardProps) {
   const isExpanded = useBoundStore((s) => s.isExpanded)
   const setExpanded = useBoundStore((s) => s.setExpanded)
   const isPatchGlowing = useBoundStore((s) => s.isPatchGlowing)
@@ -326,7 +338,7 @@ export function CanvasCard({ scene }: CanvasCardProps) {
         }}
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       >
-        <CardContent scene={scene} />
+        <CardContent scene={scene} onRerunWithCustomInput={onRerunWithCustomInput} />
       </motion.div>
 
       {/* ── Expanded overlay (fixed, above everything) ── */}
@@ -352,7 +364,7 @@ export function CanvasCard({ scene }: CanvasCardProps) {
                   'flex flex-col',
                 ].join(' ')}
               >
-                <CardContent scene={scene} />
+                <CardContent scene={scene} onRerunWithCustomInput={onRerunWithCustomInput} />
               </motion.div>
             )}
           </AnimatePresence>,

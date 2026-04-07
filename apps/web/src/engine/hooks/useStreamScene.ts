@@ -175,7 +175,8 @@ export function useStreamScene(): UseStreamSceneResult {
 
   const { submit, stop } = useObject({
     api: '/api/generate',
-    schema: SceneSchema,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    schema: SceneSchema as any,
     headers: (): Record<string, string> => {
       const { provider, model, apiKeys } = useBoundStore.getState()
       const key = apiKeys[provider]

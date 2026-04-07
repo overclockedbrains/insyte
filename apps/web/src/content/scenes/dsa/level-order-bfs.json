@@ -1,0 +1,208 @@
+{
+  "id": "level-order-bfs",
+  "title": "Binary Tree Level Order Traversal",
+  "type": "dsa-trace",
+  "layout": "code-left-canvas-right",
+  "description": "Traverse tree level by level using a queue (BFS).",
+  "category": "Data Structures & Algorithms",
+  "tags": ["bfs", "tree", "queue"],
+  "code": {
+    "language": "python",
+    "source": "from collections import deque\n\ndef level_order(root):\n    if not root:\n        return []\n    result = []\n    q = deque([root])\n    while q:\n        level_size = len(q)\n        level = []\n        for _ in range(level_size):\n            node = q.popleft()\n            level.append(node.val)\n            if node.left:\n                q.append(node.left)\n            if node.right:\n                q.append(node.right)\n        result.append(level)\n    return result\n",
+    "highlightByStep": [6, 7, 10, 12, 13, 10, 12, 13, 15, 16]
+  },
+  "visuals": [
+    {
+      "id": "tree",
+      "type": "tree",
+      "label": "Binary Tree",
+      "position": { "x": 50, "y": 40 },
+      "initialState": {
+        "rootId": "n1",
+        "nodes": [
+          { "id": "n1", "value": "1", "children": ["n2", "n3"], "x": 0, "y": 0 },
+          { "id": "n2", "value": "2", "children": ["n4", "n5"], "x": -2, "y": 1 },
+          { "id": "n3", "value": "3", "children": ["n6"], "x": 2, "y": 1 },
+          { "id": "n4", "value": "4", "children": [], "x": -3, "y": 2 },
+          { "id": "n5", "value": "5", "children": [], "x": -1, "y": 2 },
+          { "id": "n6", "value": "6", "children": [], "x": 2, "y": 2 }
+        ]
+      }
+    },
+    {
+      "id": "queue",
+      "type": "queue",
+      "label": "Queue",
+      "position": { "x": 50, "y": 72 },
+      "initialState": { "items": ["1"], "highlight": 0 }
+    },
+    {
+      "id": "op",
+      "type": "text-badge",
+      "label": "Operation",
+      "position": { "x": 50, "y": 12 },
+      "initialState": { "text": "Initialize queue with root", "style": "default" }
+    }
+  ],
+  "steps": [
+    { "index": 0, "actions": [], "duration": 900 },
+    {
+      "index": 1,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Dequeue node 1", "style": "highlight" } },
+        { "target": "queue", "action": "set", "params": { "items": [], "highlight": 0 } },
+        {
+          "target": "tree",
+          "action": "set",
+          "params": {
+            "rootId": "n1",
+            "nodes": [
+              { "id": "n1", "value": "1", "children": ["n2", "n3"], "x": 0, "y": 0, "highlight": "var(--color-primary)" },
+              { "id": "n2", "value": "2", "children": ["n4", "n5"], "x": -2, "y": 1 },
+              { "id": "n3", "value": "3", "children": ["n6"], "x": 2, "y": 1 },
+              { "id": "n4", "value": "4", "children": [], "x": -3, "y": 2 },
+              { "id": "n5", "value": "5", "children": [], "x": -1, "y": 2 },
+              { "id": "n6", "value": "6", "children": [], "x": 2, "y": 2 }
+            ]
+          }
+        }
+      ],
+      "duration": 900
+    },
+    {
+      "index": 2,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Enqueue children 2,3", "style": "highlight" } },
+        { "target": "queue", "action": "set", "params": { "items": ["2", "3"], "highlight": 0 } }
+      ],
+      "duration": 900
+    },
+    {
+      "index": 3,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Dequeue node 2", "style": "highlight" } },
+        { "target": "queue", "action": "set", "params": { "items": ["3"], "highlight": 0 } },
+        {
+          "target": "tree",
+          "action": "set",
+          "params": {
+            "rootId": "n1",
+            "nodes": [
+              { "id": "n1", "value": "1", "children": ["n2", "n3"], "x": 0, "y": 0, "highlight": "var(--color-secondary)" },
+              { "id": "n2", "value": "2", "children": ["n4", "n5"], "x": -2, "y": 1, "highlight": "var(--color-primary)" },
+              { "id": "n3", "value": "3", "children": ["n6"], "x": 2, "y": 1 },
+              { "id": "n4", "value": "4", "children": [], "x": -3, "y": 2 },
+              { "id": "n5", "value": "5", "children": [], "x": -1, "y": 2 },
+              { "id": "n6", "value": "6", "children": [], "x": 2, "y": 2 }
+            ]
+          }
+        }
+      ],
+      "duration": 900
+    },
+    {
+      "index": 4,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Enqueue children 4,5", "style": "highlight" } },
+        { "target": "queue", "action": "set", "params": { "items": ["3", "4", "5"], "highlight": 0 } }
+      ],
+      "duration": 900
+    },
+    {
+      "index": 5,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Dequeue node 3", "style": "highlight" } },
+        { "target": "queue", "action": "set", "params": { "items": ["4", "5"], "highlight": 0 } },
+        {
+          "target": "tree",
+          "action": "set",
+          "params": {
+            "rootId": "n1",
+            "nodes": [
+              { "id": "n1", "value": "1", "children": ["n2", "n3"], "x": 0, "y": 0, "highlight": "var(--color-secondary)" },
+              { "id": "n2", "value": "2", "children": ["n4", "n5"], "x": -2, "y": 1, "highlight": "var(--color-secondary)" },
+              { "id": "n3", "value": "3", "children": ["n6"], "x": 2, "y": 1, "highlight": "var(--color-primary)" },
+              { "id": "n4", "value": "4", "children": [], "x": -3, "y": 2 },
+              { "id": "n5", "value": "5", "children": [], "x": -1, "y": 2 },
+              { "id": "n6", "value": "6", "children": [], "x": 2, "y": 2 }
+            ]
+          }
+        }
+      ],
+      "duration": 900
+    },
+    {
+      "index": 6,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Enqueue child 6", "style": "highlight" } },
+        { "target": "queue", "action": "set", "params": { "items": ["4", "5", "6"], "highlight": 0 } }
+      ],
+      "duration": 900
+    },
+    {
+      "index": 7,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Process leaf nodes 4,5,6", "style": "highlight" } },
+        { "target": "queue", "action": "set", "params": { "items": [], "highlight": 0 } }
+      ],
+      "duration": 1000
+    },
+    {
+      "index": 8,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Collected levels: [1],[2,3],[4,5,6]", "style": "success" } }
+      ],
+      "duration": 900
+    },
+    {
+      "index": 9,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "BFS complete", "style": "default" } }
+      ],
+      "duration": 800
+    }
+  ],
+  "controls": [],
+  "explanation": [
+    {
+      "heading": "Queue Drives BFS",
+      "body": "A queue ensures nodes are visited in first-in, first-out order per level.",
+      "appearsAtStep": 0
+    },
+    {
+      "heading": "Level Grouping",
+      "body": "At each outer loop, `level_size` snapshots current queue length to isolate one level.",
+      "appearsAtStep": 2
+    },
+    {
+      "heading": "Traversal Order",
+      "body": "Final level order is `[[1], [2,3], [4,5,6]]`.",
+      "appearsAtStep": 8
+    }
+  ],
+  "popups": [
+    { "id": "lobfs-1", "attachTo": "queue", "text": "Queue stores next frontier", "showAtStep": 2, "hideAtStep": 7, "style": "info" },
+    { "id": "lobfs-2", "attachTo": "tree", "text": "Nodes visited level by level", "showAtStep": 5, "hideAtStep": 9, "style": "success" }
+  ],
+  "challenges": [
+    {
+      "id": "lobfs-c1",
+      "title": "Skewed Tree",
+      "description": "How does queue size evolve for a linked-list-shaped tree?",
+      "type": "predict"
+    },
+    {
+      "id": "lobfs-c2",
+      "title": "DFS Comparison",
+      "description": "Why does DFS not naturally produce level order without extra tracking?",
+      "type": "scenario"
+    },
+    {
+      "id": "lobfs-c3",
+      "title": "Memory Peak",
+      "description": "What determines BFS peak memory usage on a large tree?",
+      "type": "optimize"
+    }
+  ],
+  "complexity": { "time": "O(n)", "space": "O(w)" }
+}

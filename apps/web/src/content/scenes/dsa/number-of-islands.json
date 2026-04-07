@@ -1,0 +1,196 @@
+{
+  "id": "number-of-islands",
+  "title": "Number of Islands",
+  "type": "dsa-trace",
+  "layout": "code-left-canvas-right",
+  "description": "Count connected land components with flood fill on a grid.",
+  "category": "Data Structures & Algorithms",
+  "tags": ["grid", "dfs", "flood-fill"],
+  "code": {
+    "language": "python",
+    "source": "def num_islands(grid):\n    rows, cols = len(grid), len(grid[0])\n    seen = set()\n\n    def dfs(r, c):\n        if r < 0 or c < 0 or r >= rows or c >= cols:\n            return\n        if grid[r][c] == '0' or (r, c) in seen:\n            return\n        seen.add((r, c))\n        dfs(r + 1, c)\n        dfs(r - 1, c)\n        dfs(r, c + 1)\n        dfs(r, c - 1)\n\n    islands = 0\n    for r in range(rows):\n        for c in range(cols):\n            if grid[r][c] == '1' and (r, c) not in seen:\n                islands += 1\n                dfs(r, c)\n    return islands\n",
+    "highlightByStep": [14, 17, 18, 8, 19, 17, 19, 20]
+  },
+  "visuals": [
+    {
+      "id": "grid",
+      "type": "grid",
+      "label": "Grid",
+      "position": { "x": 48, "y": 45 },
+      "initialState": {
+        "rows": 4,
+        "cols": 5,
+        "cells": [
+          [{ "state": "start", "value": "1" }, { "state": "start", "value": "1" }, { "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }],
+          [{ "state": "start", "value": "1" }, { "state": "start", "value": "1" }, { "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }],
+          [{ "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }, { "state": "start", "value": "1" }, { "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }],
+          [{ "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }, { "state": "start", "value": "1" }, { "state": "start", "value": "1" }]
+        ],
+        "currentCell": { "row": 0, "col": 0 }
+      }
+    },
+    {
+      "id": "frontier",
+      "type": "queue",
+      "label": "DFS frontier (conceptual)",
+      "position": { "x": 52, "y": 74 },
+      "initialState": { "items": [] }
+    },
+    {
+      "id": "op",
+      "type": "text-badge",
+      "label": "Operation",
+      "position": { "x": 50, "y": 12 },
+      "initialState": { "text": "Scan for unvisited land", "style": "default" }
+    }
+  ],
+  "steps": [
+    { "index": 0, "actions": [], "duration": 900 },
+    {
+      "index": 1,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Found island #1 at (0,0)", "style": "highlight" } },
+        { "target": "frontier", "action": "set", "params": { "items": ["(0,0)"], "highlight": 0 } },
+        { "target": "grid", "action": "set", "params": { "currentCell": { "row": 0, "col": 0 } } }
+      ],
+      "duration": 900
+    },
+    {
+      "index": 2,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Flood-fill connected land cells", "style": "highlight" } },
+        {
+          "target": "grid",
+          "action": "set",
+          "params": {
+            "rows": 4,
+            "cols": 5,
+            "cells": [
+              [{ "state": "visited", "value": "1" }, { "state": "visited", "value": "1" }, { "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }],
+              [{ "state": "visited", "value": "1" }, { "state": "visited", "value": "1" }, { "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }],
+              [{ "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }, { "state": "start", "value": "1" }, { "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }],
+              [{ "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }, { "state": "start", "value": "1" }, { "state": "start", "value": "1" }]
+            ],
+            "currentCell": { "row": 1, "col": 1 }
+          }
+        },
+        { "target": "frontier", "action": "set", "params": { "items": [] } }
+      ],
+      "duration": 1200
+    },
+    {
+      "index": 3,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Continue scanning: find island #2 at (2,2)", "style": "highlight" } },
+        { "target": "frontier", "action": "set", "params": { "items": ["(2,2)"], "highlight": 0 } },
+        { "target": "grid", "action": "set", "params": { "currentCell": { "row": 2, "col": 2 } } }
+      ],
+      "duration": 900
+    },
+    {
+      "index": 4,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Island #2 has no land neighbors", "style": "default" } },
+        {
+          "target": "grid",
+          "action": "set",
+          "params": {
+            "rows": 4,
+            "cols": 5,
+            "cells": [
+              [{ "state": "visited", "value": "1" }, { "state": "visited", "value": "1" }, { "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }],
+              [{ "state": "visited", "value": "1" }, { "state": "visited", "value": "1" }, { "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }],
+              [{ "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }, { "state": "visited", "value": "1" }, { "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }],
+              [{ "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }, { "state": "start", "value": "1" }, { "state": "start", "value": "1" }]
+            ],
+            "currentCell": { "row": 2, "col": 2 }
+          }
+        },
+        { "target": "frontier", "action": "set", "params": { "items": [] } }
+      ],
+      "duration": 900
+    },
+    {
+      "index": 5,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Find island #3 at (3,3)", "style": "highlight" } },
+        { "target": "frontier", "action": "set", "params": { "items": ["(3,3)", "(3,4)"], "highlight": 0 } },
+        { "target": "grid", "action": "set", "params": { "currentCell": { "row": 3, "col": 3 } } }
+      ],
+      "duration": 900
+    },
+    {
+      "index": 6,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Flood-fill marks final island", "style": "success" } },
+        {
+          "target": "grid",
+          "action": "set",
+          "params": {
+            "rows": 4,
+            "cols": 5,
+            "cells": [
+              [{ "state": "visited", "value": "1" }, { "state": "visited", "value": "1" }, { "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }],
+              [{ "state": "visited", "value": "1" }, { "state": "visited", "value": "1" }, { "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }],
+              [{ "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }, { "state": "visited", "value": "1" }, { "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }],
+              [{ "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }, { "state": "wall", "value": "0" }, { "state": "visited", "value": "1" }, { "state": "visited", "value": "1" }]
+            ],
+            "currentCell": { "row": 3, "col": 4 }
+          }
+        },
+        { "target": "frontier", "action": "set", "params": { "items": [] } }
+      ],
+      "duration": 1100
+    },
+    {
+      "index": 7,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Scan complete -> islands = 3", "style": "success" } }
+      ],
+      "duration": 900
+    }
+  ],
+  "controls": [],
+  "explanation": [
+    {
+      "heading": "Connected Components on a Grid",
+      "body": "Every unvisited land cell starts a new island count.",
+      "appearsAtStep": 0
+    },
+    {
+      "heading": "Flood Fill",
+      "body": "DFS/BFS marks all reachable land from the start cell so it is counted once.",
+      "appearsAtStep": 2
+    },
+    {
+      "heading": "Final Count",
+      "body": "After full scan, each component contributed exactly one increment.",
+      "appearsAtStep": 7
+    }
+  ],
+  "popups": [
+    { "id": "noi-1", "attachTo": "grid", "text": "Visited cells are already counted", "showAtStep": 2, "hideAtStep": 6, "style": "info" },
+    { "id": "noi-2", "attachTo": "grid", "text": "Total islands = 3", "showAtStep": 7, "hideAtStep": 8, "style": "success" }
+  ],
+  "challenges": [
+    {
+      "id": "noi-c1",
+      "title": "Diagonal Cells",
+      "description": "Would diagonal adjacency change the island count?",
+      "type": "predict"
+    },
+    {
+      "id": "noi-c2",
+      "title": "Mutating Input",
+      "description": "What tradeoff exists if you mark visited directly inside `grid`?",
+      "type": "scenario"
+    },
+    {
+      "id": "noi-c3",
+      "title": "Large Sparse Grid",
+      "description": "How would you optimize memory for very large sparse maps?",
+      "type": "optimize"
+    }
+  ],
+  "complexity": { "time": "O(rows*cols)", "space": "O(rows*cols)" }
+}

@@ -1,0 +1,171 @@
+{
+  "id": "reverse-linked-list",
+  "title": "Reverse Linked List",
+  "type": "dsa-trace",
+  "layout": "code-left-canvas-right",
+  "description": "Reverse a singly linked list by rewiring pointers in-place.",
+  "category": "Data Structures & Algorithms",
+  "tags": ["linked-list", "pointers", "reverse"],
+  "code": {
+    "language": "python",
+    "source": "class Node:\n    def __init__(self, value, nxt=None):\n        self.value = value\n        self.next = nxt\n\ndef reverse(head):\n    prev = None\n    curr = head\n    while curr:\n        nxt = curr.next\n        curr.next = prev\n        prev = curr\n        curr = nxt\n    return prev\n\nfinalResult = reverse(Node(1, Node(2, Node(3, Node(4)))))\n",
+    "highlightByStep": [5, 8, 9, 10, 11, 12]
+  },
+  "visuals": [
+    {
+      "id": "list",
+      "type": "linked-list",
+      "label": "Linked List",
+      "position": { "x": 50, "y": 50 },
+      "initialState": {
+        "headId": "n1",
+        "nodes": [
+          { "id": "n1", "value": "1", "next": "n2" },
+          { "id": "n2", "value": "2", "next": "n3" },
+          { "id": "n3", "value": "3", "next": "n4" },
+          { "id": "n4", "value": "4", "next": null }
+        ]
+      }
+    },
+    {
+      "id": "op",
+      "type": "text-badge",
+      "label": "Pointer state",
+      "position": { "x": 50, "y": 14 },
+      "initialState": { "text": "prev=None, curr=1", "style": "default" }
+    }
+  ],
+  "steps": [
+    { "index": 0, "actions": [], "duration": 900 },
+    {
+      "index": 1,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Take nxt=2, point 1 -> None", "style": "highlight" } },
+        {
+          "target": "list",
+          "action": "set",
+          "params": {
+            "headId": "n1",
+            "nodes": [
+              { "id": "n1", "value": "1", "next": null },
+              { "id": "n2", "value": "2", "next": "n3" },
+              { "id": "n3", "value": "3", "next": "n4" },
+              { "id": "n4", "value": "4", "next": null }
+            ]
+          }
+        }
+      ],
+      "duration": 1200
+    },
+    {
+      "index": 2,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Move prev=1, curr=2", "style": "highlight" } },
+        {
+          "target": "list",
+          "action": "set",
+          "params": {
+            "headId": "n2",
+            "nodes": [
+              { "id": "n2", "value": "2", "next": "n1" },
+              { "id": "n1", "value": "1", "next": null },
+              { "id": "n3", "value": "3", "next": "n4" },
+              { "id": "n4", "value": "4", "next": null }
+            ]
+          }
+        }
+      ],
+      "duration": 1200
+    },
+    {
+      "index": 3,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Rewire 3 -> 2", "style": "highlight" } },
+        {
+          "target": "list",
+          "action": "set",
+          "params": {
+            "headId": "n3",
+            "nodes": [
+              { "id": "n3", "value": "3", "next": "n2" },
+              { "id": "n2", "value": "2", "next": "n1" },
+              { "id": "n1", "value": "1", "next": null },
+              { "id": "n4", "value": "4", "next": null }
+            ]
+          }
+        }
+      ],
+      "duration": 1200
+    },
+    {
+      "index": 4,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Rewire 4 -> 3", "style": "success" } },
+        {
+          "target": "list",
+          "action": "set",
+          "params": {
+            "headId": "n4",
+            "nodes": [
+              { "id": "n4", "value": "4", "next": "n3" },
+              { "id": "n3", "value": "3", "next": "n2" },
+              { "id": "n2", "value": "2", "next": "n1" },
+              { "id": "n1", "value": "1", "next": null }
+            ]
+          }
+        }
+      ],
+      "duration": 1200
+    },
+    {
+      "index": 5,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "curr=None -> return new head (4)", "style": "success" } }
+      ],
+      "duration": 900
+    }
+  ],
+  "controls": [],
+  "explanation": [
+    {
+      "heading": "Three Pointers",
+      "body": "Maintain `prev`, `curr`, and `nxt` so links can be reversed safely.",
+      "appearsAtStep": 0
+    },
+    {
+      "heading": "Rewire One Node Per Iteration",
+      "body": "Each loop detaches `curr` from forward direction and points it to `prev`.",
+      "appearsAtStep": 1
+    },
+    {
+      "heading": "In-place Reverse",
+      "body": "No extra list is created. Pointer rewiring gives O(1) auxiliary space.",
+      "appearsAtStep": 4
+    }
+  ],
+  "popups": [
+    { "id": "rll-1", "attachTo": "list", "text": "Direction starts flipping from head", "showAtStep": 1, "hideAtStep": 3, "style": "info" },
+    { "id": "rll-2", "attachTo": "list", "text": "New head is old tail", "showAtStep": 4, "hideAtStep": 6, "style": "success" }
+  ],
+  "challenges": [
+    {
+      "id": "rll-c1",
+      "title": "Single Node",
+      "description": "What does the loop do when the list has exactly one node?",
+      "type": "predict"
+    },
+    {
+      "id": "rll-c2",
+      "title": "Cycle Risk",
+      "description": "What bug appears if you update `curr = nxt` before rewiring `curr.next`?",
+      "type": "break-it"
+    },
+    {
+      "id": "rll-c3",
+      "title": "Recursive Variant",
+      "description": "Can you reverse recursively and compare stack space usage?",
+      "type": "optimize"
+    }
+  ],
+  "complexity": { "time": "O(n)", "space": "O(1)" }
+}

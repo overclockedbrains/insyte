@@ -12,6 +12,13 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vendored third-party runtime assets:
+    "public/pyodide/**",
+    // Generated service-worker artifacts:
+    "public/sw.js",
+    "public/sw.js.map",
+    "public/swe-worker-*.js",
+    "public/swe-worker-*.js.map",
   ]),
 ]);
 

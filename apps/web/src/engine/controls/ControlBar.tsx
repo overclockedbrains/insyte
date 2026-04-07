@@ -19,9 +19,15 @@ interface ControlBarProps {
   controls: Control[]
   values: Record<string, ControlValue>
   onChange: (id: string, val: ControlValue) => void
+  onRerunWithCustomInput?: (() => void) | null
 }
 
-export function ControlBar({ controls, values, onChange: setControlValue }: ControlBarProps) {
+export function ControlBar({
+  controls,
+  values,
+  onChange: setControlValue,
+  onRerunWithCustomInput = null,
+}: ControlBarProps) {
 
   if (controls.length === 0) return null
 
@@ -57,8 +63,17 @@ export function ControlBar({ controls, values, onChange: setControlValue }: Cont
       })}
 
       {/* Stat cards pushed to the right */}
-      {statControls.length > 0 && (
+      {(onRerunWithCustomInput || statControls.length > 0) && (
         <div className="flex items-center gap-3 ml-auto flex-wrap">
+          {onRerunWithCustomInput && (
+            <button
+              type="button"
+              onClick={onRerunWithCustomInput}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold text-on-primary bg-primary/90 hover:bg-primary transition-colors cursor-pointer"
+            >
+              Re-run with custom input
+            </button>
+          )}
           {statControls.map((control) => {
             const cfg = (control.config || {}) as Record<string, unknown>
             return (

@@ -5,6 +5,7 @@ import type { Scene } from '@insyte/scene-engine'
 import { useBoundStore } from '@/src/stores/store'
 import { SimulationLayout } from '@/src/engine/SimulationLayout'
 import { StreamingView } from '@/components/simulation/StreamingView'
+import { DSAPipelineView } from './DSAPipelineView'
 
 // ─── ScenePageClient ──────────────────────────────────────────────────────────
 // Client boundary for the simulation page.
@@ -19,6 +20,8 @@ interface ScenePageClientProps {
   topic?: string
   /** The URL slug — passed through for bookmark + context */
   slug?: string
+  isDSAMode?: boolean
+  dsaLanguage?: 'python' | 'javascript'
 }
 
 // ─── Static mode (pre-built or cached scene) ──────────────────────────────────
@@ -49,7 +52,13 @@ function StaticScene({ scene }: { scene: Scene }) {
 
 // ─── ScenePageClient ──────────────────────────────────────────────────────────
 
-export function ScenePageClient({ scene, topic, slug }: ScenePageClientProps) {
+export function ScenePageClient({
+  scene,
+  topic,
+  slug,
+  isDSAMode = false,
+  dsaLanguage = 'python',
+}: ScenePageClientProps) {
   const clearScene = useBoundStore((s) => s.clearScene)
   const reset = useBoundStore((s) => s.reset)
   const setExpanded = useBoundStore((s) => s.setExpanded)
@@ -69,6 +78,10 @@ export function ScenePageClient({ scene, topic, slug }: ScenePageClientProps) {
 
   if (scene) {
     return <StaticScene scene={scene} />
+  }
+
+  if (isDSAMode && slug) {
+    return <DSAPipelineView slug={slug} languageHint={dsaLanguage} />
   }
 
   // Streaming mode: topic is the AI prompt, slug is the URL slug

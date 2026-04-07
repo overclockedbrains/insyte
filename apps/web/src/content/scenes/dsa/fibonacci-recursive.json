@@ -1,0 +1,265 @@
+{
+  "id": "fibonacci-recursive",
+  "title": "Fibonacci (Recursive + Memoization)",
+  "type": "dsa-trace",
+  "layout": "code-left-canvas-right",
+  "description": "Recursion tree with memoization pruning for fibonacci.",
+  "category": "Data Structures & Algorithms",
+  "tags": ["recursion-tree", "memoization", "fibonacci"],
+  "code": {
+    "language": "python",
+    "source": "def fib(n, memo):\n    if n in memo:\n        return memo[n]\n    if n <= 1:\n        return n\n    memo[n] = fib(n - 1, memo) + fib(n - 2, memo)\n    return memo[n]\n\nfinalResult = fib(5, {})\n",
+    "highlightByStep": [0, 1, 3, 5, 5, 5, 1, 5, 6, 8]
+  },
+  "visuals": [
+    {
+      "id": "tree",
+      "type": "recursion-tree",
+      "label": "Call tree",
+      "position": { "x": 50, "y": 48 },
+      "initialState": {
+        "rootId": "f5",
+        "nodes": [
+          { "id": "f5", "label": "fib(5)", "status": "pending", "children": ["f4", "f3"], "x": 0, "y": 0 }
+        ]
+      }
+    },
+    {
+      "id": "op",
+      "type": "text-badge",
+      "label": "Operation",
+      "position": { "x": 50, "y": 12 },
+      "initialState": { "text": "Start fib(5)", "style": "default" }
+    }
+  ],
+  "steps": [
+    { "index": 0, "actions": [], "duration": 800 },
+    {
+      "index": 1,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Expand fib(5) -> fib(4) + fib(3)", "style": "highlight" } },
+        {
+          "target": "tree",
+          "action": "set",
+          "params": {
+            "rootId": "f5",
+            "nodes": [
+              { "id": "f5", "label": "fib(5)", "status": "computing", "children": ["f4", "f3"], "x": 0, "y": 0 },
+              { "id": "f4", "label": "fib(4)", "status": "pending", "children": ["f3a", "f2a"], "x": -1.5, "y": 1 },
+              { "id": "f3", "label": "fib(3)", "status": "pending", "children": ["f2b", "f1b"], "x": 1.5, "y": 1 }
+            ]
+          }
+        }
+      ],
+      "duration": 900
+    },
+    {
+      "index": 2,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Expand left branch fib(4)", "style": "highlight" } },
+        {
+          "target": "tree",
+          "action": "set",
+          "params": {
+            "rootId": "f5",
+            "nodes": [
+              { "id": "f5", "label": "fib(5)", "status": "computing", "children": ["f4", "f3"], "x": 0, "y": 0 },
+              { "id": "f4", "label": "fib(4)", "status": "computing", "children": ["f3a", "f2a"], "x": -1.5, "y": 1 },
+              { "id": "f3", "label": "fib(3)", "status": "pending", "children": ["f2b", "f1b"], "x": 1.5, "y": 1 },
+              { "id": "f3a", "label": "fib(3)", "status": "pending", "children": ["f2c", "f1c"], "x": -2.4, "y": 2 },
+              { "id": "f2a", "label": "fib(2)", "status": "pending", "children": ["f1a", "f0a"], "x": -0.6, "y": 2 }
+            ]
+          }
+        }
+      ],
+      "duration": 900
+    },
+    {
+      "index": 3,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Compute fib(2)=1 and memoize", "style": "highlight" } },
+        {
+          "target": "tree",
+          "action": "set",
+          "params": {
+            "rootId": "f5",
+            "nodes": [
+              { "id": "f5", "label": "fib(5)", "status": "computing", "children": ["f4", "f3"], "x": 0, "y": 0 },
+              { "id": "f4", "label": "fib(4)", "status": "computing", "children": ["f3a", "f2a"], "x": -1.5, "y": 1 },
+              { "id": "f3", "label": "fib(3)", "status": "pending", "children": ["f2b", "f1b"], "x": 1.5, "y": 1 },
+              { "id": "f3a", "label": "fib(3)", "status": "computing", "children": ["f2c", "f1c"], "x": -2.4, "y": 2 },
+              { "id": "f2a", "label": "fib(2)", "status": "complete", "result": "1", "children": ["f1a", "f0a"], "x": -0.6, "y": 2 },
+              { "id": "f1a", "label": "fib(1)", "status": "complete", "result": "1", "children": [], "x": -0.2, "y": 3 },
+              { "id": "f0a", "label": "fib(0)", "status": "complete", "result": "0", "children": [], "x": -1.0, "y": 3 }
+            ]
+          }
+        }
+      ],
+      "duration": 1000
+    },
+    {
+      "index": 4,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Finish fib(3)=2 on left subtree", "style": "highlight" } },
+        {
+          "target": "tree",
+          "action": "set",
+          "params": {
+            "rootId": "f5",
+            "nodes": [
+              { "id": "f5", "label": "fib(5)", "status": "computing", "children": ["f4", "f3"], "x": 0, "y": 0 },
+              { "id": "f4", "label": "fib(4)", "status": "computing", "children": ["f3a", "f2a"], "x": -1.5, "y": 1 },
+              { "id": "f3", "label": "fib(3)", "status": "pending", "children": ["f2b", "f1b"], "x": 1.5, "y": 1 },
+              { "id": "f3a", "label": "fib(3)", "status": "complete", "result": "2", "children": ["f2c", "f1c"], "x": -2.4, "y": 2 },
+              { "id": "f2a", "label": "fib(2)", "status": "complete", "result": "1", "children": ["f1a", "f0a"], "x": -0.6, "y": 2 },
+              { "id": "f2c", "label": "fib(2)", "status": "memoized", "result": "1", "children": [], "x": -2.9, "y": 3 },
+              { "id": "f1c", "label": "fib(1)", "status": "complete", "result": "1", "children": [], "x": -2.0, "y": 3 }
+            ]
+          }
+        }
+      ],
+      "duration": 1000
+    },
+    {
+      "index": 5,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Finish fib(4)=3 and memoize", "style": "highlight" } },
+        {
+          "target": "tree",
+          "action": "set",
+          "params": {
+            "rootId": "f5",
+            "nodes": [
+              { "id": "f5", "label": "fib(5)", "status": "computing", "children": ["f4", "f3"], "x": 0, "y": 0 },
+              { "id": "f4", "label": "fib(4)", "status": "complete", "result": "3", "children": ["f3a", "f2a"], "x": -1.5, "y": 1 },
+              { "id": "f3", "label": "fib(3)", "status": "pending", "children": ["f2b", "f1b"], "x": 1.5, "y": 1 },
+              { "id": "f3a", "label": "fib(3)", "status": "complete", "result": "2", "children": ["f2c", "f1c"], "x": -2.4, "y": 2 },
+              { "id": "f2a", "label": "fib(2)", "status": "complete", "result": "1", "children": ["f1a", "f0a"], "x": -0.6, "y": 2 }
+            ]
+          }
+        }
+      ],
+      "duration": 1000
+    },
+    {
+      "index": 6,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Right branch fib(3) hits memo entries", "style": "highlight" } },
+        {
+          "target": "tree",
+          "action": "set",
+          "params": {
+            "rootId": "f5",
+            "nodes": [
+              { "id": "f5", "label": "fib(5)", "status": "computing", "children": ["f4", "f3"], "x": 0, "y": 0 },
+              { "id": "f4", "label": "fib(4)", "status": "complete", "result": "3", "children": ["f3a", "f2a"], "x": -1.5, "y": 1 },
+              { "id": "f3", "label": "fib(3)", "status": "computing", "children": ["f2b", "f1b"], "x": 1.5, "y": 1 },
+              { "id": "f2b", "label": "fib(2)", "status": "memoized", "result": "1", "children": [], "x": 1.0, "y": 2 },
+              { "id": "f1b", "label": "fib(1)", "status": "complete", "result": "1", "children": [], "x": 2.0, "y": 2 }
+            ]
+          }
+        }
+      ],
+      "duration": 1000
+    },
+    {
+      "index": 7,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Compute fib(3)=2 from cached + base", "style": "success" } },
+        {
+          "target": "tree",
+          "action": "set",
+          "params": {
+            "rootId": "f5",
+            "nodes": [
+              { "id": "f5", "label": "fib(5)", "status": "computing", "children": ["f4", "f3"], "x": 0, "y": 0 },
+              { "id": "f4", "label": "fib(4)", "status": "complete", "result": "3", "children": ["f3a", "f2a"], "x": -1.5, "y": 1 },
+              { "id": "f3", "label": "fib(3)", "status": "complete", "result": "2", "children": ["f2b", "f1b"], "x": 1.5, "y": 1 },
+              { "id": "f2b", "label": "fib(2)", "status": "memoized", "result": "1", "children": [], "x": 1.0, "y": 2 },
+              { "id": "f1b", "label": "fib(1)", "status": "complete", "result": "1", "children": [], "x": 2.0, "y": 2 }
+            ]
+          }
+        }
+      ],
+      "duration": 1000
+    },
+    {
+      "index": 8,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Combine fib(4)+fib(3) -> fib(5)=5", "style": "success" } },
+        {
+          "target": "tree",
+          "action": "set",
+          "params": {
+            "rootId": "f5",
+            "nodes": [
+              { "id": "f5", "label": "fib(5)", "status": "complete", "result": "5", "children": ["f4", "f3"], "x": 0, "y": 0 },
+              { "id": "f4", "label": "fib(4)", "status": "complete", "result": "3", "children": ["f3a", "f2a"], "x": -1.5, "y": 1 },
+              { "id": "f3", "label": "fib(3)", "status": "complete", "result": "2", "children": ["f2b", "f1b"], "x": 1.5, "y": 1 },
+              { "id": "f2b", "label": "fib(2)", "status": "memoized", "result": "1", "children": [], "x": 1.0, "y": 2 },
+              { "id": "f3a", "label": "fib(3)", "status": "memoized", "result": "2", "children": [], "x": -2.2, "y": 2 }
+            ]
+          }
+        }
+      ],
+      "duration": 1000
+    },
+    {
+      "index": 9,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Memoization pruned repeated branches", "style": "default" } }
+      ],
+      "duration": 900
+    }
+  ],
+  "controls": [
+    {
+      "id": "memo-toggle",
+      "type": "toggle",
+      "label": "Memoization On",
+      "config": { "defaultValue": true }
+    }
+  ],
+  "explanation": [
+    {
+      "heading": "Naive Recursion Repeats Work",
+      "body": "Recursive Fibonacci expands into repeated overlapping subproblems.",
+      "appearsAtStep": 0
+    },
+    {
+      "heading": "Cache Results",
+      "body": "When a value like `fib(2)` is computed once, store it in `memo` for reuse.",
+      "appearsAtStep": 3
+    },
+    {
+      "heading": "Pruned Branches",
+      "body": "Memoized nodes are marked differently because the recursion no longer expands there.",
+      "appearsAtStep": 6
+    }
+  ],
+  "popups": [
+    { "id": "fib-1", "attachTo": "tree", "text": "Tree grows quickly without cache", "showAtStep": 1, "hideAtStep": 5, "style": "warning" },
+    { "id": "fib-2", "attachTo": "tree", "text": "Memoized nodes skip recomputation", "showAtStep": 6, "hideAtStep": 10, "style": "success" }
+  ],
+  "challenges": [
+    {
+      "id": "fib-c1",
+      "title": "Without Memoization",
+      "description": "How many extra recursive calls happen for fib(5) without caching?",
+      "type": "predict"
+    },
+    {
+      "id": "fib-c2",
+      "title": "Bottom-up DP",
+      "description": "Can you produce the same answer iteratively with O(1) extra space?",
+      "type": "optimize"
+    },
+    {
+      "id": "fib-c3",
+      "title": "Cache Lifetime",
+      "description": "When should memo cache be reused vs reset across requests?",
+      "type": "scenario"
+    }
+  ],
+  "complexity": { "time": "O(n)", "space": "O(n)" }
+}

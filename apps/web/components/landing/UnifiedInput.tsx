@@ -33,6 +33,41 @@ const MODE_COLOR: Record<NonNullable<DetectedMode>, string> = {
   hld: 'text-tertiary',
 }
 
+interface ParsedDSAInput {
+  code: string
+  language: 'python' | 'javascript'
+  problemStatement: string
+}
+
+function inferCodeLanguage(input: string): 'python' | 'javascript' {
+  if (/\bdef\s+\w+\(|\bimport\s+\w+|\bprint\s*\(/.test(input)) return 'python'
+  return 'javascript'
+}
+
+function parseDSAInput(rawInput: string): ParsedDSAInput {
+  const fenced = rawInput.match(/```(?:\s*(python|py|javascript|js))?\s*\n([\s\S]*?)```/i)
+  if (fenced) {
+    const rawLang = (fenced[1] ?? '').toLowerCase()
+    const fencedCode = fenced[2] ?? ''
+    const language: 'python' | 'javascript' =
+      rawLang === 'python' || rawLang === 'py'
+        ? 'python'
+        : rawLang === 'javascript' || rawLang === 'js'
+          ? 'javascript'
+          : inferCodeLanguage(fencedCode)
+
+    const code = fencedCode.trim()
+    const problemStatement = rawInput.replace(fenced[0], '').trim() || 'DSA Trace'
+    return { code, language, problemStatement }
+  }
+
+  return {
+    code: rawInput.trim(),
+    language: inferCodeLanguage(rawInput),
+    problemStatement: 'DSA Trace',
+  }
+}
+
 // ─── UnifiedInput ─────────────────────────────────────────────────────────────
 
 interface UnifiedInputProps {
@@ -72,6 +107,28 @@ export function UnifiedInput({ fillRef }: UnifiedInputProps) {
     [router],
   )
 
+  const navigateToDSAScene = useCallback(
+    (rawInput: string) => {
+      const parsed = parseDSAInput(rawInput)
+      const slugBase = parsed.problemStatement === 'DSA Trace' ? 'dsa-trace' : parsed.problemStatement
+      const slug = generateSlug(slugBase)
+
+      sessionStorage.setItem(
+        `insyte:dsa:${slug}`,
+        JSON.stringify({
+          code: parsed.code,
+          language: parsed.language,
+          problemStatement: parsed.problemStatement,
+        }),
+      )
+
+      router.push(
+        `/s/${slug}?mode=dsa&lang=${parsed.language}&topic=${encodeURIComponent(parsed.problemStatement)}`,
+      )
+    },
+    [router],
+  )
+
   const handleSubmit = useCallback(() => {
     const topic = inputText.trim()
     if (!topic) return
@@ -87,9 +144,8 @@ export function UnifiedInput({ fillRef }: UnifiedInputProps) {
   const handleDSAConfirm = useCallback(() => {
     confirmDSA()
     setShowDSADialog(false)
-    // DSA pipeline — Phase 9 wires the full trace, for now treat as concept
-    navigateToScene(inputText.trim())
-  }, [confirmDSA, navigateToScene, inputText])
+    navigateToDSAScene(inputText.trim())
+  }, [confirmDSA, navigateToDSAScene, inputText])
 
   const handleDSACancel = useCallback(() => {
     cancelDSA()

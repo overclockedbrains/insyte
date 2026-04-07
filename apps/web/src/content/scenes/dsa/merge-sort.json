@@ -1,0 +1,236 @@
+{
+  "id": "merge-sort",
+  "title": "Merge Sort",
+  "type": "dsa-trace",
+  "layout": "code-left-canvas-right",
+  "description": "Visualize recursive split and merge in merge sort.",
+  "category": "Data Structures & Algorithms",
+  "tags": ["merge-sort", "recursion", "divide-conquer"],
+  "code": {
+    "language": "python",
+    "source": "def merge_sort(arr):\n    if len(arr) <= 1:\n        return arr\n    mid = len(arr) // 2\n    left = merge_sort(arr[:mid])\n    right = merge_sort(arr[mid:])\n    i = j = 0\n    merged = []\n    while i < len(left) and j < len(right):\n        if left[i] <= right[j]:\n            merged.append(left[i])\n            i += 1\n        else:\n            merged.append(right[j])\n            j += 1\n    merged.extend(left[i:])\n    merged.extend(right[j:])\n    return merged\n\nfinalResult = merge_sort([8, 3, 5, 4, 7, 6, 1, 2])\n",
+    "highlightByStep": [0, 3, 4, 5, 8, 8, 8, 15, 16, 17]
+  },
+  "visuals": [
+    {
+      "id": "arr",
+      "type": "array",
+      "label": "Array",
+      "position": { "x": 50, "y": 42 },
+      "initialState": {
+        "cells": [
+          { "value": 8, "highlight": "default" },
+          { "value": 3, "highlight": "default" },
+          { "value": 5, "highlight": "default" },
+          { "value": 4, "highlight": "default" },
+          { "value": 7, "highlight": "default" },
+          { "value": 6, "highlight": "default" },
+          { "value": 1, "highlight": "default" },
+          { "value": 2, "highlight": "default" }
+        ]
+      }
+    },
+    {
+      "id": "op",
+      "type": "text-badge",
+      "label": "Phase",
+      "position": { "x": 50, "y": 13 },
+      "initialState": { "text": "Start with full array", "style": "default" }
+    }
+  ],
+  "steps": [
+    { "index": 0, "actions": [], "duration": 800 },
+    {
+      "index": 1,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Split [8,3,5,4,7,6,1,2] into two halves", "style": "highlight" } },
+        { "target": "arr", "action": "set", "params": { "windowHighlight": { "start": 0, "end": 7 } } }
+      ],
+      "duration": 900
+    },
+    {
+      "index": 2,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Recursively split left half [8,3,5,4]", "style": "highlight" } },
+        { "target": "arr", "action": "set", "params": { "windowHighlight": { "start": 0, "end": 3 } } }
+      ],
+      "duration": 900
+    },
+    {
+      "index": 3,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Recursively split right half [7,6,1,2]", "style": "highlight" } },
+        { "target": "arr", "action": "set", "params": { "windowHighlight": { "start": 4, "end": 7 } } }
+      ],
+      "duration": 900
+    },
+    {
+      "index": 4,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Base subarrays reached, begin merge", "style": "default" } },
+        {
+          "target": "arr",
+          "action": "set",
+          "params": {
+            "cells": [
+              { "value": 3, "highlight": "compare" },
+              { "value": 8, "highlight": "compare" },
+              { "value": 4, "highlight": "compare" },
+              { "value": 5, "highlight": "compare" },
+              { "value": 6, "highlight": "compare" },
+              { "value": 7, "highlight": "compare" },
+              { "value": 1, "highlight": "compare" },
+              { "value": 2, "highlight": "compare" }
+            ]
+          }
+        }
+      ],
+      "duration": 1000
+    },
+    {
+      "index": 5,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Merge left side -> [3,4,5,8]", "style": "highlight" } },
+        {
+          "target": "arr",
+          "action": "set",
+          "params": {
+            "cells": [
+              { "value": 3, "highlight": "active" },
+              { "value": 4, "highlight": "active" },
+              { "value": 5, "highlight": "active" },
+              { "value": 8, "highlight": "active" },
+              { "value": 6, "highlight": "default" },
+              { "value": 7, "highlight": "default" },
+              { "value": 1, "highlight": "default" },
+              { "value": 2, "highlight": "default" }
+            ],
+            "windowHighlight": { "start": 0, "end": 3 }
+          }
+        }
+      ],
+      "duration": 1000
+    },
+    {
+      "index": 6,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Merge right side -> [1,2,6,7]", "style": "highlight" } },
+        {
+          "target": "arr",
+          "action": "set",
+          "params": {
+            "cells": [
+              { "value": 3, "highlight": "default" },
+              { "value": 4, "highlight": "default" },
+              { "value": 5, "highlight": "default" },
+              { "value": 8, "highlight": "default" },
+              { "value": 1, "highlight": "active" },
+              { "value": 2, "highlight": "active" },
+              { "value": 6, "highlight": "active" },
+              { "value": 7, "highlight": "active" }
+            ],
+            "windowHighlight": { "start": 4, "end": 7 }
+          }
+        }
+      ],
+      "duration": 1000
+    },
+    {
+      "index": 7,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Final merge compares both sorted halves", "style": "highlight" } },
+        {
+          "target": "arr",
+          "action": "set",
+          "params": {
+            "cells": [
+              { "value": 3, "highlight": "compare" },
+              { "value": 4, "highlight": "compare" },
+              { "value": 5, "highlight": "compare" },
+              { "value": 8, "highlight": "compare" },
+              { "value": 1, "highlight": "compare" },
+              { "value": 2, "highlight": "compare" },
+              { "value": 6, "highlight": "compare" },
+              { "value": 7, "highlight": "compare" }
+            ],
+            "windowHighlight": { "start": 0, "end": 7 }
+          }
+        }
+      ],
+      "duration": 1000
+    },
+    {
+      "index": 8,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Write back merged order", "style": "success" } },
+        {
+          "target": "arr",
+          "action": "set",
+          "params": {
+            "cells": [
+              { "value": 1, "highlight": "insert" },
+              { "value": 2, "highlight": "insert" },
+              { "value": 3, "highlight": "insert" },
+              { "value": 4, "highlight": "insert" },
+              { "value": 5, "highlight": "insert" },
+              { "value": 6, "highlight": "insert" },
+              { "value": 7, "highlight": "insert" },
+              { "value": 8, "highlight": "insert" }
+            ]
+          }
+        }
+      ],
+      "duration": 1000
+    },
+    {
+      "index": 9,
+      "actions": [
+        { "target": "op", "action": "set", "params": { "text": "Sorted array complete", "style": "default" } }
+      ],
+      "duration": 800
+    }
+  ],
+  "controls": [],
+  "explanation": [
+    {
+      "heading": "Divide and Conquer",
+      "body": "Merge sort recursively splits the array until size 1 subarrays remain.",
+      "appearsAtStep": 0
+    },
+    {
+      "heading": "Merge Phase",
+      "body": "Pairs of sorted subarrays are merged while preserving order.",
+      "appearsAtStep": 4
+    },
+    {
+      "heading": "Stable O(n log n)",
+      "body": "Every level processes all `n` elements, across `log n` levels.",
+      "appearsAtStep": 8
+    }
+  ],
+  "popups": [
+    { "id": "ms-1", "attachTo": "arr", "text": "Recursive split tree expands", "showAtStep": 1, "hideAtStep": 4, "style": "info" },
+    { "id": "ms-2", "attachTo": "arr", "text": "Final merge produces sorted output", "showAtStep": 8, "hideAtStep": 10, "style": "success" }
+  ],
+  "challenges": [
+    {
+      "id": "ms-c1",
+      "title": "Auxiliary Space",
+      "description": "Why does merge sort typically need extra O(n) memory?",
+      "type": "predict"
+    },
+    {
+      "id": "ms-c2",
+      "title": "Stability",
+      "description": "How does merge sort preserve relative order of equal values?",
+      "type": "scenario"
+    },
+    {
+      "id": "ms-c3",
+      "title": "In-place Merge?",
+      "description": "Can merge sort be done in-place without hurting complexity constants?",
+      "type": "optimize"
+    }
+  ],
+  "complexity": { "time": "O(n log n)", "space": "O(n)" }
+}
