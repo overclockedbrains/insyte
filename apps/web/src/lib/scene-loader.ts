@@ -15,6 +15,19 @@ const SCENE_MODULES: Record<string, () => Promise<{ default: unknown }>> = {
   'load-balancer': () => import('@/src/content/scenes/concepts/load-balancer.json'),
   'dns-resolution': () => import('@/src/content/scenes/concepts/dns-resolution.json'),
   'git-branching': () => import('@/src/content/scenes/concepts/git-branching.json'),
+
+  // Phase 10 — LLD simulations
+  'lru-cache': () => import('@/src/content/scenes/lld/lru-cache.json'),
+  'rate-limiter': () => import('@/src/content/scenes/lld/rate-limiter.json'),
+  'min-stack': () => import('@/src/content/scenes/lld/min-stack.json'),
+  'trie': () => import('@/src/content/scenes/lld/trie.json'),
+  'design-hashmap': () => import('@/src/content/scenes/lld/design-hashmap.json'),
+
+  // Phase 10 — HLD simulations
+  'url-shortener': () => import('@/src/content/scenes/hld/url-shortener.json'),
+  'twitter-feed': () => import('@/src/content/scenes/hld/twitter-feed.json'),
+  'consistent-hashing': () => import('@/src/content/scenes/hld/consistent-hashing.json'),
+  'chat-system': () => import('@/src/content/scenes/hld/chat-system.json'),
 }
 
 // ─── Public API ───────────────────────────────────────────────────────────────

@@ -1,0 +1,364 @@
+{
+  "id": "min-stack",
+  "title": "MinStack — O(1) getMin()",
+  "type": "lld",
+  "layout": "text-left-canvas-right",
+  "description": "Design a stack that returns the minimum element in O(1) — without sorting. Uses a clever auxiliary stack to track minimums at every level.",
+  "category": "Low Level Design",
+  "tags": ["stack", "min-stack", "design", "lld", "interview"],
+
+  "visuals": [
+    {
+      "id": "main-stack",
+      "type": "stack",
+      "label": "Main Stack",
+      "position": { "x": 30, "y": 45 },
+      "initialState": {
+        "items": [],
+        "highlight": -1
+      }
+    },
+    {
+      "id": "min-stack-viz",
+      "type": "stack",
+      "label": "Min Stack (tracks min per level)",
+      "position": { "x": 70, "y": 45 },
+      "initialState": {
+        "items": [],
+        "highlight": -1
+      }
+    },
+    {
+      "id": "current-min",
+      "type": "counter",
+      "label": "getMin()",
+      "initialState": { "value": 0, "label": "getMin()", "color": "secondary" }
+    },
+    {
+      "id": "op-badge",
+      "type": "text-badge",
+      "label": "Operation",
+      "initialState": { "text": "MinStack initialized — both stacks empty", "style": "default" }
+    }
+  ],
+
+  "steps": [
+    {
+      "index": 0,
+      "actions": [],
+      "duration": 1800
+    },
+    {
+      "index": 1,
+      "actions": [
+        {
+          "target": "op-badge",
+          "action": "set",
+          "params": { "text": "push(5)  →  Min stack: [5]  (5 is minimum so far)", "style": "highlight" }
+        },
+        {
+          "target": "main-stack",
+          "action": "set",
+          "params": { "items": ["5"], "highlight": 0 }
+        },
+        {
+          "target": "min-stack-viz",
+          "action": "set",
+          "params": { "items": ["5"], "highlight": 0 }
+        },
+        {
+          "target": "current-min",
+          "action": "set",
+          "params": { "value": 5, "label": "getMin()", "color": "secondary" }
+        }
+      ],
+      "duration": 1800
+    },
+    {
+      "index": 2,
+      "actions": [
+        {
+          "target": "op-badge",
+          "action": "set",
+          "params": { "text": "push(3)  →  3 < 5 (current min)  →  push 3 to min stack", "style": "highlight" }
+        },
+        {
+          "target": "main-stack",
+          "action": "set",
+          "params": { "items": ["3", "5"], "highlight": 0 }
+        },
+        {
+          "target": "min-stack-viz",
+          "action": "set",
+          "params": { "items": ["3", "5"], "highlight": 0 }
+        },
+        {
+          "target": "current-min",
+          "action": "set",
+          "params": { "value": 3, "label": "getMin()", "color": "secondary" }
+        }
+      ],
+      "duration": 1800
+    },
+    {
+      "index": 3,
+      "actions": [
+        {
+          "target": "op-badge",
+          "action": "set",
+          "params": { "text": "push(7)  →  7 > 3 (current min)  →  push 3 again to min stack", "style": "highlight" }
+        },
+        {
+          "target": "main-stack",
+          "action": "set",
+          "params": { "items": ["7", "3", "5"], "highlight": 0 }
+        },
+        {
+          "target": "min-stack-viz",
+          "action": "set",
+          "params": { "items": ["3", "3", "5"], "highlight": 0 }
+        },
+        {
+          "target": "current-min",
+          "action": "set",
+          "params": { "value": 3, "label": "getMin()", "color": "secondary" }
+        }
+      ],
+      "duration": 2000
+    },
+    {
+      "index": 4,
+      "actions": [
+        {
+          "target": "op-badge",
+          "action": "set",
+          "params": { "text": "push(2)  →  2 < 3 (current min)  →  push 2 to min stack", "style": "highlight" }
+        },
+        {
+          "target": "main-stack",
+          "action": "set",
+          "params": { "items": ["2", "7", "3", "5"], "highlight": 0 }
+        },
+        {
+          "target": "min-stack-viz",
+          "action": "set",
+          "params": { "items": ["2", "3", "3", "5"], "highlight": 0 }
+        },
+        {
+          "target": "current-min",
+          "action": "set",
+          "params": { "value": 2, "label": "getMin()", "color": "secondary" }
+        }
+      ],
+      "duration": 1800
+    },
+    {
+      "index": 5,
+      "actions": [
+        {
+          "target": "op-badge",
+          "action": "set",
+          "params": { "text": "getMin()  →  peek top of min stack  →  returns 2  ✓ O(1)", "style": "success" }
+        },
+        {
+          "target": "main-stack",
+          "action": "set",
+          "params": { "items": ["2", "7", "3", "5"], "highlight": -1 }
+        },
+        {
+          "target": "min-stack-viz",
+          "action": "set",
+          "params": { "items": ["2", "3", "3", "5"], "highlight": 0 }
+        },
+        {
+          "target": "current-min",
+          "action": "set",
+          "params": { "value": 2, "label": "getMin() = 2", "color": "secondary" }
+        }
+      ],
+      "duration": 2000
+    },
+    {
+      "index": 6,
+      "actions": [
+        {
+          "target": "op-badge",
+          "action": "set",
+          "params": { "text": "pop()  →  removes 2 from main stack + min stack  →  min is now 3", "style": "highlight" }
+        },
+        {
+          "target": "main-stack",
+          "action": "set",
+          "params": { "items": ["7", "3", "5"], "highlight": 0 }
+        },
+        {
+          "target": "min-stack-viz",
+          "action": "set",
+          "params": { "items": ["3", "3", "5"], "highlight": 0 }
+        },
+        {
+          "target": "current-min",
+          "action": "set",
+          "params": { "value": 3, "label": "getMin()", "color": "secondary" }
+        }
+      ],
+      "duration": 2000
+    },
+    {
+      "index": 7,
+      "actions": [
+        {
+          "target": "op-badge",
+          "action": "set",
+          "params": { "text": "pop()  →  removes 7 from main  →  7 was not a min, pop min stack  →  min still 3", "style": "highlight" }
+        },
+        {
+          "target": "main-stack",
+          "action": "set",
+          "params": { "items": ["3", "5"], "highlight": 0 }
+        },
+        {
+          "target": "min-stack-viz",
+          "action": "set",
+          "params": { "items": ["3", "5"], "highlight": 0 }
+        },
+        {
+          "target": "current-min",
+          "action": "set",
+          "params": { "value": 3, "label": "getMin()", "color": "secondary" }
+        }
+      ],
+      "duration": 2200
+    },
+    {
+      "index": 8,
+      "actions": [
+        {
+          "target": "op-badge",
+          "action": "set",
+          "params": { "text": "pop()  →  removes 3 (the actual min)  →  min stack reveals next min: 5", "style": "highlight" }
+        },
+        {
+          "target": "main-stack",
+          "action": "set",
+          "params": { "items": ["5"], "highlight": 0 }
+        },
+        {
+          "target": "min-stack-viz",
+          "action": "set",
+          "params": { "items": ["5"], "highlight": 0 }
+        },
+        {
+          "target": "current-min",
+          "action": "set",
+          "params": { "value": 5, "label": "getMin()", "color": "secondary" }
+        }
+      ],
+      "duration": 2200
+    }
+  ],
+
+  "controls": [
+    {
+      "id": "btn-push5",
+      "type": "button",
+      "label": "push(5)",
+      "config": { "variant": "primary", "goToStep": 1 }
+    },
+    {
+      "id": "btn-push3",
+      "type": "button",
+      "label": "push(3)",
+      "config": { "variant": "primary", "goToStep": 2 }
+    },
+    {
+      "id": "btn-push7",
+      "type": "button",
+      "label": "push(7)",
+      "config": { "variant": "primary", "goToStep": 3 }
+    },
+    {
+      "id": "btn-push2",
+      "type": "button",
+      "label": "push(2)",
+      "config": { "variant": "primary", "goToStep": 4 }
+    },
+    {
+      "id": "btn-getmin",
+      "type": "button",
+      "label": "getMin()",
+      "config": { "variant": "secondary", "goToStep": 5 }
+    },
+    {
+      "id": "btn-pop",
+      "type": "button",
+      "label": "pop()",
+      "config": { "variant": "destructive", "goToStep": 6 }
+    }
+  ],
+
+  "explanation": [
+    {
+      "heading": "The Problem",
+      "body": "Design a stack that supports `push`, `pop`, `top`, and `getMin()` — all in **O(1)**.\n\nNaive: iterate the stack to find minimum → **O(n)**. Unacceptable.",
+      "appearsAtStep": 0
+    },
+    {
+      "heading": "The Insight: Auxiliary Min Stack",
+      "body": "Maintain a **second stack** that tracks the minimum at every level.\n\n**Push rule**: push to main stack AND push `min(new_val, current_min)` to min stack.\n\nNow `getMin()` is just `min_stack.peek()` — O(1).",
+      "appearsAtStep": 1,
+      "callout": "The min stack always has the correct minimum for the current stack size."
+    },
+    {
+      "heading": "Why push current min on non-minimums?",
+      "body": "When push(7) and current min is 3:\n- Min stack pushes **3 again** (not 7)\n\nThis preserves the invariant: **min_stack[i] = minimum of main_stack[0..i]**\n\nWhen you pop 7, you pop the corresponding 3 from min stack — and the minimum is still correct.",
+      "appearsAtStep": 3
+    },
+    {
+      "heading": "Pop — Keep Stacks in Sync",
+      "body": "On `pop()`, always pop **both** stacks simultaneously.\n\nThe sync is critical: min_stack.size == main_stack.size at all times.\n\nWhen the actual minimum is popped, the next element in min_stack reveals the new minimum — no scanning needed.",
+      "appearsAtStep": 6
+    }
+  ],
+
+  "popups": [
+    {
+      "id": "pop-sync",
+      "attachTo": "min-stack-viz",
+      "text": "Same size as main stack — always in sync",
+      "showAtStep": 3,
+      "hideAtStep": 5,
+      "style": "info",
+      "anchor": { "x": 70, "y": 15 }
+    },
+    {
+      "id": "pop-o1-get",
+      "attachTo": "current-min",
+      "text": "O(1) — just peek top of min stack",
+      "showAtStep": 5,
+      "hideAtStep": 6,
+      "style": "success"
+    }
+  ],
+
+  "challenges": [
+    {
+      "id": "ch-space-opt",
+      "title": "Space Optimization",
+      "description": "The standard implementation uses O(n) extra space for the min stack. Can you optimize to only store a new min when the pushed value is ≤ current minimum? What's the worst case space usage of the optimized version?",
+      "type": "optimize"
+    },
+    {
+      "id": "ch-max-stack",
+      "title": "MaxStack",
+      "description": "Modify the MinStack design to support getMax() in O(1) instead. Then extend it to support both getMin() AND getMax() simultaneously. What changes?",
+      "type": "scenario"
+    },
+    {
+      "id": "ch-break-invariant",
+      "title": "Break the Min Stack",
+      "description": "What happens if you forget to pop the min stack when calling pop() on the main stack? Walk through an example sequence where this bug causes getMin() to return the wrong value.",
+      "type": "break-it"
+    }
+  ]
+}

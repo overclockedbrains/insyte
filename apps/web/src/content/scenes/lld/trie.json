@@ -1,0 +1,373 @@
+{
+  "id": "trie",
+  "title": "Trie (Prefix Tree)",
+  "type": "lld",
+  "layout": "text-left-canvas-right",
+  "description": "See how a Trie (Prefix Tree) enables O(m) search, insert, and startsWith — where m is the word length. Powers autocomplete in every search bar you've used.",
+  "category": "Low Level Design",
+  "tags": ["trie", "prefix-tree", "autocomplete", "design", "lld", "tree"],
+
+  "visuals": [
+    {
+      "id": "trie-tree",
+      "type": "tree",
+      "label": "Trie Structure  (* = end of word)",
+      "position": { "x": 50, "y": 48 },
+      "initialState": {
+        "nodes": [
+          { "id": "root", "value": "·", "children": [], "x": 3, "y": 0 }
+        ],
+        "rootId": "root"
+      }
+    },
+    {
+      "id": "char-badge",
+      "type": "text-badge",
+      "label": "Current Operation",
+      "initialState": { "text": "Empty Trie  —  root node (·) represents start", "style": "default" }
+    }
+  ],
+
+  "steps": [
+    {
+      "index": 0,
+      "actions": [],
+      "duration": 2000
+    },
+    {
+      "index": 1,
+      "actions": [
+        {
+          "target": "char-badge",
+          "action": "set",
+          "params": { "text": "insert('app')  →  a → p → p*", "style": "highlight" }
+        },
+        {
+          "target": "trie-tree",
+          "action": "set",
+          "params": {
+            "nodes": [
+              { "id": "root", "value": "·", "children": ["a1"], "x": 3, "y": 0 },
+              { "id": "a1", "value": "a", "children": ["p1"], "x": 3, "y": 1, "highlight": "var(--color-primary)" },
+              { "id": "p1", "value": "p", "children": ["p2"], "x": 3, "y": 2, "highlight": "var(--color-primary)" },
+              { "id": "p2", "value": "p*", "children": [], "x": 3, "y": 3, "highlight": "var(--color-secondary)" }
+            ],
+            "rootId": "root"
+          }
+        }
+      ],
+      "duration": 2000
+    },
+    {
+      "index": 2,
+      "actions": [
+        {
+          "target": "char-badge",
+          "action": "set",
+          "params": { "text": "insert('apple')  →  shared prefix 'app' + new l → e*", "style": "highlight" }
+        },
+        {
+          "target": "trie-tree",
+          "action": "set",
+          "params": {
+            "nodes": [
+              { "id": "root", "value": "·", "children": ["a1"], "x": 3, "y": 0 },
+              { "id": "a1", "value": "a", "children": ["p1"], "x": 3, "y": 1 },
+              { "id": "p1", "value": "p", "children": ["p2"], "x": 3, "y": 2 },
+              { "id": "p2", "value": "p*", "children": ["l1"], "x": 3, "y": 3 },
+              { "id": "l1", "value": "l", "children": ["e1"], "x": 3, "y": 4, "highlight": "var(--color-primary)" },
+              { "id": "e1", "value": "e*", "children": [], "x": 3, "y": 5, "highlight": "var(--color-secondary)" }
+            ],
+            "rootId": "root"
+          }
+        }
+      ],
+      "duration": 2200
+    },
+    {
+      "index": 3,
+      "actions": [
+        {
+          "target": "char-badge",
+          "action": "set",
+          "params": { "text": "insert('ban')  →  new branch: b → a → n*  (no shared prefix)", "style": "highlight" }
+        },
+        {
+          "target": "trie-tree",
+          "action": "set",
+          "params": {
+            "nodes": [
+              { "id": "root", "value": "·", "children": ["a1", "b1"], "x": 3, "y": 0 },
+              { "id": "a1", "value": "a", "children": ["p1"], "x": 1.5, "y": 1 },
+              { "id": "p1", "value": "p", "children": ["p2"], "x": 1.5, "y": 2 },
+              { "id": "p2", "value": "p*", "children": ["l1"], "x": 1.5, "y": 3 },
+              { "id": "l1", "value": "l", "children": ["e1"], "x": 1.5, "y": 4 },
+              { "id": "e1", "value": "e*", "children": [], "x": 1.5, "y": 5 },
+              { "id": "b1", "value": "b", "children": ["an1"], "x": 4.5, "y": 1, "highlight": "var(--color-primary)" },
+              { "id": "an1", "value": "a", "children": ["n1"], "x": 4.5, "y": 2, "highlight": "var(--color-primary)" },
+              { "id": "n1", "value": "n*", "children": [], "x": 4.5, "y": 3, "highlight": "var(--color-secondary)" }
+            ],
+            "rootId": "root"
+          }
+        }
+      ],
+      "duration": 2200
+    },
+    {
+      "index": 4,
+      "actions": [
+        {
+          "target": "char-badge",
+          "action": "set",
+          "params": { "text": "search('app')  →  traverse root→a→p→p*  →  found (word end)  ✓", "style": "success" }
+        },
+        {
+          "target": "trie-tree",
+          "action": "set",
+          "params": {
+            "nodes": [
+              { "id": "root", "value": "·", "children": ["a1", "b1"], "x": 3, "y": 0, "highlight": "var(--color-secondary)" },
+              { "id": "a1", "value": "a", "children": ["p1"], "x": 1.5, "y": 1, "highlight": "var(--color-secondary)" },
+              { "id": "p1", "value": "p", "children": ["p2"], "x": 1.5, "y": 2, "highlight": "var(--color-secondary)" },
+              { "id": "p2", "value": "p*", "children": ["l1"], "x": 1.5, "y": 3, "highlight": "var(--color-secondary)" },
+              { "id": "l1", "value": "l", "children": ["e1"], "x": 1.5, "y": 4 },
+              { "id": "e1", "value": "e*", "children": [], "x": 1.5, "y": 5 },
+              { "id": "b1", "value": "b", "children": ["an1"], "x": 4.5, "y": 1 },
+              { "id": "an1", "value": "a", "children": ["n1"], "x": 4.5, "y": 2 },
+              { "id": "n1", "value": "n*", "children": [], "x": 4.5, "y": 3 }
+            ],
+            "rootId": "root"
+          }
+        }
+      ],
+      "duration": 2200
+    },
+    {
+      "index": 5,
+      "actions": [
+        {
+          "target": "char-badge",
+          "action": "set",
+          "params": { "text": "startsWith('ap')  →  traverse root→a→p  →  prefix exists  ✓", "style": "success" }
+        },
+        {
+          "target": "trie-tree",
+          "action": "set",
+          "params": {
+            "nodes": [
+              { "id": "root", "value": "·", "children": ["a1", "b1"], "x": 3, "y": 0, "highlight": "var(--color-secondary)" },
+              { "id": "a1", "value": "a", "children": ["p1"], "x": 1.5, "y": 1, "highlight": "var(--color-secondary)" },
+              { "id": "p1", "value": "p", "children": ["p2"], "x": 1.5, "y": 2, "highlight": "var(--color-secondary)" },
+              { "id": "p2", "value": "p*", "children": ["l1"], "x": 1.5, "y": 3 },
+              { "id": "l1", "value": "l", "children": ["e1"], "x": 1.5, "y": 4 },
+              { "id": "e1", "value": "e*", "children": [], "x": 1.5, "y": 5 },
+              { "id": "b1", "value": "b", "children": ["an1"], "x": 4.5, "y": 1 },
+              { "id": "an1", "value": "a", "children": ["n1"], "x": 4.5, "y": 2 },
+              { "id": "n1", "value": "n*", "children": [], "x": 4.5, "y": 3 }
+            ],
+            "rootId": "root"
+          }
+        }
+      ],
+      "duration": 2000
+    },
+    {
+      "index": 6,
+      "actions": [
+        {
+          "target": "char-badge",
+          "action": "set",
+          "params": { "text": "search('ap')  →  traverse root→a→p  →  p is NOT a word end  →  false", "style": "error" }
+        },
+        {
+          "target": "trie-tree",
+          "action": "set",
+          "params": {
+            "nodes": [
+              { "id": "root", "value": "·", "children": ["a1", "b1"], "x": 3, "y": 0, "highlight": "var(--color-primary)" },
+              { "id": "a1", "value": "a", "children": ["p1"], "x": 1.5, "y": 1, "highlight": "var(--color-primary)" },
+              { "id": "p1", "value": "p", "children": ["p2"], "x": 1.5, "y": 2, "highlight": "var(--color-error)" },
+              { "id": "p2", "value": "p*", "children": ["l1"], "x": 1.5, "y": 3 },
+              { "id": "l1", "value": "l", "children": ["e1"], "x": 1.5, "y": 4 },
+              { "id": "e1", "value": "e*", "children": [], "x": 1.5, "y": 5 },
+              { "id": "b1", "value": "b", "children": ["an1"], "x": 4.5, "y": 1 },
+              { "id": "an1", "value": "a", "children": ["n1"], "x": 4.5, "y": 2 },
+              { "id": "n1", "value": "n*", "children": [], "x": 4.5, "y": 3 }
+            ],
+            "rootId": "root"
+          }
+        }
+      ],
+      "duration": 2200
+    },
+    {
+      "index": 7,
+      "actions": [
+        {
+          "target": "char-badge",
+          "action": "set",
+          "params": { "text": "insert('banana')  →  extends 'ban' with a→n→a*", "style": "highlight" }
+        },
+        {
+          "target": "trie-tree",
+          "action": "set",
+          "params": {
+            "nodes": [
+              { "id": "root", "value": "·", "children": ["a1", "b1"], "x": 3, "y": 0 },
+              { "id": "a1", "value": "a", "children": ["p1"], "x": 1.5, "y": 1 },
+              { "id": "p1", "value": "p", "children": ["p2"], "x": 1.5, "y": 2 },
+              { "id": "p2", "value": "p*", "children": ["l1"], "x": 1.5, "y": 3 },
+              { "id": "l1", "value": "l", "children": ["e1"], "x": 1.5, "y": 4 },
+              { "id": "e1", "value": "e*", "children": [], "x": 1.5, "y": 5 },
+              { "id": "b1", "value": "b", "children": ["an1"], "x": 4.5, "y": 1 },
+              { "id": "an1", "value": "a", "children": ["n1"], "x": 4.5, "y": 2 },
+              { "id": "n1", "value": "n*", "children": ["na1"], "x": 4.5, "y": 3 },
+              { "id": "na1", "value": "a", "children": ["nan1"], "x": 4.5, "y": 4, "highlight": "var(--color-primary)" },
+              { "id": "nan1", "value": "n", "children": ["nana1"], "x": 4.5, "y": 5, "highlight": "var(--color-primary)" },
+              { "id": "nana1", "value": "a*", "children": [], "x": 4.5, "y": 6, "highlight": "var(--color-secondary)" }
+            ],
+            "rootId": "root"
+          }
+        }
+      ],
+      "duration": 2200
+    },
+    {
+      "index": 8,
+      "actions": [
+        {
+          "target": "char-badge",
+          "action": "set",
+          "params": { "text": "search('xyz')  →  'x' not a child of root  →  immediately false  (O(m))", "style": "error" }
+        },
+        {
+          "target": "trie-tree",
+          "action": "set",
+          "params": {
+            "nodes": [
+              { "id": "root", "value": "·", "children": ["a1", "b1"], "x": 3, "y": 0, "highlight": "var(--color-error)" },
+              { "id": "a1", "value": "a", "children": ["p1"], "x": 1.5, "y": 1 },
+              { "id": "p1", "value": "p", "children": ["p2"], "x": 1.5, "y": 2 },
+              { "id": "p2", "value": "p*", "children": ["l1"], "x": 1.5, "y": 3 },
+              { "id": "l1", "value": "l", "children": ["e1"], "x": 1.5, "y": 4 },
+              { "id": "e1", "value": "e*", "children": [], "x": 1.5, "y": 5 },
+              { "id": "b1", "value": "b", "children": ["an1"], "x": 4.5, "y": 1 },
+              { "id": "an1", "value": "a", "children": ["n1"], "x": 4.5, "y": 2 },
+              { "id": "n1", "value": "n*", "children": ["na1"], "x": 4.5, "y": 3 },
+              { "id": "na1", "value": "a", "children": ["nan1"], "x": 4.5, "y": 4 },
+              { "id": "nan1", "value": "n", "children": ["nana1"], "x": 4.5, "y": 5 },
+              { "id": "nana1", "value": "a*", "children": [], "x": 4.5, "y": 6 }
+            ],
+            "rootId": "root"
+          }
+        }
+      ],
+      "duration": 2000
+    }
+  ],
+
+  "controls": [
+    {
+      "id": "btn-insert-app",
+      "type": "button",
+      "label": "insert('app')",
+      "config": { "variant": "primary", "goToStep": 1 }
+    },
+    {
+      "id": "btn-insert-apple",
+      "type": "button",
+      "label": "insert('apple')",
+      "config": { "variant": "primary", "goToStep": 2 }
+    },
+    {
+      "id": "btn-insert-ban",
+      "type": "button",
+      "label": "insert('ban')",
+      "config": { "variant": "primary", "goToStep": 3 }
+    },
+    {
+      "id": "btn-search-app",
+      "type": "button",
+      "label": "search('app') ✓",
+      "config": { "variant": "secondary", "goToStep": 4 }
+    },
+    {
+      "id": "btn-starts-ap",
+      "type": "button",
+      "label": "startsWith('ap') ✓",
+      "config": { "variant": "secondary", "goToStep": 5 }
+    },
+    {
+      "id": "btn-search-ap",
+      "type": "button",
+      "label": "search('ap') ✗",
+      "config": { "variant": "destructive", "goToStep": 6 }
+    }
+  ],
+
+  "explanation": [
+    {
+      "heading": "What is a Trie?",
+      "body": "A Trie (or Prefix Tree) stores strings by sharing common prefixes.\n\nEach path from root to a marked node represents a complete word. Nodes with `*` mark word boundaries.",
+      "appearsAtStep": 0
+    },
+    {
+      "heading": "Prefix Sharing",
+      "body": "\"apple\" and \"app\" share the path `a → p → p`. Only the suffix diverges.\n\nThis sharing makes Tries memory-efficient for large dictionaries with common prefixes — like all English words starting with \"pre\" or \"un\".",
+      "appearsAtStep": 2,
+      "callout": "A 50,000-word English dictionary uses far fewer nodes than 50,000 strings stored separately."
+    },
+    {
+      "heading": "search() vs startsWith()",
+      "body": "**search(word)**: traverse character by character. Return true only if you reach the end AND the last node has `isEnd = true`.\n\n**startsWith(prefix)**: same traversal, but return true as soon as the path exists — `isEnd` doesn't matter.\n\nBoth are O(m) where m = length of the query.",
+      "appearsAtStep": 5
+    },
+    {
+      "heading": "search('ap') → false, startsWith('ap') → true",
+      "body": "The node `p` at depth 2 exists — so `startsWith('ap')` is true.\n\nBut `p` at depth 2 has `isEnd = false` — 'ap' was never inserted as a complete word. So `search('ap')` is false.",
+      "appearsAtStep": 6
+    }
+  ],
+
+  "popups": [
+    {
+      "id": "pop-shared-prefix",
+      "attachTo": "trie-tree",
+      "text": "Shared prefix! apple re-uses app's path",
+      "showAtStep": 2,
+      "hideAtStep": 3,
+      "style": "insight",
+      "anchor": { "x": 50, "y": 15 }
+    },
+    {
+      "id": "pop-word-end",
+      "attachTo": "trie-tree",
+      "text": "* = isEnd marker. search() requires this.",
+      "showAtStep": 4,
+      "hideAtStep": 6,
+      "style": "info",
+      "anchor": { "x": 50, "y": 15 }
+    }
+  ],
+
+  "challenges": [
+    {
+      "id": "ch-autocomplete",
+      "title": "Build Autocomplete",
+      "description": "Using the Trie structure, design an autocomplete function: given a prefix string, return all words that start with that prefix. What's the time complexity? How would you limit results to the top 5 most frequent words?",
+      "type": "optimize"
+    },
+    {
+      "id": "ch-delete-word",
+      "title": "Delete a Word",
+      "description": "Deleting a word from a Trie is tricky — you can't just remove the nodes because other words might share them. Design the delete algorithm. When can you safely delete a node, and when must you only clear the isEnd flag?",
+      "type": "scenario"
+    },
+    {
+      "id": "ch-count-prefixes",
+      "title": "Count Words with Prefix",
+      "description": "Add a `countStartsWith(prefix)` function that counts how many inserted words start with a given prefix. What extra state would you store in each node to make this O(m) instead of O(n)?",
+      "type": "optimize"
+    }
+  ]
+}

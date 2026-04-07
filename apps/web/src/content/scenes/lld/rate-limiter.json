@@ -1,0 +1,515 @@
+{
+  "id": "rate-limiter",
+  "title": "Rate Limiter (Token Bucket)",
+  "type": "lld",
+  "layout": "text-left-canvas-right",
+  "description": "Visualize how a Token Bucket rate limiter controls request throughput — the same algorithm used by Stripe, AWS API Gateway, and NGINX.",
+  "category": "Low Level Design",
+  "tags": ["rate-limiter", "token-bucket", "throttling", "api", "lld"],
+
+  "visuals": [
+    {
+      "id": "token-bucket",
+      "type": "array",
+      "label": "Token Bucket  (T = available, · = consumed)",
+      "position": { "x": 50, "y": 25 },
+      "initialState": {
+        "cells": [
+          { "value": "T", "highlight": "active" },
+          { "value": "T", "highlight": "active" },
+          { "value": "T", "highlight": "active" },
+          { "value": "T", "highlight": "active" },
+          { "value": "T", "highlight": "active" }
+        ]
+      }
+    },
+    {
+      "id": "flow-diagram",
+      "type": "system-diagram",
+      "label": "Request Flow",
+      "position": { "x": 50, "y": 62 },
+      "initialState": {
+        "components": [
+          { "id": "client", "label": "Request", "icon": "web", "x": 80, "y": 120, "status": "normal" },
+          { "id": "limiter", "label": "Rate Limiter", "icon": "shield", "x": 240, "y": 120, "status": "normal" },
+          { "id": "api", "label": "API Server", "icon": "server", "x": 400, "y": 120, "status": "normal" }
+        ],
+        "connections": [
+          { "from": "client", "to": "limiter", "active": false },
+          { "from": "limiter", "to": "api", "active": false }
+        ]
+      }
+    },
+    {
+      "id": "status-badge",
+      "type": "text-badge",
+      "label": "Status",
+      "initialState": { "text": "Token bucket: 5/5 tokens  (READY)", "style": "default" }
+    },
+    {
+      "id": "allowed-counter",
+      "type": "counter",
+      "label": "Allowed",
+      "initialState": { "value": 0, "label": "Allowed", "color": "secondary" }
+    },
+    {
+      "id": "rejected-counter",
+      "type": "counter",
+      "label": "Rejected",
+      "initialState": { "value": 0, "label": "Rejected", "color": "error" }
+    }
+  ],
+
+  "steps": [
+    {
+      "index": 0,
+      "actions": [],
+      "duration": 2000
+    },
+    {
+      "index": 1,
+      "actions": [
+        {
+          "target": "status-badge",
+          "action": "set",
+          "params": { "text": "Request #1 arrives  →  token available  →  ALLOWED", "style": "success" }
+        },
+        {
+          "target": "token-bucket",
+          "action": "set",
+          "params": {
+            "cells": [
+              { "value": "·" },
+              { "value": "T", "highlight": "active" },
+              { "value": "T", "highlight": "active" },
+              { "value": "T", "highlight": "active" },
+              { "value": "T", "highlight": "active" }
+            ]
+          }
+        },
+        {
+          "target": "flow-diagram",
+          "action": "set",
+          "params": {
+            "components": [
+              { "id": "client", "label": "Request", "icon": "web", "x": 80, "y": 120, "status": "active" },
+              { "id": "limiter", "label": "Rate Limiter", "icon": "shield", "x": 240, "y": 120, "status": "active" },
+              { "id": "api", "label": "API Server", "icon": "server", "x": 400, "y": 120, "status": "active" }
+            ],
+            "connections": [
+              { "from": "client", "to": "limiter", "active": true },
+              { "from": "limiter", "to": "api", "active": true }
+            ]
+          }
+        },
+        {
+          "target": "allowed-counter",
+          "action": "set",
+          "params": { "value": 1, "label": "Allowed", "color": "secondary" }
+        }
+      ],
+      "duration": 2000
+    },
+    {
+      "index": 2,
+      "actions": [
+        {
+          "target": "status-badge",
+          "action": "set",
+          "params": { "text": "Requests #2 & #3  →  tokens consumed  →  ALLOWED", "style": "success" }
+        },
+        {
+          "target": "token-bucket",
+          "action": "set",
+          "params": {
+            "cells": [
+              { "value": "·" },
+              { "value": "·" },
+              { "value": "·" },
+              { "value": "T", "highlight": "active" },
+              { "value": "T", "highlight": "active" }
+            ]
+          }
+        },
+        {
+          "target": "allowed-counter",
+          "action": "set",
+          "params": { "value": 3, "label": "Allowed", "color": "secondary" }
+        }
+      ],
+      "duration": 2000
+    },
+    {
+      "index": 3,
+      "actions": [
+        {
+          "target": "status-badge",
+          "action": "set",
+          "params": { "text": "Burst! 2 more requests  →  bucket exhausted", "style": "error" }
+        },
+        {
+          "target": "token-bucket",
+          "action": "set",
+          "params": {
+            "cells": [
+              { "value": "·" },
+              { "value": "·" },
+              { "value": "·" },
+              { "value": "·" },
+              { "value": "·" }
+            ]
+          }
+        },
+        {
+          "target": "flow-diagram",
+          "action": "set",
+          "params": {
+            "components": [
+              { "id": "client", "label": "Request", "icon": "web", "x": 80, "y": 120, "status": "active" },
+              { "id": "limiter", "label": "Rate Limiter", "icon": "shield", "x": 240, "y": 120, "status": "overloaded" },
+              { "id": "api", "label": "API Server", "icon": "server", "x": 400, "y": 120, "status": "normal" }
+            ],
+            "connections": [
+              { "from": "client", "to": "limiter", "active": true },
+              { "from": "limiter", "to": "api", "active": false }
+            ]
+          }
+        },
+        {
+          "target": "allowed-counter",
+          "action": "set",
+          "params": { "value": 5, "label": "Allowed", "color": "secondary" }
+        }
+      ],
+      "duration": 2200
+    },
+    {
+      "index": 4,
+      "actions": [
+        {
+          "target": "status-badge",
+          "action": "set",
+          "params": { "text": "Request #6  →  NO tokens  →  REJECTED (429)", "style": "error" }
+        },
+        {
+          "target": "flow-diagram",
+          "action": "set",
+          "params": {
+            "components": [
+              { "id": "client", "label": "Request", "icon": "web", "x": 80, "y": 120, "status": "overloaded" },
+              { "id": "limiter", "label": "Rate Limiter", "icon": "shield", "x": 240, "y": 120, "status": "overloaded" },
+              { "id": "api", "label": "API Server", "icon": "server", "x": 400, "y": 120, "status": "normal" }
+            ],
+            "connections": [
+              { "from": "client", "to": "limiter", "active": true, "style": "dashed" },
+              { "from": "limiter", "to": "api", "active": false }
+            ]
+          }
+        },
+        {
+          "target": "rejected-counter",
+          "action": "set",
+          "params": { "value": 1, "label": "Rejected", "color": "error" }
+        }
+      ],
+      "duration": 2000
+    },
+    {
+      "index": 5,
+      "actions": [
+        {
+          "target": "status-badge",
+          "action": "set",
+          "params": { "text": "Refill interval!  →  2 tokens added  →  2/5", "style": "highlight" }
+        },
+        {
+          "target": "token-bucket",
+          "action": "set",
+          "params": {
+            "cells": [
+              { "value": "T", "highlight": "insert" },
+              { "value": "T", "highlight": "insert" },
+              { "value": "·" },
+              { "value": "·" },
+              { "value": "·" }
+            ]
+          }
+        },
+        {
+          "target": "flow-diagram",
+          "action": "set",
+          "params": {
+            "components": [
+              { "id": "client", "label": "Request", "icon": "web", "x": 80, "y": 120, "status": "normal" },
+              { "id": "limiter", "label": "Rate Limiter", "icon": "shield", "x": 240, "y": 120, "status": "active" },
+              { "id": "api", "label": "API Server", "icon": "server", "x": 400, "y": 120, "status": "normal" }
+            ],
+            "connections": [
+              { "from": "client", "to": "limiter", "active": false },
+              { "from": "limiter", "to": "api", "active": false }
+            ]
+          }
+        }
+      ],
+      "duration": 2000
+    },
+    {
+      "index": 6,
+      "actions": [
+        {
+          "target": "status-badge",
+          "action": "set",
+          "params": { "text": "Request #7  →  token available  →  ALLOWED again", "style": "success" }
+        },
+        {
+          "target": "token-bucket",
+          "action": "set",
+          "params": {
+            "cells": [
+              { "value": "·" },
+              { "value": "T", "highlight": "active" },
+              { "value": "·" },
+              { "value": "·" },
+              { "value": "·" }
+            ]
+          }
+        },
+        {
+          "target": "flow-diagram",
+          "action": "set",
+          "params": {
+            "components": [
+              { "id": "client", "label": "Request", "icon": "web", "x": 80, "y": 120, "status": "active" },
+              { "id": "limiter", "label": "Rate Limiter", "icon": "shield", "x": 240, "y": 120, "status": "active" },
+              { "id": "api", "label": "API Server", "icon": "server", "x": 400, "y": 120, "status": "active" }
+            ],
+            "connections": [
+              { "from": "client", "to": "limiter", "active": true },
+              { "from": "limiter", "to": "api", "active": true }
+            ]
+          }
+        },
+        {
+          "target": "allowed-counter",
+          "action": "set",
+          "params": { "value": 6, "label": "Allowed", "color": "secondary" }
+        }
+      ],
+      "duration": 2000
+    },
+    {
+      "index": 7,
+      "actions": [
+        {
+          "target": "status-badge",
+          "action": "set",
+          "params": { "text": "Full refill  →  5/5 tokens  →  burst capacity restored", "style": "highlight" }
+        },
+        {
+          "target": "token-bucket",
+          "action": "set",
+          "params": {
+            "cells": [
+              { "value": "T", "highlight": "active" },
+              { "value": "T", "highlight": "active" },
+              { "value": "T", "highlight": "active" },
+              { "value": "T", "highlight": "active" },
+              { "value": "T", "highlight": "active" }
+            ]
+          }
+        }
+      ],
+      "duration": 2000
+    },
+    {
+      "index": 8,
+      "actions": [
+        {
+          "target": "status-badge",
+          "action": "set",
+          "params": { "text": "Steady state: 3 req/s arrive, 3 refill/s  →  no rejections", "style": "success" }
+        },
+        {
+          "target": "token-bucket",
+          "action": "set",
+          "params": {
+            "cells": [
+              { "value": "T", "highlight": "active" },
+              { "value": "T", "highlight": "active" },
+              { "value": "·" },
+              { "value": "·" },
+              { "value": "·" }
+            ],
+            "pointers": [{ "index": 1, "label": "steady", "color": "secondary" }]
+          }
+        }
+      ],
+      "duration": 2200
+    },
+    {
+      "index": 9,
+      "actions": [
+        {
+          "target": "status-badge",
+          "action": "set",
+          "params": { "text": "Overload: 8 req/s arrive, 3 refill/s  →  queue builds, then drops", "style": "error" }
+        },
+        {
+          "target": "token-bucket",
+          "action": "set",
+          "params": {
+            "cells": [
+              { "value": "·" },
+              { "value": "·" },
+              { "value": "·" },
+              { "value": "·" },
+              { "value": "·" }
+            ]
+          }
+        },
+        {
+          "target": "flow-diagram",
+          "action": "set",
+          "params": {
+            "components": [
+              { "id": "client", "label": "8 req/s", "icon": "web", "x": 80, "y": 120, "status": "overloaded" },
+              { "id": "limiter", "label": "Rate Limiter", "icon": "shield", "x": 240, "y": 120, "status": "overloaded" },
+              { "id": "api", "label": "API Server", "icon": "server", "x": 400, "y": 120, "status": "normal" }
+            ],
+            "connections": [
+              { "from": "client", "to": "limiter", "active": true },
+              { "from": "limiter", "to": "api", "active": true }
+            ]
+          }
+        },
+        {
+          "target": "rejected-counter",
+          "action": "set",
+          "params": { "value": 5, "label": "Rejected", "color": "error" }
+        },
+        {
+          "target": "allowed-counter",
+          "action": "set",
+          "params": { "value": 9, "label": "Allowed", "color": "secondary" }
+        }
+      ],
+      "duration": 2000
+    }
+  ],
+
+  "controls": [
+    {
+      "id": "algo",
+      "type": "toggle-group",
+      "label": "Algorithm",
+      "config": {
+        "options": ["Token Bucket", "Fixed Window", "Sliding Window"],
+        "defaultValue": "Token Bucket"
+      }
+    },
+    {
+      "id": "btn-request",
+      "type": "button",
+      "label": "Send Request",
+      "config": { "variant": "primary", "goToStep": 1 }
+    },
+    {
+      "id": "btn-burst",
+      "type": "button",
+      "label": "Burst 5 Requests",
+      "config": { "variant": "destructive", "goToStep": 3 }
+    },
+    {
+      "id": "btn-refill",
+      "type": "button",
+      "label": "Token Refill",
+      "config": { "variant": "secondary", "goToStep": 5 }
+    },
+    {
+      "id": "btn-overload",
+      "type": "button",
+      "label": "Overload System",
+      "config": { "variant": "destructive", "goToStep": 9 }
+    }
+  ],
+
+  "explanation": [
+    {
+      "heading": "The Problem: Uncontrolled Traffic",
+      "body": "Without rate limiting, a single client can flood your API with thousands of requests per second — crashing your servers or starving other users.\n\nRate limiting enforces a **maximum request rate** per client.",
+      "appearsAtStep": 0
+    },
+    {
+      "heading": "Token Bucket Algorithm",
+      "body": "Imagine a bucket that holds a fixed number of **tokens** (permits):\n- Each request consumes 1 token\n- Tokens **refill at a constant rate** (e.g., 3/second)\n- If bucket is empty → request rejected (HTTP 429)\n\nThe bucket size controls the **burst capacity**.",
+      "appearsAtStep": 1,
+      "callout": "Burst capacity = bucket size. Sustained rate = refill rate."
+    },
+    {
+      "heading": "Bucket Exhausted → 429",
+      "body": "When the bucket empties faster than it refills:\n- New requests arrive but no tokens available\n- Limiter returns **429 Too Many Requests**\n- Client should back off with exponential retry\n\nThe API server is **never overwhelmed** — the limiter absorbs the burst.",
+      "appearsAtStep": 4
+    },
+    {
+      "heading": "Token Refill",
+      "body": "Tokens refill at the **refill rate** (independent of requests).\n\nCommon strategies:\n- **Per-second**: add N tokens every second\n- **Smooth**: add 1 token every 1/N seconds (avoids micro-bursts)\n\nOnce full, extra tokens are discarded (bucket can't overflow).",
+      "appearsAtStep": 5
+    },
+    {
+      "heading": "Steady State vs Overload",
+      "body": "**Steady state**: request rate ≤ refill rate → bucket stays partially full, all requests pass.\n\n**Overload**: request rate > refill rate → bucket drains → rejections proportional to the excess.\n\nThe rejected fraction = `(arrival_rate - refill_rate) / arrival_rate`",
+      "appearsAtStep": 8
+    }
+  ],
+
+  "popups": [
+    {
+      "id": "pop-token-consumed",
+      "attachTo": "token-bucket",
+      "text": "1 token consumed per request",
+      "showAtStep": 1,
+      "hideAtStep": 3,
+      "style": "info",
+      "anchor": { "x": 50, "y": 15 }
+    },
+    {
+      "id": "pop-empty-bucket",
+      "attachTo": "token-bucket",
+      "text": "Bucket empty! Reject incoming requests.",
+      "showAtStep": 3,
+      "hideAtStep": 5,
+      "style": "warning",
+      "anchor": { "x": 50, "y": 15 }
+    },
+    {
+      "id": "pop-refilling",
+      "attachTo": "token-bucket",
+      "text": "Refill rate: 2 tokens / interval",
+      "showAtStep": 5,
+      "hideAtStep": 7,
+      "style": "success",
+      "anchor": { "x": 50, "y": 15 }
+    }
+  ],
+
+  "challenges": [
+    {
+      "id": "ch-steady-50pct",
+      "title": "50% Rejection Rate",
+      "description": "Configure the token bucket so that exactly 50% of requests are rejected at steady state. If the refill rate is 4 tokens/second and bucket size is 4, what request rate would achieve exactly 50% rejection? Show your math.",
+      "type": "optimize"
+    },
+    {
+      "id": "ch-burst-allowed",
+      "title": "Why Allow Bursts?",
+      "description": "A customer complains: 'My app makes 100 API calls in 1 second every morning at 9am, then nothing for the rest of the hour.' Why is the Token Bucket better than a Fixed Window limiter for this use case? What bucket size should you configure?",
+      "type": "scenario"
+    },
+    {
+      "id": "ch-distributed",
+      "title": "Distributed Rate Limiting",
+      "description": "Your API runs on 10 servers. Each server runs its own token bucket limiter. A client sends 6 requests per second across all servers — each server allows 1 req/sec. What's the problem and how would you fix it?",
+      "type": "break-it"
+    }
+  ]
+}

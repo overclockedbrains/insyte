@@ -1,0 +1,344 @@
+{
+  "id": "chat-system",
+  "title": "Chat System (WhatsApp Architecture)",
+  "type": "hld",
+  "layout": "canvas-only",
+  "description": "How real-time messaging works under the hood — WebSocket connections, message queues for offline users, and delivery guarantees. The architecture behind WhatsApp and Slack.",
+  "category": "System Design",
+  "tags": ["chat", "websocket", "real-time", "hld", "system-design", "message-queue"],
+
+  "visuals": [
+    {
+      "id": "chat-system",
+      "type": "system-diagram",
+      "label": "Chat System Architecture",
+      "position": { "x": 50, "y": 50 },
+      "initialState": {
+        "components": [
+          { "id": "clientA", "label": "Client A", "icon": "mobile", "x": 80, "y": 180, "status": "active" },
+          { "id": "ws1", "label": "WS Server 1", "icon": "server", "x": 260, "y": 120, "status": "active" },
+          { "id": "ws2", "label": "WS Server 2", "icon": "server", "x": 260, "y": 260, "status": "normal" },
+          { "id": "msg-queue", "label": "Message Queue", "icon": "layers", "x": 440, "y": 180, "status": "normal" },
+          { "id": "msg-db", "label": "Message DB", "icon": "database", "x": 600, "y": 120, "status": "normal" },
+          { "id": "notif-svc", "label": "Push Notify", "icon": "zap", "x": 600, "y": 280, "status": "normal" },
+          { "id": "clientB", "label": "Client B", "icon": "mobile", "x": 760, "y": 180, "status": "active" }
+        ],
+        "connections": [
+          { "from": "clientA", "to": "ws1", "active": true, "label": "WS open" },
+          { "from": "ws1", "to": "msg-queue", "active": false },
+          { "from": "msg-queue", "to": "msg-db", "active": false },
+          { "from": "msg-queue", "to": "ws2", "active": false, "style": "dashed" },
+          { "from": "ws2", "to": "clientB", "active": true, "label": "WS open" },
+          { "from": "msg-queue", "to": "notif-svc", "active": false, "style": "dashed" }
+        ]
+      }
+    },
+    {
+      "id": "delivery-badge",
+      "type": "text-badge",
+      "label": "Status",
+      "initialState": { "text": "Both clients ONLINE  —  WebSocket connections established", "style": "success" }
+    },
+    {
+      "id": "msg-counter",
+      "type": "counter",
+      "label": "Messages",
+      "initialState": { "value": 0, "label": "Delivered", "color": "secondary" }
+    }
+  ],
+
+  "steps": [
+    {
+      "index": 0,
+      "actions": [],
+      "duration": 2000
+    },
+    {
+      "index": 1,
+      "actions": [
+        {
+          "target": "delivery-badge",
+          "action": "set",
+          "params": { "text": "Client A sends message  →  travels through WS Server 1 → Message Queue", "style": "highlight" }
+        },
+        {
+          "target": "chat-system",
+          "action": "set",
+          "params": {
+            "components": [
+              { "id": "clientA", "label": "Client A", "icon": "mobile", "x": 80, "y": 180, "status": "active" },
+              { "id": "ws1", "label": "WS Server 1", "icon": "server", "x": 260, "y": 120, "status": "active" },
+              { "id": "ws2", "label": "WS Server 2", "icon": "server", "x": 260, "y": 260, "status": "normal" },
+              { "id": "msg-queue", "label": "Message Queue", "icon": "layers", "x": 440, "y": 180, "status": "active" },
+              { "id": "msg-db", "label": "Message DB", "icon": "database", "x": 600, "y": 120, "status": "active" },
+              { "id": "notif-svc", "label": "Push Notify", "icon": "zap", "x": 600, "y": 280, "status": "normal" },
+              { "id": "clientB", "label": "Client B", "icon": "mobile", "x": 760, "y": 180, "status": "active" }
+            ],
+            "connections": [
+              { "from": "clientA", "to": "ws1", "active": true, "label": "send msg" },
+              { "from": "ws1", "to": "msg-queue", "active": true },
+              { "from": "msg-queue", "to": "msg-db", "active": true, "label": "persist" },
+              { "from": "msg-queue", "to": "ws2", "active": false, "style": "dashed" },
+              { "from": "ws2", "to": "clientB", "active": true, "label": "WS open" },
+              { "from": "msg-queue", "to": "notif-svc", "active": false, "style": "dashed" }
+            ]
+          }
+        }
+      ],
+      "duration": 2000
+    },
+    {
+      "index": 2,
+      "actions": [
+        {
+          "target": "delivery-badge",
+          "action": "set",
+          "params": { "text": "Queue routes to WS Server 2 → delivers to Client B via open WebSocket", "style": "success" }
+        },
+        {
+          "target": "chat-system",
+          "action": "set",
+          "params": {
+            "components": [
+              { "id": "clientA", "label": "Client A", "icon": "mobile", "x": 80, "y": 180, "status": "normal" },
+              { "id": "ws1", "label": "WS Server 1", "icon": "server", "x": 260, "y": 120, "status": "normal" },
+              { "id": "ws2", "label": "WS Server 2", "icon": "server", "x": 260, "y": 260, "status": "active" },
+              { "id": "msg-queue", "label": "Message Queue", "icon": "layers", "x": 440, "y": 180, "status": "active" },
+              { "id": "msg-db", "label": "Message DB", "icon": "database", "x": 600, "y": 120, "status": "normal" },
+              { "id": "notif-svc", "label": "Push Notify", "icon": "zap", "x": 600, "y": 280, "status": "normal" },
+              { "id": "clientB", "label": "Client B", "icon": "mobile", "x": 760, "y": 180, "status": "active" }
+            ],
+            "connections": [
+              { "from": "clientA", "to": "ws1", "active": false },
+              { "from": "ws1", "to": "msg-queue", "active": false },
+              { "from": "msg-queue", "to": "msg-db", "active": false },
+              { "from": "msg-queue", "to": "ws2", "active": true, "label": "route to B's server" },
+              { "from": "ws2", "to": "clientB", "active": true, "label": "deliver!" },
+              { "from": "msg-queue", "to": "notif-svc", "active": false, "style": "dashed" }
+            ]
+          }
+        },
+        {
+          "target": "msg-counter",
+          "action": "set",
+          "params": { "value": 1, "label": "Delivered", "color": "secondary" }
+        }
+      ],
+      "duration": 2000
+    },
+    {
+      "index": 3,
+      "actions": [
+        {
+          "target": "delivery-badge",
+          "action": "set",
+          "params": { "text": "Client B goes OFFLINE  →  WebSocket connection drops", "style": "error" }
+        },
+        {
+          "target": "chat-system",
+          "action": "set",
+          "params": {
+            "components": [
+              { "id": "clientA", "label": "Client A", "icon": "mobile", "x": 80, "y": 180, "status": "active" },
+              { "id": "ws1", "label": "WS Server 1", "icon": "server", "x": 260, "y": 120, "status": "active" },
+              { "id": "ws2", "label": "WS Server 2", "icon": "server", "x": 260, "y": 260, "status": "normal" },
+              { "id": "msg-queue", "label": "Message Queue", "icon": "layers", "x": 440, "y": 180, "status": "normal" },
+              { "id": "msg-db", "label": "Message DB", "icon": "database", "x": 600, "y": 120, "status": "normal" },
+              { "id": "notif-svc", "label": "Push Notify", "icon": "zap", "x": 600, "y": 280, "status": "normal" },
+              { "id": "clientB", "label": "Client B (offline)", "icon": "mobile", "x": 760, "y": 180, "status": "dead" }
+            ],
+            "connections": [
+              { "from": "clientA", "to": "ws1", "active": true },
+              { "from": "ws1", "to": "msg-queue", "active": false },
+              { "from": "msg-queue", "to": "msg-db", "active": false },
+              { "from": "msg-queue", "to": "ws2", "active": false, "style": "dashed" },
+              { "from": "ws2", "to": "clientB", "active": false, "style": "dashed" },
+              { "from": "msg-queue", "to": "notif-svc", "active": false, "style": "dashed" }
+            ]
+          }
+        }
+      ],
+      "duration": 2000
+    },
+    {
+      "index": 4,
+      "actions": [
+        {
+          "target": "delivery-badge",
+          "action": "set",
+          "params": { "text": "Client A sends message while B is offline  →  queued in Message DB", "style": "warning" }
+        },
+        {
+          "target": "chat-system",
+          "action": "set",
+          "params": {
+            "components": [
+              { "id": "clientA", "label": "Client A", "icon": "mobile", "x": 80, "y": 180, "status": "active" },
+              { "id": "ws1", "label": "WS Server 1", "icon": "server", "x": 260, "y": 120, "status": "active" },
+              { "id": "ws2", "label": "WS Server 2", "icon": "server", "x": 260, "y": 260, "status": "normal" },
+              { "id": "msg-queue", "label": "Message Queue", "icon": "layers", "x": 440, "y": 180, "status": "active" },
+              { "id": "msg-db", "label": "Message DB", "icon": "database", "x": 600, "y": 120, "status": "active" },
+              { "id": "notif-svc", "label": "Push Notify", "icon": "zap", "x": 600, "y": 280, "status": "active" },
+              { "id": "clientB", "label": "Client B (offline)", "icon": "mobile", "x": 760, "y": 180, "status": "dead" }
+            ],
+            "connections": [
+              { "from": "clientA", "to": "ws1", "active": true, "label": "send msg" },
+              { "from": "ws1", "to": "msg-queue", "active": true },
+              { "from": "msg-queue", "to": "msg-db", "active": true, "label": "queue for later" },
+              { "from": "msg-queue", "to": "ws2", "active": false, "style": "dashed" },
+              { "from": "ws2", "to": "clientB", "active": false, "style": "dashed" },
+              { "from": "msg-queue", "to": "notif-svc", "active": true, "label": "push notify!" }
+            ]
+          }
+        }
+      ],
+      "duration": 2200
+    },
+    {
+      "index": 5,
+      "actions": [
+        {
+          "target": "delivery-badge",
+          "action": "set",
+          "params": { "text": "Client B comes back ONLINE  →  reconnects WebSocket → drains message queue", "style": "success" }
+        },
+        {
+          "target": "chat-system",
+          "action": "set",
+          "params": {
+            "components": [
+              { "id": "clientA", "label": "Client A", "icon": "mobile", "x": 80, "y": 180, "status": "normal" },
+              { "id": "ws1", "label": "WS Server 1", "icon": "server", "x": 260, "y": 120, "status": "normal" },
+              { "id": "ws2", "label": "WS Server 2", "icon": "server", "x": 260, "y": 260, "status": "active" },
+              { "id": "msg-queue", "label": "Message Queue", "icon": "layers", "x": 440, "y": 180, "status": "active" },
+              { "id": "msg-db", "label": "Message DB", "icon": "database", "x": 600, "y": 120, "status": "active" },
+              { "id": "notif-svc", "label": "Push Notify", "icon": "zap", "x": 600, "y": 280, "status": "normal" },
+              { "id": "clientB", "label": "Client B (back!)", "icon": "mobile", "x": 760, "y": 180, "status": "active" }
+            ],
+            "connections": [
+              { "from": "clientA", "to": "ws1", "active": false },
+              { "from": "ws1", "to": "msg-queue", "active": false },
+              { "from": "msg-db", "to": "msg-queue", "active": true, "label": "drain queue" },
+              { "from": "msg-queue", "to": "ws2", "active": true },
+              { "from": "ws2", "to": "clientB", "active": true, "label": "deliver queued msgs" },
+              { "from": "msg-queue", "to": "notif-svc", "active": false, "style": "dashed" }
+            ]
+          }
+        },
+        {
+          "target": "msg-counter",
+          "action": "set",
+          "params": { "value": 3, "label": "Delivered", "color": "secondary" }
+        }
+      ],
+      "duration": 2200
+    }
+  ],
+
+  "controls": [
+    {
+      "id": "transport",
+      "type": "toggle-group",
+      "label": "Transport Protocol",
+      "config": {
+        "options": ["WebSocket", "Long Polling", "SSE"],
+        "defaultValue": "WebSocket"
+      }
+    },
+    {
+      "id": "user-b-online",
+      "type": "toggle",
+      "label": "User B Online",
+      "config": { "defaultValue": true }
+    },
+    {
+      "id": "btn-send",
+      "type": "button",
+      "label": "Send Message",
+      "config": { "variant": "primary", "goToStep": 1 }
+    },
+    {
+      "id": "btn-offline",
+      "type": "button",
+      "label": "User B Goes Offline",
+      "config": { "variant": "destructive", "goToStep": 3 }
+    },
+    {
+      "id": "btn-offline-msg",
+      "type": "button",
+      "label": "Send While Offline",
+      "config": { "variant": "primary", "goToStep": 4 }
+    },
+    {
+      "id": "btn-reconnect",
+      "type": "button",
+      "label": "User B Reconnects",
+      "config": { "variant": "secondary", "goToStep": 5 }
+    }
+  ],
+
+  "explanation": [
+    {
+      "heading": "WebSocket: Full-Duplex Channel",
+      "body": "HTTP is request-response — client must ask to receive data.\n\nWebSocket is a **persistent TCP connection**: both sides can send at any time. Perfect for chat — messages arrive instantly without polling.",
+      "appearsAtStep": 0
+    },
+    {
+      "heading": "Message Queue: The Reliability Layer",
+      "body": "Messages go through a Message Queue (Kafka, RabbitMQ) before delivery.\n\nThis decouples senders from receivers and guarantees **at-least-once delivery**.\n\nIf the destination WebSocket server is down, the queue retains the message.",
+      "appearsAtStep": 1
+    },
+    {
+      "heading": "Offline Delivery: Queue + Push",
+      "body": "When recipient is offline:\n1. Message stored in DB\n2. Push notification sent via APNS/FCM\n3. On reconnect, client fetches missed messages from DB (via cursor-based pagination)\n\nThis is **store-and-forward** — the same model used by email.",
+      "appearsAtStep": 4
+    },
+    {
+      "heading": "Reconnect: Drain the Queue",
+      "body": "On reconnect, the client sends its **last seen message ID**.\n\nThe server fetches all messages after that ID from the DB and pushes them in order.\n\nThis ensures no message is skipped even if the client was offline for days.",
+      "appearsAtStep": 5
+    }
+  ],
+
+  "popups": [
+    {
+      "id": "pop-ws-vs-polling",
+      "attachTo": "chat-system",
+      "text": "Long Polling: client re-requests every N seconds — 100× more overhead",
+      "showAtStep": 0,
+      "hideAtStep": 1,
+      "style": "info",
+      "anchor": { "x": 50, "y": 85 }
+    },
+    {
+      "id": "pop-offline-queue",
+      "attachTo": "chat-system",
+      "text": "Message queued — won't be lost even if server restarts",
+      "showAtStep": 4,
+      "hideAtStep": 5,
+      "style": "warning",
+      "anchor": { "x": 50, "y": 85 }
+    }
+  ],
+
+  "challenges": [
+    {
+      "id": "ch-server-selection",
+      "title": "WebSocket Server Selection",
+      "description": "Client A is connected to WS Server 1, Client B to WS Server 2. How does Server 1 know which server to forward the message to? Design the routing mechanism using a service discovery layer (e.g., Redis with userId → serverId mapping).",
+      "type": "scenario"
+    },
+    {
+      "id": "ch-delivery-guarantees",
+      "title": "Exactly-Once Delivery",
+      "description": "The Message Queue guarantees at-least-once delivery. But if Server 2 crashes after receiving but before acknowledging, the message gets re-delivered and Client B sees it twice. How would you implement exactly-once delivery? What's the cost?",
+      "type": "break-it"
+    },
+    {
+      "id": "ch-group-chat",
+      "title": "Extend to Group Chat",
+      "description": "Design group chat with 1000 members. When a message is sent, it needs to reach all 1000 members. Should you use fanout-on-write (pre-push to all) or fanout-on-read (store once, fetch on demand)? What's the crossover point?",
+      "type": "optimize"
+    }
+  ]
+}

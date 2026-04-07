@@ -1,7 +1,7 @@
 'use client'
 
 import type { Control } from '@insyte/scene-engine'
-import { useControlValues } from '../hooks/useControls'
+import type { ControlValue } from '../hooks/useControls'
 import { SliderControl } from './SliderControl'
 import { ToggleControl } from './ToggleControl'
 import { ToggleGroupControl } from './ToggleGroupControl'
@@ -12,14 +12,16 @@ import { StatCard } from './StatCard'
 // ─── ControlBar ───────────────────────────────────────────────────────────────
 // Reads scene.controls array and renders each control type.
 // Stat cards (type:'stat') float to the right of the bar.
-// Generic and data-driven — used heavily in Phases 5, 9, and 10.
+// Accepts external values/onChange from parent (CanvasCard lifts control state
+// so that showWhen conditions can be evaluated on the visualization layer).
 
 interface ControlBarProps {
   controls: Control[]
+  values: Record<string, ControlValue>
+  onChange: (id: string, val: ControlValue) => void
 }
 
-export function ControlBar({ controls }: ControlBarProps) {
-  const { values, setControlValue } = useControlValues(controls)
+export function ControlBar({ controls, values, onChange: setControlValue }: ControlBarProps) {
 
   if (controls.length === 0) return null
 

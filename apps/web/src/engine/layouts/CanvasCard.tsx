@@ -12,6 +12,8 @@ import { StepPopup } from '../annotations/StepPopup'
 import { PrimitiveRegistry } from '../primitives'
 import { computeVisualStateAtStep } from '@insyte/scene-engine'
 import { usePlayback } from '../hooks/usePlayback'
+import { useControlValues, type ControlValue } from '../hooks/useControls'
+import ReactMarkdown from 'react-markdown'
 
 // ─── CanvasCard ────────────────────────────────────────────────────────────────
 // The dark card container that wraps the simulation canvas visuals.
@@ -32,20 +34,36 @@ interface CanvasCardProps {
 // Toggle to visualise each primitive's bounding box during development
 const DEV_BORDERS = process.env.NEXT_PUBLIC_DEV_BORDERS === 'true'
 
-function CanvasVisualization({ scene }: { scene: Scene }) {
+function CanvasVisualization({ scene, controlValues }: { scene: Scene; controlValues: Record<string, ControlValue> }) {
   const { currentStep } = usePlayback()
+
+  // Evaluate a visual's showWhen condition against current control values
+  const isVisible = (visual: { showWhen?: { control: string; equals: unknown } }) => {
+    if (!visual.showWhen) return true
+    const val = controlValues[visual.showWhen.control]
+    return val === visual.showWhen.equals
+  }
 
   const visiblePopups = scene.popups.filter(
     (p) =>
       currentStep >= p.showAtStep &&
-      (p.hideAtStep === undefined || currentStep < p.hideAtStep),
+      (p.hideAtStep === undefined || currentStep < p.hideAtStep) &&
+      isVisible(p),
   )
 
-  const textBadges = scene.visuals.filter((v) => v.type === 'text-badge')
-  const counters = scene.visuals.filter((v) => v.type === 'counter')
+  const textBadges = scene.visuals.filter((v) => v.type === 'text-badge' && isVisible(v))
+  const counters = scene.visuals.filter((v) => v.type === 'counter' && isVisible(v))
   const canvasVisuals = scene.visuals.filter(
-    (v) => v.type !== 'text-badge' && v.type !== 'counter',
+    (v) => v.type !== 'text-badge' && v.type !== 'counter' && isVisible(v),
   )
+
+  // For canvas-only HLD scenes, show a floating explanation card
+  const floatingExplanation =
+    scene.layout === 'canvas-only'
+      ? [...scene.explanation]
+          .filter((s) => s.appearsAtStep <= currentStep)
+          .pop()
+      : null
 
   const hasHud = textBadges.length > 0 || counters.length > 0
   const useAbsoluteLayout = canvasVisuals.some((v) => v.position != null)
@@ -197,6 +215,36 @@ function CanvasVisualization({ scene }: { scene: Scene }) {
           )
         })}
 
+        {/* Floating explanation card for canvas-only HLD scenes */}
+        <AnimatePresence mode="wait">
+          {floatingExplanation && (
+            <motion.div
+              key={floatingExplanation.heading}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 4 }}
+              transition={{ type: 'spring', stiffness: 340, damping: 30 }}
+              className="absolute bottom-4 left-4 z-40 max-w-[280px] pointer-events-none"
+            >
+              <div className="glass-panel rounded-2xl border border-primary/15 px-4 py-3 shadow-lg"
+                style={{ boxShadow: '0 0 20px rgba(183,159,255,0.10)' }}>
+                <p className="text-[11px] font-semibold text-primary mb-1 uppercase tracking-widest">
+                  {floatingExplanation.heading}
+                </p>
+                <div className="text-[11px] text-on-surface-variant leading-relaxed prose prose-invert prose-p:mb-1 prose-strong:text-on-surface max-w-none">
+                  <ReactMarkdown>{floatingExplanation.body}</ReactMarkdown>
+                </div>
+                {floatingExplanation.callout && (
+                  <div className="mt-2 bg-primary/8 rounded px-2 py-1.5 text-[10px] text-on-surface border border-primary/10">
+                    <span className="font-semibold text-primary mr-1">▸</span>
+                    {floatingExplanation.callout}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
       </div>
     </div>
   )
@@ -205,6 +253,10 @@ function CanvasVisualization({ scene }: { scene: Scene }) {
 // ─── Shared card content ──────────────────────────────────────────────────────
 
 function CardContent({ scene }: { scene: Scene }) {
+  // Lift control values here so both CanvasVisualization and ControlBar share state.
+  // This enables showWhen conditions to filter visuals based on current control values.
+  const { values, setControlValue } = useControlValues(scene.controls)
+
   return (
     <>
       {/* Top: Playback controls */}
@@ -213,11 +265,11 @@ function CardContent({ scene }: { scene: Scene }) {
       </div>
 
       {/* Middle: visualization area */}
-      <CanvasVisualization scene={scene} />
+      <CanvasVisualization scene={scene} controlValues={values} />
 
       {/* Bottom: ControlBar */}
       <div className="flex-shrink-0">
-        <ControlBar controls={scene.controls} />
+        <ControlBar controls={scene.controls} values={values} onChange={setControlValue} />
       </div>
     </>
   )

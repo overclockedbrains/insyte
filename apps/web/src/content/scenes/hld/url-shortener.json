@@ -1,0 +1,437 @@
+{
+  "id": "url-shortener",
+  "title": "URL Shortener (bit.ly Architecture)",
+  "type": "hld",
+  "layout": "canvas-only",
+  "description": "Design a URL shortener like bit.ly — the write path generates short IDs, the read path resolves them via Cache and Database with optional CDN.",
+  "category": "System Design",
+  "tags": ["url-shortener", "hld", "system-design", "cache", "cdn", "redis"],
+
+  "visuals": [
+    {
+      "id": "url-system",
+      "type": "system-diagram",
+      "label": "URL Shortener Architecture",
+      "position": { "x": 50, "y": 50 },
+      "initialState": {
+        "components": [
+          { "id": "client", "label": "Client", "icon": "web", "x": 80, "y": 200, "status": "normal" },
+          { "id": "api", "label": "API Server", "icon": "server", "x": 240, "y": 200, "status": "normal" },
+          { "id": "cache", "label": "Redis Cache", "icon": "zap", "x": 420, "y": 120, "status": "normal" },
+          { "id": "db", "label": "Database", "icon": "database", "x": 420, "y": 280, "status": "normal" },
+          { "id": "cdn", "label": "CDN Edge", "icon": "cloud", "x": 80, "y": 80, "status": "normal" }
+        ],
+        "connections": [
+          { "from": "client", "to": "api", "active": false },
+          { "from": "api", "to": "cache", "active": false, "label": "read" },
+          { "from": "api", "to": "db", "active": false, "label": "write" },
+          { "from": "cdn", "to": "client", "active": false, "style": "dashed" }
+        ]
+      }
+    },
+    {
+      "id": "url-system-no-cache",
+      "type": "system-diagram",
+      "label": "URL Shortener (Cache Off)",
+      "position": { "x": 50, "y": 50 },
+      "showWhen": { "control": "cache-toggle", "equals": false },
+      "initialState": {
+        "components": [
+          { "id": "client2", "label": "Client", "icon": "web", "x": 80, "y": 200, "status": "normal" },
+          { "id": "api2", "label": "API Server", "icon": "server", "x": 260, "y": 200, "status": "normal" },
+          { "id": "db2", "label": "Database", "icon": "database", "x": 440, "y": 200, "status": "normal" }
+        ],
+        "connections": [
+          { "from": "client2", "to": "api2", "active": false },
+          { "from": "api2", "to": "db2", "active": false }
+        ]
+      }
+    },
+    {
+      "id": "stats-total",
+      "type": "counter",
+      "label": "Requests",
+      "initialState": { "value": 0, "label": "Total Requests", "color": "primary" }
+    },
+    {
+      "id": "stats-cache-hit",
+      "type": "counter",
+      "label": "Cache Hits",
+      "initialState": { "value": 0, "label": "Cache Hits", "color": "secondary" }
+    },
+    {
+      "id": "stats-db",
+      "type": "counter",
+      "label": "DB Reads",
+      "initialState": { "value": 0, "label": "DB Reads", "color": "primary" }
+    },
+    {
+      "id": "flow-badge",
+      "type": "text-badge",
+      "label": "Flow",
+      "initialState": { "text": "Ready  —  Click 'Shorten URL' or 'Resolve URL' to start", "style": "default" }
+    }
+  ],
+
+  "steps": [
+    {
+      "index": 0,
+      "actions": [],
+      "duration": 2000
+    },
+    {
+      "index": 1,
+      "actions": [
+        {
+          "target": "flow-badge",
+          "action": "set",
+          "params": { "text": "WRITE PATH: Client sends long URL to API Server", "style": "highlight" }
+        },
+        {
+          "target": "url-system",
+          "action": "set",
+          "params": {
+            "components": [
+              { "id": "client", "label": "Client", "icon": "web", "x": 80, "y": 200, "status": "active" },
+              { "id": "api", "label": "API Server", "icon": "server", "x": 240, "y": 200, "status": "active" },
+              { "id": "cache", "label": "Redis Cache", "icon": "zap", "x": 420, "y": 120, "status": "normal" },
+              { "id": "db", "label": "Database", "icon": "database", "x": 420, "y": 280, "status": "normal" },
+              { "id": "cdn", "label": "CDN Edge", "icon": "cloud", "x": 80, "y": 80, "status": "normal" }
+            ],
+            "connections": [
+              { "from": "client", "to": "api", "active": true },
+              { "from": "api", "to": "cache", "active": false, "label": "read" },
+              { "from": "api", "to": "db", "active": false, "label": "write" },
+              { "from": "cdn", "to": "client", "active": false, "style": "dashed" }
+            ]
+          }
+        },
+        {
+          "target": "stats-total",
+          "action": "set",
+          "params": { "value": 1, "label": "Total Requests", "color": "primary" }
+        }
+      ],
+      "duration": 2000
+    },
+    {
+      "index": 2,
+      "actions": [
+        {
+          "target": "flow-badge",
+          "action": "set",
+          "params": { "text": "WRITE PATH: API generates Base62 short ID → stores in DB", "style": "highlight" }
+        },
+        {
+          "target": "url-system",
+          "action": "set",
+          "params": {
+            "components": [
+              { "id": "client", "label": "Client", "icon": "web", "x": 80, "y": 200, "status": "normal" },
+              { "id": "api", "label": "API Server", "icon": "server", "x": 240, "y": 200, "status": "active" },
+              { "id": "cache", "label": "Redis Cache", "icon": "zap", "x": 420, "y": 120, "status": "normal" },
+              { "id": "db", "label": "Database", "icon": "database", "x": 420, "y": 280, "status": "active" },
+              { "id": "cdn", "label": "CDN Edge", "icon": "cloud", "x": 80, "y": 80, "status": "normal" }
+            ],
+            "connections": [
+              { "from": "client", "to": "api", "active": false },
+              { "from": "api", "to": "cache", "active": false, "label": "read" },
+              { "from": "api", "to": "db", "active": true, "label": "write shortID→URL" },
+              { "from": "cdn", "to": "client", "active": false, "style": "dashed" }
+            ]
+          }
+        }
+      ],
+      "duration": 2200
+    },
+    {
+      "index": 3,
+      "actions": [
+        {
+          "target": "flow-badge",
+          "action": "set",
+          "params": { "text": "READ PATH: Client resolves short URL → API checks Cache first", "style": "highlight" }
+        },
+        {
+          "target": "url-system",
+          "action": "set",
+          "params": {
+            "components": [
+              { "id": "client", "label": "Client", "icon": "web", "x": 80, "y": 200, "status": "active" },
+              { "id": "api", "label": "API Server", "icon": "server", "x": 240, "y": 200, "status": "active" },
+              { "id": "cache", "label": "Redis Cache", "icon": "zap", "x": 420, "y": 120, "status": "active" },
+              { "id": "db", "label": "Database", "icon": "database", "x": 420, "y": 280, "status": "normal" },
+              { "id": "cdn", "label": "CDN Edge", "icon": "cloud", "x": 80, "y": 80, "status": "normal" }
+            ],
+            "connections": [
+              { "from": "client", "to": "api", "active": true },
+              { "from": "api", "to": "cache", "active": true, "label": "cache lookup" },
+              { "from": "api", "to": "db", "active": false, "label": "write" },
+              { "from": "cdn", "to": "client", "active": false, "style": "dashed" }
+            ]
+          }
+        },
+        {
+          "target": "stats-total",
+          "action": "set",
+          "params": { "value": 2, "label": "Total Requests", "color": "primary" }
+        }
+      ],
+      "duration": 2000
+    },
+    {
+      "index": 4,
+      "actions": [
+        {
+          "target": "flow-badge",
+          "action": "set",
+          "params": { "text": "CACHE HIT! Redis returns long URL → API redirects client (301/302)", "style": "success" }
+        },
+        {
+          "target": "url-system",
+          "action": "set",
+          "params": {
+            "components": [
+              { "id": "client", "label": "Client", "icon": "web", "x": 80, "y": 200, "status": "active" },
+              { "id": "api", "label": "API Server", "icon": "server", "x": 240, "y": 200, "status": "active" },
+              { "id": "cache", "label": "Redis Cache", "icon": "zap", "x": 420, "y": 120, "status": "active" },
+              { "id": "db", "label": "Database", "icon": "database", "x": 420, "y": 280, "status": "normal" },
+              { "id": "cdn", "label": "CDN Edge", "icon": "cloud", "x": 80, "y": 80, "status": "normal" }
+            ],
+            "connections": [
+              { "from": "api", "to": "client", "active": true, "label": "302 redirect" },
+              { "from": "api", "to": "cache", "active": true, "label": "hit!" },
+              { "from": "api", "to": "db", "active": false, "label": "write" },
+              { "from": "cdn", "to": "client", "active": false, "style": "dashed" }
+            ]
+          }
+        },
+        {
+          "target": "stats-cache-hit",
+          "action": "set",
+          "params": { "value": 1, "label": "Cache Hits", "color": "secondary" }
+        }
+      ],
+      "duration": 2200
+    },
+    {
+      "index": 5,
+      "actions": [
+        {
+          "target": "flow-badge",
+          "action": "set",
+          "params": { "text": "CACHE MISS: shortID not in cache → fall through to Database", "style": "warning" }
+        },
+        {
+          "target": "url-system",
+          "action": "set",
+          "params": {
+            "components": [
+              { "id": "client", "label": "Client", "icon": "web", "x": 80, "y": 200, "status": "active" },
+              { "id": "api", "label": "API Server", "icon": "server", "x": 240, "y": 200, "status": "active" },
+              { "id": "cache", "label": "Redis Cache", "icon": "zap", "x": 420, "y": 120, "status": "overloaded", "sublabel": "MISS" },
+              { "id": "db", "label": "Database", "icon": "database", "x": 420, "y": 280, "status": "active" },
+              { "id": "cdn", "label": "CDN Edge", "icon": "cloud", "x": 80, "y": 80, "status": "normal" }
+            ],
+            "connections": [
+              { "from": "client", "to": "api", "active": true },
+              { "from": "api", "to": "cache", "active": true, "label": "miss!" },
+              { "from": "api", "to": "db", "active": true, "label": "DB lookup" },
+              { "from": "cdn", "to": "client", "active": false, "style": "dashed" }
+            ]
+          }
+        },
+        {
+          "target": "stats-total",
+          "action": "set",
+          "params": { "value": 3, "label": "Total Requests", "color": "primary" }
+        },
+        {
+          "target": "stats-db",
+          "action": "set",
+          "params": { "value": 1, "label": "DB Reads", "color": "primary" }
+        }
+      ],
+      "duration": 2200
+    },
+    {
+      "index": 6,
+      "actions": [
+        {
+          "target": "flow-badge",
+          "action": "set",
+          "params": { "text": "DB hit → populate cache (write-through) → redirect client", "style": "success" }
+        },
+        {
+          "target": "url-system",
+          "action": "set",
+          "params": {
+            "components": [
+              { "id": "client", "label": "Client", "icon": "web", "x": 80, "y": 200, "status": "active" },
+              { "id": "api", "label": "API Server", "icon": "server", "x": 240, "y": 200, "status": "active" },
+              { "id": "cache", "label": "Redis Cache", "icon": "zap", "x": 420, "y": 120, "status": "active" },
+              { "id": "db", "label": "Database", "icon": "database", "x": 420, "y": 280, "status": "normal" },
+              { "id": "cdn", "label": "CDN Edge", "icon": "cloud", "x": 80, "y": 80, "status": "normal" }
+            ],
+            "connections": [
+              { "from": "api", "to": "client", "active": true, "label": "302 redirect" },
+              { "from": "api", "to": "cache", "active": true, "label": "cache populate" },
+              { "from": "api", "to": "db", "active": false, "label": "write" },
+              { "from": "cdn", "to": "client", "active": false, "style": "dashed" }
+            ]
+          }
+        }
+      ],
+      "duration": 2000
+    },
+    {
+      "index": 7,
+      "actions": [
+        {
+          "target": "flow-badge",
+          "action": "set",
+          "params": { "text": "CDN ENABLED: static redirects cached at edge — 0 DB calls", "style": "success" }
+        },
+        {
+          "target": "url-system",
+          "action": "set",
+          "params": {
+            "components": [
+              { "id": "client", "label": "Client", "icon": "web", "x": 80, "y": 200, "status": "active" },
+              { "id": "api", "label": "API Server", "icon": "server", "x": 240, "y": 200, "status": "normal" },
+              { "id": "cache", "label": "Redis Cache", "icon": "zap", "x": 420, "y": 120, "status": "normal" },
+              { "id": "db", "label": "Database", "icon": "database", "x": 420, "y": 280, "status": "normal" },
+              { "id": "cdn", "label": "CDN Edge", "icon": "cloud", "x": 80, "y": 80, "status": "active" }
+            ],
+            "connections": [
+              { "from": "cdn", "to": "client", "active": true, "label": "CDN redirect" },
+              { "from": "client", "to": "api", "active": false },
+              { "from": "api", "to": "cache", "active": false, "label": "read" },
+              { "from": "api", "to": "db", "active": false, "label": "write" }
+            ]
+          }
+        },
+        {
+          "target": "stats-total",
+          "action": "set",
+          "params": { "value": 10, "label": "Total Requests", "color": "primary" }
+        },
+        {
+          "target": "stats-cache-hit",
+          "action": "set",
+          "params": { "value": 10, "label": "Cache Hits", "color": "secondary" }
+        },
+        {
+          "target": "stats-db",
+          "action": "set",
+          "params": { "value": 1, "label": "DB Reads", "color": "primary" }
+        }
+      ],
+      "duration": 2500
+    }
+  ],
+
+  "controls": [
+    {
+      "id": "cache-toggle",
+      "type": "toggle",
+      "label": "Cache (Redis)",
+      "config": { "defaultValue": true }
+    },
+    {
+      "id": "cdn-toggle",
+      "type": "toggle",
+      "label": "CDN Edge",
+      "config": { "defaultValue": false }
+    },
+    {
+      "id": "btn-shorten",
+      "type": "button",
+      "label": "Shorten URL",
+      "config": { "variant": "primary", "goToStep": 1 }
+    },
+    {
+      "id": "btn-resolve",
+      "type": "button",
+      "label": "Resolve URL (cache hit)",
+      "config": { "variant": "secondary", "goToStep": 3 }
+    },
+    {
+      "id": "btn-cache-miss",
+      "type": "button",
+      "label": "Resolve (cache miss)",
+      "config": { "variant": "destructive", "goToStep": 5 }
+    },
+    {
+      "id": "btn-cdn",
+      "type": "button",
+      "label": "CDN Edge Resolution",
+      "config": { "variant": "secondary", "goToStep": 7 }
+    }
+  ],
+
+  "explanation": [
+    {
+      "heading": "URL Shortener: Read-Heavy System",
+      "body": "A URL shortener is **100:1 read-to-write**. Once shortened, a URL is resolved millions of times.\n\nDesign centers around making reads as fast as possible.",
+      "appearsAtStep": 0
+    },
+    {
+      "heading": "Write Path: Generate Short ID",
+      "body": "**PUT /shorten**: API generates a 6-character Base62 ID (62^6 = 56 billion possible IDs) and stores the mapping in the database.\n\nBase62 uses [a-z A-Z 0-9] for URL-safe IDs.",
+      "appearsAtStep": 1
+    },
+    {
+      "heading": "Read Path: Cache-First",
+      "body": "**GET /abc123**: Check Redis first (sub-ms latency). Cache hit rate > 80% for popular URLs.\n\nOnly fall through to DB on a miss. Write result back to cache for next time.",
+      "appearsAtStep": 3
+    },
+    {
+      "heading": "CDN for Maximum Speed",
+      "body": "For highly popular URLs, cache the redirect at CDN edge nodes globally.\n\nThe redirect never reaches your origin servers — pure edge resolution at <10ms from anywhere.",
+      "appearsAtStep": 7
+    }
+  ],
+
+  "popups": [
+    {
+      "id": "pop-base62",
+      "attachTo": "url-system",
+      "text": "Base62: [a-z A-Z 0-9] = URL-safe IDs",
+      "showAtStep": 2,
+      "hideAtStep": 3,
+      "style": "info",
+      "anchor": { "x": 55, "y": 25 }
+    },
+    {
+      "id": "pop-301-vs-302",
+      "attachTo": "url-system",
+      "text": "301 = permanent (browser caches). 302 = temporary (always hits your server).",
+      "showAtStep": 4,
+      "hideAtStep": 6,
+      "style": "insight",
+      "anchor": { "x": 30, "y": 75 }
+    }
+  ],
+
+  "challenges": [
+    {
+      "id": "ch-301-vs-302",
+      "title": "301 vs 302 Redirect",
+      "description": "Should the short URL redirect use HTTP 301 (Permanent) or 302 (Temporary)? 301 means browsers cache the redirect and never call your server again — great for performance but you lose click analytics. 302 hits your server every time. Which would you choose for a business? Why?",
+      "type": "scenario"
+    },
+    {
+      "id": "ch-collision",
+      "title": "ID Collision",
+      "description": "Two users submit different long URLs that hash to the same short ID. How do you handle this? Design the put() algorithm to guarantee uniqueness. What happens when the ID space (62^6 = 56B) fills up?",
+      "type": "break-it"
+    },
+    {
+      "id": "ch-scale",
+      "title": "10B URLs, 100M resolutions/day",
+      "description": "The system needs to handle 10 billion stored URLs and 100 million resolutions per day. Walk through the capacity estimates: storage size, cache memory needed, DB read QPS, required DB sharding strategy.",
+      "type": "optimize"
+    }
+  ]
+}

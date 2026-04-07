@@ -1,0 +1,378 @@
+{
+  "id": "twitter-feed",
+  "title": "Twitter Feed — Fanout Architecture",
+  "type": "hld",
+  "layout": "canvas-only",
+  "description": "How Twitter delivers your feed in milliseconds — and why the celebrity problem breaks naive fanout. Visualize fanout-on-write vs fanout-on-read and the hybrid approach.",
+  "category": "System Design",
+  "tags": ["twitter", "feed", "fanout", "hld", "system-design", "social-network"],
+
+  "visuals": [
+    {
+      "id": "twitter-system",
+      "type": "system-diagram",
+      "label": "Twitter Feed Architecture",
+      "position": { "x": 50, "y": 50 },
+      "initialState": {
+        "components": [
+          { "id": "writer", "label": "Writer", "icon": "mobile", "x": 80, "y": 200, "status": "normal" },
+          { "id": "api-gw", "label": "API Gateway", "icon": "layers", "x": 240, "y": 200, "status": "normal" },
+          { "id": "tweet-svc", "label": "Tweet Service", "icon": "server", "x": 400, "y": 120, "status": "normal" },
+          { "id": "tweet-db", "label": "Tweet DB", "icon": "database", "x": 560, "y": 120, "status": "normal" },
+          { "id": "fanout-svc", "label": "Fanout Service", "icon": "zap", "x": 400, "y": 280, "status": "normal" },
+          { "id": "feed-cache-a", "label": "Feed Cache A", "icon": "zap", "x": 540, "y": 220, "status": "normal" },
+          { "id": "feed-cache-b", "label": "Feed Cache B", "icon": "zap", "x": 540, "y": 300, "status": "normal" },
+          { "id": "feed-cache-c", "label": "Feed Cache C", "icon": "zap", "x": 540, "y": 380, "status": "normal" },
+          { "id": "reader", "label": "Reader", "icon": "mobile", "x": 680, "y": 300, "status": "normal" }
+        ],
+        "connections": [
+          { "from": "writer", "to": "api-gw", "active": false },
+          { "from": "api-gw", "to": "tweet-svc", "active": false },
+          { "from": "tweet-svc", "to": "tweet-db", "active": false },
+          { "from": "api-gw", "to": "fanout-svc", "active": false, "style": "dashed" },
+          { "from": "fanout-svc", "to": "feed-cache-a", "active": false },
+          { "from": "fanout-svc", "to": "feed-cache-b", "active": false },
+          { "from": "fanout-svc", "to": "feed-cache-c", "active": false },
+          { "from": "feed-cache-b", "to": "reader", "active": false }
+        ]
+      }
+    },
+    {
+      "id": "stats-followers",
+      "type": "counter",
+      "label": "Followers",
+      "initialState": { "value": 1000, "label": "Followers", "color": "primary" }
+    },
+    {
+      "id": "stats-writes",
+      "type": "counter",
+      "label": "Cache Writes",
+      "initialState": { "value": 0, "label": "Cache Writes", "color": "secondary" }
+    },
+    {
+      "id": "fanout-badge",
+      "type": "text-badge",
+      "label": "Strategy",
+      "initialState": { "text": "Fanout-on-Write  —  pre-compute feeds at write time", "style": "highlight" }
+    }
+  ],
+
+  "steps": [
+    {
+      "index": 0,
+      "actions": [],
+      "duration": 2000
+    },
+    {
+      "index": 1,
+      "actions": [
+        {
+          "target": "fanout-badge",
+          "action": "set",
+          "params": { "text": "POST TWEET: Writer sends tweet to API Gateway", "style": "highlight" }
+        },
+        {
+          "target": "twitter-system",
+          "action": "set",
+          "params": {
+            "components": [
+              { "id": "writer", "label": "Writer", "icon": "mobile", "x": 80, "y": 200, "status": "active" },
+              { "id": "api-gw", "label": "API Gateway", "icon": "layers", "x": 240, "y": 200, "status": "active" },
+              { "id": "tweet-svc", "label": "Tweet Service", "icon": "server", "x": 400, "y": 120, "status": "active" },
+              { "id": "tweet-db", "label": "Tweet DB", "icon": "database", "x": 560, "y": 120, "status": "active" },
+              { "id": "fanout-svc", "label": "Fanout Service", "icon": "zap", "x": 400, "y": 280, "status": "normal" },
+              { "id": "feed-cache-a", "label": "Feed Cache A", "icon": "zap", "x": 540, "y": 220, "status": "normal" },
+              { "id": "feed-cache-b", "label": "Feed Cache B", "icon": "zap", "x": 540, "y": 300, "status": "normal" },
+              { "id": "feed-cache-c", "label": "Feed Cache C", "icon": "zap", "x": 540, "y": 380, "status": "normal" },
+              { "id": "reader", "label": "Reader", "icon": "mobile", "x": 680, "y": 300, "status": "normal" }
+            ],
+            "connections": [
+              { "from": "writer", "to": "api-gw", "active": true },
+              { "from": "api-gw", "to": "tweet-svc", "active": true },
+              { "from": "tweet-svc", "to": "tweet-db", "active": true },
+              { "from": "api-gw", "to": "fanout-svc", "active": false, "style": "dashed" },
+              { "from": "fanout-svc", "to": "feed-cache-a", "active": false },
+              { "from": "fanout-svc", "to": "feed-cache-b", "active": false },
+              { "from": "fanout-svc", "to": "feed-cache-c", "active": false },
+              { "from": "feed-cache-b", "to": "reader", "active": false }
+            ]
+          }
+        }
+      ],
+      "duration": 2000
+    },
+    {
+      "index": 2,
+      "actions": [
+        {
+          "target": "fanout-badge",
+          "action": "set",
+          "params": { "text": "FANOUT-ON-WRITE: Fanout Service pushes tweet to ALL follower caches", "style": "highlight" }
+        },
+        {
+          "target": "twitter-system",
+          "action": "set",
+          "params": {
+            "components": [
+              { "id": "writer", "label": "Writer", "icon": "mobile", "x": 80, "y": 200, "status": "normal" },
+              { "id": "api-gw", "label": "API Gateway", "icon": "layers", "x": 240, "y": 200, "status": "normal" },
+              { "id": "tweet-svc", "label": "Tweet Service", "icon": "server", "x": 400, "y": 120, "status": "normal" },
+              { "id": "tweet-db", "label": "Tweet DB", "icon": "database", "x": 560, "y": 120, "status": "normal" },
+              { "id": "fanout-svc", "label": "Fanout Service", "icon": "zap", "x": 400, "y": 280, "status": "active" },
+              { "id": "feed-cache-a", "label": "Feed Cache A", "icon": "zap", "x": 540, "y": 220, "status": "active" },
+              { "id": "feed-cache-b", "label": "Feed Cache B", "icon": "zap", "x": 540, "y": 300, "status": "active" },
+              { "id": "feed-cache-c", "label": "Feed Cache C", "icon": "zap", "x": 540, "y": 380, "status": "active" },
+              { "id": "reader", "label": "Reader", "icon": "mobile", "x": 680, "y": 300, "status": "normal" }
+            ],
+            "connections": [
+              { "from": "writer", "to": "api-gw", "active": false },
+              { "from": "api-gw", "to": "tweet-svc", "active": false },
+              { "from": "tweet-svc", "to": "tweet-db", "active": false },
+              { "from": "api-gw", "to": "fanout-svc", "active": true },
+              { "from": "fanout-svc", "to": "feed-cache-a", "active": true },
+              { "from": "fanout-svc", "to": "feed-cache-b", "active": true },
+              { "from": "fanout-svc", "to": "feed-cache-c", "active": true },
+              { "from": "feed-cache-b", "to": "reader", "active": false }
+            ]
+          }
+        },
+        {
+          "target": "stats-writes",
+          "action": "set",
+          "params": { "value": 1000, "label": "Cache Writes", "color": "secondary" }
+        }
+      ],
+      "duration": 2500
+    },
+    {
+      "index": 3,
+      "actions": [
+        {
+          "target": "fanout-badge",
+          "action": "set",
+          "params": { "text": "READ FEED: Reader fetches pre-built feed from own cache  — O(1)!", "style": "success" }
+        },
+        {
+          "target": "twitter-system",
+          "action": "set",
+          "params": {
+            "components": [
+              { "id": "writer", "label": "Writer", "icon": "mobile", "x": 80, "y": 200, "status": "normal" },
+              { "id": "api-gw", "label": "API Gateway", "icon": "layers", "x": 240, "y": 200, "status": "active" },
+              { "id": "tweet-svc", "label": "Tweet Service", "icon": "server", "x": 400, "y": 120, "status": "normal" },
+              { "id": "tweet-db", "label": "Tweet DB", "icon": "database", "x": 560, "y": 120, "status": "normal" },
+              { "id": "fanout-svc", "label": "Fanout Service", "icon": "zap", "x": 400, "y": 280, "status": "normal" },
+              { "id": "feed-cache-a", "label": "Feed Cache A", "icon": "zap", "x": 540, "y": 220, "status": "normal" },
+              { "id": "feed-cache-b", "label": "Feed Cache B", "icon": "zap", "x": 540, "y": 300, "status": "active" },
+              { "id": "feed-cache-c", "label": "Feed Cache C", "icon": "zap", "x": 540, "y": 380, "status": "normal" },
+              { "id": "reader", "label": "Reader", "icon": "mobile", "x": 680, "y": 300, "status": "active" }
+            ],
+            "connections": [
+              { "from": "writer", "to": "api-gw", "active": false },
+              { "from": "api-gw", "to": "tweet-svc", "active": false },
+              { "from": "tweet-svc", "to": "tweet-db", "active": false },
+              { "from": "api-gw", "to": "fanout-svc", "active": false },
+              { "from": "fanout-svc", "to": "feed-cache-a", "active": false },
+              { "from": "fanout-svc", "to": "feed-cache-b", "active": false },
+              { "from": "fanout-svc", "to": "feed-cache-c", "active": false },
+              { "from": "feed-cache-b", "to": "reader", "active": true, "label": "feed served!" }
+            ]
+          }
+        }
+      ],
+      "duration": 2000
+    },
+    {
+      "index": 4,
+      "actions": [
+        {
+          "target": "fanout-badge",
+          "action": "set",
+          "params": { "text": "⚠️ CELEBRITY PROBLEM: User with 50M followers tweets — Fanout explodes!", "style": "error" }
+        },
+        {
+          "target": "twitter-system",
+          "action": "set",
+          "params": {
+            "components": [
+              { "id": "writer", "label": "Elon (50M)", "icon": "mobile", "x": 80, "y": 200, "status": "active" },
+              { "id": "api-gw", "label": "API Gateway", "icon": "layers", "x": 240, "y": 200, "status": "active" },
+              { "id": "tweet-svc", "label": "Tweet Service", "icon": "server", "x": 400, "y": 120, "status": "normal" },
+              { "id": "tweet-db", "label": "Tweet DB", "icon": "database", "x": 560, "y": 120, "status": "normal" },
+              { "id": "fanout-svc", "label": "Fanout Service", "icon": "zap", "x": 400, "y": 280, "status": "overloaded" },
+              { "id": "feed-cache-a", "label": "Feed Cache A", "icon": "zap", "x": 540, "y": 220, "status": "overloaded" },
+              { "id": "feed-cache-b", "label": "Feed Cache B", "icon": "zap", "x": 540, "y": 300, "status": "overloaded" },
+              { "id": "feed-cache-c", "label": "Feed Cache C", "icon": "zap", "x": 540, "y": 380, "status": "overloaded" },
+              { "id": "reader", "label": "Reader", "icon": "mobile", "x": 680, "y": 300, "status": "normal" }
+            ],
+            "connections": [
+              { "from": "writer", "to": "api-gw", "active": true },
+              { "from": "api-gw", "to": "tweet-svc", "active": true },
+              { "from": "tweet-svc", "to": "tweet-db", "active": true },
+              { "from": "api-gw", "to": "fanout-svc", "active": true },
+              { "from": "fanout-svc", "to": "feed-cache-a", "active": true },
+              { "from": "fanout-svc", "to": "feed-cache-b", "active": true },
+              { "from": "fanout-svc", "to": "feed-cache-c", "active": true },
+              { "from": "feed-cache-b", "to": "reader", "active": false }
+            ]
+          }
+        },
+        {
+          "target": "stats-followers",
+          "action": "set",
+          "params": { "value": 50000000, "label": "Followers", "color": "error" }
+        },
+        {
+          "target": "stats-writes",
+          "action": "set",
+          "params": { "value": 50000000, "label": "Cache Writes", "color": "error" }
+        }
+      ],
+      "duration": 2500
+    },
+    {
+      "index": 5,
+      "actions": [
+        {
+          "target": "fanout-badge",
+          "action": "set",
+          "params": { "text": "HYBRID APPROACH: Celebrity tweets stored in Tweet DB — readers fetch on demand", "style": "success" }
+        },
+        {
+          "target": "twitter-system",
+          "action": "set",
+          "params": {
+            "components": [
+              { "id": "writer", "label": "Celebrity", "icon": "mobile", "x": 80, "y": 200, "status": "active" },
+              { "id": "api-gw", "label": "API Gateway", "icon": "layers", "x": 240, "y": 200, "status": "active" },
+              { "id": "tweet-svc", "label": "Tweet Service", "icon": "server", "x": 400, "y": 120, "status": "active" },
+              { "id": "tweet-db", "label": "Tweet DB", "icon": "database", "x": 560, "y": 120, "status": "active" },
+              { "id": "fanout-svc", "label": "Fanout Service", "icon": "zap", "x": 400, "y": 280, "status": "normal", "sublabel": "skipped!" },
+              { "id": "feed-cache-a", "label": "Feed Cache A", "icon": "zap", "x": 540, "y": 220, "status": "normal" },
+              { "id": "feed-cache-b", "label": "Feed Cache B", "icon": "zap", "x": 540, "y": 300, "status": "normal" },
+              { "id": "feed-cache-c", "label": "Feed Cache C", "icon": "zap", "x": 540, "y": 380, "status": "normal" },
+              { "id": "reader", "label": "Reader", "icon": "mobile", "x": 680, "y": 300, "status": "normal" }
+            ],
+            "connections": [
+              { "from": "writer", "to": "api-gw", "active": true },
+              { "from": "api-gw", "to": "tweet-svc", "active": true },
+              { "from": "tweet-svc", "to": "tweet-db", "active": true },
+              { "from": "api-gw", "to": "fanout-svc", "active": false, "style": "dashed" },
+              { "from": "fanout-svc", "to": "feed-cache-a", "active": false },
+              { "from": "fanout-svc", "to": "feed-cache-b", "active": false },
+              { "from": "fanout-svc", "to": "feed-cache-c", "active": false },
+              { "from": "feed-cache-b", "to": "reader", "active": false }
+            ]
+          }
+        },
+        {
+          "target": "stats-writes",
+          "action": "set",
+          "params": { "value": 1, "label": "Cache Writes", "color": "secondary" }
+        }
+      ],
+      "duration": 2500
+    }
+  ],
+
+  "controls": [
+    {
+      "id": "fanout-mode",
+      "type": "toggle-group",
+      "label": "Fanout Strategy",
+      "config": {
+        "options": ["Fanout-on-Write", "Fanout-on-Read", "Hybrid"],
+        "defaultValue": "Fanout-on-Write"
+      }
+    },
+    {
+      "id": "btn-post-tweet",
+      "type": "button",
+      "label": "Post Tweet",
+      "config": { "variant": "primary", "goToStep": 1 }
+    },
+    {
+      "id": "btn-read-feed",
+      "type": "button",
+      "label": "Read Feed",
+      "config": { "variant": "secondary", "goToStep": 3 }
+    },
+    {
+      "id": "btn-celebrity",
+      "type": "button",
+      "label": "Celebrity Tweets (50M followers)",
+      "config": { "variant": "destructive", "goToStep": 4 }
+    },
+    {
+      "id": "btn-hybrid",
+      "type": "button",
+      "label": "Hybrid Fix",
+      "config": { "variant": "secondary", "goToStep": 5 }
+    }
+  ],
+
+  "explanation": [
+    {
+      "heading": "The Fanout Problem",
+      "body": "When user A posts a tweet, it must appear in the feeds of all their followers. \"Fanning out\" to N followers is the core challenge.\n\nTwitter serves **hundreds of millions of timelines** — reads happen 100× more than writes.",
+      "appearsAtStep": 0
+    },
+    {
+      "heading": "Fanout-on-Write",
+      "body": "When a tweet is posted, immediately **push it into every follower's feed cache**.\n\n✓ Fast reads: feed is pre-computed, O(1) cache lookup\n✗ Slow writes: N cache updates per tweet (N = follower count)",
+      "appearsAtStep": 2
+    },
+    {
+      "heading": "The Celebrity Problem",
+      "body": "With Fanout-on-Write, a tweet from a 50M-follower account triggers **50 million cache writes** in seconds.\n\nThis is a write storm — the Fanout Service gets overwhelmed, latency spikes, users notice.",
+      "appearsAtStep": 4
+    },
+    {
+      "heading": "Hybrid Solution",
+      "body": "Twitter's actual solution:\n- **Regular users** (< ~1M followers): fanout-on-write as normal\n- **Celebrities**: skip fanout — tweet lives only in Tweet DB\n\nOn read: merge the user's pre-built feed cache with the celebrity's tweet from DB.\n\nSmall overhead per read, but avoids the write storm.",
+      "appearsAtStep": 5
+    }
+  ],
+
+  "popups": [
+    {
+      "id": "pop-fanout-cost",
+      "attachTo": "twitter-system",
+      "text": "1000 followers = 1000 cache writes per tweet",
+      "showAtStep": 2,
+      "hideAtStep": 4,
+      "style": "info",
+      "anchor": { "x": 70, "y": 80 }
+    },
+    {
+      "id": "pop-celebrity-storm",
+      "attachTo": "twitter-system",
+      "text": "50M writes in seconds — system collapses!",
+      "showAtStep": 4,
+      "hideAtStep": 5,
+      "style": "warning",
+      "anchor": { "x": 50, "y": 80 }
+    }
+  ],
+
+  "challenges": [
+    {
+      "id": "ch-fanout-read",
+      "title": "Fanout-on-Read Trade-off",
+      "description": "Design the Fanout-on-Read approach: when a user requests their feed, fetch tweets from all followed accounts' tweet DBs and merge them. What's the time complexity? Why does this approach fail at Twitter's scale?",
+      "type": "scenario"
+    },
+    {
+      "id": "ch-threshold",
+      "title": "Celebrity Threshold",
+      "description": "At what follower count should Twitter switch from fanout-on-write to the hybrid approach? Assume: 10ms per cache write, fanout must complete in <100ms total, writes are parallelized across 100 workers. Calculate the threshold.",
+      "type": "optimize"
+    },
+    {
+      "id": "ch-unfollow",
+      "title": "Unfollow Problem",
+      "description": "User unfollows someone mid-session. Their pre-built feed cache still contains tweets from the unfollowed account. How do you handle this? Should you invalidate the cache immediately? What consistency level is acceptable for a social feed?",
+      "type": "break-it"
+    }
+  ]
+}
