@@ -33,6 +33,40 @@ Ship a fully functional, publicly accessible platform where:
 
 ---
 
+## Progress Tracker
+
+### Release 1 (R1) - Core Platform
+
+| Phase | Status | Description |
+|-------|--------|-------------|
+| **Phase 0** | ✅ | Monorepo Setup |
+| **Phase 1** | ✅ | Design System + Global Layout |
+| **Phase 2** | ✅ | Scene Engine Core |
+| **Phase 3** | ✅ | Visual Primitives |
+| **Phase 4** | ✅ | Simulation Page Layouts |
+| **Phase 5** | ✅ | 5 Concept Simulations (Hand-Crafted) |
+| **Phase 6** | ✅ | Gallery + Landing Page |
+| **Phase 7** | ✅ | AI Scene Generation (Streaming) |
+| **Phase 8** | ✅ | AI Chat + Scene Patching |
+| **Phase 9** | ✅ | Settings + BYOK |
+| **Phase 10** | ✅ | LLD + HLD Simulations |
+| **Phase 11** | ✅ | Supabase Integration + User Accounts |
+| **Phase 12** | 🚧 | DSA Pipeline |
+| **Phase 13** | 🚧 | Polish + Responsive |
+| **Phase 14** | 🚧 | Complete Deploy |
+
+### Release 2 (R2) - Planned Enhancements (These will be replaced with actual phases when R2 is planned)
+
+| Area | Status | Description |
+|------|--------|-------------|
+| **Canvas Interactivity** | ⬜ | Interactive Mode, Draggable Nodes, Hover Tooltips, Context Menus |
+| **Visual Design** | ⬜ | Distinct Git Node Types, Side-by-Side Code Visualization |
+| **Performance & UX** | ⬜ | WebGL/Canvas API for Complex Scenes, Persistent Command Terminal |
+| **Visual Primitives** | ⬜ | Complex Call-Stack Frame, Timeline / Sequence Diagram, Text-Stream |
+| **Pending Implementation** | ⬜ | Server-Side API Key Security, Worker OOM Protection, Pyodide Caching |
+
+---
+
 ## Phases
 
 ### Phase 0 — Monorepo Setup
