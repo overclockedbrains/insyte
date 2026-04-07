@@ -63,7 +63,7 @@
   * `@serwist/next` configures a `CacheFirst` strategy for `/pyodide/**`. Subsequent sessions load WASM from the service worker cache, not the network.
 
 * **Global COOP/COEP header breakages**:
-  * **→ ALREADY RESOLVED in Phase 9, Task 9.3 and Phase 13, Task 13.7.**
+  * **→ ALREADY RESOLVED in Phase 9, Task 9.3 and Phase 12, Task 12.7.**
   * COOP/COEP headers are scoped exclusively to the `/pyodide/(.*)` path. All other routes use a separate CSP header block. External images (Supabase OG images) and fonts are not affected.
 
 ---
@@ -75,7 +75,7 @@
   * The `/api/generate` route no longer accepts or forwards any API key headers. When a BYOK key is present in `settings-store`, `generateSceneBrowserDirect.ts` is called client-side — the key never touches the server.
 
 * **XSS via `localStorage`**:
-  * **→ RESOLVED: Phase 13, Task 13.7 (CSP headers).**
+  * **→ RESOLVED: Phase 12, Task 12.7 (CSP headers).**
   * A `Content-Security-Policy` header is configured for all non-Pyodide routes, including `worker-src 'self' blob:` to lock down Web Worker origins. The `'unsafe-eval'` requirement is documented as a Pyodide limitation with risk context.
 
 ---

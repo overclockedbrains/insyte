@@ -1,222 +1,130 @@
-# Phase 13 — DSA Pipeline
+# Phase 13 — Polish + Responsive
 
-**Goal:** Full DSA trace pipeline working end-to-end: paste code → Pyodide/Worker executes → AI generates Scene JSON. 10 pre-built DSA Scene JSONs authored. "Re-run with custom input" flow functional.
+**Goal:** Core product (concept + LLD/HLD + auth) is mobile-first, pixel-perfect, and production-quality. All loading/error states handled. DSA-specific polish is deferred to Phase 14.
 
-**Entry criteria:** Phase 12 complete. AI generation, scene-store, and simulation page all working.
+**Entry criteria:** Phase 12 complete. All core features (generation, chat, auth, profiles) functional.
 
 ---
 
 ## Tasks
 
-### 13.1 — Sandbox types
-Create `apps/web/src/sandbox/types.ts`:
-```typescript
-interface TraceStep {
-  step: string;         // step name/type
-  line: number;         // source line number
-  vars: Record<string, unknown>;  // variable values at this step
-  note?: string;        // human-readable note
-  highlight?: {         // which visual elements to highlight
-    array_index?: number;
-    array_indices?: number[];
-    lookup_key?: string;
-    hash_insert?: Record<string, number>;
-    tree_node?: string;
-    [key: string]: unknown;
-  };
-}
+### 13.1 — Mobile responsive pass (320px minimum)
 
-interface TraceData {
-  steps: TraceStep[];
-  finalResult?: unknown;
-  error?: string;
-  truncated?: boolean;  // true when step limit was hit — renderer shows a warning
-}
-```
+**Landing page (`/`):**
+- [ ] Single column at `< md`: headline stack → input → popular chips → live demo below → how it works → features
+- [ ] LiveDemo: compact size (full-width, ~200px height), autoplay still visible
+- [ ] Headline font: reduce from `text-7xl` to `text-4xl` on mobile
+- [ ] Unified input: full-width, no expand animation needed (already full-width)
+- [ ] Popular chips: horizontal scroll (hide scrollbar), no wrapping
 
-### 13.2 — PyodideRunner
-Create `apps/web/src/sandbox/PyodideRunner.ts`:
-- [ ] `class PyodideRunner`
-- [ ] Static `instance: PyodideRunner | null` — singleton
-- [ ] `static getInstance(): PyodideRunner`
-- [ ] `isInitialized: boolean`
-- [ ] `initializationProgress: number` (0–100)
-- [ ] `onProgress: (progress: number, message: string) => void` callback
-- [ ] `initialize(): Promise<void>` — lazy-loads Pyodide from `public/pyodide/`
-  - Reports progress: "Loading Python runtime (1/4)...", "Downloading packages...", etc.
-  - Sets `isInitialized = true` on complete
-- [ ] `execute(code: string): Promise<TraceData>` — runs code in Pyodide, extracts `_trace` variable
-  - Wraps execution in try/catch, captures Python exceptions
-  - Returns `{ steps: _trace, finalResult, error }`
-- [ ] `reset(): void` — clears Pyodide namespace for fresh execution
+**Gallery page (`/explore`):**
+- [ ] Search bar: full-width
+- [ ] TopicRow: horizontal scroll works on touch, no scroll arrows (use native scroll)
+- [ ] TopicCard: min-width `160px`, height proportional
 
-### 13.3 — Pyodide WASM files
-- [ ] Download Pyodide distribution to `apps/web/public/pyodide/`
-  - Files needed: `pyodide.js`, `pyodide.asm.js`, `pyodide.asm.wasm`, `pyodide_py.tar`, standard packages
-  - Use Pyodide v0.27.x
-- [ ] Update `apps/web/next.config.ts` to allow WASM:
-  ```js
-  async headers() {
-    return [{ source: '/pyodide/(.*)', headers: [
-      { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
-      { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' }
-    ]}]
-  }
-  ```
+**Simulation page (`/s/[slug]`):**
+- [ ] Mobile layout: `[SimulationNav] [Canvas: 100% width, 55vh] [CompactPlaybackBar] [Explanation/Code] [Challenges]`
+- [ ] Canvas: fixed 55vh on mobile, scrollable explanation below
+- [ ] `CompactPlaybackBar`: `[◀ ▶/⏸ ▶ • speed]` all in one horizontal bar, `py-2` compact height
+- [ ] `TextLeftCanvasRight` on mobile: canvas at top, ExplanationPanel scrolls below
+- [ ] `CodeLeftCanvasRight` on mobile: tab switcher `["Code" | "Visual"]` — only one panel visible at a time
+- [ ] `CanvasOnly` on mobile: canvas full-width, floating explanation card moves to bottom of page
 
-### 13.4 — JavaScript Web Worker sandbox
-Create `apps/web/src/sandbox/workers/js-sandbox.worker.ts`:
-- [ ] Web Worker that receives `{ code: string }` message
-- [ ] Wraps code execution in a `try/catch`
-- [ ] Intercepts `_trace.push()` calls from instrumented code
-- [ ] Posts back `{ steps: TraceStep[], finalResult, error }`
-- [ ] Security: runs in isolated Worker scope (no DOM, no network)
+**Auth modal on mobile:**
+- [ ] Full-screen sheet on `< sm`
+- [ ] Input fields large enough for touch (min 44px tap target)
 
-Create `apps/web/src/sandbox/JSRunner.ts`:
-- [ ] `class JSRunner`
-- [ ] Lazy-creates Worker on first call
-- [ ] `execute(code: string, timeout?: number): Promise<TraceData>`
-- [ ] Kills Worker if execution exceeds timeout (default 5000ms)
+**Chat on mobile:**
+- [ ] `ChatButton`: `bottom-4 right-4` (slightly inset from edge)
+- [ ] Chat opens as bottom sheet (Sheet component, 60% height)
+- [ ] Input area stays above keyboard (use `env(safe-area-inset-bottom)` CSS)
 
-### 13.5 — SandboxManager
-Create `apps/web/src/sandbox/SandboxManager.ts`:
-- [ ] `execute(code: string, language: 'python' | 'javascript'): Promise<TraceData>`
-- [ ] Routes to `PyodideRunner` or `JSRunner` based on language
-- [ ] For Python: calls `PyodideRunner.getInstance().execute(code)`
-- [ ] For JavaScript: calls new `JSRunner().execute(code)`
-- [ ] Exports singleton: `export const sandboxManager = new SandboxManager()`
+**Profile page on mobile:**
+- [ ] Saved grid: 2 columns
+- [ ] Generated history: full-width list
 
-### 13.6 — Pyodide loading progress UI
-Create `apps/web/src/components/simulation/PyodideLoader.tsx`:
-- [ ] Shows when `PyodideRunner.isInitialized === false` and DSA mode is detected
-- [ ] Progress bar: `bg-primary/80 rounded-full` inside `bg-surface-container rounded-full`
-- [ ] Message: "Initializing Python runtime... (~10MB)" then "Loading packages..." etc.
-- [ ] Smooth Framer Motion width animation on progress bar
-- [ ] Disappears (Framer Motion exit animation) when fully loaded
+### 13.2 — Tablet layout (768–1024px)
+- [ ] Simulation page: same as desktop but left panel 40% instead of 35%
+- [ ] Gallery: 2-column grid for TopicCards in each row (instead of horizontal scroll)
+- [ ] Landing: two-column hero maintained, but spacing reduced
+- [ ] Profile: 3-column saved grid
 
-### 13.7 — AI instrumentation
-Create `apps/web/src/ai/prompts/code-instrumentation.md`:
-- [ ] System: You are an expert at adding trace instrumentation to code for visualization.
-- [ ] Instructions: Given the user's solution code + problem statement, add `_trace.append({...})` calls at each meaningful step (key variable assignments, loop iterations, condition checks, return statements)
-- [ ] TraceStep format: exactly match the `TraceStep` TypeScript interface
-- [ ] Do NOT modify the logic — only add instrumentation
-- [ ] Include a call to run the function with sample input at the end
-- [ ] **Step limit guard (required):** Instruct the AI to add this guard at every trace append site:
-  ```python
-  if len(_trace) < 1000:
-      _trace.append({...})
-  elif len(_trace) == 1000:
-      _trace.append({"step": "truncated", "line": 0, "vars": {}, "note": "Trace limit reached (1000 steps). Increase input size may cause OOM."})
-  ```
-- [ ] **Delta capture (required):** Each `vars` dict should only include variables that **changed** since the previous step. Instruct the AI: "Only include a variable in `vars` if its value differs from the previous step. For the first step, include all variables."
-- [ ] Example: shows Two Sum before/after instrumentation (with step limit + delta vars)
+### 13.3 — Loading states
 
-Create `apps/web/src/ai/instrumentCode.ts`:
-- [ ] `instrumentCode(code: string, language: 'python'|'javascript', problemStatement: string): Promise<string>`
-- [ ] Calls AI with code-instrumentation prompt
-- [ ] Returns the instrumented code string
-- [ ] Does NOT stream (short response, just wait for it)
+**Suspense boundaries:**
+- [ ] `apps/web/src/app/s/[slug]/loading.tsx` — skeleton: shimmer nav, shimmer canvas card, shimmer left panel
+- [ ] `apps/web/src/app/explore/loading.tsx` — skeleton: search bar placeholder + 2 row skeletons with card shimmer
+- [ ] `apps/web/src/app/profile/loading.tsx` — skeleton: avatar placeholder, grid skeletons
 
-Create `apps/web/src/app/api/instrument/route.ts`:
-- [ ] POST: `{ code: string, language: string, problemStatement?: string }`
-- [ ] Returns: `{ instrumentedCode: string }`
-- [ ] Error: 400 on empty code, 500 on AI failure
+**Skeleton components:**
+- [ ] `SkeletonCard.tsx`: shimmer placeholder matching TopicCard dimensions
+- [ ] `SkeletonSimulation.tsx`: full simulation layout skeleton
+- [ ] `SkeletonText.tsx`: multiple lines of shimmer text with variable widths
+- [ ] All skeletons: `animate-pulse bg-surface-container-high rounded`
 
-### 13.8 — AI trace-to-scene conversion
-Create `apps/web/src/ai/prompts/trace-to-scene.md`:
-- [ ] System: You are an expert at designing educational visualizations for algorithm execution.
-- [ ] Instructions: Given the real trace data + original code, design a Scene JSON visualization
-- [ ] Rules: pick primitives based on data structures observed in trace (arrays → ArrayViz, dicts → HashMapViz, etc.)
-- [ ] Each TraceStep → one or more `Step` objects in scene JSON
-- [ ] Write popup annotations explaining the WHY of each significant step
-- [ ] Use `code-left-canvas-right` layout always for DSA traces
-- [ ] Include 3 challenges relevant to the algorithm
+**Loading states in components:**
+- [ ] `PlaybackControls`: disabled + grayed out when `totalSteps === 0`
+- [ ] `ControlBar`: disabled state when scene streaming
+- [ ] `ChallengesSection`: skeleton while scene streaming
+- [ ] `ChatCard`: disabled send button while AI responding
+- [ ] `UnifiedInput`: loading spinner while navigating after submit
 
-Create `apps/web/src/ai/traceToScene.ts`:
-- [ ] `traceToScene(trace: TraceData, originalCode: string, language: string, problemStatement: string): AsyncGenerator<Partial<Scene>>`
-- [ ] Streams using `streamObject` with SceneSchema
-- [ ] Same streaming pattern as `generateScene.ts`
+**Empty states:**
+- [ ] `/profile` saved section empty state: "No saved simulations yet. Bookmark one to see it here."
+- [ ] `/profile` history empty state: "No simulations generated yet. Try typing a concept on the home page."
 
-Create `apps/web/src/app/api/visualize-trace/route.ts`:
-- [ ] POST: `{ trace: TraceData, originalCode: string, language: string, problemStatement?: string }`
-- [ ] Streams Scene JSON back to client
-- [ ] BYOK header support
+### 13.4 — Error boundaries
+Create `apps/web/src/components/ErrorBoundary.tsx`:
+- [ ] React class component (required for error boundary)
+- [ ] Catches render errors in SceneRenderer + all primitive components
+- [ ] Fallback UI: glass-panel card with "Simulation failed to render" + retry button + error details (collapsible, dev-only)
+- [ ] `apps/web/src/app/s/[slug]/error.tsx` — Next.js error page for route-level errors
+- [ ] API route error handling:
+  - `/api/generate`: catch AI errors, return 500 with `{ error: 'Generation failed', retryable: true }`
+  - `/api/chat`: catch errors, return 500
 
-### 13.9 — DSA orchestration hook
-Create `apps/web/src/engine/hooks/useDSAPipeline.ts`:
-- [ ] `useDSAPipeline()` → `{ stage, progress, error, run, rerun }`
-- [ ] Stages: `'idle' | 'instrumenting' | 'executing' | 'visualizing' | 'complete' | 'error'`
-- [ ] `run(code, language, problemStatement, customInput?)`:
-  1. Stage → `'instrumenting'`: POST `/api/instrument`
-  2. Stage → `'executing'`: run instrumented code in sandbox
-  3. Stage → `'visualizing'`: POST `/api/visualize-trace`, stream into scene-store
-  4. Stage → `'complete'`
-- [ ] `rerun(customInput)`: skips Stage 1 (use cached instrumented code), runs Stage 2+3 fresh
+### 13.5 — Share button
+Update `SimulationNav.tsx`:
+- [ ] Share button: copies `window.location.href` to clipboard on click
+- [ ] Success feedback: button text changes to "✓ Copied!" for 2 seconds (Framer Motion)
+- [ ] On devices without clipboard API: shows URL in a modal for manual copy
 
-### 13.10 — DSA mode in simulation page
-Update `apps/web/src/app/s/[slug]/page.tsx`:
-- [ ] Detect if this is a DSA generation request (from URL param or redirect from detection flow)
-- [ ] Show `<PyodideLoader />` during initialization
-- [ ] Show DSA pipeline progress UI during all 3 stages:
-  - Stage 1: "AI is reading your code..."
-  - Stage 2: "Executing in sandbox..."
-  - Stage 3: "Building visualization..."
-- [ ] When complete: render `SceneRenderer` with `code-left-canvas-right` layout
-- [ ] "Re-run with custom input" button in `ControlBar` → calls `useDSAPipeline().rerun()`
+### 13.6 — OG meta tags on simulation pages
+Update `apps/web/src/app/s/[slug]/page.tsx` `generateMetadata`:
+- [ ] `title`: `"[Simulation Title] — insyte"`
+- [ ] `description`: first sentence of first explanation section
+- [ ] `openGraph.image`: `og_image_url` from Supabase record, fallback to `/og-image.png`
+- [ ] `openGraph.url`: `https://insyte.dev/s/[slug]`
+- [ ] `twitter.card`: `summary_large_image`
 
-**Mobile DSA layout:**
-- [ ] `CodeLeftCanvasRight` on mobile: tab switcher `["Code" | "Visual"]`
-- [ ] Pyodide loader visible and readable at 375px
+### 13.7 — Accessibility pass
+- [ ] Keyboard navigation: all interactive elements reachable via Tab
+- [ ] Focus rings: visible on all focusable elements (`focus-visible:ring-2 ring-primary`)
+- [ ] Aria labels: on all icon-only buttons (share, expand, bookmark, chat toggle)
+- [ ] Modal focus trap: auth modal and chat card trap focus correctly
+- [ ] Screen reader test: VoiceOver/NVDA pass on landing + simulation page
 
-### 13.11 — Pyodide WASM Service Worker caching
-Install and configure `serwist`:
-- [ ] `pnpm add @serwist/next serwist --filter web`
-- [ ] Create `apps/web/src/sw.ts` — service worker entry point with CacheFirst for `/pyodide/` (1 year TTL)
-- [ ] Update `apps/web/next.config.ts` to wrap config with `withSerwist`
-- [ ] Service worker activates only in production (`NODE_ENV === 'production'`)
-- [ ] Verify: DevTools → Application → Cache Storage → `pyodide-cache` contains `.wasm` files after first DSA run
-
-### 13.12 — 10 pre-built DSA Scene JSONs
-Create `apps/web/src/content/scenes/dsa/`:
-- [ ] `two-sum.json` — ArrayViz + HashMapViz, 5 steps
-- [ ] `valid-parentheses.json` — ArrayViz + StackViz, 8 steps
-- [ ] `binary-search.json` — ArrayViz with two-pointer highlight, 6 steps
-- [ ] `reverse-linked-list.json` — LinkedListViz with pointer rewiring, 6 steps
-- [ ] `climbing-stairs.json` — DPTableViz (1D), 8 steps
-- [ ] `merge-sort.json` — ArrayViz with recursive split visualization, 10 steps
-- [ ] `level-order-bfs.json` — TreeViz + QueueViz, 10 steps
-- [ ] `number-of-islands.json` — GridViz (`type: 'grid'`), 8 steps showing BFS/DFS flood-fill
-- [ ] `sliding-window-max.json` — ArrayViz + QueueViz (deque), 8 steps
-- [ ] `fibonacci-recursive.json` — RecursionTreeViz with memoization toggle, 10 steps
-
-Each JSON must:
-- [ ] Use `code-left-canvas-right` layout
-- [ ] Include the actual Python source code in `scene.code.source`
-- [ ] Have `highlightByStep` mapping each step to a source line number
-- [ ] Have 3 challenges
-- [ ] Have explanation sections per step block
+### 13.8 — Performance pass
+- [ ] Bundle analysis: `pnpm build && pnpm analyze` — identify any unexpectedly large chunks
+- [ ] Lazy load heavy components: `ChatCard`, `ChallengesSection` with `dynamic(() => import(...))`
+- [ ] Image optimization: all `<img>` tags replaced with `<Image>` from `next/image`
+- [ ] Font optimization: verify `display: swap` on all font imports
 
 ---
 
 ## Exit Criteria
-- [ ] Pasting Python Two Sum code → Pyodide executes it → trace captured → Scene JSON generated → animation shows ArrayViz + HashMapViz
-- [ ] Pyodide loading progress bar visible with accurate percentage
-- [ ] DSA pipeline stages 1→2→3 show distinct progress messages
-- [ ] "Re-run with custom input" → changes `nums` array → animation re-runs with new values
-- [ ] All 10 pre-built DSA scenes load at their `/s/[slug]` routes
-- [ ] `fibonacci-recursive` shows memoization pruning (memoized nodes appear different)
-- [ ] Code panel active line synced to animation step
-- [ ] `number-of-islands.json` renders a `GridViz` grid (not a force-directed graph)
-- [ ] Pasting a pathological O(n²) algorithm with n=500 produces a `truncated: true` trace — renderer shows "Trace truncated at 1000 steps" warning
-- [ ] Second Pyodide session (production build) loads from service worker cache — no `/pyodide/` network requests in DevTools
+- [ ] Mobile (375px): all pages usable, no horizontal overflow, no overlapping elements
+- [ ] Tablet (768px): all pages functional with appropriate layout adjustments
+- [ ] All loading skeletons appear correctly before data arrives
+- [ ] Error boundary shows fallback UI on render errors (test by temporarily throwing in a primitive)
+- [ ] Share button copies URL on mobile Safari
+- [ ] Empty states appear correctly on `/profile` for new users
+- [ ] No console errors in production build
+- [ ] Lighthouse score: Performance > 80, Accessibility > 90
 
 ---
 
 ## Key Notes
-- Pyodide files MUST be self-hosted in `public/pyodide/` — not loaded from CDN. COOP/COEP headers are required for SharedArrayBuffer.
-- The instrumented code runs with `_trace = []` already defined in the Python globals — AI-generated instrumented code can just call `_trace.append(...)` directly
-- JavaScript sandbox is a Web Worker — ensure `next.config.ts` is configured to bundle worker files correctly
-- For pre-built DSA JSONs: these can be AI-generated with the `traceToScene` pipeline then manually verified — they don't need to be 100% hand-authored from scratch
-- The 10 pre-built DSA JSONs bypass the pipeline entirely — they load as static files exactly like concept simulations
-- `number-of-islands` uses `GridViz` (`type: 'grid'`), not `GraphViz`
-- Service worker caching (`serwist`) is production-only — in dev, Pyodide still fetches from disk on every cold start; this is expected
+- DSA-specific responsive work (Pyodide loader, code/visual tab switcher) is handled in Phase 12
+- The chat bottom sheet on mobile must account for iOS safe area insets — test on real device or Safari simulator
+- `CodeLeftCanvasRight` tab switcher is the trickiest mobile layout — build it as a controlled component driven by local `activeTab` state, not media query display hacks

@@ -257,24 +257,7 @@ _OG Images_
 
 ---
 
-### Phase 12 — Polish + Responsive
-**Goal:** Core product (concept + LLD/HLD) is mobile-first, pixel-perfect, and production-quality before DSA lands.
-
-**Deliverables:**
-- Full mobile responsive pass (320px minimum): all pages, simulation layouts, chat card
-- Tablet (768–1024px) layout adjustments
-- `<Suspense>` boundaries + skeleton components for all async data paths
-- Error boundaries on SceneRenderer + API routes
-- Share button (copy URL to clipboard, toast confirmation)
-- Empty states and loading states for profile / saved scenes pages
-- Accessibility pass: keyboard nav, focus rings, aria labels on interactive elements
-- Performance pass: image optimization, lazy loading, bundle analysis
-
-**Plan:** [→ phases/phase-12/PLAN.md](phases/phase-12/PLAN.md)
-
----
-
-### Phase 13 — DSA Pipeline
+### Phase 12 — DSA Pipeline
 **Goal:** Full DSA trace pipeline working end-to-end: paste code → sandbox execute → Scene JSON.
 
 **Deliverables:**
@@ -294,6 +277,23 @@ _OG Images_
 - 10 pre-built DSA Scene JSONs in `src/content/scenes/dsa/`
 - `next.config.ts` — WASM headers for Pyodide
 - Mobile DSA layout: stacked canvas top, explanation below, tab switcher
+
+**Plan:** [→ phases/phase-12/PLAN.md](phases/phase-12/PLAN.md)
+
+---
+
+### Phase 13 — Polish + Responsive
+**Goal:** Core product (concept + LLD/HLD + DSA) is mobile-first, pixel-perfect, and production-quality.
+
+**Deliverables:**
+- Full mobile responsive pass (320px minimum): all pages, simulation layouts, chat card
+- Tablet (768–1024px) layout adjustments
+- `<Suspense>` boundaries + skeleton components for all async data paths
+- Error boundaries on SceneRenderer + API routes
+- Share button (copy URL to clipboard, toast confirmation)
+- Empty states and loading states for profile / saved scenes pages
+- Accessibility pass: keyboard nav, focus rings, aria labels on interactive elements
+- Performance pass: image optimization, lazy loading, bundle analysis
 
 **Plan:** [→ phases/phase-13/PLAN.md](phases/phase-13/PLAN.md)
 
@@ -339,16 +339,16 @@ _OG Images_
 | 3 | `load-balancer` | How does Load Balancing work? | concept | 5 |
 | 4 | `dns-resolution` | How does DNS Resolution work? | concept | 5 |
 | 5 | `git-branching` | How does Git Branching work? | concept | 5 |
-| 6 | `two-sum` | Two Sum | dsa | 13 |
-| 7 | `valid-parentheses` | Valid Parentheses | dsa | 13 |
-| 8 | `binary-search` | Binary Search | dsa | 13 |
-| 9 | `reverse-linked-list` | Reverse Linked List | dsa | 13 |
-| 10 | `climbing-stairs` | Climbing Stairs DP | dsa | 13 |
-| 11 | `merge-sort` | Merge Sort | dsa | 13 |
-| 12 | `level-order-bfs` | Binary Tree Level Order | dsa | 13 |
-| 13 | `number-of-islands` | Number of Islands | dsa | 13 |
-| 14 | `sliding-window-max` | Sliding Window Maximum | dsa | 13 |
-| 15 | `fibonacci-recursive` | Fibonacci (memoization) | dsa | 13 |
+| 6 | `two-sum` | Two Sum | dsa | 12 |
+| 7 | `valid-parentheses` | Valid Parentheses | dsa | 12 |
+| 8 | `binary-search` | Binary Search | dsa | 12 |
+| 9 | `reverse-linked-list` | Reverse Linked List | dsa | 12 |
+| 10 | `climbing-stairs` | Climbing Stairs DP | dsa | 12 |
+| 11 | `merge-sort` | Merge Sort | dsa | 12 |
+| 12 | `level-order-bfs` | Binary Tree Level Order | dsa | 12 |
+| 13 | `number-of-islands` | Number of Islands | dsa | 12 |
+| 14 | `sliding-window-max` | Sliding Window Maximum | dsa | 12 |
+| 15 | `fibonacci-recursive` | Fibonacci (memoization) | dsa | 12 |
 | 16 | `lru-cache` | LRU Cache | lld | 10 |
 | 17 | `rate-limiter` | Rate Limiter (Token Bucket) | lld | 10 |
 | 18 | `min-stack` | MinStack | lld | 10 |
