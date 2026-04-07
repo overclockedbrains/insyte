@@ -10,7 +10,7 @@
 
 | Dimension | Value |
 |-----------|-------|
-| Domain | insyte.dev |
+| Domain | insyte.amanarya.com |
 | Stack | Next.js 15, TypeScript, Tailwind v4, Framer Motion, Zustand, Vercel AI SDK |
 | Monorepo | Turborepo + pnpm workspaces |
 | Database | Supabase (no auth in R1) |
@@ -53,7 +53,7 @@ Ship a fully functional, publicly accessible platform where:
 | **Phase 11** | ✅ | Supabase Integration + User Accounts |
 | **Phase 12** | ✅ | DSA Pipeline |
 | **Phase 13** | ✅ | Polish + Responsive |
-| **Phase 14** | 🚧 | Complete Deploy |
+| **Phase 14** | ✅ | Complete Deploy |
 
 ### Release 2 (R2) - Planned Enhancements (These will be replaced with actual phases when R2 is planned)
 
@@ -337,13 +337,15 @@ _OG Images_
 **Goal:** Production deploy on Vercel, all environment variables live, README complete, scenes validated.
 
 **Deliverables:**
-- Environment variables configured: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `GEMINI_API_KEY`, `NEXTAUTH_SECRET`
+- Environment variables configured: `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `GEMINI_API_KEY`
 - Vercel deployment (production + preview branches)
-- Custom domain `insyte.dev` wired to Vercel
-- README with setup instructions, architecture overview, BYOK guide, contribution guide
+- Custom domain `insyte.amanarya.com` wired to Vercel
+- README with setup instructions, architecture overview, BYOK guide, contribution guide, and license section
 - `scripts/validate-scenes.ts` — validates all 24 scene JSON files against Zod schema
 - Smoke test checklist: landing → generate → simulate → chat → settings → profile → save
 - Analytics: Vercel Analytics + basic event tracking (scene generated, chat sent, BYOK activated)
+
+**Status:** Completed on April 8, 2026.
 
 **Plan:** [→ phases/phase-14/PLAN.md](phases/phase-14/PLAN.md)
 
