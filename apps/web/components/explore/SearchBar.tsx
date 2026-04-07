@@ -95,7 +95,7 @@ export function SearchBar() {
   }, [])
 
   return (
-    <div ref={containerRef} className="relative w-full max-w-2xl mx-auto">
+    <div ref={containerRef} className="relative w-full">
       {/* Input */}
       <div
         className={[

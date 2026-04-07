@@ -36,8 +36,22 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE.url),
   title: SITE.title,
   description: SITE.description,
+  openGraph: {
+    title: SITE.title,
+    description: SITE.description,
+    type: 'website',
+    url: SITE.url,
+    images: [`${SITE.url}/og-image.png`],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: SITE.title,
+    description: SITE.description,
+    images: [`${SITE.url}/og-image.png`],
+  },
 }
 
 export default function RootLayout({

@@ -169,7 +169,11 @@ function DemoCanvas() {
 
 // ─── LiveDemo ─────────────────────────────────────────────────────────────────
 
-export function LiveDemo() {
+interface LiveDemoProps {
+  compact?: boolean
+}
+
+export function LiveDemo({ compact = false }: LiveDemoProps) {
   return (
     <div className="relative w-full rounded-3xl overflow-hidden border border-primary/20 bg-surface-container"
       style={{ boxShadow: '0 0 40px rgba(183,159,255,0.12)' }}
@@ -181,7 +185,7 @@ export function LiveDemo() {
         {/* Canvas scaled down to fit hero column */}
         <div
           className="relative w-full overflow-hidden"
-          style={{ aspectRatio: '16/11' }}
+          style={compact ? { height: '200px' } : { aspectRatio: '16/11' }}
         >
           <DemoCanvas />
         </div>

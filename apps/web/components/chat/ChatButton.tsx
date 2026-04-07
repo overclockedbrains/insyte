@@ -52,7 +52,7 @@ export function ChatButton() {
     <motion.button
       onClick={handleClick}
       className={[
-        'fixed bottom-6 right-6 z-50',
+        'fixed bottom-4 right-4 z-50',
         'w-12 h-12 rounded-full',
         'flex items-center justify-center',
         'bg-surface-container-high border border-outline-variant/30',

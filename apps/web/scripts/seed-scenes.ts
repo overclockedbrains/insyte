@@ -40,7 +40,6 @@ interface SceneRow {
   title: string
   type: string
   scene_json: unknown
-  og_image_url: null
   hit_count: number
   created_at: string
 }
@@ -72,7 +71,6 @@ function collectSceneFiles(dir: string): SceneRow[] {
             title: json.title as string,
             type: json.type as string,
             scene_json: json,
-            og_image_url: null,
             hit_count: 0,
             created_at: new Date().toISOString(),
           })

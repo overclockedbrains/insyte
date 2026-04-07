@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS scenes (
   title        TEXT NOT NULL,
   type         TEXT NOT NULL CHECK (type IN ('concept', 'dsa-trace', 'lld', 'hld')),
   scene_json   JSONB NOT NULL,
-  og_image_url TEXT,
   hit_count    INTEGER DEFAULT 0,
   created_at   TIMESTAMPTZ DEFAULT NOW()
 );
@@ -37,9 +36,12 @@ CREATE TABLE IF NOT EXISTS topic_index (
   type         TEXT NOT NULL CHECK (type IN ('concept', 'dsa-trace', 'lld', 'hld')),
   is_featured  BOOLEAN DEFAULT FALSE,
   is_prebuilt  BOOLEAN DEFAULT FALSE,
-  og_image_url TEXT,
   created_at   TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Optional cleanup for existing deployments that already had OG columns:
+ALTER TABLE scenes DROP COLUMN IF EXISTS og_image_url;
+ALTER TABLE topic_index DROP COLUMN IF EXISTS og_image_url;
 
 -- ── Row Level Security ────────────────────────────────────────────────────────
 -- Public read for scenes and topic_index (no auth in R1)

@@ -37,7 +37,6 @@ async function seed() {
     type: t.type,
     is_featured: t.isFeatured,
     is_prebuilt: t.isPrebuilt,
-    og_image_url: null as string | null,
     created_at: new Date().toISOString(),
   }))
 

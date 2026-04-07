@@ -5,12 +5,12 @@
   "scripts": {
     "dev": "next dev --webpack",
     "build": "next build --webpack",
+    "analyze": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "type-check": "tsc --noEmit",
     "seed": "dotenv -e .env.local -- tsx scripts/seed-topic-index.ts",
-    "seed-scenes": "dotenv -e .env.local -- tsx scripts/seed-scenes.ts",
-    "generate-og": "dotenv -e .env.local -- tsx scripts/generate-og-images.ts"
+    "seed-scenes": "dotenv -e .env.local -- tsx scripts/seed-scenes.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.66",

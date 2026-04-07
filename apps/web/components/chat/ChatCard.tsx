@@ -7,6 +7,7 @@ import { Send, ArrowRight, X, Minus, Maximize2 } from 'lucide-react'
 import { useBoundStore } from '@/src/stores/store'
 import { useChatStream } from './useChatStream'
 import type { ChatMessage } from '@/src/stores/slices/chat-slice'
+import { useFocusTrap } from '@/components/hooks/useFocusTrap'
 
 // ─── Breakpoint hook ──────────────────────────────────────────────────────────
 
@@ -165,7 +166,10 @@ function ChatInput({
   }
 
   return (
-    <div className="px-3 pb-3 pt-2 border-t border-outline-variant/15 flex-shrink-0">
+    <div
+      className="px-3 pt-2 border-t border-outline-variant/15 flex-shrink-0"
+      style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom))' }}
+    >
       <div
         className={[
           'flex items-end gap-2 rounded-2xl',
@@ -319,16 +323,22 @@ function CardHeader({ onClose }: { onClose: () => void }) {
 function CardBody({
   onClose,
   isMobile,
+  focusTrapActive,
 }: {
   onClose: () => void
   isMobile: boolean
+  focusTrapActive: boolean
 }) {
+  const cardRef = useRef<HTMLDivElement>(null)
   const messages = useBoundStore((s) => s.messages)
   const isLoading = useBoundStore((s) => s.isLoading)
   const { sendMessage } = useChatStream()
 
+  useFocusTrap(focusTrapActive, cardRef)
+
   return (
     <div
+      ref={cardRef}
       className={[
         'flex flex-col h-full',
         'bg-[rgba(19,19,25,0.92)] backdrop-blur-xl',
@@ -367,7 +377,7 @@ function DesktopCard({ onClose }: { onClose: () => void }) {
       className="fixed bottom-24 right-6 z-50 w-80"
       style={{ height: '420px' }}
     >
-      <CardBody onClose={onClose} isMobile={false} />
+      <CardBody onClose={onClose} isMobile={false} focusTrapActive={true} />
     </motion.div>
   )
 }
@@ -398,7 +408,7 @@ function MobileSheet({ onClose }: { onClose: () => void }) {
         className="fixed inset-x-0 bottom-0 z-50"
         style={{ height: '60vh' }}
       >
-        <CardBody onClose={onClose} isMobile={true} />
+        <CardBody onClose={onClose} isMobile={true} focusTrapActive={true} />
       </motion.div>
     </>
   )

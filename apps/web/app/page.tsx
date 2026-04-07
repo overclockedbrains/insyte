@@ -7,42 +7,35 @@ import { UnifiedInput } from '@/components/landing/UnifiedInput'
 import { PopularChips } from '@/components/landing/PopularChips'
 import { LiveDemoLoader } from '@/components/landing/LiveDemoLoader'
 
-// ─── Metadata ─────────────────────────────────────────────────────────────────
-
 export const metadata: Metadata = {
   title: SITE.title,
   description: `${SITE.description} Not a video. Not text. A playground.`,
   openGraph: {
     title: SITE.title,
-    description: `Turn any tech concept into an interactive simulation you can play with.`,
+    description: 'Turn any tech concept into an interactive simulation you can play with.',
     type: 'website',
+    images: [`${SITE.url}/og-image.png`],
   },
   twitter: {
     card: 'summary_large_image',
     title: SITE.title,
     description: 'Turn any tech concept into an interactive simulation.',
+    images: [`${SITE.url}/og-image.png`],
   },
 }
-
-// ─── Landing page ─────────────────────────────────────────────────────────────
 
 export default function Home() {
   return (
     <div className="flex flex-col gap-24 px-4 sm:px-6 pb-24">
-
-      {/* ── HERO ──────────────────────────────────────────────────────────── */}
       <section className="min-h-[calc(100vh-7rem)] flex items-center">
         <div className="mx-auto w-full max-w-screen-xl">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center">
-
-            {/* Left column: headline + input + chips */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-8 lg:gap-16 items-center">
             <div className="flex flex-col gap-8">
-              {/* Headline */}
               <div className="flex flex-col gap-3">
-                <h1 className="font-headline font-extrabold text-5xl sm:text-6xl xl:text-7xl text-on-surface leading-[1.08] tracking-tight">
+                <h1 className="font-headline font-extrabold text-4xl sm:text-6xl xl:text-7xl text-on-surface leading-[1.08] tracking-tight">
                   Understand any<br />tech concept.
                 </h1>
-                <p className="font-headline font-extrabold text-5xl sm:text-6xl xl:text-7xl leading-[1.08] tracking-tight">
+                <p className="font-headline font-extrabold text-4xl sm:text-6xl xl:text-7xl leading-[1.08] tracking-tight">
                   By{' '}
                   <span
                     style={{
@@ -58,14 +51,14 @@ export default function Home() {
                 </p>
               </div>
 
-              {/* Unified input */}
               <UnifiedInput />
-
-              {/* Popular chips */}
               <PopularChips />
+
+              <div className="md:hidden">
+                <LiveDemoLoader compact />
+              </div>
             </div>
 
-            {/* Right column: live hash table demo — hidden on mobile per spec */}
             <div className="hidden md:block">
               <LiveDemoLoader />
             </div>
@@ -73,21 +66,17 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── HOW IT WORKS ──────────────────────────────────────────────────── */}
       <div className="mx-auto w-full max-w-screen-xl">
         <HowItWorks />
       </div>
 
-      {/* ── FEATURED SIMULATIONS ──────────────────────────────────────────── */}
       <div className="mx-auto w-full max-w-screen-xl">
         <FeaturedSimulations />
       </div>
 
-      {/* ── FEATURE HIGHLIGHTS ────────────────────────────────────────────── */}
       <div className="mx-auto w-full max-w-screen-xl">
         <FeatureCards />
       </div>
-
     </div>
   )
 }

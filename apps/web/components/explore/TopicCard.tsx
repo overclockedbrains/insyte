@@ -40,7 +40,10 @@ export function TopicCard({ topic }: TopicCardProps) {
   const typeLabel = TYPE_LABEL[topic.type] ?? topic.type
 
   return (
-    <Link href={`/s/${topic.slug}`} className="block shrink-0 w-[240px] focus:outline-none">
+    <Link
+      href={`/s/${topic.slug}`}
+      className="block shrink-0 w-[min(240px,70vw)] min-w-[160px] md:w-full md:min-w-0 lg:w-[240px] lg:min-w-[240px] focus:outline-none"
+    >
       <motion.article
         className="rounded-2xl overflow-hidden border border-outline-variant/20 bg-surface-container-low hover:border-primary/30 transition-colors duration-200 cursor-pointer group"
         whileHover={{ scale: 1.02, boxShadow: '0 0 20px rgba(183,159,255,0.15)' }}

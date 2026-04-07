@@ -9,7 +9,7 @@ import { ProviderSelector } from '@/components/settings/ProviderSelector'
 import { ModelSelector } from '@/components/settings/ModelSelector'
 import { ApiKeyInput } from '@/components/settings/ApiKeyInput'
 import { ActiveProviderStatus } from '@/components/settings/ActiveProviderStatus'
-import { GITHUB_URL, SITE } from '@/src/lib/config'
+import { APP_VERSION, GITHUB_URL, SITE } from '@/src/lib/config'
 
 // ─── Section card ─────────────────────────────────────────────────────────────
 
@@ -247,12 +247,11 @@ export default function SettingsPage() {
           </div>
         </SectionCard>
 
-        {/* ── 4. About ── */}
         <SectionCard title="About">
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm">
               <span className="text-on-surface-variant">Version</span>
-              <span className="font-mono text-on-surface">0.1.0</span>
+              <span className="font-mono text-on-surface">{APP_VERSION}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-on-surface-variant">Product</span>

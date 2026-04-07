@@ -1,12 +1,9 @@
 'use client'
 
-import { useCallback } from 'react'
+import { type MutableRefObject, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { useBoundStore } from '@/src/stores/store'
 import type { DetectedMode } from '@/src/stores/slices/detection-slice'
-
-// ─── Hardcoded popular topics ─────────────────────────────────────────────────
-// The 5 most visually impressive pre-built simulations.
 
 interface Chip {
   label: string
@@ -22,11 +19,8 @@ const POPULAR_CHIPS: Chip[] = [
   { label: 'Twitter Feed', query: 'Design a Twitter feed system', mode: 'hld' },
 ]
 
-// ─── PopularChips ─────────────────────────────────────────────────────────────
-
 interface PopularChipsProps {
-  /** Ref to the UnifiedInput fill function so chips can fill the textarea */
-  fillInputRef?: React.MutableRefObject<((text: string) => void) | null>
+  fillInputRef?: MutableRefObject<((text: string) => void) | null>
 }
 
 export function PopularChips({ fillInputRef }: PopularChipsProps) {
@@ -43,19 +37,22 @@ export function PopularChips({ fillInputRef }: PopularChipsProps) {
   )
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div
+      className="flex items-center gap-2 overflow-x-auto whitespace-nowrap pb-1"
+      style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+    >
       <span className="text-xs text-on-surface-variant/60 font-medium shrink-0">
         Popular:
       </span>
-      {POPULAR_CHIPS.map((chip, i) => (
+      {POPULAR_CHIPS.map((chip, index) => (
         <motion.button
           key={chip.label}
           onClick={() => handleChip(chip)}
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.05, duration: 0.2 }}
+          transition={{ delay: index * 0.05, duration: 0.2 }}
           whileTap={{ scale: 0.95 }}
-          className="rounded-full border border-outline-variant/30 px-4 py-1.5 text-sm text-on-surface-variant hover:border-primary/40 hover:text-on-surface hover:bg-primary/5 transition-all duration-150 cursor-pointer"
+          className="shrink-0 rounded-full border border-outline-variant/30 px-4 py-1.5 text-sm text-on-surface-variant hover:border-primary/40 hover:text-on-surface hover:bg-primary/5 transition-all duration-150 cursor-pointer"
         >
           {chip.label}
         </motion.button>

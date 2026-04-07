@@ -16,7 +16,6 @@ export interface Database {
           title: string
           type: string
           scene_json: unknown
-          og_image_url: string | null
           hit_count: number
           created_at: string
         }
@@ -26,7 +25,6 @@ export interface Database {
           title: string
           type: string
           scene_json: unknown
-          og_image_url?: string | null
           hit_count?: number
           created_at?: string
         }
@@ -36,7 +34,6 @@ export interface Database {
           title?: string
           type?: string
           scene_json?: unknown
-          og_image_url?: string | null
           hit_count?: number
           created_at?: string
         }
@@ -70,7 +67,6 @@ export interface Database {
           type: string
           is_featured: boolean
           is_prebuilt: boolean
-          og_image_url: string | null
           created_at: string
         }
         Insert: {
@@ -82,7 +78,6 @@ export interface Database {
           type: string
           is_featured?: boolean
           is_prebuilt?: boolean
-          og_image_url?: string | null
           created_at?: string
         }
         Update: {
@@ -94,7 +89,6 @@ export interface Database {
           type?: string
           is_featured?: boolean
           is_prebuilt?: boolean
-          og_image_url?: string | null
           created_at?: string
         }
         Relationships: []
@@ -302,7 +296,6 @@ export async function saveScene(slug: string, scene: Scene): Promise<void> {
       title: scene.title,
       type: scene.type,
       scene_json: scene as unknown,
-      og_image_url: null,
       hit_count: 0,
       created_at: new Date().toISOString(),
     })

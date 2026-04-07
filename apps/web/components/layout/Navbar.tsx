@@ -18,7 +18,7 @@ import type { Provider } from '@/src/stores/slices/settings-slice'
 import { signOut, getUserInitials, getUserAvatarUrl } from '@/lib/auth'
 import { BookmarkButton } from '@/components/simulation/BookmarkButton'
 
-// ─── Provider indicator ───────────────────────────────────────────────────────
+// Provider indicator
 
 const PROVIDER_LABELS: Record<Provider, string> = {
   gemini: 'Gemini',
@@ -61,7 +61,7 @@ function SettingsLink({
   )
 }
 
-// ─── UserMenu — avatar + dropdown ────────────────────────────────────────────
+// User menu (avatar + dropdown)
 
 function UserMenu() {
   const user = useBoundStore((s) => s.user)
@@ -167,11 +167,13 @@ function UserMenu() {
   )
 }
 
-// ─── Navbar ───────────────────────────────────────────────────────────────────
+// Navbar
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [shareUrl, setShareUrl] = useState('')
+  const [showShareFallback, setShowShareFallback] = useState(false)
   const activeScene = useBoundStore((s) => s.activeScene)
   const isExpanded = useBoundStore((s) => s.isExpanded)
   const toggleExpanded = useBoundStore((s) => s.toggleExpanded)
@@ -181,12 +183,20 @@ export function Navbar() {
   const currentSlug = pathname?.startsWith('/s/') ? pathname.slice(3) : null
 
   const handleShare = useCallback(async () => {
+    const url = window.location.href
     try {
-      await navigator.clipboard.writeText(window.location.href)
+      if (!navigator.clipboard?.writeText) {
+        setShareUrl(url)
+        setShowShareFallback(true)
+        return
+      }
+
+      await navigator.clipboard.writeText(url)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
-      // Clipboard API unavailable — silently ignore
+      setShareUrl(url)
+      setShowShareFallback(true)
     }
   }, [])
 
@@ -242,7 +252,18 @@ export function Navbar() {
                 ].join(' ')}
               >
                 {copied ? <Check className="h-3.5 w-3.5" /> : <Share2 className="h-3.5 w-3.5" />}
-                <span className="hidden sm:inline">{copied ? 'Copied!' : 'Share'}</span>
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.span
+                    key={copied ? 'copied' : 'share'}
+                    initial={{ opacity: 0, y: 2 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -2 }}
+                    transition={{ duration: 0.15 }}
+                    className="hidden sm:inline"
+                  >
+                    {copied ? 'Copied!' : 'Share'}
+                  </motion.span>
+                </AnimatePresence>
               </motion.button>
 
               <motion.button
@@ -356,6 +377,54 @@ export function Navbar() {
           </>
         )}
       </nav>
+
+      <AnimatePresence>
+                {showShareFallback && (
+          <>
+            <motion.div
+              className="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowShareFallback(false)}
+              aria-hidden="true"
+            />
+            <motion.div
+              className="fixed inset-0 z-[80] flex items-center justify-center p-4"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+            >
+              <div
+                className="w-full max-w-lg rounded-2xl border border-outline-variant/30 bg-surface-container-low p-4 sm:p-5"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <h3 className="text-sm font-semibold text-on-surface">Copy simulation URL</h3>
+                <p className="mt-1 text-xs text-on-surface-variant">
+                  Clipboard API is unavailable on this device. Copy the URL manually.
+                </p>
+                <input
+                  readOnly
+                  value={shareUrl}
+                  className="mt-3 w-full rounded-xl border border-outline-variant/30 bg-surface-container px-3 py-2 text-sm text-on-surface"
+                  onFocus={(event) => event.currentTarget.select()}
+                />
+                <div className="mt-3 flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowShareFallback(false)}
+                    className="px-3 py-2 rounded-lg text-xs text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </header>
   )
 }
+
+

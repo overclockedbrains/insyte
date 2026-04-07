@@ -51,8 +51,8 @@ Ship a fully functional, publicly accessible platform where:
 | **Phase 9** | ✅ | Settings + BYOK |
 | **Phase 10** | ✅ | LLD + HLD Simulations |
 | **Phase 11** | ✅ | Supabase Integration + User Accounts |
-| **Phase 12** | 🚧 | DSA Pipeline |
-| **Phase 13** | 🚧 | Polish + Responsive |
+| **Phase 12** | ✅ | DSA Pipeline |
+| **Phase 13** | ✅ | Polish + Responsive |
 | **Phase 14** | 🚧 | Complete Deploy |
 
 ### Release 2 (R2) - Planned Enhancements (These will be replaced with actual phases when R2 is planned)

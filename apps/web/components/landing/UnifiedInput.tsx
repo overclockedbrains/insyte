@@ -1,8 +1,9 @@
 'use client'
 
-import { useRef, useState, useCallback, useEffect } from 'react'
+import { type RefObject, useRef, useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Loader2 } from 'lucide-react'
 import { useBoundStore } from '@/src/stores/store'
 import { detectMode } from '@/src/stores/slices/detection-slice'
 import { generateSlug } from '@/src/lib/slug'
@@ -14,16 +15,13 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
-
-// ─── Mode label ────────────────────────────────────────────────────────────────
-
 import type { DetectedMode } from '@/src/stores/slices/detection-slice'
 
 const MODE_LABEL: Record<NonNullable<DetectedMode>, string> = {
-  concept: '✦ Concept Mode',
-  dsa: '⟨/⟩ DSA Trace Mode',
-  lld: '⚙ LLD Mode',
-  hld: '🏗 System Design Mode',
+  concept: 'Concept Mode',
+  dsa: 'DSA Trace Mode',
+  lld: 'LLD Mode',
+  hld: 'System Design Mode',
 }
 
 const MODE_COLOR: Record<NonNullable<DetectedMode>, string> = {
@@ -68,11 +66,8 @@ function parseDSAInput(rawInput: string): ParsedDSAInput {
   }
 }
 
-// ─── UnifiedInput ─────────────────────────────────────────────────────────────
-
 interface UnifiedInputProps {
-  /** Exposes the fill function so parent can wire popular chips */
-  fillRef?: React.RefObject<((text: string) => void) | null>
+  fillRef?: RefObject<((text: string) => void) | null>
 }
 
 export function UnifiedInput({ fillRef }: UnifiedInputProps) {
@@ -80,6 +75,10 @@ export function UnifiedInput({ fillRef }: UnifiedInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [isFocused, setIsFocused] = useState(false)
   const [showDSADialog, setShowDSADialog] = useState(false)
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.matchMedia('(max-width: 767px)').matches : false,
+  )
+  const [isNavigating, setIsNavigating] = useState(false)
 
   const setInput = useBoundStore((s) => s.setInput)
   const setMode = useBoundStore((s) => s.setMode)
@@ -88,19 +87,28 @@ export function UnifiedInput({ fillRef }: UnifiedInputProps) {
   const confirmDSA = useBoundStore((s) => s.confirmDSA)
   const cancelDSA = useBoundStore((s) => s.cancelDSA)
 
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 767px)')
+    const onChange = (event: MediaQueryListEvent) => setIsMobile(event.matches)
+    media.addEventListener('change', onChange)
+    return () => media.removeEventListener('change', onChange)
+  }, [])
+
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const val = e.target.value
-      setInput(val)
-      const mode = detectMode(val)
-      setMode(mode)
+      const value = e.target.value
+      setInput(value)
+      setMode(detectMode(value))
+      if (isNavigating) {
+        setIsNavigating(false)
+      }
     },
-    [setInput, setMode],
+    [setInput, setMode, isNavigating],
   )
 
-  // Navigate to the generated scene URL and begin streaming
   const navigateToScene = useCallback(
     (topic: string) => {
+      setIsNavigating(true)
       const slug = generateSlug(topic)
       router.push(`/s/${slug}?topic=${encodeURIComponent(topic)}`)
     },
@@ -109,6 +117,7 @@ export function UnifiedInput({ fillRef }: UnifiedInputProps) {
 
   const navigateToDSAScene = useCallback(
     (rawInput: string) => {
+      setIsNavigating(true)
       const parsed = parseDSAInput(rawInput)
       const slugBase = parsed.problemStatement === 'DSA Trace' ? 'dsa-trace' : parsed.problemStatement
       const slug = generateSlug(slugBase)
@@ -131,15 +140,15 @@ export function UnifiedInput({ fillRef }: UnifiedInputProps) {
 
   const handleSubmit = useCallback(() => {
     const topic = inputText.trim()
-    if (!topic) return
+    if (!topic || isNavigating) return
 
     if (detectedMode === 'dsa') {
-      // Show confirmation dialog for DSA mode
       setShowDSADialog(true)
-    } else {
-      navigateToScene(topic)
+      return
     }
-  }, [inputText, detectedMode, navigateToScene])
+
+    navigateToScene(topic)
+  }, [inputText, detectedMode, navigateToScene, isNavigating])
 
   const handleDSAConfirm = useCallback(() => {
     confirmDSA()
@@ -150,7 +159,6 @@ export function UnifiedInput({ fillRef }: UnifiedInputProps) {
   const handleDSACancel = useCallback(() => {
     cancelDSA()
     setShowDSADialog(false)
-    // Re-detected as concept — navigate directly
     navigateToScene(inputText.trim())
   }, [cancelDSA, navigateToScene, inputText])
 
@@ -164,7 +172,6 @@ export function UnifiedInput({ fillRef }: UnifiedInputProps) {
     [handleSubmit],
   )
 
-  // Expose fill function so PopularChips can fill the textarea
   const fill = useCallback(
     (text: string) => {
       setInput(text)
@@ -180,7 +187,6 @@ export function UnifiedInput({ fillRef }: UnifiedInputProps) {
     }
   }, [fillRef, fill])
 
-  // Extract language hint from code for the DSA dialog
   const detectedLanguage = (() => {
     if (!inputText) return null
     if (/\bdef |\bimport |\bprint\s*\(/.test(inputText)) return 'Python'
@@ -189,10 +195,11 @@ export function UnifiedInput({ fillRef }: UnifiedInputProps) {
     return 'code'
   })()
 
+  const canSubmit = inputText.trim().length > 0 && !isNavigating
+
   return (
     <>
       <div className="flex flex-col gap-3 w-full">
-        {/* Textarea container */}
         <motion.div
           animate={{
             boxShadow: isFocused
@@ -210,16 +217,14 @@ export function UnifiedInput({ fillRef }: UnifiedInputProps) {
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             placeholder="How does a hash table work? Or paste your LeetCode solution..."
-            rows={isFocused ? 4 : 2}
-            className="w-full bg-surface-container-low border border-outline-variant/40 rounded-2xl px-5 py-4 font-body text-sm text-on-surface placeholder:text-on-surface-variant/60 resize-none outline-none transition-all duration-200 leading-relaxed"
-            style={{ minHeight: isFocused ? '6rem' : '3.25rem' }}
+            rows={isMobile ? 3 : isFocused ? 4 : 2}
+            className="w-full bg-surface-container-low border border-outline-variant/40 rounded-2xl px-5 py-4 font-body text-sm text-on-surface placeholder:text-on-surface-variant/60 resize-none outline-none leading-relaxed"
+            style={{ minHeight: isMobile ? '4.5rem' : isFocused ? '6rem' : '3.25rem' }}
             aria-label="Describe what you want to visualize"
           />
         </motion.div>
 
-        {/* Bottom row: mode label + submit */}
         <div className="flex items-center justify-between gap-3 min-h-[2.25rem]">
-          {/* Mode detection label */}
           <AnimatePresence mode="wait">
             {detectedMode && (
               <motion.span
@@ -246,30 +251,29 @@ export function UnifiedInput({ fillRef }: UnifiedInputProps) {
             )}
           </AnimatePresence>
 
-          {/* Submit button */}
           <motion.button
             onClick={handleSubmit}
-            disabled={!inputText.trim()}
-            whileTap={inputText.trim() ? { scale: 0.96 } : {}}
+            disabled={!canSubmit}
+            whileTap={canSubmit ? { scale: 0.96 } : {}}
             className={[
-              'shrink-0 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200',
-              inputText.trim()
+              'shrink-0 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center gap-2',
+              canSubmit
                 ? 'text-on-primary cursor-pointer hover:opacity-90 active:scale-95'
                 : 'opacity-40 cursor-not-allowed text-on-surface-variant bg-surface-container',
             ].join(' ')}
             style={
-              inputText.trim()
+              canSubmit
                 ? { background: 'linear-gradient(135deg, #b79fff 0%, #ab8ffe 100%)' }
                 : undefined
             }
             aria-label="Explore this concept"
           >
-            Explore →
+            {isNavigating && <Loader2 className="h-4 w-4 animate-spin" />}
+            {isNavigating ? 'Loading...' : 'Explore ->'}
           </motion.button>
         </div>
       </div>
 
-      {/* ── DSA Confirmation Dialog ──────────────────────────────────────── */}
       <Dialog open={showDSADialog} onOpenChange={setShowDSADialog}>
         <DialogContent className="bg-surface-container-low border border-outline-variant/40 max-w-md">
           <DialogHeader>
@@ -277,12 +281,9 @@ export function UnifiedInput({ fillRef }: UnifiedInputProps) {
               Code detected
             </DialogTitle>
             <DialogDescription className="text-on-surface-variant text-sm leading-relaxed">
-              We detected{' '}
-              <span className="text-secondary font-semibold">
-                {detectedLanguage ?? 'code'}
-              </span>{' '}
-              in your input. Would you like to visualize it as a step-by-step
-              DSA trace, or treat it as a concept?
+              We detected <span className="text-secondary font-semibold">{detectedLanguage ?? 'code'}</span>{' '}
+              in your input. Would you like to visualize it as a step-by-step DSA trace,
+              or treat it as a concept?
             </DialogDescription>
           </DialogHeader>
 
@@ -300,7 +301,7 @@ export function UnifiedInput({ fillRef }: UnifiedInputProps) {
                 background: 'linear-gradient(135deg, #3adffa 0%, #1ad0eb 100%)',
               }}
             >
-              Visualize →
+              Visualize {'->'}
             </button>
           </DialogFooter>
         </DialogContent>

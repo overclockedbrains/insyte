@@ -18,6 +18,10 @@ const LiveDemoInner = dynamic(
   },
 )
 
-export function LiveDemoLoader() {
-  return <LiveDemoInner />
+interface LiveDemoLoaderProps {
+  compact?: boolean
+}
+
+export function LiveDemoLoader({ compact = false }: LiveDemoLoaderProps) {
+  return <LiveDemoInner compact={compact} />
 }

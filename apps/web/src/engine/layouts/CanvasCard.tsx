@@ -225,7 +225,7 @@ function CanvasVisualization({ scene, controlValues }: { scene: Scene; controlVa
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 4 }}
               transition={{ type: 'spring', stiffness: 340, damping: 30 }}
-              className="absolute bottom-4 left-4 z-40 max-w-[280px] pointer-events-none"
+              className="absolute z-40 pointer-events-none bottom-3 left-3 right-3 max-w-none md:bottom-4 md:left-4 md:right-auto md:max-w-[280px]"
             >
               <div className="glass-panel rounded-2xl border border-primary/15 px-4 py-3 shadow-lg"
                 style={{ boxShadow: '0 0 20px rgba(183,159,255,0.10)' }}>
@@ -267,7 +267,7 @@ function CardContent({
   return (
     <>
       {/* Top: Playback controls */}
-      <div className="px-4 pt-4 pb-2 border-b border-outline-variant/10 flex-shrink-0">
+      <div className="px-3 md:px-4 pt-2 md:pt-4 pb-2 border-b border-outline-variant/10 flex-shrink-0">
         <PlaybackControls />
       </div>
 

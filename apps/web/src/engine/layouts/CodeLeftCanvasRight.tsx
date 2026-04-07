@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Scene } from '@insyte/scene-engine'
 import { useBoundStore } from '@/src/stores/store'
@@ -8,11 +8,6 @@ import { CodePanel } from '../annotations/CodePanel'
 import { ExplanationPanel } from '../annotations/ExplanationPanel'
 import { CanvasCard } from './CanvasCard'
 import { usePlayback } from '../hooks/usePlayback'
-
-// ─── CodeLeftCanvasRight ──────────────────────────────────────────────────────
-// Desktop: code panel 35% left, canvas 65% right (same split as text-left).
-// Mobile (<md): tabs — "Code" | "Visual" — switch between panels with FM animation.
-// Expand mode: code panel slides out (width → 0), canvas fills.
 
 interface Props {
   scene: Scene
@@ -23,31 +18,38 @@ export function CodeLeftCanvasRight({ scene, onRerunWithCustomInput = null }: Pr
   const isExpanded = useBoundStore((s) => s.isExpanded)
   const { currentStep } = usePlayback()
   const [mobileTab, setMobileTab] = useState<'code' | 'visual'>('visual')
+  const [isTablet, setIsTablet] = useState(() =>
+    typeof window !== 'undefined'
+      ? window.matchMedia('(min-width: 768px) and (max-width: 1023px)').matches
+      : false,
+  )
+
+  useEffect(() => {
+    const media = window.matchMedia('(min-width: 768px) and (max-width: 1023px)')
+    const onChange = (event: MediaQueryListEvent) => setIsTablet(event.matches)
+    media.addEventListener('change', onChange)
+    return () => media.removeEventListener('change', onChange)
+  }, [])
 
   return (
     <div className="flex flex-col md:flex-row h-full w-full min-h-0">
-
-      {/* ─── Desktop: side-by-side panels ─── */}
       <div className="hidden md:flex flex-row w-full h-full min-h-0">
-        {/* Left: code panel */}
         <AnimatePresence initial={false}>
           {!isExpanded && (
             <motion.div
               key="code-panel"
               initial={{ width: 0, opacity: 0 }}
-              animate={{ width: '35%', opacity: 1 }}
+              animate={{ width: isTablet ? '40%' : '35%', opacity: 1 }}
               exit={{ width: 0, opacity: 0, overflow: 'hidden' }}
               transition={{ type: 'spring', stiffness: 350, damping: 35 }}
               className="flex-shrink-0 overflow-hidden border-r border-outline-variant/20 min-h-0"
             >
               <div className="h-full flex flex-col min-h-0">
-                {/* Code — fixed portion, scrolls horizontally only */}
                 {scene.code && (
                   <div className="flex-shrink-0 max-h-[45%] overflow-y-auto border-b border-outline-variant/20 custom-scrollbar">
                     <CodePanel code={scene.code} currentStep={currentStep} />
                   </div>
                 )}
-                {/* Explanation — takes remaining space, scrolls independently */}
                 {scene.explanation && scene.explanation.length > 0 && (
                   <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
                     <ExplanationPanel sections={scene.explanation} currentStep={currentStep} />
@@ -63,26 +65,26 @@ export function CodeLeftCanvasRight({ scene, onRerunWithCustomInput = null }: Pr
           )}
         </AnimatePresence>
 
-        {/* Right: canvas */}
         <motion.div layout className="flex-1 min-w-0 min-h-0 flex flex-col p-4">
           <CanvasCard scene={scene} onRerunWithCustomInput={onRerunWithCustomInput} />
         </motion.div>
       </div>
 
-      {/* ─── Mobile: tabbed interface ─── */}
       <div className="flex md:hidden flex-col w-full h-full min-h-0">
-        {/* Tab bar */}
         <div className="flex-shrink-0 px-4 pt-3 pb-0 border-b border-outline-variant/20">
           <div className="flex gap-1 p-0.5 bg-surface-container-lowest rounded-xl border border-outline-variant/20 w-fit">
-            {(['visual', 'code'] as const).map((tab) => {
-              const isActive = mobileTab === tab
+            {([
+              { key: 'code', label: 'Code' },
+              { key: 'visual', label: 'Visual' },
+            ] as const).map((tab) => {
+              const isActive = mobileTab === tab.key
               return (
                 <motion.button
-                  key={tab}
+                  key={tab.key}
                   type="button"
-                  onClick={() => setMobileTab(tab)}
+                  onClick={() => setMobileTab(tab.key)}
                   className={[
-                    'relative px-4 py-1.5 rounded-lg text-xs font-bold transition-colors duration-150 cursor-pointer capitalize',
+                    'relative px-4 py-1.5 rounded-lg text-xs font-bold transition-colors duration-150 cursor-pointer',
                     isActive ? 'text-on-secondary' : 'text-on-surface-variant hover:text-on-surface',
                   ].join(' ')}
                 >
@@ -93,14 +95,13 @@ export function CodeLeftCanvasRight({ scene, onRerunWithCustomInput = null }: Pr
                       transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                     />
                   )}
-                  <span className="relative z-10">{tab}</span>
+                  <span className="relative z-10">{tab.label}</span>
                 </motion.button>
               )
             })}
           </div>
         </div>
 
-        {/* Tab content */}
         <div className="flex-1 min-h-0 relative">
           <AnimatePresence mode="wait">
             {mobileTab === 'visual' && (
@@ -112,7 +113,9 @@ export function CodeLeftCanvasRight({ scene, onRerunWithCustomInput = null }: Pr
                 transition={{ duration: 0.2 }}
                 className="absolute inset-0 flex flex-col p-3"
               >
-                <CanvasCard scene={scene} onRerunWithCustomInput={onRerunWithCustomInput} />
+                <div className="h-[55vh]">
+                  <CanvasCard scene={scene} onRerunWithCustomInput={onRerunWithCustomInput} />
+                </div>
               </motion.div>
             )}
             {mobileTab === 'code' && (

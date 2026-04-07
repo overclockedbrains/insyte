@@ -1,31 +1,51 @@
 'use client'
 
-import { useEffect, useCallback } from 'react'
+import dynamic from 'next/dynamic'
+import { useCallback, useEffect, useState } from 'react'
 import type { Scene } from '@insyte/scene-engine'
 import { useBoundStore } from '@/src/stores/store'
-import { ChallengesSection } from '@/components/simulation/ChallengesSection'
 import { ChatButton } from '@/components/chat/ChatButton'
-import { ChatCard } from '@/components/chat/ChatCard'
+import { ErrorBoundary } from '@/src/components/ErrorBoundary'
 import { TextLeftCanvasRight } from './layouts/TextLeftCanvasRight'
 import { CodeLeftCanvasRight } from './layouts/CodeLeftCanvasRight'
 import { CanvasOnly } from './layouts/CanvasOnly'
 import { usePlaybackTick } from './hooks/usePlayback'
 
-// ─── SimulationLayout ─────────────────────────────────────────────────────────
-// Phase 4 orchestrator component. Renders:
-//   1. SimulationNav (sticky, below global Navbar)
-//   2. Correct layout component based on scene.layout
-//   3. ChallengesSection below the canvas
-//   4. ChatButton FAB stub (Phase 8 wires the real one)
-//
-// Also owns the 'f' keyboard shortcut for expand/collapse.
+const ChatCard = dynamic(
+  () => import('@/components/chat/ChatCard').then((mod) => mod.ChatCard),
+  { ssr: false },
+)
+
+const ChallengesSection = dynamic(
+  () =>
+    import('@/components/simulation/ChallengesSection').then(
+      (mod) => mod.ChallengesSection,
+    ),
+  {
+    loading: () => <ChallengesLoadingSkeleton />,
+  },
+)
 
 interface SimulationLayoutProps {
   scene: Scene
   onRerunWithCustomInput?: (() => void) | null
 }
 
-// ─── Layout selector ──────────────────────────────────────────────────────────
+function ChallengesLoadingSkeleton() {
+  return (
+    <section className="border-t border-outline-variant/20 bg-surface-container-low/40 px-4 sm:px-6 py-4">
+      <div className="h-5 w-28 rounded animate-pulse bg-surface-container-high" />
+      <div className="mt-4 flex gap-3 overflow-hidden" aria-hidden="true">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <div
+            key={index}
+            className="h-24 min-w-[220px] rounded-2xl animate-pulse bg-surface-container-high"
+          />
+        ))}
+      </div>
+    </section>
+  )
+}
 
 function LayoutComponent({
   scene,
@@ -45,24 +65,24 @@ function LayoutComponent({
   }
 }
 
-// ─── SimulationLayout ─────────────────────────────────────────────────────────
-
 export function SimulationLayout({
   scene,
   onRerunWithCustomInput = null,
 }: SimulationLayoutProps) {
-  // Drive auto-advance ticks at the orchestrator level (exactly once)
   usePlaybackTick()
 
   const toggleExpanded = useBoundStore((s) => s.toggleExpanded)
   const isExpanded = useBoundStore((s) => s.isExpanded)
+  const isStreaming = useBoundStore((s) => s.isStreaming)
+  const [layoutRenderKey, setLayoutRenderKey] = useState(0)
 
-  // 'f' key toggles full-canvas expand/collapse
   const handleKey = useCallback(
     (e: KeyboardEvent) => {
-      // Don't fire when user is typing in an input/textarea
-      const tag = (e.target as HTMLElement).tagName
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
+      const target = e.target as HTMLElement | null
+      const tag = target?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
+        return
+      }
       if (e.key === 'f' || e.key === 'F') {
         e.preventDefault()
         toggleExpanded()
@@ -77,28 +97,27 @@ export function SimulationLayout({
   }, [handleKey])
 
   return (
-    // Root is a plain flex-col — height determined by its children, page scrolls.
     <div className="flex flex-col">
-      {/* ── Canvas area ─────────────────────────────────────────────────────
-           Fixed height = 100vh − global Navbar (3.5rem = h-14).
-           Scene title/share/expand live in the Navbar when activeScene is set.
-           When expanded, pointer-events disabled so clicks pass to the overlay. ── */}
-      <div
-        className={[
-          'h-[calc(100vh-3.5rem)] flex-shrink-0',
-          'flex flex-col min-h-0',
-          isExpanded ? 'pointer-events-none' : '',
-        ].join(' ')}
-      >
-        <LayoutComponent scene={scene} onRerunWithCustomInput={onRerunWithCustomInput} />
-      </div>
+      <ErrorBoundary onRetry={() => setLayoutRenderKey((prev) => prev + 1)}>
+        <div
+          key={layoutRenderKey}
+          className={[
+            'h-[calc(100vh-3.5rem)] flex-shrink-0',
+            'flex flex-col min-h-0',
+            isExpanded ? 'pointer-events-none' : '',
+          ].join(' ')}
+        >
+          <LayoutComponent scene={scene} onRerunWithCustomInput={onRerunWithCustomInput} />
+        </div>
+      </ErrorBoundary>
 
-      {/* ── Challenges section (below the canvas fold, page scrolls to reach) ── */}
-      {scene.challenges && scene.challenges.length > 0 && (
-        <ChallengesSection challenges={scene.challenges} />
-      )}
+      {scene.challenges && scene.challenges.length > 0 &&
+        (isStreaming ? (
+          <ChallengesLoadingSkeleton />
+        ) : (
+          <ChallengesSection challenges={scene.challenges} />
+        ))}
 
-      {/* ── AI Chat FAB + card ── */}
       <ChatButton />
       <ChatCard />
     </div>

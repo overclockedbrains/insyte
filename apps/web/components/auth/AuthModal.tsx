@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react'
 import { signInWithEmail, signUpWithEmail, signInWithGoogle } from '@/lib/auth'
 import { useBoundStore } from '@/src/stores/store'
+import { useFocusTrap } from '@/components/hooks/useFocusTrap'
 
 // ─── AuthModal ────────────────────────────────────────────────────────────────
 // Glass-morphism modal with Sign In / Sign Up tabs + Google OAuth.
@@ -15,6 +16,7 @@ type Tab = 'signin' | 'signup'
 export function AuthModal() {
   const isOpen = useBoundStore((s) => s.authModalOpen)
   const closeModal = useBoundStore((s) => s.closeAuthModal)
+  const modalRef = useRef<HTMLDivElement>(null)
   const [tab, setTab] = useState<Tab>('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -23,6 +25,8 @@ export function AuthModal() {
   const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+
+  useFocusTrap(isOpen, modalRef)
 
   function resetForm() {
     setEmail('')
@@ -91,17 +95,18 @@ export function AuthModal() {
 
           {/* Modal */}
           <motion.div
-            className="fixed inset-0 z-[90] flex items-center justify-center p-4"
+            className="fixed inset-0 z-[90] flex items-end sm:items-center justify-center p-0 sm:p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
             <motion.div
-              className="w-full max-w-md rounded-2xl border border-outline-variant/30 bg-surface-container-low/90 backdrop-blur-2xl p-6 relative"
+              ref={modalRef}
+              className="w-full h-full sm:h-auto sm:max-w-md rounded-none sm:rounded-2xl border border-outline-variant/30 bg-surface-container-low/90 backdrop-blur-2xl p-5 sm:p-6 relative overflow-y-auto"
               style={{ boxShadow: '0 0 40px rgba(183,159,255,0.12), 0 0 0 1px rgba(183,159,255,0.08)' }}
-              initial={{ scale: 0.95, y: 8 }}
+              initial={{ scale: 0.98, y: 16 }}
               animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 8 }}
+              exit={{ scale: 0.98, y: 16 }}
               transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -151,7 +156,7 @@ export function AuthModal() {
                 type="button"
                 onClick={handleGoogle}
                 disabled={googleLoading}
-                className="w-full flex items-center justify-center gap-3 px-4 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container hover:bg-surface-container-high text-sm font-medium text-on-surface transition-colors disabled:opacity-60 mb-4"
+                className="w-full min-h-[44px] flex items-center justify-center gap-3 px-4 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container hover:bg-surface-container-high text-sm font-medium text-on-surface transition-colors disabled:opacity-60 mb-4"
               >
                 {googleLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -180,7 +185,7 @@ export function AuthModal() {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     autoComplete="email"
-                    className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-outline-variant/30 bg-surface-container text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-colors"
+                    className="w-full min-h-[44px] pl-9 pr-4 py-2.5 rounded-xl border border-outline-variant/30 bg-surface-container text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-colors"
                   />
                 </div>
 
@@ -195,7 +200,7 @@ export function AuthModal() {
                     required
                     autoComplete={tab === 'signin' ? 'current-password' : 'new-password'}
                     minLength={tab === 'signup' ? 8 : undefined}
-                    className="w-full pl-9 pr-10 py-2.5 rounded-xl border border-outline-variant/30 bg-surface-container text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-colors"
+                    className="w-full min-h-[44px] pl-9 pr-10 py-2.5 rounded-xl border border-outline-variant/30 bg-surface-container text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-colors"
                   />
                   <button
                     type="button"
@@ -243,7 +248,7 @@ export function AuthModal() {
                 <button
                   type="submit"
                   disabled={loading || !email || !password}
-                  className="w-full py-2.5 rounded-xl bg-primary text-on-primary text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2 mt-1"
+                  className="w-full min-h-[44px] py-2.5 rounded-xl bg-primary text-on-primary text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2 mt-1"
                 >
                   {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                   {tab === 'signin' ? 'Sign In' : 'Create Account'}

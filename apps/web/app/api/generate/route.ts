@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     aiLog.server.error('generation', err)
     return new Response(
-      JSON.stringify({ error: 'AI generation failed. Please try again.' }),
+      JSON.stringify({ error: 'Generation failed', retryable: true }),
       { status: 500, headers: { 'Content-Type': 'application/json' } },
     )
   }

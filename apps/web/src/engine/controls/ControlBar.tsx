@@ -2,6 +2,7 @@
 
 import type { Control } from '@insyte/scene-engine'
 import type { ControlValue } from '../hooks/useControls'
+import { useBoundStore } from '@/src/stores/store'
 import { SliderControl } from './SliderControl'
 import { ToggleControl } from './ToggleControl'
 import { ToggleGroupControl } from './ToggleGroupControl'
@@ -28,6 +29,7 @@ export function ControlBar({
   onChange: setControlValue,
   onRerunWithCustomInput = null,
 }: ControlBarProps) {
+  const isStreaming = useBoundStore((s) => s.isStreaming)
 
   if (controls.length === 0) return null
 
@@ -38,29 +40,39 @@ export function ControlBar({
 
 
   return (
-    <div className="flex flex-wrap items-end gap-4 px-4 py-3 border-t border-outline-variant/20 bg-surface-container-low/60">
+    <div
+      className={[
+        'flex flex-wrap items-end gap-4 px-4 py-3 border-t border-outline-variant/20 bg-surface-container-low/60',
+        isStreaming ? 'opacity-70' : '',
+      ].join(' ')}
+      aria-busy={isStreaming}
+    >
       {/* Interactive controls */}
-      {interactiveControls.map((control) => {
-        const props = {
-          control,
-          value: values[control.id],
-          onChange: setControlValue,
-        }
-        switch (control.type) {
-          case 'slider':
-            return <SliderControl key={control.id} {...props} />
-          case 'toggle':
-            return <ToggleControl key={control.id} {...props} />
-          case 'toggle-group':
-            return <ToggleGroupControl key={control.id} {...props} />
-          case 'input':
-            return <InputControl key={control.id} {...props} />
-          case 'button':
-            return <ButtonControl key={control.id} control={control} onChange={setControlValue} />
-          default:
-            return null
-        }
-      })}
+      <div className={isStreaming ? 'pointer-events-none select-none' : ''}>
+        <div className="flex flex-wrap items-end gap-4">
+          {interactiveControls.map((control) => {
+            const props = {
+              control,
+              value: values[control.id],
+              onChange: setControlValue,
+            }
+            switch (control.type) {
+              case 'slider':
+                return <SliderControl key={control.id} {...props} />
+              case 'toggle':
+                return <ToggleControl key={control.id} {...props} />
+              case 'toggle-group':
+                return <ToggleGroupControl key={control.id} {...props} />
+              case 'input':
+                return <InputControl key={control.id} {...props} />
+              case 'button':
+                return <ButtonControl key={control.id} control={control} onChange={setControlValue} />
+              default:
+                return null
+            }
+          })}
+        </div>
+      </div>
 
       {/* Stat cards pushed to the right */}
       {(onRerunWithCustomInput || statControls.length > 0) && (
@@ -69,7 +81,8 @@ export function ControlBar({
             <button
               type="button"
               onClick={onRerunWithCustomInput}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold text-on-primary bg-primary/90 hover:bg-primary transition-colors cursor-pointer"
+              disabled={isStreaming}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold text-on-primary bg-primary/90 hover:bg-primary transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Re-run with custom input
             </button>

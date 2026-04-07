@@ -14,7 +14,7 @@ interface Props {
 
 export function CanvasOnly({ scene }: Props) {
   return (
-    <div className="w-full h-full min-h-0 flex flex-col p-3 md:p-4">
+    <div className="w-full h-full min-h-0 flex flex-col p-0 md:p-4">
       <CanvasCard scene={scene} />
     </div>
   )

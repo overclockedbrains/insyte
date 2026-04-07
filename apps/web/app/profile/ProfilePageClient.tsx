@@ -113,14 +113,14 @@ export function ProfilePageClient() {
           />
           {dataLoading ? (
             <SkeletonGrid count={3} />
-          ) : savedScenes.length === 0 ? (
-            <EmptyState message="No saved simulations yet. Bookmark a simulation to see it here." />
-          ) : (
-            <motion.div
-              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-4"
-              initial="hidden"
-              animate="visible"
-              variants={{ visible: { transition: { staggerChildren: 0.05 } } }}
+            ) : savedScenes.length === 0 ? (
+              <EmptyState message="No saved simulations yet. Bookmark one to see it here." />
+            ) : (
+              <motion.div
+                className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-4"
+                initial="hidden"
+                animate="visible"
+                variants={{ visible: { transition: { staggerChildren: 0.05 } } }}
             >
               {savedScenes.map((s) => (
                 <SavedCard key={s.scene_slug} slug={s.scene_slug} savedAt={s.saved_at} />
@@ -138,9 +138,9 @@ export function ProfilePageClient() {
           />
           {dataLoading ? (
             <SkeletonList count={5} />
-          ) : generatedScenes.length === 0 ? (
-            <EmptyState message="No AI-generated simulations yet. Generate one from the home page." />
-          ) : (
+            ) : generatedScenes.length === 0 ? (
+              <EmptyState message="No simulations generated yet. Try typing a concept on the home page." />
+            ) : (
             <motion.div
               className="flex flex-col gap-2 mt-4"
               initial="hidden"
@@ -284,7 +284,7 @@ function EmptyState({ message }: { message: string }) {
 
 function SkeletonGrid({ count }: { count: number }) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-4">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-4">
       {Array.from({ length: count }).map((_, i) => (
         <div key={i} className="h-16 rounded-xl bg-surface-container animate-pulse" />
       ))}
