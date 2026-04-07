@@ -6,6 +6,7 @@ import { Eye, EyeOff, Check, X } from 'lucide-react'
 import { useSettings } from '@/src/stores/hooks'
 import { REGISTRY } from '@/src/ai/registry'
 import type { Provider } from '@/src/ai/registry'
+import { va } from '@/src/lib/analytics'
 
 const MIN_KEY_LENGTH = 20
 
@@ -33,12 +34,19 @@ export function ApiKeyInput({ provider }: ApiKeyInputProps) {
       setValidationError(`Key must be at least ${MIN_KEY_LENGTH} characters.`)
       return
     }
+
+    const isFirstSavedKey = !Object.values(apiKeys).some(Boolean)
+
     setValidationError('')
     setApiKey(provider, trimmed)
     setInputValue('')
     setJustSaved(true)
     setTimeout(() => setJustSaved(false), 2000)
-  }, [inputValue, provider, setApiKey])
+
+    if (isFirstSavedKey) {
+      va.track('byok_activated', { provider })
+    }
+  }, [apiKeys, inputValue, provider, setApiKey])
 
   const handleClear = useCallback(() => {
     clearApiKey(provider)

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Manrope, Inter, JetBrains_Mono } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/next'
 import { cn } from '@/lib/utils'
 import { SITE } from '@/src/lib/config'
 import { Navbar } from '@/components/layout/Navbar'
@@ -86,6 +87,7 @@ export default function RootLayout({
           {/* Global auth modal — triggered from anywhere via openAuthModal() */}
           <AuthModal />
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   )

@@ -8,6 +8,7 @@ import { SceneSchema, VisualSchema, StepSchema, ControlSchema, ExplanationSectio
 import { useBoundStore } from '@/src/stores/store'
 import { validateGeneratedScene } from '@/src/ai/generateScene'
 import { aiLog } from '@/lib/ai-logger'
+import { va } from '@/src/lib/analytics'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -125,7 +126,17 @@ export function useStreamScene(): UseStreamSceneResult {
     (raw: unknown, topic: string) => {
       try {
         const validatedScene = validateGeneratedScene(raw)
+        const { provider, model, apiKeys } = useBoundStore.getState()
         aiLog.stream.validated(true)
+        va.track('scene_generated', {
+          provider,
+          model,
+          byok: Boolean(apiKeys[provider]),
+          scene_type: validatedScene.type,
+          layout: validatedScene.layout,
+          steps: validatedScene.steps.length,
+          visuals: validatedScene.visuals.length,
+        })
         setScene(validatedScene)
         aiLog.store.setScene('final', validatedScene.title)
         setStreaming(false)

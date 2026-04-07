@@ -7,7 +7,7 @@ export const SITE = {
   title: 'insyte - See how it works.',
   description:
     'AI-powered platform that turns any tech concept into a live, interactive simulation you can play with.',
-  url: 'https://insyte.amanarya.com',
+  url: process.env.NEXT_PUBLIC_APP_URL ?? 'https://insyte.amanarya.com',
 } as const
 
 export const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION ?? '0.1.0'

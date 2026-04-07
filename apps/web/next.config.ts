@@ -10,6 +10,23 @@ const withSerwist = withSerwistInit({
   globPublicPatterns: ['**/*', '!pyodide/**/*'],
 })
 
+const isProduction = process.env.NODE_ENV === 'production'
+
+function buildContentSecurityPolicy() {
+  return [
+    "default-src 'self'",
+    "base-uri 'self'",
+    "frame-ancestors 'none'",
+    "object-src 'none'",
+    "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com",
+    "img-src 'self' data: blob: https://*.supabase.co https://lh3.googleusercontent.com",
+    "connect-src 'self' https://*.supabase.co https://generativelanguage.googleapis.com https://api.openai.com https://api.anthropic.com https://api.groq.com",
+    "worker-src 'self' blob:",
+  ].join('; ')
+}
+
 function getWorkspaceVersion(): string {
   const candidates = [
     resolve(process.cwd(), '..', '..', 'package.json'),
@@ -48,7 +65,7 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
-    return [
+    const headers = [
       {
         source: '/pyodide/(.*)',
         headers: [
@@ -57,6 +74,28 @@ const nextConfig: NextConfig = {
         ],
       },
     ]
+
+    if (isProduction) {
+      headers.push({
+        source: '/((?!pyodide).*)',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: buildContentSecurityPolicy(),
+          },
+        ],
+      })
+    }
+
+    return headers
+  },
+  webpack(config) {
+    config.resolve.extensionAlias = {
+      ...(config.resolve.extensionAlias ?? {}),
+      '.js': ['.ts', '.tsx', '.js'],
+    }
+
+    return config
   },
 }
 

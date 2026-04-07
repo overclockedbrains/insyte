@@ -1,6 +1,6 @@
 {
   "name": "insyte",
-  "version": "1.0.13",
+  "version": "1.1.0",
   "description": "An AI-powered interactive learning platform for live algorithmic traces and system design simulations.",
   "private": true,
   "packageManager": "pnpm@10.30.3",
@@ -9,6 +9,7 @@
     "build": "turbo build",
     "lint": "turbo lint",
     "type-check": "turbo type-check",
+    "validate-scenes": "pnpm --filter web validate-scenes",
     "clean": "turbo clean && pnpm -r exec rimraf .next dist .turbo tsconfig.tsbuildinfo",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "setup-symlinks": "bash scripts/setup-symlinks.sh"

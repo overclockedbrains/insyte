@@ -3,7 +3,7 @@
   "title": "DNS Resolution",
   "type": "concept",
   "layout": "text-left-canvas-right",
-  "description": "Watch how a domain name like insyte.dev gets resolved to an IP address — from browser cache to root servers and back.",
+  "description": "Watch how a domain name like insyte.amanarya.com gets resolved to an IP address — from browser cache to root servers and back.",
   "category": "Networking",
   "tags": ["dns", "networking", "caching", "ttl", "http"],
 
@@ -18,7 +18,7 @@
           { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 240, "status": "normal" },
           { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 250, "y": 240, "status": "normal" },
           { "id": "root-ns", "label": "Root NS", "icon": "database", "x": 450, "y": 80, "status": "normal" },
-          { "id": "tld-ns", "label": ".dev TLD NS", "icon": "database", "x": 450, "y": 240, "status": "normal" },
+          { "id": "tld-ns", "label": ".com TLD NS", "icon": "database", "x": 450, "y": 240, "status": "normal" },
           { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 450, "y": 400, "status": "normal" }
         ],
         "connections": [
@@ -34,7 +34,7 @@
       "type": "text-badge",
       "label": "Cache Status",
       "position": { "x": 50, "y": 5 },
-      "initialState": { "text": "Looking up: insyte.dev", "style": "default" }
+      "initialState": { "text": "Looking up: insyte.amanarya.com", "style": "default" }
     },
     {
       "id": "latency",
@@ -52,7 +52,7 @@
         {
           "target": "cache-status",
           "action": "set",
-          "params": { "text": "Browser: lookup insyte.dev → local cache MISS", "style": "error" }
+          "params": { "text": "Browser: lookup insyte.amanarya.com → local cache MISS", "style": "error" }
         },
         {
           "target": "dns-system",
@@ -62,7 +62,7 @@
               { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 240, "status": "active" },
               { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 250, "y": 240, "status": "normal" },
               { "id": "root-ns", "label": "Root NS", "icon": "database", "x": 450, "y": 80, "status": "normal" },
-              { "id": "tld-ns", "label": ".dev TLD NS", "icon": "database", "x": 450, "y": 240, "status": "normal" },
+              { "id": "tld-ns", "label": ".com TLD NS", "icon": "database", "x": 450, "y": 240, "status": "normal" },
               { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 450, "y": 400, "status": "normal" }
             ],
             "connections": [
@@ -92,7 +92,7 @@
               { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 240, "status": "active" },
               { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 250, "y": 240, "status": "active" },
               { "id": "root-ns", "label": "Root NS", "icon": "database", "x": 450, "y": 80, "status": "normal" },
-              { "id": "tld-ns", "label": ".dev TLD NS", "icon": "database", "x": 450, "y": 240, "status": "normal" },
+              { "id": "tld-ns", "label": ".com TLD NS", "icon": "database", "x": 450, "y": 240, "status": "normal" },
               { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 450, "y": 400, "status": "normal" }
             ],
             "connections": [
@@ -117,7 +117,7 @@
         {
           "target": "cache-status",
           "action": "set",
-          "params": { "text": "Resolver asks Root NS: Who handles .dev?", "style": "highlight" }
+          "params": { "text": "Resolver asks Root NS: Who handles .com?", "style": "highlight" }
         },
         {
           "target": "dns-system",
@@ -127,7 +127,7 @@
               { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 240, "status": "normal" },
               { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 250, "y": 240, "status": "active" },
               { "id": "root-ns", "label": "Root NS", "icon": "database", "x": 450, "y": 80, "status": "active" },
-              { "id": "tld-ns", "label": ".dev TLD NS", "icon": "database", "x": 450, "y": 240, "status": "normal" },
+              { "id": "tld-ns", "label": ".com TLD NS", "icon": "database", "x": 450, "y": 240, "status": "normal" },
               { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 450, "y": 400, "status": "normal" }
             ],
             "connections": [
@@ -152,7 +152,7 @@
         {
           "target": "cache-status",
           "action": "set",
-          "params": { "text": "Root NS replies: .dev TLD NS is at ns-tld.google.com", "style": "success" }
+          "params": { "text": "Root NS replies: .com TLD NS is at a Verisign .com name server", "style": "success" }
         },
         {
           "target": "dns-system",
@@ -162,7 +162,7 @@
               { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 240, "status": "normal" },
               { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 250, "y": 240, "status": "active" },
               { "id": "root-ns", "label": "Root NS ✓", "icon": "database", "x": 450, "y": 80, "status": "normal" },
-              { "id": "tld-ns", "label": ".dev TLD NS", "icon": "database", "x": 450, "y": 240, "status": "active" },
+              { "id": "tld-ns", "label": ".com TLD NS", "icon": "database", "x": 450, "y": 240, "status": "active" },
               { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 450, "y": 400, "status": "normal" }
             ],
             "connections": [
@@ -187,7 +187,7 @@
         {
           "target": "cache-status",
           "action": "set",
-          "params": { "text": "TLD NS replies: insyte.dev NS is at ns1.vercel-dns.com", "style": "success" }
+          "params": { "text": "TLD NS replies: amanarya.com NS is at ns1.vercel-dns.com", "style": "success" }
         },
         {
           "target": "dns-system",
@@ -197,7 +197,7 @@
               { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 240, "status": "normal" },
               { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 250, "y": 240, "status": "active" },
               { "id": "root-ns", "label": "Root NS ✓", "icon": "database", "x": 450, "y": 80, "status": "normal" },
-              { "id": "tld-ns", "label": ".dev TLD NS ✓", "icon": "database", "x": 450, "y": 240, "status": "normal" },
+              { "id": "tld-ns", "label": ".com TLD NS ✓", "icon": "database", "x": 450, "y": 240, "status": "normal" },
               { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 450, "y": 400, "status": "active" }
             ],
             "connections": [
@@ -222,7 +222,7 @@
         {
           "target": "cache-status",
           "action": "set",
-          "params": { "text": "Authoritative NS returns: insyte.dev → 76.76.21.21", "style": "success" }
+          "params": { "text": "Authoritative NS returns: insyte.amanarya.com → 76.76.21.21", "style": "success" }
         },
         {
           "target": "dns-system",
@@ -232,7 +232,7 @@
               { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 240, "status": "active" },
               { "id": "resolver", "label": "Recursive Resolver ✓", "icon": "compute", "x": 250, "y": 240, "status": "active" },
               { "id": "root-ns", "label": "Root NS ✓", "icon": "database", "x": 450, "y": 80, "status": "normal" },
-              { "id": "tld-ns", "label": ".dev TLD NS ✓", "icon": "database", "x": 450, "y": 240, "status": "normal" },
+              { "id": "tld-ns", "label": ".com TLD NS ✓", "icon": "database", "x": 450, "y": 240, "status": "normal" },
               { "id": "auth-ns", "label": "Auth NS ✓", "icon": "database", "x": 450, "y": 400, "status": "normal" }
             ],
             "connections": [
@@ -267,7 +267,7 @@
               { "id": "browser", "label": "Browser (cached)", "icon": "web", "x": 60, "y": 240, "status": "active" },
               { "id": "resolver", "label": "Resolver (cached)", "icon": "compute", "x": 250, "y": 240, "status": "active" },
               { "id": "root-ns", "label": "Root NS", "icon": "database", "x": 450, "y": 80, "status": "normal" },
-              { "id": "tld-ns", "label": ".dev TLD NS", "icon": "database", "x": 450, "y": 240, "status": "normal" },
+              { "id": "tld-ns", "label": ".com TLD NS", "icon": "database", "x": 450, "y": 240, "status": "normal" },
               { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 450, "y": 400, "status": "normal" }
             ],
             "connections": [
@@ -302,7 +302,7 @@
               { "id": "browser", "label": "Browser ✓ HIT", "icon": "web", "x": 60, "y": 240, "status": "active" },
               { "id": "resolver", "label": "Resolver (skipped)", "icon": "compute", "x": 250, "y": 240, "status": "normal" },
               { "id": "root-ns", "label": "Root NS (skipped)", "icon": "database", "x": 450, "y": 80, "status": "normal" },
-              { "id": "tld-ns", "label": ".dev TLD (skipped)", "icon": "database", "x": 450, "y": 240, "status": "normal" },
+              { "id": "tld-ns", "label": ".com TLD (skipped)", "icon": "database", "x": 450, "y": 240, "status": "normal" },
               { "id": "auth-ns", "label": "Auth NS (skipped)", "icon": "database", "x": 450, "y": 400, "status": "normal" }
             ],
             "connections": [
@@ -337,7 +337,7 @@
               { "id": "browser", "label": "Browser (expired)", "icon": "web", "x": 60, "y": 240, "status": "normal" },
               { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 250, "y": 240, "status": "normal" },
               { "id": "root-ns", "label": "Root NS", "icon": "database", "x": 450, "y": 80, "status": "normal" },
-              { "id": "tld-ns", "label": ".dev TLD NS", "icon": "database", "x": 450, "y": 240, "status": "normal" },
+              { "id": "tld-ns", "label": ".com TLD NS", "icon": "database", "x": 450, "y": 240, "status": "normal" },
               { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 450, "y": 400, "status": "normal" }
             ],
             "connections": [
@@ -372,7 +372,7 @@
               { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 240, "status": "active" },
               { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 250, "y": 240, "status": "active" },
               { "id": "root-ns", "label": "Root NS", "icon": "database", "x": 450, "y": 80, "status": "active" },
-              { "id": "tld-ns", "label": ".dev TLD NS", "icon": "database", "x": 450, "y": 240, "status": "active" },
+              { "id": "tld-ns", "label": ".com TLD NS", "icon": "database", "x": 450, "y": 240, "status": "active" },
               { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 450, "y": 400, "status": "active" }
             ],
             "connections": [
@@ -423,7 +423,7 @@
   "explanation": [
     {
       "heading": "What is DNS?",
-      "body": "DNS (Domain Name System) is the internet's phone book. Humans use names like `insyte.dev`; computers need IP addresses like `76.76.21.21`.\n\nDNS translates between the two. Every time you visit a website, a DNS lookup happens (unless it's cached).",
+      "body": "DNS (Domain Name System) is the internet's phone book. Humans use names like `insyte.amanarya.com`; computers need IP addresses like `76.76.21.21`.\n\nDNS translates between the two. Every time you visit a website, a DNS lookup happens (unless it's cached).",
       "appearsAtStep": 0
     },
     {
@@ -495,13 +495,13 @@
     {
       "id": "ch-ttl-tradeoff",
       "title": "TTL Trade-off Decision",
-      "description": "You're deploying insyte.dev to a new IP address. Your current TTL is 3600s (1 hour). How long will it take for all users worldwide to see the new IP? What TTL would you set 24 hours before the migration? After?",
+      "description": "You're deploying insyte.amanarya.com to a new IP address. Your current TTL is 3600s (1 hour). How long will it take for all users worldwide to see the new IP? What TTL would you set 24 hours before the migration? After?",
       "type": "scenario"
     },
     {
       "id": "ch-dns-poisoning",
       "title": "DNS Cache Poisoning",
-      "description": "A malicious resolver returns a fake IP for insyte.dev, pointing to an attacker's server. The browser caches it. What prevents this attack in modern DNS? Look up DNSSEC.",
+      "description": "A malicious resolver returns a fake IP for insyte.amanarya.com, pointing to an attacker's server. The browser caches it. What prevents this attack in modern DNS? Look up DNSSEC.",
       "type": "break-it"
     }
   ]

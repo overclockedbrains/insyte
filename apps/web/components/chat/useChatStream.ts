@@ -6,6 +6,7 @@ import { applyDiff } from '@/src/ai/applyDiff'
 import type { ScenePatch } from '@/src/ai/applyDiff'
 import { buildSceneContext } from '@/src/ai/liveChat'
 import { PATCH_START, PATCH_END } from '@/src/ai/prompts/live-chat'
+import { va } from '@/src/lib/analytics'
 
 // ─── useChatStream ────────────────────────────────────────────────────────────
 // Handles the full lifecycle of a streaming chat request:
@@ -48,6 +49,13 @@ export function useChatStream() {
       addUserMessage(text)
       addAssistantMessage('')
       setLoading(true)
+      va.track('chat_sent', {
+        scene_id: activeScene.id,
+        scene_type: activeScene.type,
+        provider,
+        model,
+        byok: Boolean(apiKeys[provider]),
+      })
 
       // Build scene context (minimal — no full JSON)
       const sceneContext = buildSceneContext(activeScene, currentStep)
