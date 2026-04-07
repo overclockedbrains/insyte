@@ -17,7 +17,7 @@
 - [ ] Unified input: full-width, no expand animation needed (already full-width)
 - [ ] Popular chips: horizontal scroll (hide scrollbar), no wrapping
 
-**Gallery page (`/explore`):**
+**Explore page (`/explore`):**
 - [ ] Search bar: full-width
 - [ ] TopicRow: horizontal scroll works on touch, no scroll arrows (use native scroll)
 - [ ] TopicCard: min-width `160px`, height proportional
@@ -45,7 +45,7 @@
 
 ### 13.2 — Tablet layout (768–1024px)
 - [ ] Simulation page: same as desktop but left panel 40% instead of 35%
-- [ ] Gallery: 2-column grid for TopicCards in each row (instead of horizontal scroll)
+- [ ] Explore page: 2-column grid for TopicCards in each row (instead of horizontal scroll)
 - [ ] Landing: two-column hero maintained, but spacing reduced
 - [ ] Profile: 3-column saved grid
 

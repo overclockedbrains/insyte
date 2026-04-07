@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     'Browse 24 interactive simulations covering Data Structures, System Design, Networking, and more.',
 }
 
-// ─── Explore page (Gallery) ───────────────────────────────────────────────────
+// ─── Explore page ─────────────────────────────────────────────────────────────
 // Server Component — rows are built from static topic-index (no data fetching).
 
 export default function ExplorePage() {

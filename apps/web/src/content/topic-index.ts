@@ -1,5 +1,5 @@
 // Topic catalog — all 24 pre-built simulations
-// Used by Gallery page, search, and FeaturedSimulations.
+// Used by the Explore page, search, and FeaturedSimulations.
 
 import type { SceneType } from '@insyte/scene-engine'
 

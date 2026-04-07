@@ -1,6 +1,6 @@
-# Phase 6 — Gallery + Landing Page
+# Phase 6 — Explore + Landing Page
 
-**Goal:** `/explore` gallery (Netflix-style rows) and `/` landing page (two-column hero with live hash table demo) fully built and navigable.
+**Goal:** `/explore` page (Netflix-style rows) and `/` landing page (two-column hero with live hash table demo) fully built and navigable.
 
 **Entry criteria:** Phase 5 complete. All 5 concept simulations rendering correctly.
 
@@ -48,7 +48,7 @@ Create `apps/web/src/components/explore/SearchBar.tsx`:
 - [ ] Keyboard: up/down arrows, Enter to navigate, Escape to close
 - [ ] Empty state: "No simulations match '[query]'"
 
-### 6.5 — Gallery page (`/explore`)
+### 6.5 — Explore page (`/explore`)
 Create `apps/web/src/app/explore/page.tsx`:
 - [ ] `<SearchBar />` at top
 - [ ] Row 1: Featured (4 featured simulations)

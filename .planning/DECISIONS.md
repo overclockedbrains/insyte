@@ -114,7 +114,7 @@ Global state rules:
 
 ```
 /                        → Landing page
-/explore                 → Gallery page (Netflix-style rows)
+/explore                 → Explore page (Netflix-style rows)
 /s/[slug]                → Universal simulation page (concept, DSA, LLD, HLD)
 /settings                → BYOK, model selector, preferences
 /api/generate            → POST: prompt → Scene JSON (streaming, AI)
@@ -216,7 +216,7 @@ Layout: **Two-column** on desktop (left: headline + input, right: live auto-play
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  [NAV: insyte logo | Explore | Gallery | ★ GitHub | Settings⚙] │
+│  [NAV: insyte logo | Explore | ★ GitHub | Settings⚙] │
 ├─────────────────────────────────────────────────────────────────┤
 │  [ambient glow blobs in background]                             │
 │                                                                 │
@@ -341,7 +341,7 @@ Layout: **Two-column** on desktop (left: headline + input, right: live auto-play
 - Minimize → card shrinks back to `[💬]` button, history preserved in session
 - **Mobile:** tap `[💬]` → bottom sheet slides up (60% screen height)
 
-### Gallery Page (`/explore`)
+### Explore Page (`/explore`)
 
 **Netflix-style horizontal category rows:**
 
@@ -375,12 +375,12 @@ Layout: **Two-column** on desktop (left: headline + input, right: live auto-play
 
 **Desktop top nav (all pages):**
 ```
-[insyte logo ←]          [Explore] [Gallery] [★ GitHub]          [⚙ Settings]
+[insyte logo ←]          [Explore] [★ GitHub]          [⚙ Settings]
 ```
 
 **Mobile nav:**
 - Hamburger menu → side drawer
-- Drawer contains: Explore, Gallery, GitHub, Settings
+- Drawer contains: Explore, GitHub, Settings
 
 ---
 
@@ -572,7 +572,7 @@ All primitives live in `apps/web/src/engine/primitives/`. Registered in a `Primi
 - ✅ Shareable URLs (slug-based)
 - ✅ OG image generation (Satori)
 - ✅ Supabase scene caching + topic index
-- ✅ Gallery (Netflix rows)
+- ✅ Explore page (Netflix rows)
 - ✅ Settings page (BYOK + model selector)
 - ✅ Fully responsive: mobile, tablet, desktop
 - ✅ Auto-detection input (concept vs DSA vs HLD vs LLD)
@@ -649,8 +649,8 @@ All primitives live in `apps/web/src/engine/primitives/`. Registered in a `Primi
 - `git-branching.json`
 - Each loaded from `apps/web/src/content/scenes/concepts/`
 
-### Phase 6: Gallery + Landing Page
-- `/explore` gallery page (Netflix-style rows from topic_index)
+### Phase 6: Explore + Landing Page
+- `/explore` Explore page (Netflix-style rows from topic_index)
 - TopicCard component with OG image thumbnail
 - Horizontal scroll rows per category
 - Search bar with autocomplete

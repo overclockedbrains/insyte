@@ -45,7 +45,7 @@ Ship a fully functional, publicly accessible platform where:
 | **Phase 3** | ✅ | Visual Primitives |
 | **Phase 4** | ✅ | Simulation Page Layouts |
 | **Phase 5** | ✅ | 5 Concept Simulations (Hand-Crafted) |
-| **Phase 6** | ✅ | Gallery + Landing Page |
+| **Phase 6** | ✅ | Explore + Landing Page |
 | **Phase 7** | ✅ | AI Scene Generation (Streaming) |
 | **Phase 8** | ✅ | AI Chat + Scene Patching |
 | **Phase 9** | ✅ | Settings + BYOK |
@@ -55,7 +55,13 @@ Ship a fully functional, publicly accessible platform where:
 | **Phase 13** | ✅ | Polish + Responsive |
 | **Phase 14** | ✅ | Complete Deploy |
 
-### Release 2 (R2) - Planned Enhancements (These will be replaced with actual phases when R2 is planned)
+### Release 2 (R2) - Active Phase
+
+| Phase | Status | Description |
+|-------|--------|-------------|
+| **Phase 15** | 🚧 | R1 Fixes + UI Tweaks |
+
+### Release 2 (R2) - Backlog
 
 | Area | Status | Description |
 |------|--------|-------------|
@@ -168,8 +174,8 @@ Ship a fully functional, publicly accessible platform where:
 
 ---
 
-### Phase 6 — Gallery + Landing Page
-**Goal:** `/explore` gallery and `/` landing page fully built with live hash table demo.
+### Phase 6 — Explore + Landing Page
+**Goal:** `/explore` page and `/` landing page fully built with live hash table demo.
 
 **Deliverables:**
 - `/explore` page: Netflix-style rows (Featured, DSA, System Design, LLD, Networking)
@@ -348,6 +354,19 @@ _OG Images_
 **Status:** Completed on April 8, 2026.
 
 **Plan:** [→ phases/phase-14/PLAN.md](phases/phase-14/PLAN.md)
+
+---
+
+### Phase 15 — R1 Fixes + UI Tweaks
+**Goal:** Fix rough edges discovered after launch, tighten the R1 UI, and track every polish item in one running phase document.
+
+**Deliverables:**
+- Navigation, page naming, and microcopy consistency pass across the product
+- Rolling backlog of R1 bugs, broken UX, and visual inconsistencies
+- Incremental fixes for landing, explore, simulation, settings, and profile surfaces
+- Verification notes for each fix cluster so the phase doc stays current while work lands
+
+**Plan:** [→ phases/phase-15/PLAN.md](phases/phase-15/PLAN.md)
 
 ---
 

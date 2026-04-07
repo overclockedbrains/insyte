@@ -286,7 +286,7 @@ Update `apps/web/src/app/s/[slug]/page.tsx` (or `SimulationNav`):
 - [ ] `TopicCard` shows real OG image thumbnails
 - [ ] `hit_count` increments on every simulation page load
 - [ ] Typing "how does dns work?" and "How Does DNS Work?" both navigate to the same slug
-- [ ] Gallery page loads topics from Supabase (verify in Network tab)
+- [ ] Explore page loads topics from Supabase (verify in Network tab)
 - [ ] Google OAuth sign-in flow completes and user appears in navbar
 - [ ] Email sign-up creates user in Supabase Auth dashboard
 - [ ] `/profile` redirects to `/` with auth modal when not signed in

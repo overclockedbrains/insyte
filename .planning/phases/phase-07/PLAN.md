@@ -2,7 +2,7 @@
 
 **Goal:** Typing a new concept generates a streaming Scene JSON with skeleton UX → node fade-in → panel fill. Generated scenes are cached in Supabase for future users.
 
-**Entry criteria:** Phase 6 complete. Gallery and landing page working. Supabase project created (can be basic setup at this point).
+**Entry criteria:** Phase 6 complete. Explore page and landing page working. Supabase project created (can be basic setup at this point).
 
 ---
 

@@ -16,5 +16,4 @@ export const GITHUB_URL = 'https://github.com/overclockedbrains/insyte'
 
 export const NAV_LINKS = [
   { label: 'Explore', href: '/explore' },
-  { label: 'Gallery', href: '/explore' },
 ] as const

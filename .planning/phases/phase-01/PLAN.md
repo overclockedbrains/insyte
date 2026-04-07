@@ -49,7 +49,7 @@ Create `apps/web/src/components/layout/GlowEffect.tsx`:
 ### 1.4 — Navbar component
 Create `apps/web/src/components/layout/Navbar.tsx`:
 - [ ] Sticky top, `backdrop-blur-md`, `bg-background/80`, bottom primary glow (`box-shadow: 0 10px 30px -15px rgba(183,159,255,0.3)`)
-- [ ] Desktop layout: `[insyte logo ←]` left, `[Explore] [Gallery] [★ GitHub]` center-right, `[⚙ Settings]` far right
+- [ ] Desktop layout: `[insyte logo ←]` left, `[Explore] [★ GitHub]` center-right, `[⚙ Settings]` far right
 - [ ] Logo: "insyte" in `font-headline font-bold text-xl` with gradient text on the "i"
 - [ ] Nav links: `text-on-surface-variant hover:text-on-surface transition-colors text-sm font-medium`
 - [ ] GitHub link: `★ GitHub` opens `https://github.com/[repo]` in new tab
