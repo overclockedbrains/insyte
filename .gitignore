@@ -23,6 +23,7 @@ coverage/
 .env
 .env*.local
 .env.production
+!.env.example
 
 # ─── Vercel / deployment ──────────────────────────────────────────────────────
 .vercel
