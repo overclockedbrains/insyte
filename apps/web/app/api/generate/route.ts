@@ -3,7 +3,13 @@ import { Agent, fetch as undiciFetch } from 'undici'
 import { generateScene } from '@/src/ai/generateScene'
 import { resolveModel } from '@/src/ai/providers'
 import type { Provider } from '@/src/ai/registry'
-import { checkAndIncrementRateLimit, saveScene } from '@/lib/supabase'
+import {
+  checkAndIncrementRateLimit,
+  saveScene,
+  getCachedSlugForQuery,
+  saveQueryHash,
+  recordUserGeneration,
+} from '@/lib/supabase'
 import { generateSlug } from '@/src/lib/slug'
 import { safeParseScene } from '@insyte/scene-engine'
 import { aiLog } from '@/lib/ai-logger'
@@ -12,13 +18,11 @@ import { aiLog } from '@/lib/ai-logger'
 export const maxDuration = 300
 
 // Custom HTTP agent with extended timeouts for long-running AI generation.
-// Used by all providers in this route — generation can take several minutes.
 const longRunningAgent = new Agent({
   headersTimeout: 10 * 60 * 1000, // 10 minutes
   bodyTimeout: 10 * 60 * 1000,    // 10 minutes
 })
 
-// Cast undici's fetch to the global fetch type expected by AI SDKs.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const longRunningFetch = (url: any, options?: any) =>
   undiciFetch(url, { ...options, dispatcher: longRunningAgent }) as unknown as Promise<Response>
@@ -27,10 +31,11 @@ const longRunningFetch = (url: any, options?: any) =>
 
 export async function POST(req: NextRequest) {
   // BYOK headers — present when the user has configured their own API key.
-  // Keys are never logged and never stored server-side.
   const byokKey = req.headers.get('x-api-key')
   const byokProvider = req.headers.get('x-provider') as Provider | null
   const byokModel = req.headers.get('x-model')
+  // Auth header — present when user is signed in (userId for history tracking)
+  const userId = req.headers.get('x-user-id')
 
   // Parse body
   let topic: string
@@ -49,6 +54,19 @@ export async function POST(req: NextRequest) {
 
   if (topic.length > 500) {
     return new Response('topic is too long (max 500 chars)', { status: 400 })
+  }
+
+  // ── Query deduplication: skip AI if this exact query was generated before ──
+  // Only for free-tier (our server key) — BYOK users may want fresh generation.
+  if (!byokKey) {
+    const existingSlug = await getCachedSlugForQuery(topic)
+    if (existingSlug) {
+      // Return a redirect response — client should load from /s/[existingSlug]
+      return Response.json(
+        { cached: true, slug: existingSlug },
+        { status: 200, headers: { 'X-Cache': 'HIT' } },
+      )
+    }
   }
 
   // Rate limit only applies to the free tier (our server key).
@@ -95,6 +113,12 @@ export async function POST(req: NextRequest) {
         if (parsed.success) {
           const saveSlug = slug ?? generateSlug(topic)
           await saveScene(saveSlug, parsed.scene)
+          // Save query → slug mapping for deduplication
+          saveQueryHash(topic, saveSlug)
+          // Record in user history if signed in
+          if (userId) {
+            recordUserGeneration(userId, topic, saveSlug)
+          }
           aiLog.server.cache('saved', saveSlug)
         } else {
           aiLog.server.cache('skipped', 'scene failed schema validation')
@@ -105,8 +129,6 @@ export async function POST(req: NextRequest) {
       }
     })()
 
-    // toTextStreamResponse() is the format expected by experimental_useObject on the client.
-    // Do NOT change this to toDataStreamResponse() — that is for useChat, a different protocol.
     return result.toTextStreamResponse()
   } catch (err) {
     aiLog.server.error('generation', err)

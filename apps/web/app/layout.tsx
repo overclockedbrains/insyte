@@ -6,6 +6,8 @@ import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
 import { GlowEffect } from '@/components/layout/GlowEffect'
 import { DotGridBackground } from '@/components/layout/DotGridBackground'
+import { AuthProvider } from '@/components/auth/AuthProvider'
+import { AuthModal } from '@/components/auth/AuthModal'
 import './globals.css'
 
 const manrope = Manrope({
@@ -58,12 +60,18 @@ export default function RootLayout({
         <GlowEffect />
         <DotGridBackground opacity={0.4} />
 
-        {/* Page chrome */}
-        <Navbar />
-        <main className="flex-1 relative z-10">
-          {children}
-        </main>
-        <Footer />
+        {/* Auth provider — initialises session on mount */}
+        <AuthProvider>
+          {/* Page chrome */}
+          <Navbar />
+          <main className="flex-1 relative z-10">
+            {children}
+          </main>
+          <Footer />
+
+          {/* Global auth modal — triggered from anywhere via openAuthModal() */}
+          <AuthModal />
+        </AuthProvider>
       </body>
     </html>
   )

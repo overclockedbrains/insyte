@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { getAllStaticSlugs, loadStaticScene } from '@/src/lib/scene-loader'
 import { extractTopicFromSlug } from '@/src/lib/slug'
-import { getCachedScene } from '@/lib/supabase'
+import { getCachedScene, incrementHitCount } from '@/lib/supabase'
 import { ScenePageClient } from './ScenePageClient'
 
 // ─── Static params ─────────────────────────────────────────────────────────────
@@ -27,14 +27,24 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 
   if (scene) {
     const description =
-      scene.description ??
+      (scene as { description?: string }).description ??
       `Interactive ${scene.type} simulation: ${scene.title}. Visualize and play with this concept on insyte.`
 
     return {
       title: `${scene.title} — insyte`,
       description,
-      openGraph: { title: `${scene.title} — insyte`, description, type: 'website' },
-      twitter: { card: 'summary_large_image', title: `${scene.title} — insyte`, description },
+      openGraph: {
+        title: `${scene.title} — insyte`,
+        description,
+        type: 'website',
+        images: [`/api/og?slug=${encodeURIComponent(slug)}`],
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: `${scene.title} — insyte`,
+        description,
+        images: [`/api/og?slug=${encodeURIComponent(slug)}`],
+      },
     }
   }
 
@@ -43,8 +53,16 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   return {
     title: `${topic} — insyte`,
     description: `AI-generated interactive simulation for "${topic}" on insyte.`,
-    openGraph: { title: `${topic} — insyte`, type: 'website' },
-    twitter: { card: 'summary_large_image', title: `${topic} — insyte` },
+    openGraph: {
+      title: `${topic} — insyte`,
+      type: 'website',
+      images: [`/api/og?slug=${encodeURIComponent(slug)}`],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${topic} — insyte`,
+      images: [`/api/og?slug=${encodeURIComponent(slug)}`],
+    },
   }
 }
 
@@ -57,13 +75,17 @@ export default async function SimulationPage({ params, searchParams }: Props) {
   // 1. Try pre-built static scene
   const staticScene = await loadStaticScene(slug)
   if (staticScene) {
-    return <ScenePageClient scene={staticScene} />
+    // Fire hit count increment (static scenes also count as views)
+    incrementHitCount(slug)
+    return <ScenePageClient scene={staticScene} slug={slug} />
   }
 
   // 2. Try Supabase cache (AI-generated scenes from previous visits)
   const cachedScene = await getCachedScene(slug)
   if (cachedScene) {
-    return <ScenePageClient scene={cachedScene} />
+    // Fire hit count increment for cached scenes
+    incrementHitCount(slug)
+    return <ScenePageClient scene={cachedScene} slug={slug} />
   }
 
   // 3. AI-generated slug — extract topic and start streaming on the client

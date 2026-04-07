@@ -1,9 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useCallback } from 'react'
-import { MenuIcon, SettingsIcon, StarIcon, Share2, Check, Maximize2, Minimize2 } from 'lucide-react'
-import { motion } from 'framer-motion'
+import Image from 'next/image'
+import { useState, useCallback, useRef, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
+import { MenuIcon, SettingsIcon, StarIcon, Share2, Check, Maximize2, Minimize2, LogOut, User } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Sheet,
   SheetContent,
@@ -13,8 +15,10 @@ import { useBoundStore } from '@/src/stores/store'
 import { Pill } from '@/components/ui/Pill'
 import { GITHUB_URL, NAV_LINKS } from '@/src/lib/config'
 import type { Provider } from '@/src/stores/slices/settings-slice'
+import { signOut, getUserInitials, getUserAvatarUrl } from '@/lib/auth'
+import { BookmarkButton } from '@/components/simulation/BookmarkButton'
 
-// ─── Provider indicator tooltip labels ───────────────────────────────────────
+// ─── Provider indicator ───────────────────────────────────────────────────────
 
 const PROVIDER_LABELS: Record<Provider, string> = {
   gemini: 'Gemini',
@@ -36,20 +40,15 @@ function SettingsLink({
   const apiKeys = useBoundStore((s) => s.apiKeys)
   const hasByok = Boolean(apiKeys[provider])
 
-  const tooltipLabel = hasByok
-    ? `Using ${PROVIDER_LABELS[provider]} key`
-    : 'Using free tier'
-
   return (
     <Link
       href="/settings"
       className={className}
-      title={tooltipLabel}
+      title={hasByok ? `Using ${PROVIDER_LABELS[provider]} key` : 'Using free tier'}
       onClick={onClick}
     >
       <span className="relative flex items-center">
         <SettingsIcon className={showLabel ? 'h-4 w-4' : 'h-3.5 w-3.5'} />
-        {/* Provider indicator dot */}
         <span
           className={[
             'absolute -top-0.5 -right-1 h-1.5 w-1.5 rounded-full',
@@ -62,12 +61,124 @@ function SettingsLink({
   )
 }
 
+// ─── UserMenu — avatar + dropdown ────────────────────────────────────────────
+
+function UserMenu() {
+  const user = useBoundStore((s) => s.user)
+  const openAuthModal = useBoundStore((s) => s.openAuthModal)
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!dropdownOpen) return
+    function handleClick(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [dropdownOpen])
+
+  if (!user) {
+    return (
+      <button
+        type="button"
+        onClick={openAuthModal}
+        className="px-3 py-1.5 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors rounded-md hover:bg-surface-container-high"
+      >
+        Sign In
+      </button>
+    )
+  }
+
+  const initials = getUserInitials(user)
+  const avatarUrl = getUserAvatarUrl(user)
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={() => setDropdownOpen((v) => !v)}
+        className="h-8 w-8 rounded-full overflow-hidden border-2 border-primary/30 hover:border-primary/60 transition-colors flex items-center justify-center bg-primary/10 text-primary text-xs font-bold focus:outline-none"
+        aria-label="Account menu"
+        aria-expanded={dropdownOpen}
+      >
+        {avatarUrl ? (
+          <Image
+            src={avatarUrl}
+            alt={initials}
+            width={32}
+            height={32}
+            className="object-cover"
+          />
+        ) : (
+          <span>{initials}</span>
+        )}
+      </button>
+
+      <AnimatePresence>
+        {dropdownOpen && (
+          <motion.div
+            className="absolute right-0 top-full mt-2 w-52 rounded-md border border-outline-variant/30 bg-surface-container-low/95 backdrop-blur-md shadow-xl z-50 overflow-hidden"
+            initial={{ opacity: 0, scale: 0.95, y: -4 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -4 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+          >
+            {/* User info */}
+            <div className="px-4 py-3 border-b border-outline-variant/20">
+              <p className="text-sm font-semibold text-on-surface truncate">
+                {(user.user_metadata?.full_name as string) ?? user.email ?? 'User'}
+              </p>
+              <p className="text-xs text-on-surface-variant truncate mt-0.5">
+                {user.email}
+              </p>
+            </div>
+
+            {/* Menu items */}
+            <div className="p-1">
+              <Link
+                href="/profile"
+                onClick={() => setDropdownOpen(false)}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors"
+              >
+                <User className="h-4 w-4" />
+                Profile
+              </Link>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  setDropdownOpen(false)
+                  await signOut()
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-error hover:bg-error/10 transition-colors"
+              >
+                <LogOut className="h-4 w-4" />
+                Sign Out
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+// ─── Navbar ───────────────────────────────────────────────────────────────────
+
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const activeScene = useBoundStore((s) => s.activeScene)
   const isExpanded = useBoundStore((s) => s.isExpanded)
   const toggleExpanded = useBoundStore((s) => s.toggleExpanded)
+  const pathname = usePathname()
+
+  // Extract slug from /s/[slug] paths for bookmark button
+  const currentSlug = pathname?.startsWith('/s/') ? pathname.slice(3) : null
 
   const handleShare = useCallback(async () => {
     try {
@@ -75,14 +186,7 @@ export function Navbar() {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
-      const ta = document.createElement('textarea')
-      ta.value = window.location.href
-      document.body.appendChild(ta)
-      ta.select()
-      document.execCommand('copy')
-      document.body.removeChild(ta)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      // Clipboard API unavailable — silently ignore
     }
   }, [])
 
@@ -95,7 +199,7 @@ export function Navbar() {
     >
       <nav className="mx-auto flex h-14 max-w-screen-2xl items-center justify-between px-4 sm:px-6 gap-3">
 
-        {/* Logo — always present */}
+        {/* Logo */}
         <Link
           href="/"
           className="font-headline font-bold text-xl text-on-surface hover:opacity-90 transition-opacity shrink-0"
@@ -105,7 +209,6 @@ export function Navbar() {
 
         {isScenePage ? (
           <>
-            {/* Explore link — kept visible on scene pages */}
             <Link
               href="/explore"
               className="hidden md:block px-3 py-1.5 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors rounded-md hover:bg-surface-container-high shrink-0"
@@ -113,7 +216,6 @@ export function Navbar() {
               Explore
             </Link>
 
-            {/* Center: scene title + category */}
             <div className="flex items-center gap-2 min-w-0 flex-1 justify-center">
               <span className="text-sm font-semibold text-on-surface font-headline truncate max-w-[200px] sm:max-w-xs md:max-w-md">
                 {activeScene.title}
@@ -125,7 +227,6 @@ export function Navbar() {
               )}
             </div>
 
-            {/* Right: Share + Expand + Settings */}
             <div className="flex items-center gap-1 shrink-0">
               <motion.button
                 type="button"
@@ -161,12 +262,23 @@ export function Navbar() {
                 <span className="hidden md:inline">{isExpanded ? 'Collapse' : 'Expand'}</span>
               </motion.button>
 
+              {/* Bookmark */}
+              {currentSlug && (
+                <div className="hidden sm:flex">
+                  <BookmarkButton slug={currentSlug} />
+                </div>
+              )}
+
               <SettingsLink className="hidden sm:flex items-center px-2.5 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-150" />
+
+              {/* Auth UI on scene page */}
+              <div className="hidden sm:flex ml-1">
+                <UserMenu />
+              </div>
             </div>
           </>
         ) : (
           <>
-            {/* Normal nav links (non-scene pages) */}
             <div className="hidden md:flex items-center gap-1">
               {NAV_LINKS.map((link) => (
                 <Link
@@ -190,6 +302,10 @@ export function Navbar() {
                 showLabel
                 className="ml-2 flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors rounded-md hover:bg-surface-container-high"
               />
+              {/* Auth UI */}
+              <div className="ml-2">
+                <UserMenu />
+              </div>
             </div>
 
             {/* Mobile hamburger */}
@@ -230,6 +346,9 @@ export function Navbar() {
                       onClick={() => setMobileOpen(false)}
                       className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-on-surface-variant hover:text-on-surface rounded-md hover:bg-surface-container-high transition-colors"
                     />
+                    <div className="mt-2 px-3">
+                      <UserMenu />
+                    </div>
                   </nav>
                 </SheetContent>
               </Sheet>

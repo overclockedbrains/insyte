@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
+import { createHash } from 'crypto'
 import type { Scene } from '@insyte/scene-engine'
 
 // ─── Database schema types ────────────────────────────────────────────────────
-// These mirror the Supabase tables defined in DECISIONS.md.
 
 export interface Database {
   public: {
@@ -99,25 +99,168 @@ export interface Database {
         }
         Relationships: []
       }
+      query_hashes: {
+        Row: {
+          hash: string
+          normalized_query: string
+          scene_slug: string | null
+          created_at: string
+        }
+        Insert: {
+          hash: string
+          normalized_query: string
+          scene_slug?: string | null
+          created_at?: string
+        }
+        Update: {
+          hash?: string
+          normalized_query?: string
+          scene_slug?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      saved_scenes: {
+        Row: {
+          id: string
+          user_id: string
+          scene_slug: string
+          saved_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          scene_slug: string
+          saved_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          scene_slug?: string
+          saved_at?: string
+        }
+        Relationships: []
+      }
+      user_generated_scenes: {
+        Row: {
+          id: string
+          user_id: string
+          scene_slug: string | null
+          query: string | null
+          generated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          scene_slug?: string | null
+          query?: string | null
+          generated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          scene_slug?: string | null
+          query?: string | null
+          generated_at?: string
+        }
+        Relationships: []
+      }
     }
   }
 }
 
-// ─── Client ───────────────────────────────────────────────────────────────────
+// ─── Server client (service role — write operations) ──────────────────────────
 
-function buildClient() {
+function buildServerClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!url || !key) return null
   return createClient<Database>(url, key, { auth: { persistSession: false } })
 }
 
-let _client: ReturnType<typeof buildClient> | undefined = undefined
+let _serverClient: ReturnType<typeof buildServerClient> | undefined = undefined
 
 export function getServerSupabase() {
-  if (_client !== undefined) return _client
-  _client = buildClient()
-  return _client
+  if (_serverClient !== undefined) return _serverClient
+  _serverClient = buildServerClient()
+  return _serverClient
+}
+
+// ─── Browser client (anon key — auth + read) ─────────────────────────────────
+// Exported as a singleton for client components.
+
+let _browserClient: ReturnType<typeof createClient<Database>> | undefined = undefined
+
+export function getBrowserSupabase() {
+  if (_browserClient) return _browserClient
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !key) return null
+  _browserClient = createClient<Database>(url, key)
+  return _browserClient
+}
+
+// ─── IP privacy ───────────────────────────────────────────────────────────────
+// Never store raw IPs. Always hash before persisting.
+
+export function hashIp(ip: string): string {
+  return createHash('sha256').update(ip).digest('hex')
+}
+
+// ─── Query normalization + deduplication ─────────────────────────────────────
+
+export function normalizeQuery(query: string): string {
+  return query
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, ' ')
+    .replace(/[?.!,;:]+$/, '')
+}
+
+export function hashQuery(normalized: string): string {
+  return createHash('sha256').update(normalized).digest('hex')
+}
+
+/**
+ * Checks if a query was already generated before.
+ * Returns the existing scene slug if found, null otherwise.
+ */
+export async function getCachedSlugForQuery(query: string): Promise<string | null> {
+  const supabase = getServerSupabase()
+  if (!supabase) return null
+
+  try {
+    const normalized = normalizeQuery(query)
+    const hash = hashQuery(normalized)
+
+    const { data, error } = await supabase
+      .from('query_hashes')
+      .select('scene_slug')
+      .eq('hash', hash)
+      .maybeSingle()
+
+    if (error || !data?.scene_slug) return null
+    return data.scene_slug
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Persists a query → slug mapping for future deduplication.
+ * Fire-and-forget — does not throw.
+ */
+export function saveQueryHash(query: string, slug: string): void {
+  const supabase = getServerSupabase()
+  if (!supabase) return
+
+  const normalized = normalizeQuery(query)
+  const hash = hashQuery(normalized)
+
+  void supabase
+    .from('query_hashes')
+    .upsert({ hash, normalized_query: normalized, scene_slug: slug })
+    .then(() => {})
 }
 
 // ─── Scene caching ────────────────────────────────────────────────────────────
@@ -133,19 +276,11 @@ export async function getCachedScene(slug: string): Promise<Scene | null> {
   try {
     const { data, error } = await supabase
       .from('scenes')
-      .select('scene_json, hit_count')
+      .select('scene_json')
       .eq('slug', slug)
-      .single()
+      .maybeSingle()
 
     if (error || !data) return null
-
-    // Increment hit count async (fire-and-forget)
-    void supabase
-      .from('scenes')
-      .update({ hit_count: data.hit_count + 1 })
-      .eq('slug', slug)
-      .then(() => {})
-
     return data.scene_json as Scene
   } catch {
     return null
@@ -176,27 +311,90 @@ export async function saveScene(slug: string, scene: Scene): Promise<void> {
   }
 }
 
+/**
+ * Increments the hit counter for a scene slug.
+ * Fire-and-forget — does not await.
+ */
+export function incrementHitCount(slug: string): void {
+  const supabase = getServerSupabase()
+  if (!supabase) return
+
+  // Fetch current count then increment (atomic RPC not required here)
+  void supabase
+    .from('scenes')
+    .select('hit_count')
+    .eq('slug', slug)
+    .maybeSingle()
+    .then(({ data }) => {
+      if (!data) return
+      void supabase
+        .from('scenes')
+        .update({ hit_count: data.hit_count + 1 })
+        .eq('slug', slug)
+        .then(() => {})
+    })
+}
+
+// ─── User history ─────────────────────────────────────────────────────────────
+
+/**
+ * Records a user-generated scene in user_generated_scenes.
+ * Fire-and-forget — service role can write regardless of RLS.
+ */
+export function recordUserGeneration(userId: string, query: string, slug: string): void {
+  const supabase = getServerSupabase()
+  if (!supabase) return
+
+  void supabase
+    .from('user_generated_scenes')
+    .insert({ user_id: userId, scene_slug: slug, query })
+    .then(() => {})
+}
+
+// ─── Saved scenes (bookmarks) ─────────────────────────────────────────────────
+
+export async function getSavedSlugs(userId: string): Promise<string[]> {
+  const supabase = getServerSupabase()
+  if (!supabase) return []
+
+  try {
+    const { data } = await supabase
+      .from('saved_scenes')
+      .select('scene_slug')
+      .eq('user_id', userId)
+      .order('saved_at', { ascending: false })
+
+    return (data ?? []).map((r) => r.scene_slug)
+  } catch {
+    return []
+  }
+}
+
+export async function isSceneSaved(userId: string, slug: string): Promise<boolean> {
+  const supabase = getServerSupabase()
+  if (!supabase) return false
+
+  try {
+    const { data } = await supabase
+      .from('saved_scenes')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('scene_slug', slug)
+      .maybeSingle()  // null when not saved, no 406
+    return !!data
+  } catch {
+    return false
+  }
+}
+
 // ─── Rate limiting ────────────────────────────────────────────────────────────
 
 export const RATE_LIMIT_MAX = 15
 const RATE_LIMIT_WINDOW_SECS = 3600 // 1 hour
 
 /**
- * Checks and increments the rate-limit counter for an IP.
- * Returns true if the request is allowed, false if rate-limited.
- * Falls back to allowed=true when Supabase is not configured.
- *
- * Required table:
- *   CREATE TABLE rate_limits (
- *     ip TEXT,
- *     window_start TIMESTAMPTZ,
- *     count INTEGER DEFAULT 0,
- *     PRIMARY KEY (ip, window_start)
- *   );
- */
-/**
- * Read-only rate-limit check for a given IP.
- * Returns `{ remaining, resetAt }` without incrementing the counter.
+ * Read-only rate-limit status for a given IP.
+ * Does NOT increment the counter.
  */
 export async function getRateLimitStatus(
   ip: string,
@@ -208,15 +406,16 @@ export async function getRateLimitStatus(
   const supabase = getServerSupabase()
   if (!supabase) return { remaining: RATE_LIMIT_MAX, resetAt }
 
+  const ipHash = hashIp(ip)
   const windowStart = new Date(windowStartMs).toISOString()
 
   try {
     const { data } = await supabase
       .from('rate_limits')
       .select('count')
-      .eq('ip', ip)
+      .eq('ip', ipHash)
       .eq('window_start', windowStart)
-      .single()
+      .maybeSingle()
 
     const used = data?.count ?? 0
     return { remaining: Math.max(0, RATE_LIMIT_MAX - used), resetAt }
@@ -229,6 +428,7 @@ export async function checkAndIncrementRateLimit(ip: string): Promise<boolean> {
   const supabase = getServerSupabase()
   if (!supabase) return true
 
+  const ipHash = hashIp(ip)
   const windowStart = new Date(
     Math.floor(Date.now() / (RATE_LIMIT_WINDOW_SECS * 1000)) *
       RATE_LIMIT_WINDOW_SECS *
@@ -239,16 +439,16 @@ export async function checkAndIncrementRateLimit(ip: string): Promise<boolean> {
     const { data } = await supabase
       .from('rate_limits')
       .select('count')
-      .eq('ip', ip)
+      .eq('ip', ipHash)
       .eq('window_start', windowStart)
-      .single()
+      .maybeSingle()
 
     const currentCount = data?.count ?? 0
 
     if (currentCount >= RATE_LIMIT_MAX) return false
 
     await supabase.from('rate_limits').upsert({
-      ip,
+      ip: ipHash,
       window_start: windowStart,
       count: currentCount + 1,
     })

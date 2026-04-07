@@ -17,7 +17,7 @@ interface ScenePageClientProps {
   scene: Scene | null
   /** Original topic text — used as the AI generation prompt (streaming mode only) */
   topic?: string
-  /** The URL slug — passed through for context (streaming mode only) */
+  /** The URL slug — passed through for bookmark + context */
   slug?: string
 }
 

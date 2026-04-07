@@ -10,6 +10,7 @@ import { createPlaybackSlice, type PlaybackSlice } from './slices/playback-slice
 import { createSettingsSlice, type SettingsSlice } from './slices/settings-slice'
 import { createChatSlice, type ChatSlice } from './slices/chat-slice'
 import { createDetectionSlice, type DetectionSlice } from './slices/detection-slice'
+import { createAuthSlice, type AuthSlice } from './slices/auth-slice'
 
 // ─── Combined store type ──────────────────────────────────────────────────────
 
@@ -17,16 +18,10 @@ export type BoundStore = SceneSlice &
   PlaybackSlice &
   SettingsSlice &
   ChatSlice &
-  DetectionSlice
+  DetectionSlice &
+  AuthSlice
 
 // ─── Single bound store ───────────────────────────────────────────────────────
-//
-// One useBoundStore is the single source of truth for all app state.
-// - immer middleware: clean immutable updates in slice creators
-// - persist middleware: only settings fields written to localStorage
-//
-// Cross-slice actions (e.g. chat patch that also pauses playback) must be written
-// in the initiating slice and issue a single set() call spanning multiple slices.
 
 export const useBoundStore = create<BoundStore>()(
   immer(
@@ -37,10 +32,11 @@ export const useBoundStore = create<BoundStore>()(
         ...createSettingsSlice(...a),
         ...createChatSlice(...a),
         ...createDetectionSlice(...a),
+        ...createAuthSlice(...a),
       }),
       {
         name: 'insyte-settings',
-        // Only persist the settings slice fields — session state is ephemeral
+        // Only persist the settings slice fields — auth + session state is ephemeral
         partialize: (state) => ({
           provider: state.provider,
           model: state.model,
