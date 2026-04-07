@@ -115,4 +115,42 @@ This is especially valuable for: git-branching, shell/OS simulations, DSA traces
 
 ---
 
+## Visual Primitives (Deferred from R1)
+
+### Complex Call-Stack Frame
+**Origin:** FUTURE_IMPROVEMENTS.md
+
+Support a complex `call-stack-frame` with local variables. While `StackViz` covers basic JS Event Loop simulation adequately for R1, more advanced scenarios may require detailed stack frame representations.
+
+### Timeline / Sequence Diagram
+**Origin:** FUTURE_IMPROVEMENTS.md
+
+A `timeline` or `sequence-diagram` visualizer with swimlanes. This would be a natural R2 addition for simulating TCP handshakes, HTTP/2 multiplexing, and other similar temporal connection flows.
+
+### String / Text-Stream Visualizer
+**Origin:** FUTURE_IMPROVEMENTS.md
+
+A `string` or `text-stream` visualizer with support for highlight ranges. This is an optimal choice for regex engine traces, tokenizers, or parser visualizations.
+
+---
+
+## Missing Implementation Carryovers (From R1)
+
+### Server-Side API Key Logging Prevention
+**Origin:** FUTURE_IMPROVEMENTS.md (Phase 7 Carryover)
+
+The implementation of `generateSceneBrowserDirect.ts` to ensure that BYOK (Bring Your Own Key) credentials never touch the server during generation is missing and needs to be completed.
+
+### Web Worker Deep Copy OOM Prevention
+**Origin:** FUTURE_IMPROVEMENTS.md (Phase 9 Carryover)
+
+Main thread OOM (Out of Memory) protection for Web Worker traces requires adding a `truncated: boolean` flag to `TraceData` along with a 1000-step guard limit in the execution sandbox. 
+
+### Pyodide Initialization WASM Caching
+**Origin:** FUTURE_IMPROVEMENTS.md (Phase 9 Carryover)
+
+Improve WASM initialization times by caching Pyodide via a `CacheFirst` strategy using `@serwist/next`, which is currently uninstalled.
+
+---
+
 *Added: April 5, 2026. Source: Phase 5 manual regression (MANUAL_REGRESSION_BUGS.md).*
