@@ -200,14 +200,19 @@ export function UnifiedInput({ fillRef }: UnifiedInputProps) {
   return (
     <>
       <div className="flex flex-col gap-3 w-full">
-        <motion.div
-          animate={{
-            boxShadow: isFocused
-              ? '0 0 0 1px rgba(58,223,250,0.3), 0 0 20px rgba(183,159,255,0.12)'
-              : '0 0 0 1px rgba(72,71,77,0.5)',
-          }}
-          transition={{ duration: 0.2 }}
-          className="relative rounded-2xl overflow-hidden"
+        <div
+          className={[
+            'relative rounded-2xl overflow-hidden bg-surface-container-low border transition-all duration-200',
+            isFocused ? 'border-secondary/38' : 'border-outline-variant/45 shadow-none',
+          ].join(' ')}
+          style={
+            isFocused
+              ? {
+                  boxShadow:
+                    '0 0 0 1px rgba(58,223,250,0.24), 0 0 14px rgba(58,223,250,0.12), 0 0 22px rgba(183,159,255,0.1)',
+                }
+              : undefined
+          }
         >
           <textarea
             ref={textareaRef}
@@ -217,12 +222,12 @@ export function UnifiedInput({ fillRef }: UnifiedInputProps) {
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             placeholder="How does a hash table work? Or paste your LeetCode solution..."
-            rows={isMobile ? 3 : isFocused ? 4 : 2}
-            className="w-full bg-surface-container-low border border-outline-variant/40 rounded-2xl px-5 py-4 font-body text-sm text-on-surface placeholder:text-on-surface-variant/60 resize-none outline-none leading-relaxed"
-            style={{ minHeight: isMobile ? '4.5rem' : isFocused ? '6rem' : '3.25rem' }}
+            rows={isMobile ? 3 : 2}
+            className="landing-no-focus-ring w-full bg-transparent border-0 rounded-2xl px-5 py-4 font-body text-sm text-on-surface placeholder:text-on-surface-variant/60 resize-none outline-none leading-relaxed shadow-none focus:ring-0 focus:ring-offset-0 focus:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:shadow-none"
+            style={{ minHeight: isMobile ? '4.5rem' : '3.25rem' }}
             aria-label="Describe what you want to visualize"
           />
-        </motion.div>
+        </div>
 
         <div className="flex items-center justify-between gap-3 min-h-[2.25rem]">
           <AnimatePresence mode="wait">

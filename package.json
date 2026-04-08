@@ -10,6 +10,7 @@
     "lint": "turbo lint",
     "type-check": "turbo type-check",
     "validate-scenes": "pnpm --filter web validate-scenes",
+    "img:webp": "node scripts/image-to-webp.mjs",
     "clean": "turbo clean && pnpm -r exec rimraf .next dist .turbo tsconfig.tsbuildinfo",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "setup-symlinks": "bash scripts/setup-symlinks.sh"

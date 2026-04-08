@@ -1,7 +1,4 @@
-'use client'
-
 import Link from 'next/link'
-import { motion } from 'framer-motion'
 import type { TopicEntry } from '@/src/content/topic-index'
 import { TopicCard } from './TopicCard'
 
@@ -9,26 +6,35 @@ interface TopicRowProps {
   title: string
   topics: TopicEntry[]
   seeAllHref?: string
+  seeAllLabel?: string
+  layout?: 'carousel' | 'grid'
 }
 
 function RowCards({ topics }: { topics: TopicEntry[] }) {
   return (
     <>
       {topics.map((topic, index) => (
-        <motion.div
+        <div
           key={topic.slug}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.04, duration: 0.2 }}
+          className="shrink-0 insyte-card-enter"
+          style={{
+            animationDelay: `${Math.min(index * 24, 180)}ms`,
+          }}
         >
           <TopicCard topic={topic} />
-        </motion.div>
+        </div>
       ))}
     </>
   )
 }
 
-export function TopicRow({ title, topics, seeAllHref }: TopicRowProps) {
+export function TopicRow({
+  title,
+  topics,
+  seeAllHref,
+  seeAllLabel = 'See all ->',
+  layout = 'carousel',
+}: TopicRowProps) {
   if (topics.length === 0) return null
 
   return (
@@ -40,28 +46,40 @@ export function TopicRow({ title, topics, seeAllHref }: TopicRowProps) {
             href={seeAllHref}
             className="text-sm text-on-surface-variant hover:text-primary transition-colors duration-150"
           >
-            See all {'->'}
+            {seeAllLabel}
           </Link>
         )}
       </div>
 
-      <div
-        className="flex md:hidden gap-4 overflow-x-auto pb-2"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
-        <RowCards topics={topics} />
-      </div>
+      {layout === 'grid' ? (
+        <div className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(220px,1fr))] [&>div]:min-w-0 [&>div>a]:w-full [&>div>a]:min-w-0 [&>div>a]:lg:w-full [&>div>a]:lg:min-w-0">
+          <RowCards topics={topics} />
+        </div>
+      ) : (
+        <>
+          <div
+            className="flex md:hidden overflow-x-auto px-2 py-4"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            <div className="flex gap-4 px-1">
+              <RowCards topics={topics} />
+            </div>
+          </div>
 
-      <div className="hidden md:grid lg:hidden grid-cols-2 gap-4">
-        <RowCards topics={topics} />
-      </div>
+          <div className="hidden md:grid lg:hidden grid-cols-2 gap-4">
+            <RowCards topics={topics} />
+          </div>
 
-      <div
-        className="hidden lg:flex gap-4 overflow-x-auto pb-2"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
-        <RowCards topics={topics} />
-      </div>
+          <div
+            className="hidden lg:flex overflow-x-auto px-2 py-4"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            <div className="flex gap-4 px-1">
+              <RowCards topics={topics} />
+            </div>
+          </div>
+        </>
+      )}
     </section>
   )
 }

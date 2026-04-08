@@ -228,6 +228,18 @@ body {
   box-shadow: 0 0 0 2px rgba(183, 159, 255, 0.95), 0 0 0 4px rgba(183, 159, 255, 0.25);
 }
 
+input.searchbar-input-no-ring:focus,
+input.searchbar-input-no-ring:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+textarea.landing-no-focus-ring:focus,
+textarea.landing-no-focus-ring:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 /* ─── Selection Color ───────────────────────────────────────────────────────── */
 
 ::selection {
@@ -312,4 +324,19 @@ body {
     transparent 1px
   );
   background-size: 24px 24px;
+}
+
+@keyframes insyte-card-enter {
+  from {
+    opacity: 0.55;
+    transform: translateY(14px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.insyte-card-enter {
+  animation: insyte-card-enter 280ms ease-out both;
 }

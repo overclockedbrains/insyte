@@ -1,6 +1,15 @@
 import Link from 'next/link'
 import { getFeaturedTopics } from '@/src/content/topic-index'
-import { TopicCard } from '@/components/explore/TopicCard'
+import { FeaturedSimulationCard } from '@/components/landing/FeaturedSimulationCard'
+
+const FEATURED_SIM_IMAGE_BY_SLUG: Record<string, string> = {
+  'hash-tables': '/images/simulations/hash-tables.webp',
+  'js-event-loop': '/images/simulations/js-event-loop.webp',
+  'dns-resolution': '/images/simulations/dns-resolution.webp',
+  'twitter-feed': '/images/simulations/twitter-feed.webp',
+}
+
+const FEATURED_SIM_FALLBACK_IMAGE = '/images/simulations/fallback.webp'
 
 // ─── FeaturedSimulations ──────────────────────────────────────────────────────
 // Server Component — uses static topic-index, no data fetching.
@@ -24,10 +33,14 @@ export function FeaturedSimulations() {
         </Link>
       </div>
 
-      {/* 2×2 grid — wraps to 1-col on mobile, 2-col on sm+ */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      {/* Full-width featured grid; local card-width overrides prevent /explore regression */}
+      <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {featured.map((topic) => (
-          <TopicCard key={topic.slug} topic={topic} />
+          <FeaturedSimulationCard
+            key={topic.slug}
+            topic={topic}
+            imageSrc={FEATURED_SIM_IMAGE_BY_SLUG[topic.slug] ?? FEATURED_SIM_FALLBACK_IMAGE}
+          />
         ))}
       </div>
     </section>

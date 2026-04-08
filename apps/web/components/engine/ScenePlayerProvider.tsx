@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { Scene } from '@insyte/scene-engine'
 import {
   createPlayerStore,
@@ -22,6 +22,8 @@ interface ScenePlayerProviderProps {
 }
 
 export function ScenePlayerProvider({ scene, children }: ScenePlayerProviderProps) {
+  const hasMountedRef = useRef(false)
+
   // Create store AND seed scene synchronously — one store per mount, never shared.
   const [store] = useState<PlayerStoreApi>(() => {
     const s = createPlayerStore()
@@ -34,6 +36,11 @@ export function ScenePlayerProvider({ scene, children }: ScenePlayerProviderProp
 
   // Re-seed if the scene prop changes (e.g. parent swaps simulation)
   useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true
+      return
+    }
+
     store.getState().setScene(scene)
     store.getState().setTotalSteps(scene.steps.length)
     store.getState().reset()

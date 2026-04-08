@@ -1,7 +1,4 @@
-'use client'
-
 import Link from 'next/link'
-import { motion } from 'framer-motion'
 import type { TopicEntry } from '@/src/content/topic-index'
 
 // ─── Type icon map ────────────────────────────────────────────────────────────
@@ -42,13 +39,9 @@ export function TopicCard({ topic }: TopicCardProps) {
   return (
     <Link
       href={`/s/${topic.slug}`}
-      className="block shrink-0 w-[min(240px,70vw)] min-w-[160px] md:w-full md:min-w-0 lg:w-[240px] lg:min-w-[240px] focus:outline-none"
+      className="block h-full shrink-0 w-[min(240px,70vw)] min-w-[160px] md:w-full md:min-w-0 lg:w-[240px] lg:min-w-[240px] focus:outline-none"
     >
-      <motion.article
-        className="rounded-2xl overflow-hidden border border-outline-variant/20 bg-surface-container-low hover:border-primary/30 transition-colors duration-200 cursor-pointer group"
-        whileHover={{ scale: 1.02, boxShadow: '0 0 20px rgba(183,159,255,0.15)' }}
-        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-      >
+      <article className="h-full rounded-2xl overflow-hidden border border-outline-variant/20 bg-surface-container-low hover:border-primary/35 hover:scale-[1.02] hover:shadow-[0_0_12px_rgba(183,159,255,0.09)] transition-[transform,box-shadow,border-color] duration-200 cursor-pointer group flex flex-col transform-gpu">
         {/* Thumbnail — 16:9 placeholder */}
         <div className="relative w-full aspect-video bg-surface-container-high overflow-hidden">
           {/* Subtle dot grid */}
@@ -72,29 +65,7 @@ export function TopicCard({ topic }: TopicCardProps) {
           </div>
 
           {/* Play button — appears on hover */}
-          <motion.div
-            className="absolute top-2 right-2 h-7 w-7 rounded-full bg-surface-container-highest/90 border border-outline-variant/30 flex items-center justify-center"
-            initial={{ opacity: 0 }}
-            whileHover={{ opacity: 1 }}
-            animate={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-          >
-            <svg
-              width="10"
-              height="10"
-              viewBox="0 0 10 10"
-              fill="currentColor"
-              className="text-on-surface ml-0.5"
-            >
-              <polygon points="2,1 9,5 2,9" />
-            </svg>
-          </motion.div>
-
-          {/* Hover overlay — play button */}
-          <motion.div
-            className="absolute top-2 right-2 h-7 w-7 rounded-full bg-surface-container-highest/90 border border-primary/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-            aria-hidden="true"
-          >
+          <div className="absolute top-2 right-2 h-7 w-7 rounded-full bg-surface-container-highest/90 border border-primary/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <svg
               width="10"
               height="10"
@@ -104,16 +75,18 @@ export function TopicCard({ topic }: TopicCardProps) {
             >
               <polygon points="2,1 9,5 2,9" />
             </svg>
-          </motion.div>
+          </div>
+
+          {/* Hover overlay — play button */}
         </div>
 
         {/* Card body */}
-        <div className="p-3 flex flex-col gap-1.5">
-          <p className="text-sm font-semibold text-on-surface leading-snug line-clamp-2 font-headline">
+        <div className="p-3 flex flex-col gap-1.5 flex-1">
+          <p className="text-sm font-semibold text-on-surface leading-snug line-clamp-2 font-headline min-h-[3rem]">
             {topic.title}
           </p>
 
-          <div className="flex items-center gap-1.5 flex-wrap">
+          <div className="mt-auto flex items-center gap-1.5 flex-wrap">
             {/* Category badge */}
             <span
               className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${categoryColor}`}
@@ -127,7 +100,7 @@ export function TopicCard({ topic }: TopicCardProps) {
             </span>
           </div>
         </div>
-      </motion.article>
+      </article>
     </Link>
   )
 }

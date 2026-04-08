@@ -99,9 +99,9 @@ export function SearchBar() {
       {/* Input */}
       <div
         className={[
-          'flex items-center gap-3 bg-surface-container-low border rounded-2xl px-4 py-3 transition-all duration-200',
+          'flex items-center gap-3 bg-surface-container-low border rounded-2xl px-4 py-3 transition-all duration-200 focus-within:border-secondary/30 focus-within:ring-1 focus-within:ring-secondary/50',
           isOpen
-            ? 'border-secondary/30 ring-1 ring-secondary/50'
+            ? 'border-secondary/30'
             : 'border-outline-variant hover:border-outline',
         ].join(' ')}
       >
@@ -118,7 +118,7 @@ export function SearchBar() {
           aria-autocomplete="list"
           aria-controls={listboxId}
           aria-activedescendant={activeIndex >= 0 ? `result-${activeIndex}` : undefined}
-          className="flex-1 bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant outline-none font-body"
+          className="searchbar-input-no-ring flex-1 bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant outline-none font-body"
         />
         {query && (
           <button
