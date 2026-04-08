@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import type { TopicEntry } from '@/src/content/topic-index'
 
 // ─── Type icon map ────────────────────────────────────────────────────────────
@@ -25,6 +26,35 @@ const CATEGORY_COLOR: Record<string, string> = {
   'Concepts': 'text-primary bg-primary/10',
 }
 
+const EXPLORE_SIM_IMAGE_BY_SLUG: Record<string, string> = {
+  'hash-tables': '/images/explore/simulations/hash-tables.webp',
+  'js-event-loop': '/images/explore/simulations/js-event-loop.webp',
+  'load-balancer': '/images/explore/simulations/load-balancer.webp',
+  'dns-resolution': '/images/explore/simulations/dns-resolution.webp',
+  'git-branching': '/images/explore/simulations/git-branching.webp',
+  'two-sum': '/images/explore/simulations/two-sum.webp',
+  'valid-parentheses': '/images/explore/simulations/valid-parentheses.webp',
+  'binary-search': '/images/explore/simulations/binary-search.webp',
+  'reverse-linked-list': '/images/explore/simulations/reverse-linked-list.webp',
+  'climbing-stairs': '/images/explore/simulations/climbing-stairs.webp',
+  'merge-sort': '/images/explore/simulations/merge-sort.webp',
+  'level-order-bfs': '/images/explore/simulations/level-order-bfs.webp',
+  'number-of-islands': '/images/explore/simulations/number-of-islands.webp',
+  'sliding-window-max': '/images/explore/simulations/sliding-window-max.webp',
+  'fibonacci-recursive': '/images/explore/simulations/fibonacci-recursive.webp',
+  'lru-cache': '/images/explore/simulations/lru-cache.webp',
+  'rate-limiter': '/images/explore/simulations/rate-limiter.webp',
+  'min-stack': '/images/explore/simulations/min-stack.webp',
+  trie: '/images/explore/simulations/trie.webp',
+  'design-hashmap': '/images/explore/simulations/design-hashmap.webp',
+  'url-shortener': '/images/explore/simulations/url-shortener.webp',
+  'twitter-feed': '/images/explore/simulations/twitter-feed.webp',
+  'consistent-hashing': '/images/explore/simulations/consistent-hashing.webp',
+  'chat-system': '/images/explore/simulations/chat-system.webp',
+}
+
+const EXPLORE_SIM_FALLBACK_IMAGE = '/images/fallback_simulation.webp'
+
 // ─── TopicCard ────────────────────────────────────────────────────────────────
 
 interface TopicCardProps {
@@ -35,6 +65,7 @@ export function TopicCard({ topic }: TopicCardProps) {
   const categoryColor = CATEGORY_COLOR[topic.category] ?? 'text-primary bg-primary/10'
   const typeIcon = TYPE_ICON[topic.type] ?? '●'
   const typeLabel = TYPE_LABEL[topic.type] ?? topic.type
+  const imageSrc = EXPLORE_SIM_IMAGE_BY_SLUG[topic.slug] ?? EXPLORE_SIM_FALLBACK_IMAGE
 
   return (
     <Link
@@ -44,25 +75,17 @@ export function TopicCard({ topic }: TopicCardProps) {
       <article className="h-full rounded-2xl overflow-hidden border border-outline-variant/20 bg-surface-container-low hover:border-primary/35 hover:scale-[1.02] hover:shadow-[0_0_12px_rgba(183,159,255,0.09)] transition-[transform,box-shadow,border-color] duration-200 cursor-pointer group flex flex-col transform-gpu">
         {/* Thumbnail — 16:9 placeholder */}
         <div className="relative w-full aspect-video bg-surface-container-high overflow-hidden">
-          {/* Subtle dot grid */}
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage:
-                'radial-gradient(circle, rgba(183,159,255,0.15) 1px, transparent 1px)',
-              backgroundSize: '16px 16px',
-            }}
+          <Image
+            src={imageSrc}
+            alt={`${topic.title} preview`}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+            sizes="(max-width: 640px) 70vw, (max-width: 1024px) 50vw, 240px"
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-surface-container-low/40 to-transparent" />
 
           {/* Simulation type icon — centered */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-            <span
-              className="text-3xl leading-none select-none text-on-surface-variant/50 group-hover:text-primary/60 transition-colors duration-200"
-              aria-hidden="true"
-            >
-              {typeIcon}
-            </span>
-          </div>
+
 
           {/* Play button — appears on hover */}
           <div className="absolute top-2 right-2 h-7 w-7 rounded-full bg-surface-container-highest/90 border border-primary/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
