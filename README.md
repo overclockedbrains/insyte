@@ -1,4 +1,4 @@
-<p align="center">
+﻿<p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/assets/insyte-wordmark-dark.svg">
     <img src="docs/assets/insyte-wordmark-light.svg" alt="insyte" width="300">
@@ -36,6 +36,7 @@
 
 | Section | Link |
 | --- | --- |
+| Live product screens | [Product Preview](#product-preview) |
 | Local setup | [Quick Start](#quick-start) |
 | Environment variables | [Environment Setup](#environment-setup) |
 | Scripts | [Commands](#commands) |
@@ -91,6 +92,45 @@ Copy-Item apps/web/.env.example apps/web/.env.local
 | `pnpm validate-scenes` | Validate production scene JSON against schema |
 | `pnpm --filter web seed` | Seed topic index data to Supabase |
 | `pnpm --filter web seed-scenes` | Seed scene records to Supabase |
+
+## Product Preview
+
+<p align="center">
+  <sub>Live product snapshots from <a href="https://insyte.amanarya.com/">insyte.amanarya.com</a></sub>
+</p>
+
+<p align="center">
+  <a href="docs/assets/screenshots/home.png">
+    <img src="docs/assets/screenshots/home.png" alt="insyte homepage" width="92%">
+  </a>
+</p>
+
+<p align="center">
+  <sub><strong>Homepage</strong> | Prompt-first landing and live demo entry</sub>
+</p>
+
+<table align="center" width="92%" cellpadding="8" cellspacing="0">
+  <tr>
+    <td align="center" valign="top" width="33%">
+      <a href="docs/assets/screenshots/simulation-chat-system.png">
+        <img src="docs/assets/screenshots/simulation-chat-system.png" alt="insyte simulation player" width="100%">
+      </a>
+      <p><strong>Simulation Player</strong><br/><sub>Interactive playback and controls</sub></p>
+    </td>
+    <td align="center" valign="top" width="33%">
+      <a href="docs/assets/screenshots/explore.png">
+        <img src="docs/assets/screenshots/explore.png" alt="insyte explore catalog" width="100%">
+      </a>
+      <p><strong>Explore</strong><br/><sub>Curated simulation catalog</sub></p>
+    </td>
+    <td align="center" valign="top" width="33%">
+      <a href="docs/assets/screenshots/settings.png">
+        <img src="docs/assets/screenshots/settings.png" alt="insyte settings and BYOK" width="100%">
+      </a>
+      <p><strong>Settings</strong><br/><sub>Provider and BYOK controls</sub></p>
+    </td>
+  </tr>
+</table>
 
 ## Architecture
 
