@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="84" viewBox="0 0 360 84" role="img" aria-label="insyte">
+  <defs>
+    <linearGradient id="insyteGradDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b79fff"/>
+      <stop offset="100%" stop-color="#3adffa"/>
+    </linearGradient>
+  </defs>
+  <rect width="360" height="84" fill="none"/>
+  <text x="50%" y="60" text-anchor="middle" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="56" font-weight="800">
+    <tspan fill="url(#insyteGradDark)">i</tspan><tspan fill="#f8fafc">nsyte</tspan>
+  </text>
+</svg>
