@@ -25,7 +25,7 @@
 - [ ] Audit remaining UI copy for outdated R1 labels or duplicated navigation concepts
 
 ### 15.2 — UI polish queue
-- [ ] Landing page visual/copy inconsistencies audit
+- [x] Landing page visual/copy inconsistencies audit
 - [x] Replace the reused landing simulation with a bespoke `Prompt -> Code -> Network -> System` cinematic loop
 - [x] Rework the hero animation to use short stage captions instead of overflowing simulation commands
 - [x] Make the landing hero motion self-contained and timer-driven so it stays smooth and predictable
@@ -87,6 +87,9 @@
 - [x] Removed outer hover glow on `/explore` cards (inset highlight only) and simplified row padding so hover state no longer clips at scroll bounds
 - [x] Restored `/explore` outer card glow and fixed clipping properly by adding buffered inner row wrappers inside horizontal scrollers
 - [x] Made `/explore` row-level `See all` actions meaningful by wiring them to `?row=` filtering with a `Show all` reset state
+- [x] Standardized landing below-hero sections with a shared heading pattern (title, description, optional action) for consistent alignment
+- [x] Normalized landing section rhythm with one unified post-hero spacing stack and tighter heading-to-content gaps
+- [x] Unified below-hero card treatment (radius, border strength, hover shadow, icon container scale) to reduce visual drift
 - [ ] Add the next discovered R1 fix here before implementation starts
 
 ---

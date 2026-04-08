@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <div className="flex flex-col gap-24 px-4 sm:px-6 pb-24">
+    <div className="flex flex-col px-4 pb-24 sm:px-6">
       <section className="min-h-[calc(100vh-7rem)] flex items-center">
         <div className="mx-auto w-full max-w-screen-xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-8 lg:gap-16 items-center">
@@ -66,15 +66,9 @@ export default function Home() {
         </div>
       </section>
 
-      <div className="mx-auto w-full max-w-screen-xl">
+      <div className="mx-auto mt-16 flex w-full max-w-screen-xl flex-col gap-16 sm:mt-20 sm:gap-20 lg:gap-24">
         <HowItWorks />
-      </div>
-
-      <div className="mx-auto w-full max-w-screen-xl">
         <FeaturedSimulations />
-      </div>
-
-      <div className="mx-auto w-full max-w-screen-xl">
         <FeatureCards />
       </div>
     </div>

@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, type CSSProperties } from 'react'
 import { motion } from 'framer-motion'
+import { SectionHeader } from '@/components/landing/SectionHeader'
 
 const STEPS = [
   {
@@ -40,11 +41,11 @@ const STEPS = [
 ]
 
 // Height of the connector strip below the cards
-const STRIP_H = 64
+const STRIP_H = 54
 // Vertical center of the S-curve within the strip
-const MID_Y = STRIP_H / 2 + 8
+const MID_Y = STRIP_H / 2 + 6
 // Amplitude of the S-curve (how much it rises/dips)
-const AMP = 20
+const AMP = 14
 
 function buildPath(w: number): string {
   // Card centers at 1/6, 3/6, 5/6 of total width
@@ -78,24 +79,18 @@ export function HowItWorks() {
   }, [])
 
   return (
-    <section className="py-8 w-full">
-      <h2 className="text-4xl font-headline font-bold text-center text-on-surface mb-14">
-        How it{' '}
-        <span style={{
-          background: 'linear-gradient(135deg, #b79fff 0%, #3adffa 100%)',
-          WebkitBackgroundClip: 'text',
-          backgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-        }}>
-          works
-        </span>
-      </h2>
+    <section className="w-full">
+      <SectionHeader
+        title="How It Works"
+        description="From prompt to interactive simulation in three focused steps."
+        className="mb-8 sm:mb-10"
+      />
 
       {/* ── Desktop ── */}
       <div className="hidden md:flex flex-col">
 
         {/* Cards */}
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-3 gap-5">
           {STEPS.map(step => <StepCard key={step.number} step={step} />)}
         </div>
 
@@ -113,16 +108,16 @@ export function HowItWorks() {
                   d={pathD}
                   fill="none"
                   stroke="rgba(72,71,77,0.6)"
-                  strokeWidth="1.5"
+                  strokeWidth="1.25"
                   strokeDasharray="6 5"
                 />
                 <path
                   d={pathD}
                   fill="none"
                   stroke="#3adffa"
-                  strokeWidth="1.5"
+                  strokeWidth="1.25"
                   strokeDasharray="6 5"
-                  opacity="0.3"
+                  opacity="0.22"
                 />
               </svg>
 
@@ -135,8 +130,8 @@ export function HowItWorks() {
                   left: 0,
                   marginLeft: '-6px',
                   marginTop: '0px',
-                  filter: 'drop-shadow(0 0 6px #3adffa)',
-                } as React.CSSProperties}
+                  filter: 'drop-shadow(0 0 5px #3adffa)',
+                } as CSSProperties}
                 animate={{ offsetDistance: ['0%', '100%'] }}
                 transition={{
                   duration: 2.6,
@@ -151,7 +146,7 @@ export function HowItWorks() {
       </div>
 
       {/* ── Mobile ── */}
-      <div className="md:hidden flex flex-col gap-4">
+      <div className="md:hidden flex flex-col gap-3.5">
         {STEPS.map(step => <StepCard key={step.number} step={step} mobile />)}
       </div>
     </section>
@@ -161,12 +156,12 @@ export function HowItWorks() {
 function StepCard({ step, mobile }: { step: typeof STEPS[number]; mobile?: boolean }) {
   return (
     <div className={[
-      'flex gap-4 rounded-2xl border border-outline-variant/20 bg-surface-container-low p-6',
-      mobile ? 'flex-row items-start' : 'flex-col items-center text-center',
+      'flex gap-4 rounded-2xl border border-outline-variant/20 bg-surface-container-low p-5',
+      mobile ? 'flex-row items-start' : 'min-h-[182px] flex-col items-center text-center',
     ].join(' ')}>
       <div className={[
-        'flex items-center justify-center rounded-2xl shrink-0 border border-outline-variant/20 bg-surface-container-high',
-        mobile ? 'h-12 w-12' : 'h-14 w-14 mb-1',
+        'flex items-center justify-center rounded-xl shrink-0 border border-outline-variant/20 bg-surface-container-high',
+        mobile ? 'h-11 w-11' : 'h-12 w-12 mb-1',
       ].join(' ')}>
         <span className="text-primary">{step.icon}</span>
       </div>
