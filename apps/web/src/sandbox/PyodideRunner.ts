@@ -1,88 +1,72 @@
-import type { TraceData, TraceStep } from './types'
+import type { TraceData } from './types'
 
-interface PyodideGlobal {
-  loadPyodide: (options: { indexURL: string }) => Promise<PyodideInstance>
+interface WorkerResult {
+  steps: TraceData['steps']
+  finalResult?: unknown
+  error?: string
+  truncated?: boolean
 }
 
-interface PyodideInstance {
-  runPythonAsync: (code: string) => Promise<unknown>
-  globals: {
-    get: (key: string) => unknown
-  }
-}
+type WorkerResponse =
+  | { type: 'progress'; progress: number; message: string }
+  | { type: 'ready' }
+  | { type: 'result'; payload: WorkerResult }
+  | { type: 'error'; error: string }
 
-const PYODIDE_SCRIPT_ID = 'insyte-pyodide-runtime'
-
-function hasToJs(value: unknown): value is { toJs: (options?: unknown) => unknown } {
-  return typeof value === 'object' && value !== null && 'toJs' in value
-}
-
-function hasDestroy(value: unknown): value is { destroy: () => void } {
-  return typeof value === 'object' && value !== null && 'destroy' in value
-}
-
-function toPlainJs(value: unknown): unknown {
-  if (!hasToJs(value)) {
-    return value
-  }
-  return value.toJs({
-    dict_converter: (entries: Iterable<[string, unknown]>) => Object.fromEntries(entries),
-  })
-}
-
-async function loadPyodideScript(): Promise<void> {
-  if (typeof window === 'undefined') {
-    throw new Error('Pyodide is only available in the browser.')
-  }
-
-  const win = window as Window & Partial<PyodideGlobal>
-  if (typeof win.loadPyodide === 'function') {
-    return
-  }
-
-  const existing = document.getElementById(PYODIDE_SCRIPT_ID) as HTMLScriptElement | null
-  if (existing) {
-    await new Promise<void>((resolve, reject) => {
-      if (typeof win.loadPyodide === 'function') {
-        resolve()
-        return
-      }
-      existing.addEventListener('load', () => resolve(), { once: true })
-      existing.addEventListener('error', () => reject(new Error('Failed to load pyodide.js')), {
-        once: true,
-      })
-    })
-    return
-  }
-
-  await new Promise<void>((resolve, reject) => {
-    const script = document.createElement('script')
-    script.id = PYODIDE_SCRIPT_ID
-    script.src = '/pyodide/pyodide.js'
-    script.async = true
-    script.onload = () => resolve()
-    script.onerror = () => reject(new Error('Failed to load /pyodide/pyodide.js'))
-    document.head.appendChild(script)
-  })
-}
+const PYTHON_TIMEOUT_MS = 8000
+const SANDBOX_BUSY_MESSAGE = 'A sandbox run is already in progress. Please wait for it to finish.'
 
 export class PyodideRunner {
-  private static instance: PyodideRunner | null = null
-
-  static getInstance(): PyodideRunner {
-    if (!PyodideRunner.instance) {
-      PyodideRunner.instance = new PyodideRunner()
-    }
-    return PyodideRunner.instance
-  }
-
   public isInitialized = false
   public initializationProgress = 0
   public onProgress: ((progress: number, message: string) => void) | null = null
 
-  private pyodide: PyodideInstance | null = null
+  private worker: Worker | null = null
+  private inFlight = false
   private initializationPromise: Promise<void> | null = null
   private progressListeners = new Set<(progress: number, message: string) => void>()
+  private pendingInitialization:
+    | {
+        resolve: () => void
+        reject: (error: Error) => void
+      }
+    | null = null
+  private pendingExecution:
+    | {
+        resolve: (result: TraceData) => void
+        timeoutId: number
+      }
+    | null = null
+
+  private getWorker(): Worker {
+    if (!this.worker) {
+      this.worker = new Worker(new URL('./workers/pyodide-sandbox.worker.ts', import.meta.url), {
+        type: 'module',
+      })
+      this.worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
+        this.handleWorkerMessage(event.data)
+      }
+      this.worker.onerror = (event) => {
+        this.handleWorkerFailure(event.message || 'Python worker failed.')
+      }
+    }
+
+    return this.worker
+  }
+
+  private terminateWorker(): void {
+    if (this.worker) {
+      this.worker.terminate()
+      this.worker = null
+    }
+
+    this.inFlight = false
+    this.initializationPromise = null
+    this.pendingInitialization = null
+    this.pendingExecution = null
+    this.isInitialized = false
+    this.initializationProgress = 0
+  }
 
   subscribeProgress(listener: (progress: number, message: string) => void): () => void {
     this.progressListeners.add(listener)
@@ -101,90 +85,120 @@ export class PyodideRunner {
     }
   }
 
-  async initialize(): Promise<void> {
-    if (this.isInitialized && this.pyodide) {
+  private handleWorkerMessage(message: WorkerResponse): void {
+    if (message.type === 'progress') {
+      this.reportProgress(message.progress, message.message)
       return
     }
+
+    if (message.type === 'ready') {
+      this.isInitialized = true
+      this.pendingInitialization?.resolve()
+      this.pendingInitialization = null
+      return
+    }
+
+    if (message.type === 'result') {
+      const pendingExecution = this.pendingExecution
+      if (!pendingExecution) {
+        return
+      }
+
+      window.clearTimeout(pendingExecution.timeoutId)
+      this.pendingExecution = null
+      this.inFlight = false
+
+      const result: TraceData = {
+        steps: message.payload.steps ?? [],
+        finalResult: message.payload.finalResult,
+        error: message.payload.error,
+        truncated: message.payload.truncated,
+      }
+
+      if (result.error) {
+        this.terminateWorker()
+      }
+
+      pendingExecution.resolve(result)
+      return
+    }
+
+    this.handleWorkerFailure(message.error)
+  }
+
+  private handleWorkerFailure(message: string): void {
+    const initReject = this.pendingInitialization?.reject
+    const pendingExecution = this.pendingExecution
+
+    if (pendingExecution) {
+      window.clearTimeout(pendingExecution.timeoutId)
+    }
+
+    this.reportProgress(0, message)
+    this.terminateWorker()
+
+    initReject?.(new Error(message))
+    pendingExecution?.resolve({ steps: [], error: message })
+  }
+
+  async initialize(): Promise<void> {
+    if (this.isInitialized) {
+      return
+    }
+
     if (this.initializationPromise) {
       return this.initializationPromise
     }
 
-    this.initializationPromise = (async () => {
-      this.reportProgress(5, 'Loading Python runtime (1/4)...')
-      await loadPyodideScript()
-
-      this.reportProgress(35, 'Initializing Pyodide engine (2/4)...')
-      const win = window as unknown as Window & PyodideGlobal
-      this.pyodide = await win.loadPyodide({ indexURL: '/pyodide/' })
-
-      this.reportProgress(70, 'Downloading packages (3/4)...')
-      await this.pyodide.runPythonAsync('import math, json, random')
-
-      this.reportProgress(90, 'Preparing execution sandbox (4/4)...')
-      await this.pyodide.runPythonAsync('_trace = []\nfinalResult = None')
-
-      this.isInitialized = true
-      this.reportProgress(100, 'Python runtime ready.')
-    })()
+    this.initializationPromise = new Promise<void>((resolve, reject) => {
+      this.pendingInitialization = { resolve, reject }
+      this.getWorker().postMessage({ type: 'initialize' })
+    })
 
     try {
       await this.initializationPromise
     } catch (error) {
-      this.initializationPromise = null
-      this.isInitialized = false
-      this.pyodide = null
+      this.terminateWorker()
       throw error
     }
   }
 
-  async execute(code: string): Promise<TraceData> {
+  async execute(code: string, timeout = PYTHON_TIMEOUT_MS): Promise<TraceData> {
+    if (this.inFlight) {
+      return {
+        steps: [],
+        error: SANDBOX_BUSY_MESSAGE,
+      }
+    }
+
     try {
       await this.initialize()
-      if (!this.pyodide) {
-        throw new Error('Pyodide failed to initialize.')
-      }
-
-      await this.pyodide.runPythonAsync('_trace = []\nfinalResult = None')
-      await this.pyodide.runPythonAsync(code)
-
-      const rawTrace = this.pyodide.globals.get('_trace')
-      const rawResult = this.pyodide.globals.get('finalResult')
-
-      const steps = (toPlainJs(rawTrace) as TraceStep[] | undefined) ?? []
-      const finalResult = toPlainJs(rawResult)
-      const truncated = steps.some((step) => step?.step === 'truncated')
-
-      if (hasDestroy(rawTrace)) rawTrace.destroy()
-      if (hasDestroy(rawResult)) rawResult.destroy()
-
-      return {
-        steps,
-        finalResult,
-        truncated,
-      }
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Python execution failed.'
-
-      try {
-        if (this.pyodide) {
-          const rawTrace = this.pyodide.globals.get('_trace')
-          const steps = (toPlainJs(rawTrace) as TraceStep[] | undefined) ?? []
-          const truncated = steps.some((step) => step?.step === 'truncated')
-          if (hasDestroy(rawTrace)) rawTrace.destroy()
-          return { steps, error: message, truncated }
-        }
-      } catch {
-        // Ignore fallback extraction failures.
+      return {
+        steps: [],
+        error: error instanceof Error ? error.message : 'Python execution failed.',
       }
-
-      return { steps: [], error: message }
     }
-  }
 
-  reset(): void {
-    if (!this.pyodide) {
-      return
-    }
-    void this.pyodide.runPythonAsync('_trace = []\nfinalResult = None')
+    this.inFlight = true
+    const worker = this.getWorker()
+
+    return await new Promise<TraceData>((resolve) => {
+      const timeoutId = window.setTimeout(() => {
+        if (this.pendingExecution?.resolve !== resolve) {
+          return
+        }
+
+        this.pendingExecution = null
+        this.terminateWorker()
+        resolve({
+          steps: [],
+          error: `Python execution timed out after ${timeout}ms.`,
+        })
+      }, timeout)
+
+      this.pendingExecution = { resolve, timeoutId }
+      worker.postMessage({ type: 'execute', code })
+    })
   }
 }

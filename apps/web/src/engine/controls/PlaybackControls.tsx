@@ -1,53 +1,11 @@
 'use client'
 
-import { type ReactNode, useEffect, useState } from 'react'
+import { type ReactNode } from 'react'
 import { motion } from 'framer-motion'
+import { Pause, Play, RotateCcw, SkipBack, SkipForward } from 'lucide-react'
+import { useIsMobile } from '@/components/hooks/useMediaQuery'
 import { usePlayerStore } from '@/src/stores/player-store'
 import type { PlaybackSpeed } from '@/src/stores/slices/playback-slice'
-
-function IconReset() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-      <path d="M3 3v5h5" />
-    </svg>
-  )
-}
-
-function IconStepBack() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="19 20 9 12 19 4 19 20" />
-      <line x1="5" y1="19" x2="5" y2="5" />
-    </svg>
-  )
-}
-
-function IconPlay() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-      <polygon points="5 3 19 12 5 21 5 3" />
-    </svg>
-  )
-}
-
-function IconPause() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-      <rect x="6" y="4" width="4" height="16" />
-      <rect x="14" y="4" width="4" height="16" />
-    </svg>
-  )
-}
-
-function IconStepForward() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="5 4 15 12 5 20 5 4" />
-      <line x1="19" y1="5" x2="19" y2="19" />
-    </svg>
-  )
-}
 
 const SPEED_OPTIONS: PlaybackSpeed[] = [0.5, 1, 1.5, 2]
 
@@ -62,17 +20,7 @@ export function PlaybackControls() {
   const stepBack = usePlayerStore((s) => s.stepBack)
   const reset = usePlayerStore((s) => s.reset)
   const setSpeed = usePlayerStore((s) => s.setSpeed)
-
-  const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== 'undefined' ? window.matchMedia('(max-width: 767px)').matches : false,
-  )
-
-  useEffect(() => {
-    const media = window.matchMedia('(max-width: 767px)')
-    const onChange = (event: MediaQueryListEvent) => setIsMobile(event.matches)
-    media.addEventListener('change', onChange)
-    return () => media.removeEventListener('change', onChange)
-  }, [])
+  const isMobile = useIsMobile()
 
   const disabled = totalSteps === 0
 
@@ -87,7 +35,7 @@ export function PlaybackControls() {
       <div className="relative overflow-hidden bg-surface-container border border-outline-variant/20 rounded-2xl px-3 py-2 flex items-center justify-between gap-2">
         <div className="flex items-center gap-1">
           <PlaybackButton onClick={stepBack} disabled={disabled || currentStep === 0} title="Step back">
-            <IconStepBack />
+            <SkipBack className="h-4 w-4" />
           </PlaybackButton>
           <PlaybackButton
             onClick={isPlaying ? pause : play}
@@ -95,14 +43,14 @@ export function PlaybackControls() {
             title={isPlaying ? 'Pause' : 'Play'}
             prominent
           >
-            {isPlaying ? <IconPause /> : <IconPlay />}
+            {isPlaying ? <Pause className="h-4 w-4 fill-current" /> : <Play className="h-4 w-4 fill-current" />}
           </PlaybackButton>
           <PlaybackButton
             onClick={stepForward}
             disabled={disabled || currentStep >= totalSteps - 1}
             title="Step forward"
           >
-            <IconStepForward />
+            <SkipForward className="h-4 w-4" />
           </PlaybackButton>
         </div>
 
@@ -129,11 +77,11 @@ export function PlaybackControls() {
     <div className="relative overflow-hidden bg-surface-container border border-outline-variant/20 rounded-2xl px-4 py-2 flex items-center gap-3 flex-nowrap">
       <div className="flex items-center gap-1">
         <PlaybackButton onClick={reset} disabled={disabled} title="Reset">
-          <IconReset />
+          <RotateCcw className="h-4 w-4" />
         </PlaybackButton>
 
         <PlaybackButton onClick={stepBack} disabled={disabled || currentStep === 0} title="Step back">
-          <IconStepBack />
+          <SkipBack className="h-4 w-4" />
         </PlaybackButton>
 
         <PlaybackButton
@@ -142,7 +90,7 @@ export function PlaybackControls() {
           title={isPlaying ? 'Pause' : 'Play'}
           prominent
         >
-          {isPlaying ? <IconPause /> : <IconPlay />}
+          {isPlaying ? <Pause className="h-4 w-4 fill-current" /> : <Play className="h-4 w-4 fill-current" />}
         </PlaybackButton>
 
         <PlaybackButton
@@ -150,7 +98,7 @@ export function PlaybackControls() {
           disabled={disabled || currentStep >= totalSteps - 1}
           title="Step forward"
         >
-          <IconStepForward />
+          <SkipForward className="h-4 w-4" />
         </PlaybackButton>
       </div>
 

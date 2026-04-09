@@ -10,9 +10,6 @@ export type SceneLayout =
   | 'code-left-canvas-right'
   | 'text-left-canvas-right'
 
-/** @deprecated Use SceneLayout */
-export type LayoutType = SceneLayout
-
 export type VisualType =
   | 'array'
   | 'hashmap'

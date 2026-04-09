@@ -6,6 +6,7 @@ import { immer } from 'zustand/middleware/immer'
 import type { Scene } from '@insyte/scene-engine'
 import type { PlaybackSpeed } from './slices/playback-slice'
 import { useBoundStore } from './store'
+import { createPlaybackActions } from './shared/playbackActions'
 
 // ─── Isolated player state ────────────────────────────────────────────────────
 // Used by Phase 6 LiveDemo cards — each card gets its own player instance,
@@ -51,52 +52,8 @@ export function createPlayerStore() {
       isPlaying: false,
       speed: 1,
       totalSteps: 0,
+      ...createPlaybackActions(set),
 
-      play: () =>
-        set((state) => {
-          if (state.totalSteps > 0) state.isPlaying = true
-        }),
-
-      pause: () =>
-        set((state) => {
-          state.isPlaying = false
-        }),
-
-      stepForward: () =>
-        set((state) => {
-          if (state.currentStep < state.totalSteps - 1) {
-            state.currentStep += 1
-          } else {
-            state.isPlaying = false
-          }
-        }),
-
-      stepBack: () =>
-        set((state) => {
-          if (state.currentStep > 0) state.currentStep -= 1
-        }),
-
-      reset: () =>
-        set((state) => {
-          state.currentStep = 0
-          state.isPlaying = false
-        }),
-
-      setSpeed: (speed) =>
-        set((state) => {
-          state.speed = speed
-        }),
-
-      jumpToStep: (n) =>
-        set((state) => {
-          state.currentStep = Math.max(0, Math.min(n, state.totalSteps - 1))
-        }),
-
-      setTotalSteps: (n) =>
-        set((state) => {
-          state.totalSteps = n
-          if (state.currentStep >= n) state.currentStep = Math.max(0, n - 1)
-        }),
     })),
   )
 }

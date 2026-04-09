@@ -55,11 +55,12 @@ Ship a fully functional, publicly accessible platform where:
 | **Phase 13** | ✅ | Polish + Responsive |
 | **Phase 14** | ✅ | Complete Deploy |
 
-### Release 2 (R2) - Active Phase
+### Release 2 (R2) - Current Sequence
 
 | Phase | Status | Description |
 |-------|--------|-------------|
-| **Phase 15** | 🚧 | R1 Fixes + UI Tweaks |
+| **Phase 15** | ✅ | R1 Fixes + UI Tweaks |
+| **Phase 16** | ✅ | Core Correctness + Runtime Hardening |
 
 ### Release 2 (R2) - Backlog
 
@@ -360,6 +361,8 @@ _OG Images_
 ### Phase 15 — R1 Fixes + UI Tweaks
 **Goal:** Fix rough edges discovered after launch, tighten the R1 UI, and track every polish item in one running phase document.
 
+**Status:** Completed on April 10, 2026.
+
 **Deliverables:**
 - Navigation, page naming, and microcopy consistency pass across the product
 - Rolling backlog of R1 bugs, broken UX, and visual inconsistencies
@@ -367,6 +370,22 @@ _OG Images_
 - Verification notes for each fix cluster so the phase doc stays current while work lands
 
 **Plan:** [→ phases/phase-15/PLAN.md](phases/phase-15/PLAN.md)
+
+---
+
+### Phase 16 — Core Correctness + Runtime Hardening
+**Goal:** Resolve the audited post-launch correctness issues in sandbox execution, AI data flow, state management, and Supabase integration before deeper R2 work continues.
+
+**Status:** Planned as of April 10, 2026.
+
+**Deliverables:**
+- Worker-backed Python sandbox execution with hard timeout and clean runtime recovery
+- Chat history, signed-in generation history, and DSA route validation fixed end-to-end
+- Store lifecycle cleanup for patch glow and latest-trace state, plus shared playback actions
+- Atomic Supabase hit counting, shared rate-limit window logic, and generated database types
+- Provider-state cleanup, dead export removal, and lint cleanup from the audit
+
+**Plan:** [→ phases/phase-16/PLAN.md](phases/phase-16/PLAN.md)
 
 ---
 

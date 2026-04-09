@@ -12,7 +12,6 @@ export interface AuthSlice {
   authModalOpen: boolean
 
   // Actions
-  setUser: (user: User | null) => void
   setSession: (session: Session | null) => void
   setAuthLoading: (loading: boolean) => void
   openAuthModal: () => void
@@ -31,11 +30,6 @@ export const createAuthSlice: StateCreator<
   session: null,
   authLoading: true, // true on first mount — gets resolved by initAuth()
   authModalOpen: false,
-
-  setUser: (user) =>
-    set((state) => {
-      state.user = user
-    }),
 
   setSession: (session) =>
     set((state) => {

@@ -1,7 +1,6 @@
 import { streamObject } from 'ai'
 import type { LanguageModel } from 'ai'
 import { SceneSchema } from '@insyte/scene-engine'
-import type { Scene } from '@insyte/scene-engine'
 import { resolveModel } from './providers'
 import { REGISTRY } from './registry'
 import type { Provider } from './registry'
@@ -53,26 +52,4 @@ export function streamTraceToScene(
     maxOutputTokens: 32768,
     maxRetries: 0,
   })
-}
-
-export async function* traceToScene(
-  trace: TraceData,
-  originalCode: string,
-  language: string,
-  problemStatement: string,
-  options?: TraceToSceneOptions,
-): AsyncGenerator<Partial<Scene>> {
-  const result = streamTraceToScene(
-    trace,
-    originalCode,
-    language,
-    problemStatement,
-    options,
-  )
-
-  for await (const partial of result.partialObjectStream) {
-    if (partial) {
-      yield partial as Partial<Scene>
-    }
-  }
 }

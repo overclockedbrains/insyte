@@ -189,10 +189,21 @@ export function useStreamScene(): UseStreamSceneResult {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     schema: SceneSchema as any,
     headers: (): Record<string, string> => {
-      const { provider, model, apiKeys } = useBoundStore.getState()
+      const { provider, model, apiKeys, user } = useBoundStore.getState()
       const key = apiKeys[provider]
-      if (!key) return {}
-      return { 'x-api-key': key, 'x-provider': provider, 'x-model': model }
+      const headers: Record<string, string> = {}
+
+      if (key) {
+        headers['x-api-key'] = key
+        headers['x-provider'] = provider
+        headers['x-model'] = model
+      }
+
+      if (user?.id) {
+        headers['x-user-id'] = user.id
+      }
+
+      return headers
     },
     onFinish: ({ object }) => {
       handleCompleteRef.current(object, lastTopicRef.current)

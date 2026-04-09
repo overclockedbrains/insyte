@@ -30,68 +30,6 @@ const STAGES = [
 
 const HERO_STAGE_MS = 2600
 
-function NodePill({
-  label,
-  accent = 'rgba(105,172,196,0.42)',
-  active = false,
-  className = '',
-}: {
-  label: string
-  accent?: string
-  active?: boolean
-  className?: string
-}) {
-  return (
-    <motion.div
-      className={[
-        'rounded-2xl border px-3 py-2 text-[10px] font-mono uppercase tracking-[0.22em]',
-        'bg-surface-container-high/95 text-on-surface',
-        className,
-      ].join(' ')}
-      animate={{
-        borderColor: active ? accent : 'rgba(72,71,77,0.28)',
-        backgroundColor: active ? 'rgba(255,255,255,0.015)' : 'rgba(255,255,255,0)',
-      }}
-      transition={{ duration: 0.25 }}
-    >
-      {label}
-    </motion.div>
-  )
-}
-
-function Connector({
-  orientation = 'horizontal',
-  accent = 'rgba(58,223,250,0.7)',
-  className = '',
-}: {
-  orientation?: 'horizontal' | 'vertical'
-  accent?: string
-  className?: string
-}) {
-  const isHorizontal = orientation === 'horizontal'
-
-  return (
-    <motion.div
-      className={[
-        'shrink-0 rounded-full',
-        isHorizontal ? 'h-px w-8 sm:w-12' : 'h-8 w-px',
-        className,
-      ].join(' ')}
-      style={{
-        background: isHorizontal
-          ? `linear-gradient(90deg, transparent, ${accent}, transparent)`
-          : `linear-gradient(180deg, transparent, ${accent}, transparent)`,
-      }}
-      animate={
-        isHorizontal
-          ? { opacity: [0.35, 1, 0.35], scaleX: [0.9, 1, 0.9] }
-          : { opacity: [0.35, 1, 0.35], scaleY: [0.9, 1, 0.9] }
-      }
-      transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
-    />
-  )
-}
-
 function PromptScene({ compact }: { compact: boolean }) {
   const parsedFields = compact
     ? [

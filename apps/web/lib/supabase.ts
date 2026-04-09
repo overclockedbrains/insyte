@@ -1,10 +1,11 @@
 import { createClient } from '@supabase/supabase-js'
 import { createHash } from 'crypto'
 import type { Scene } from '@insyte/scene-engine'
+import type { Database, Json } from './database.types'
 
 // ─── Database schema types ────────────────────────────────────────────────────
 
-export interface Database {
+export interface DatabaseSchemaSnapshot {
   public: {
     Views: Record<string, never>
     Functions: Record<string, never>
@@ -251,10 +252,7 @@ export function saveQueryHash(query: string, slug: string): void {
   const normalized = normalizeQuery(query)
   const hash = hashQuery(normalized)
 
-  void supabase
-    .from('query_hashes')
-    .upsert({ hash, normalized_query: normalized, scene_slug: slug })
-    .then(() => {})
+  void supabase.from('query_hashes').upsert({ hash, normalized_query: normalized, scene_slug: slug })
 }
 
 // ─── Scene caching ────────────────────────────────────────────────────────────
@@ -275,7 +273,7 @@ export async function getCachedScene(slug: string): Promise<Scene | null> {
       .maybeSingle()
 
     if (error || !data) return null
-    return data.scene_json as Scene
+    return data.scene_json as unknown as Scene
   } catch {
     return null
   }
@@ -295,7 +293,7 @@ export async function saveScene(slug: string, scene: Scene): Promise<void> {
       slug,
       title: scene.title,
       type: scene.type,
-      scene_json: scene as unknown,
+      scene_json: scene as unknown as Json,
       hit_count: 0,
       created_at: new Date().toISOString(),
     })
@@ -312,20 +310,7 @@ export function incrementHitCount(slug: string): void {
   const supabase = getServerSupabase()
   if (!supabase) return
 
-  // Fetch current count then increment (atomic RPC not required here)
-  void supabase
-    .from('scenes')
-    .select('hit_count')
-    .eq('slug', slug)
-    .maybeSingle()
-    .then(({ data }) => {
-      if (!data) return
-      void supabase
-        .from('scenes')
-        .update({ hit_count: data.hit_count + 1 })
-        .eq('slug', slug)
-        .then(() => {})
-    })
+  void supabase.rpc('increment_hit_count', { slug_arg: slug })
 }
 
 // ─── User history ─────────────────────────────────────────────────────────────
@@ -338,10 +323,7 @@ export function recordUserGeneration(userId: string, query: string, slug: string
   const supabase = getServerSupabase()
   if (!supabase) return
 
-  void supabase
-    .from('user_generated_scenes')
-    .insert({ user_id: userId, scene_slug: slug, query })
-    .then(() => {})
+  void supabase.from('user_generated_scenes').insert({ user_id: userId, scene_slug: slug, query })
 }
 
 // ─── Saved scenes (bookmarks) ─────────────────────────────────────────────────
@@ -385,6 +367,12 @@ export async function isSceneSaved(userId: string, slug: string): Promise<boolea
 export const RATE_LIMIT_MAX = 15
 const RATE_LIMIT_WINDOW_SECS = 3600 // 1 hour
 
+function getCurrentWindowStart(now = Date.now()): string {
+  const windowMs = RATE_LIMIT_WINDOW_SECS * 1000
+  const windowStartMs = Math.floor(now / windowMs) * windowMs
+  return new Date(windowStartMs).toISOString()
+}
+
 /**
  * Read-only rate-limit status for a given IP.
  * Does NOT increment the counter.
@@ -393,14 +381,14 @@ export async function getRateLimitStatus(
   ip: string,
 ): Promise<{ remaining: number; resetAt: string }> {
   const windowMs = RATE_LIMIT_WINDOW_SECS * 1000
-  const windowStartMs = Math.floor(Date.now() / windowMs) * windowMs
+  const windowStart = getCurrentWindowStart()
+  const windowStartMs = Date.parse(windowStart)
   const resetAt = new Date(windowStartMs + windowMs).toISOString()
 
   const supabase = getServerSupabase()
   if (!supabase) return { remaining: RATE_LIMIT_MAX, resetAt }
 
   const ipHash = hashIp(ip)
-  const windowStart = new Date(windowStartMs).toISOString()
 
   try {
     const { data } = await supabase
@@ -422,11 +410,7 @@ export async function checkAndIncrementRateLimit(ip: string): Promise<boolean> {
   if (!supabase) return true
 
   const ipHash = hashIp(ip)
-  const windowStart = new Date(
-    Math.floor(Date.now() / (RATE_LIMIT_WINDOW_SECS * 1000)) *
-      RATE_LIMIT_WINDOW_SECS *
-      1000,
-  ).toISOString()
+  const windowStart = getCurrentWindowStart()
 
   try {
     const { data } = await supabase

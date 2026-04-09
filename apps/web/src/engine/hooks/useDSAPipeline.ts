@@ -59,6 +59,7 @@ export function useDSAPipeline() {
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [traceTruncated, setTraceTruncated] = useState(false)
+  const [latestTrace, setLatestTrace] = useState<TraceData | null>(null)
 
   const setScene = useBoundStore((s) => s.setScene)
   const setDraftScene = useBoundStore((s) => s.setDraftScene)
@@ -69,7 +70,6 @@ export function useDSAPipeline() {
   const originalCodeRef = useRef<string | null>(null)
   const languageRef = useRef<'python' | 'javascript'>('python')
   const problemStatementRef = useRef<string>('')
-  const latestTraceRef = useRef<TraceData | null>(null)
   const visualizeAwaiterRef = useRef<VisualizeAwaiter | null>(null)
 
   const {
@@ -155,6 +155,7 @@ export function useDSAPipeline() {
         stopVisualizing()
         clearVisualizing()
         setError(null)
+        setLatestTrace(null)
         setTraceTruncated(false)
         setProgress(5)
         setStage('instrumenting')
@@ -192,7 +193,7 @@ export function useDSAPipeline() {
         setProgress(40)
 
         const trace = await executeInstrumented(instrumentedCode, language, customInput)
-        latestTraceRef.current = trace
+        setLatestTrace(trace)
         setTraceTruncated(Boolean(trace.truncated))
         if (trace.error) {
           throw new Error(trace.error)
@@ -243,7 +244,7 @@ export function useDSAPipeline() {
         setProgress(45)
 
         const trace = await executeInstrumented(instrumentedCode, language, customInput)
-        latestTraceRef.current = trace
+        setLatestTrace(trace)
         setTraceTruncated(Boolean(trace.truncated))
         if (trace.error) {
           throw new Error(trace.error)
@@ -274,9 +275,9 @@ export function useDSAPipeline() {
       run,
       rerun,
       traceTruncated,
-      latestTrace: latestTraceRef.current,
+      latestTrace,
     }),
-    [stage, progress, error, run, rerun, traceTruncated],
+    [stage, progress, error, run, rerun, traceTruncated, latestTrace],
   )
 
   return api

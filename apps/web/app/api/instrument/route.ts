@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server'
 import { instrumentCode } from '@/src/ai/instrumentCode'
 import { resolveModel } from '@/src/ai/providers'
 import type { Provider } from '@/src/ai/registry'
+import { isValidLanguage } from '@/src/sandbox/types'
 
 function detectLanguage(code: string): 'python' | 'javascript' {
   if (/\bdef\s+\w+\(|\bimport\s+\w+|:\s*$/.test(code)) {
@@ -23,10 +24,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     code = (body?.code ?? '').trim()
     const rawLanguage = (body?.language ?? '').trim().toLowerCase()
-    language =
-      rawLanguage === 'python' || rawLanguage === 'javascript'
-        ? rawLanguage
-        : detectLanguage(code)
+    language = isValidLanguage(rawLanguage) ? rawLanguage : detectLanguage(code)
     problemStatement = (body?.problemStatement ?? '').trim()
   } catch {
     return new Response('Invalid JSON body', { status: 400 })
@@ -52,4 +50,3 @@ export async function POST(req: NextRequest) {
     )
   }
 }
-

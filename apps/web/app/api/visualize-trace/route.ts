@@ -2,13 +2,9 @@ import type { NextRequest } from 'next/server'
 import { resolveModel } from '@/src/ai/providers'
 import type { Provider } from '@/src/ai/registry'
 import { streamTraceToScene } from '@/src/ai/traceToScene'
-import type { TraceData } from '@/src/sandbox/types'
+import { isValidLanguage, type TraceData } from '@/src/sandbox/types'
 
 export const maxDuration = 180
-
-function isLanguage(value: string): value is 'python' | 'javascript' {
-  return value === 'python' || value === 'javascript'
-}
 
 function isTraceData(value: unknown): value is TraceData {
   return (
@@ -33,7 +29,10 @@ export async function POST(req: NextRequest) {
     trace = body?.trace
     originalCode = (body?.originalCode ?? '').trim()
     const rawLanguage = (body?.language ?? '').trim().toLowerCase()
-    language = isLanguage(rawLanguage) ? rawLanguage : 'python'
+    if (!isValidLanguage(rawLanguage)) {
+      return new Response('language must be "python" or "javascript"', { status: 400 })
+    }
+    language = rawLanguage
     problemStatement = (body?.problemStatement ?? '').trim()
   } catch {
     return new Response('Invalid JSON body', { status: 400 })
@@ -65,4 +64,3 @@ export async function POST(req: NextRequest) {
     )
   }
 }
-

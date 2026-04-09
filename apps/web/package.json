@@ -8,6 +8,7 @@
     "analyze": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
+    "supabase:types": "supabase gen types typescript --project-id %SUPABASE_PROJECT_ID% --schema public > lib/database.types.ts",
     "type-check": "tsc --noEmit",
     "validate-scenes": "tsx scripts/validate-scenes.ts",
     "seed": "dotenv -e .env.local -- tsx scripts/seed-topic-index.ts",

@@ -4,6 +4,7 @@ import { type RefObject, useRef, useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Loader2 } from 'lucide-react'
+import { useIsMobile } from '@/components/hooks/useMediaQuery'
 import { useBoundStore } from '@/src/stores/store'
 import { detectMode } from '@/src/stores/slices/detection-slice'
 import { generateSlug } from '@/src/lib/slug'
@@ -75,9 +76,7 @@ export function UnifiedInput({ fillRef }: UnifiedInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [isFocused, setIsFocused] = useState(false)
   const [showDSADialog, setShowDSADialog] = useState(false)
-  const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== 'undefined' ? window.matchMedia('(max-width: 767px)').matches : false,
-  )
+  const isMobile = useIsMobile()
   const [isNavigating, setIsNavigating] = useState(false)
 
   const setInput = useBoundStore((s) => s.setInput)
@@ -86,13 +85,6 @@ export function UnifiedInput({ fillRef }: UnifiedInputProps) {
   const detectedMode = useBoundStore((s) => s.detectedMode)
   const confirmDSA = useBoundStore((s) => s.confirmDSA)
   const cancelDSA = useBoundStore((s) => s.cancelDSA)
-
-  useEffect(() => {
-    const media = window.matchMedia('(max-width: 767px)')
-    const onChange = (event: MediaQueryListEvent) => setIsMobile(event.matches)
-    media.addEventListener('change', onChange)
-    return () => media.removeEventListener('change', onChange)
-  }, [])
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {

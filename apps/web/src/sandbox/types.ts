@@ -20,3 +20,8 @@ export interface TraceData {
   truncated?: boolean
 }
 
+export type SandboxLanguage = 'python' | 'javascript'
+
+export function isValidLanguage(value: string): value is SandboxLanguage {
+  return value === 'python' || value === 'javascript'
+}

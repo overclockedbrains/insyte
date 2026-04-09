@@ -94,11 +94,7 @@ export function useChatStream() {
           const { done, value } = await reader.read()
           if (done) break
 
-          const rawChunk = decoder.decode(value, { stream: true })
-
-          // The toTextStreamResponse format prefixes each chunk with "0:" (Vercel AI protocol).
-          // Strip the protocol prefix if present.
-          const chunk = parseTextStreamChunk(rawChunk)
+          const chunk = decoder.decode(value, { stream: true })
           if (!chunk) continue
 
           accumulated += chunk
@@ -199,12 +195,4 @@ export function useChatStream() {
   )
 
   return { sendMessage }
-}
-
-// ─── parseTextStreamChunk ─────────────────────────────────────────────────────
-// toTextStreamResponse() returns plain text chunks — no protocol envelope.
-// Just return the raw decoded bytes as-is.
-
-function parseTextStreamChunk(raw: string): string {
-  return raw
 }

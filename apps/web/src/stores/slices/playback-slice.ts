@@ -1,5 +1,6 @@
 import type { StateCreator } from 'zustand'
 import type { BoundStore } from '../store'
+import { createPlaybackActions } from '../shared/playbackActions'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -39,59 +40,7 @@ export const createPlaybackSlice: StateCreator<
   speed: 1,
   totalSteps: 0,
   isExpanded: false,
-
-  play: () =>
-    set((state) => {
-      if (state.totalSteps > 0) state.isPlaying = true
-    }),
-
-  pause: () =>
-    set((state) => {
-      state.isPlaying = false
-    }),
-
-  stepForward: () =>
-    set((state) => {
-      if (state.currentStep < state.totalSteps - 1) {
-        state.currentStep += 1
-      } else {
-        // Reached end — pause
-        state.isPlaying = false
-      }
-    }),
-
-  stepBack: () =>
-    set((state) => {
-      if (state.currentStep > 0) {
-        state.currentStep -= 1
-      }
-    }),
-
-  reset: () =>
-    set((state) => {
-      state.currentStep = 0
-      state.isPlaying = false
-    }),
-
-  setSpeed: (speed) =>
-    set((state) => {
-      state.speed = speed
-    }),
-
-  jumpToStep: (n) =>
-    set((state) => {
-      const clamped = Math.max(0, Math.min(n, state.totalSteps - 1))
-      state.currentStep = clamped
-    }),
-
-  setTotalSteps: (n) =>
-    set((state) => {
-      state.totalSteps = n
-      // Clamp currentStep if it's now out of range
-      if (state.currentStep >= n) {
-        state.currentStep = Math.max(0, n - 1)
-      }
-    }),
+  ...createPlaybackActions(set),
 
   setExpanded: (val) =>
     set((state) => {
@@ -104,6 +53,4 @@ export const createPlaybackSlice: StateCreator<
     }),
 })
 
-// Re-export for convenience
-export type { BoundStore }
 

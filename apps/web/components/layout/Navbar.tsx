@@ -11,10 +11,10 @@ import {
   SheetContent,
   SheetTrigger,
 } from '@/components/ui/sheet'
+import type { Provider } from '@/src/ai/registry'
 import { useBoundStore } from '@/src/stores/store'
 import { Pill } from '@/components/ui/Pill'
 import { GITHUB_URL, NAV_LINKS } from '@/src/lib/config'
-import type { Provider } from '@/src/stores/slices/settings-slice'
 import { signOut, getUserInitials, getUserAvatarUrl } from '@/lib/auth'
 import { BookmarkButton } from '@/components/simulation/BookmarkButton'
 

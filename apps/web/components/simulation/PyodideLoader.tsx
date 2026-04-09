@@ -2,31 +2,29 @@
 
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { PyodideRunner } from '@/src/sandbox/PyodideRunner'
+import { sandboxManager } from '@/src/sandbox/SandboxManager'
 
 interface PyodideLoaderProps {
   active: boolean
 }
 
-const pyodideRunner = PyodideRunner.getInstance()
-
 export function PyodideLoader({ active }: PyodideLoaderProps) {
-  const [progress, setProgress] = useState(pyodideRunner.initializationProgress || 0)
+  const [progress, setProgress] = useState(sandboxManager.pythonInitializationProgress || 0)
   const [message, setMessage] = useState('Initializing Python runtime... (~10MB)')
-  const visible = active && !pyodideRunner.isInitialized && progress < 100
+  const visible = active && !sandboxManager.pythonReady && progress < 100
 
   useEffect(() => {
     if (!active) {
       return
     }
 
-    const unsubscribe = pyodideRunner.subscribeProgress((nextProgress, nextMessage) => {
+    const unsubscribe = sandboxManager.subscribePythonProgress((nextProgress, nextMessage) => {
       setProgress(nextProgress)
       setMessage(nextMessage || 'Initializing Python runtime... (~10MB)')
     })
 
-    if (!pyodideRunner.isInitialized) {
-      void pyodideRunner.initialize().catch((error) => {
+    if (!sandboxManager.pythonReady) {
+      void sandboxManager.initializePython().catch((error) => {
         const text = error instanceof Error ? error.message : 'Failed to initialize Python runtime.'
         setMessage(text)
       })

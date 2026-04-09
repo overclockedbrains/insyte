@@ -1,10 +1,7 @@
 import type { StateCreator } from 'zustand'
 import type { BoundStore } from '../store'
-import { DEFAULT_MODELS } from '@/src/ai/registry'
+import { DEFAULT_MODELS, REGISTRY } from '@/src/ai/registry'
 import type { Provider } from '@/src/ai/registry'
-
-// Re-export Provider so existing imports of it from this file keep working.
-export type { Provider }
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -22,6 +19,12 @@ export interface SettingsSlice {
   setModel: (model: string) => void
 }
 
+function createEmptyApiKeys(): Record<Provider, string | null> {
+  return Object.fromEntries(
+    Object.keys(REGISTRY).map((provider) => [provider, null]),
+  ) as Record<Provider, string | null>
+}
+
 // ─── Slice creator ────────────────────────────────────────────────────────────
 
 export const createSettingsSlice: StateCreator<
@@ -32,12 +35,7 @@ export const createSettingsSlice: StateCreator<
 > = (set) => ({
   provider: 'gemini',
   model: DEFAULT_MODELS['gemini'],
-  apiKeys: {
-    gemini: null,
-    openai: null,
-    anthropic: null,
-    groq: null,
-  },
+  apiKeys: createEmptyApiKeys(),
 
   setApiKey: (provider, key) =>
     set((state) => {
@@ -51,7 +49,7 @@ export const createSettingsSlice: StateCreator<
 
   clearAllKeys: () =>
     set((state) => {
-      state.apiKeys = { gemini: null, openai: null, anthropic: null, groq: null }
+      state.apiKeys = createEmptyApiKeys()
     }),
 
   setProvider: (provider) =>

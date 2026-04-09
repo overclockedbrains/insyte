@@ -4,27 +4,13 @@ import { useRef, useEffect, useState, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Send, ArrowRight, X, Minus, Maximize2 } from 'lucide-react'
+import { useIsMobile } from '@/components/hooks/useMediaQuery'
 import { useBoundStore } from '@/src/stores/store'
 import { useChatStream } from './useChatStream'
 import type { ChatMessage } from '@/src/stores/slices/chat-slice'
 import { useFocusTrap } from '@/components/hooks/useFocusTrap'
 
 // ─── Breakpoint hook ──────────────────────────────────────────────────────────
-
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false)
-
-  useEffect(() => {
-    const mq = window.matchMedia('(max-width: 768px)')
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsMobile(mq.matches)
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
-    mq.addEventListener('change', handler)
-    return () => mq.removeEventListener('change', handler)
-  }, [])
-
-  return isMobile
-}
 
 // ─── Typing cursor (animated dots) ───────────────────────────────────────────
 

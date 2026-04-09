@@ -6,7 +6,6 @@ export type {
   Scene,
   SceneType,
   SceneLayout,
-  LayoutType,
   VisualType,
   CodeLanguage,
   Visual,

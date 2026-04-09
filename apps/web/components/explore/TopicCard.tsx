@@ -4,13 +4,6 @@ import type { TopicEntry } from '@/src/content/topic-index'
 
 // ─── Type icon map ────────────────────────────────────────────────────────────
 
-const TYPE_ICON: Record<string, string> = {
-  concept: '⬡',
-  'dsa-trace': '⟨/⟩',
-  lld: '⚙',
-  hld: '🏗',
-}
-
 const TYPE_LABEL: Record<string, string> = {
   concept: 'Concept',
   'dsa-trace': 'DSA',
@@ -63,7 +56,6 @@ interface TopicCardProps {
 
 export function TopicCard({ topic }: TopicCardProps) {
   const categoryColor = CATEGORY_COLOR[topic.category] ?? 'text-primary bg-primary/10'
-  const typeIcon = TYPE_ICON[topic.type] ?? '●'
   const typeLabel = TYPE_LABEL[topic.type] ?? topic.type
   const imageSrc = EXPLORE_SIM_IMAGE_BY_SLUG[topic.slug] ?? EXPLORE_SIM_FALLBACK_IMAGE
 

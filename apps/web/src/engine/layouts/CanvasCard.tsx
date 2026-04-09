@@ -293,6 +293,8 @@ export function CanvasCard({ scene, onRerunWithCustomInput = null }: CanvasCardP
   const isExpanded = useBoundStore((s) => s.isExpanded)
   const setExpanded = useBoundStore((s) => s.setExpanded)
   const isPatchGlowing = useBoundStore((s) => s.isPatchGlowing)
+  const patchGlowNonce = useBoundStore((s) => s.patchGlowNonce)
+  const clearGlow = useBoundStore((s) => s.clearGlow)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -314,6 +316,20 @@ export function CanvasCard({ scene, onRerunWithCustomInput = null }: CanvasCardP
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [handleKeyDown])
+
+  useEffect(() => {
+    if (patchGlowNonce === 0 || !isPatchGlowing) {
+      return
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      clearGlow()
+    }, 1000)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [clearGlow, isPatchGlowing, patchGlowNonce])
 
   // Lock body scroll when expanded
   useEffect(() => {

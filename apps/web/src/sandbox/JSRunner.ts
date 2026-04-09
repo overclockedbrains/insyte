@@ -1,5 +1,7 @@
 import type { TraceData } from './types'
 
+const SANDBOX_BUSY_MESSAGE = 'A sandbox run is already in progress. Please wait for it to finish.'
+
 interface WorkerResponse {
   steps: TraceData['steps']
   finalResult?: unknown
@@ -31,7 +33,10 @@ export class JSRunner {
 
   execute(code: string, timeout = 5000): Promise<TraceData> {
     if (this.inFlight) {
-      return Promise.reject(new Error('JavaScript sandbox is busy.'))
+      return Promise.resolve({
+        steps: [],
+        error: SANDBOX_BUSY_MESSAGE,
+      })
     }
 
     this.inFlight = true
@@ -78,4 +83,3 @@ export class JSRunner {
     })
   }
 }
-

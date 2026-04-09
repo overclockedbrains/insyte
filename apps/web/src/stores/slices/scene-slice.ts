@@ -15,6 +15,7 @@ export interface SceneSlice {
   isStreaming: boolean
   streamedFields: Set<string>
   isPatchGlowing: boolean
+  patchGlowNonce: number
 
   // Actions
   setScene: (scene: Scene) => void
@@ -27,6 +28,7 @@ export interface SceneSlice {
   setStreaming: (val: boolean) => void
   markFieldStreamed: (field: string) => void
   triggerGlow: () => void
+  clearGlow: () => void
 }
 
 // ─── Slice creator ────────────────────────────────────────────────────────────
@@ -42,6 +44,7 @@ export const createSceneSlice: StateCreator<
   isStreaming: false,
   streamedFields: new Set<string>(),
   isPatchGlowing: false,
+  patchGlowNonce: 0,
 
   setScene: (scene) =>
     set((state) => {
@@ -87,14 +90,14 @@ export const createSceneSlice: StateCreator<
       state.streamedFields.add(field)
     }),
 
-  triggerGlow: () => {
+  triggerGlow: () =>
     set((state) => {
       state.isPatchGlowing = true
-    })
-    setTimeout(() => {
-      set((state) => {
-        state.isPatchGlowing = false
-      })
-    }, 1000)
-  },
+      state.patchGlowNonce += 1
+    }),
+
+  clearGlow: () =>
+    set((state) => {
+      state.isPatchGlowing = false
+    }),
 })
