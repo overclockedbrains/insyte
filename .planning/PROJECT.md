@@ -2,7 +2,7 @@
 
 > **"See how it works."**
 > AI-powered platform that turns any tech concept into a live, interactive simulation.
-> Turborepo + pnpm monorepo · Next.js 15 · Dark-only · 24 pre-built simulations
+> Turborepo + pnpm monorepo · Next.js 16 · Dark-only · 24 pre-built simulations
 
 ---
 
@@ -11,9 +11,9 @@
 | Dimension | Value |
 |-----------|-------|
 | Domain | insyte.amanarya.com |
-| Stack | Next.js 15, TypeScript, Tailwind v4, Framer Motion, Zustand, Vercel AI SDK |
+| Stack | Next.js 16, TypeScript, Tailwind v4, Framer Motion, Zustand, Vercel AI SDK |
 | Monorepo | Turborepo + pnpm workspaces |
-| Database | Supabase (no auth in R1) |
+| Database | Supabase |
 | AI Default | Gemini Flash (free tier) |
 | BYOK | OpenAI · Anthropic · Gemini · Groq |
 | Theme | Dark-only, always |
@@ -21,19 +21,9 @@
 
 ---
 
-## R1 Goal
-
-Ship a fully functional, publicly accessible platform where:
-1. Any user can type a tech concept and get an interactive simulation
-2. Any user can paste DSA code and get a step-by-step execution trace
-3. 24 hand-crafted simulations are available instantly (no AI cost)
-4. Live AI chat lets users interrogate any simulation
-5. BYOK unlocks unlimited AI with own keys
-6. Everything works on mobile, tablet, and desktop
-
----
-
 ## Progress Tracker
+
+R1 released on 8 April 2026 and R2 is in progress
 
 ### Release 1 (R1) - Core Platform
 
@@ -55,22 +45,12 @@ Ship a fully functional, publicly accessible platform where:
 | **Phase 13** | ✅ | Polish + Responsive |
 | **Phase 14** | ✅ | Complete Deploy |
 
-### Release 2 (R2) - Current Sequence
+### Release 2 (R2)
 
 | Phase | Status | Description |
 |-------|--------|-------------|
 | **Phase 15** | ✅ | R1 Fixes + UI Tweaks |
 | **Phase 16** | ✅ | Core Correctness + Runtime Hardening |
-
-### Release 2 (R2) - Backlog
-
-| Area | Status | Description |
-|------|--------|-------------|
-| **Canvas Interactivity** | ⬜ | Interactive Mode, Draggable Nodes, Hover Tooltips, Context Menus |
-| **Visual Design** | ⬜ | Distinct Git Node Types, Side-by-Side Code Visualization |
-| **Performance & UX** | ⬜ | WebGL/Canvas API for Complex Scenes, Persistent Command Terminal |
-| **Visual Primitives** | ⬜ | Complex Call-Stack Frame, Timeline / Sequence Diagram, Text-Stream |
-| **Pending Implementation** | ⬜ | Server-Side API Key Security, Worker OOM Protection, Pyodide Caching |
 
 ---
 
@@ -83,7 +63,7 @@ Ship a fully functional, publicly accessible platform where:
 - Root Turborepo config (`turbo.json`, `pnpm-workspace.yaml`)
 - `packages/scene-engine` — pure TS package: types, Zod schema, parser
 - `packages/tsconfig` — shared TypeScript base configs
-- `apps/web` — Next.js 15 app scaffolded
+- `apps/web` — Next.js 16 app scaffolded
 - Tailwind v4 with all DESIGN.md color tokens configured
 - shadcn/ui initialized
 - ESLint + Prettier configured across workspace
