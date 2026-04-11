@@ -51,6 +51,7 @@ R1 released on 8 April 2026 and R2 is in progress
 |-------|--------|-------------|
 | **Phase 15** | ✅ | R1 Fixes + UI Tweaks |
 | **Phase 16** | ✅ | Core Correctness + Runtime Hardening |
+| **Phase 17** | 🔲 | Local & Custom LLM Support (Ollama + OpenAI-compatible endpoints) |
 
 ---
 
@@ -366,6 +367,25 @@ _OG Images_
 - Provider-state cleanup, dead export removal, and lint cleanup from the audit
 
 **Plan:** [→ phases/phase-16/PLAN.md](phases/phase-16/PLAN.md)
+
+---
+
+### Phase 17 — Local & Custom LLM Support
+**Goal:** Add Ollama (local) and custom OpenAI-compatible endpoint support using one unified code path — no new SDK dependencies. Covers Ollama, LM Studio, vLLM, Together.ai, and any self-hosted inference server.
+
+**Status:** Planned as of April 12, 2026.
+
+**Deliverables:**
+- `Provider` type extended to `'ollama' | 'custom'`
+- `createModel()` factory centralizing all model instantiation via `createOpenAI({ baseURL })`
+- `generateSceneCompat()` text-mode fallback with JSON extraction for models without structured output support
+- `/api/providers/ollama-models` proxy route (server-side, avoids CORS)
+- Settings UI: Local & Custom section with health check indicator + dynamic model picker
+- Settings store additions: `ollamaBaseURL`, `customBaseURL`, `customApiKey`, `customModelId`
+
+**Note:** Ollama generation runs browser-direct (not through Vercel) — users on the production site can use their locally-running Ollama instance. Requires `OLLAMA_ORIGINS=https://insyte.amanarya.com` set when starting Ollama. Cloud providers always run server-side for API key protection.
+
+**Plan:** [→ phases/phase-17/PLAN.md](phases/phase-17/PLAN.md)
 
 ---
 
