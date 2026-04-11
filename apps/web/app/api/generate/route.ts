@@ -34,6 +34,8 @@ export async function POST(req: NextRequest) {
   const byokKey = req.headers.get('x-api-key')
   const byokProvider = req.headers.get('x-provider') as Provider | null
   const byokModel = req.headers.get('x-model')
+  // Custom base URL — present for Ollama and Custom Endpoint providers.
+  const byokBaseURL = req.headers.get('x-base-url')
   // Auth header — present when user is signed in (userId for history tracking)
   const userId = req.headers.get('x-user-id')
 
@@ -57,8 +59,8 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Query deduplication: skip AI if this exact query was generated before ──
-  // Only for free-tier (our server key) — BYOK users may want fresh generation.
-  if (!byokKey) {
+  // Only for free-tier (our server key) — BYOK / local-model users want fresh generation.
+  if (!byokKey && !byokBaseURL) {
     const existingSlug = await getCachedSlugForQuery(topic)
     if (existingSlug) {
       // Return a redirect response — client should load from /s/[existingSlug]
@@ -70,8 +72,8 @@ export async function POST(req: NextRequest) {
   }
 
   // Rate limit only applies to the free tier (our server key).
-  // BYOK users consume their own quota — no limit imposed.
-  if (!byokKey) {
+  // BYOK and local/custom endpoint users consume their own quota — no limit imposed.
+  if (!byokKey && !byokBaseURL) {
     const ip =
       req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
     const allowed = await checkAndIncrementRateLimit(ip)
@@ -85,7 +87,7 @@ export async function POST(req: NextRequest) {
   }
 
   const provider = byokProvider ?? 'gemini'
-  const model = resolveModel(provider, byokModel, byokKey, longRunningFetch)
+  const model = resolveModel(provider, byokModel, byokKey, longRunningFetch, byokBaseURL)
   const modelId = byokModel ?? (byokKey ? provider : 'gemini-2.5-flash')
   aiLog.server.request(topic, modelId)
 

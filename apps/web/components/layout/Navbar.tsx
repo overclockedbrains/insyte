@@ -25,6 +25,8 @@ const PROVIDER_LABELS: Record<Provider, string> = {
   openai: 'OpenAI',
   anthropic: 'Anthropic',
   groq: 'Groq',
+  ollama: 'Ollama',
+  custom: 'Custom',
 }
 
 function SettingsLink({

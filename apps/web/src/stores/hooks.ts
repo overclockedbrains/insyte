@@ -24,6 +24,15 @@ export function useSettings() {
       clearAllKeys: s.clearAllKeys,
       setProvider: s.setProvider,
       setModel: s.setModel,
+      // Local & custom endpoint config
+      ollamaBaseURL: s.ollamaBaseURL,
+      customBaseURL: s.customBaseURL,
+      customApiKey: s.customApiKey,
+      customModelId: s.customModelId,
+      setOllamaBaseURL: s.setOllamaBaseURL,
+      setCustomBaseURL: s.setCustomBaseURL,
+      setCustomApiKey: s.setCustomApiKey,
+      setCustomModelId: s.setCustomModelId,
     })),
   )
 }

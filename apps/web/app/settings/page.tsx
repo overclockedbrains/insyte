@@ -9,6 +9,7 @@ import { ProviderSelector } from '@/components/settings/ProviderSelector'
 import { ModelSelector } from '@/components/settings/ModelSelector'
 import { ApiKeyInput } from '@/components/settings/ApiKeyInput'
 import { ActiveProviderStatus } from '@/components/settings/ActiveProviderStatus'
+import { LocalProviderSettings } from '@/components/settings/LocalProviderSettings'
 import { APP_VERSION, GITHUB_URL, SITE } from '@/src/lib/config'
 
 // ─── Section card ─────────────────────────────────────────────────────────────
@@ -18,7 +19,7 @@ function SectionCard({
   description,
   children,
 }: {
-  title: string
+  title: React.ReactNode
   description?: string
   children: React.ReactNode
 }) {
@@ -182,19 +183,8 @@ export default function SettingsPage() {
         {/* ── 2. API Keys ── */}
         <SectionCard
           title="API Keys"
-          description="Your keys are stored locally in your browser and only forwarded to the AI provider — never stored on our servers."
+          description="Stored in your browser only — never logged or retained on our servers."
         >
-          {/* Security note */}
-          <div className="flex items-start gap-3 rounded-xl border border-outline-variant/20 bg-surface-container-low px-4 py-3">
-            <span className="text-lg shrink-0">🔒</span>
-            <p className="text-xs text-on-surface-variant leading-relaxed">
-              <span className="font-semibold text-on-surface">
-                Your key is stored locally in your browser.
-              </span>{' '}
-              It is forwarded to the AI provider through our servers only to process your request — it is never logged, stored, or retained beyond the request.
-            </p>
-          </div>
-
           {/* Per-provider key inputs */}
           <div className="space-y-5">
             {ALL_PROVIDERS.map((p) => (
@@ -224,7 +214,33 @@ export default function SettingsPage() {
           )}
         </SectionCard>
 
-        {/* ── 3. Preferences ── */}
+        {/* ── 3. Local & Custom ── */}
+        <SectionCard
+          title={
+            <span className="flex items-center gap-2">
+              Local &amp; Custom
+              {/* Unreliable badge with tooltip */}
+              <span className="group relative inline-flex">
+                <span className="inline-flex items-center rounded-full border border-error/30 bg-error/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-error cursor-help">
+                  Unreliable
+                </span>
+                <span className="pointer-events-none absolute bottom-full left-0 mb-1.5 w-52 rounded-md border border-outline-variant/25 bg-surface-container-highest px-2.5 py-2 text-[11px] leading-snug text-on-surface-variant opacity-0 shadow-md transition-opacity duration-150 group-hover:opacity-100 z-50">
+                  <span className="font-semibold text-error block mb-0.5">Not fully supported</span>
+                  May be slow, produce wrong visuals, or fail. Use a cloud provider for best results.
+                </span>
+              </span>
+              {/* Experimental badge */}
+              <span className="inline-flex items-center rounded-full border border-outline-variant/30 bg-surface-container px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
+                Experimental
+              </span>
+            </span>
+          }
+          description="Connect Ollama for local inference, or any OpenAI-compatible endpoint."
+        >
+          <LocalProviderSettings />
+        </SectionCard>
+
+        {/* ── 4. Preferences ── */}
         <SectionCard
           title="Preferences"
           description="Animation and display settings."

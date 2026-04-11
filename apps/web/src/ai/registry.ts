@@ -6,7 +6,7 @@
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type Provider = 'gemini' | 'openai' | 'anthropic' | 'groq'
+export type Provider = 'gemini' | 'openai' | 'anthropic' | 'groq' | 'ollama' | 'custom'
 
 export interface ModelOption {
   id: string
@@ -36,6 +36,10 @@ export interface ProviderConfig {
   serverDefault: boolean
   /** Default model selected when the user switches to this provider */
   defaultModel: string
+  /** Pre-filled base URL (Ollama: localhost, Custom: empty) */
+  defaultBaseURL?: string
+  /** When true, models are fetched dynamically (e.g. Ollama /api/tags) */
+  dynamicModels?: boolean
   /** Models shown in the model selector UI */
   models: ModelOption[]
   /**
@@ -124,6 +128,37 @@ export const REGISTRY: Record<Provider, ProviderConfig> = {
       { id: 'llama-3.1-8b-instant', label: 'Llama 8B', badge: 'fast' },
       { id: 'openai/gpt-oss-120b', label: 'GPT OSS 120B', badge: 'new' },
     ],
+    providerOptions: {},
+  },
+
+  ollama: {
+    name: 'Ollama',
+    shortName: 'Ollama',
+    subtitle: 'Local models',
+    color: 'text-teal-400',
+    initials: 'O',
+    keyPlaceholder: '',
+    badge: 'Local',
+    serverDefault: false,
+    defaultModel: '',
+    defaultBaseURL: 'http://localhost:11434/v1',
+    dynamicModels: true,
+    models: [],
+    providerOptions: {},
+  },
+
+  custom: {
+    name: 'Custom Endpoint',
+    shortName: 'Custom',
+    subtitle: 'Any OpenAI-compatible API',
+    color: 'text-purple-400',
+    initials: '⚙',
+    keyPlaceholder: 'optional',
+    badge: 'Custom',
+    serverDefault: false,
+    defaultModel: '',
+    dynamicModels: false,
+    models: [],
     providerOptions: {},
   },
 }

@@ -189,11 +189,24 @@ export function useStreamScene(): UseStreamSceneResult {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     schema: SceneSchema as any,
     headers: (): Record<string, string> => {
-      const { provider, model, apiKeys, user } = useBoundStore.getState()
+      const { provider, model, apiKeys, user, ollamaBaseURL, customBaseURL, customApiKey } =
+        useBoundStore.getState()
       const key = apiKeys[provider]
       const headers: Record<string, string> = {}
 
-      if (key) {
+      if (provider === 'ollama') {
+        // Ollama: no API key, but needs provider + model + base URL
+        headers['x-provider'] = 'ollama'
+        if (model) headers['x-model'] = model
+        headers['x-base-url'] = ollamaBaseURL || 'http://localhost:11434/v1'
+      } else if (provider === 'custom') {
+        // Custom endpoint: optional API key, required base URL + model
+        headers['x-provider'] = 'custom'
+        if (model) headers['x-model'] = model
+        if (customBaseURL) headers['x-base-url'] = customBaseURL
+        if (customApiKey) headers['x-api-key'] = customApiKey
+      } else if (key) {
+        // Standard BYOK providers (Gemini, OpenAI, Anthropic, Groq)
         headers['x-api-key'] = key
         headers['x-provider'] = provider
         headers['x-model'] = model
