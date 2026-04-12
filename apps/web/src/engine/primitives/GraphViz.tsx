@@ -1,13 +1,9 @@
 /**
- * GraphViz — Phase 18: Coordinate System Unification
+ * GraphViz — Phase 19 bridge: circular auto-layout
  *
- * Rewritten from dual-coordinate (DOM % + SVG px) to a single SVG viewBox
- * with <foreignObject> node bodies. Edges (<path>) and nodes (<foreignObject>)
- * share the same viewBox coordinate space — misalignment at any container size
- * is now structurally impossible.
- *
- * Node x/y in scene JSON are treated as 0-based grid coordinates scaled by
- * NODE_UNIT. The SVG viewBox auto-fits the content via computeViewBox().
+ * x/y removed from scene JSON in Phase 19. Positions are now computed here
+ * using a simple circular arrangement (N nodes evenly spaced around a ring).
+ * Phase 20 will replace this with computeLayout() / dagre from @insyte/scene-engine.
  */
 
 'use client'
@@ -17,19 +13,15 @@ import type { PrimitiveProps } from '.'
 import { computeViewBox } from '../CanvasContext'
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
-// NODE_UNIT: pixels per scene-coordinate unit in the internal SVG coordinate space.
-// This is NOT tied to the container size — the SVG viewBox absorbs scaling.
-const NODE_UNIT = 90  // px per scene-coord unit
-const NODE_W    = 56  // foreignObject width  (matches the old w-14 class)
-const NODE_H    = 56  // foreignObject height (matches the old h-14 class)
+const NODE_W = 56
+const NODE_H = 56
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface GraphNode {
   id: string
   label: string
-  x: number
-  y: number
   color?: string
+  // x/y no longer in scene JSON — positions computed below
 }
 
 interface GraphEdge {
@@ -73,12 +65,20 @@ export function GraphViz({ state }: PrimitiveProps) {
 
   const getNode = (id: string) => nodes.find((n) => n.id === id)
 
-  // Scale scene coords to SVG space
-  const scaledNodes = nodes.map((n) => ({
-    ...n,
-    x: n.x * NODE_UNIT + NODE_W / 2,
-    y: n.y * NODE_UNIT + NODE_H / 2,
-  }))
+  // TODO(Phase 20): replace with computeLayout() / dagre from @insyte/scene-engine
+  // Bridge: circular layout — N nodes evenly spaced around a ring
+  const n = nodes.length
+  const radius = Math.max(100, n * 38)
+  const cx = radius + NODE_W
+  const cy = radius + NODE_H
+  const scaledNodes = nodes.map((node, i) => {
+    const angle = (2 * Math.PI * i) / Math.max(n, 1) - Math.PI / 2
+    return {
+      ...node,
+      x: cx + radius * Math.cos(angle),
+      y: cy + radius * Math.sin(angle),
+    }
+  })
 
   const getScaled = (id: string) => scaledNodes.find((n) => n.id === id)
 

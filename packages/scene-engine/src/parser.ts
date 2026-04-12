@@ -2,6 +2,44 @@ import { SceneSchema } from './schema'
 import type { Scene, Visual, VisualState } from './types'
 import { ZodError } from 'zod'
 
+// ─── Migration helpers ────────────────────────────────────────────────────────
+
+/**
+ * Silently drops the legacy `position` field from a visual if present.
+ * Also drops `x`/`y` from node arrays inside initialState (graph, tree,
+ * recursion-tree, system-diagram use "nodes" or "components").
+ * Runs before schema validation so old JSONs parse cleanly during the transition.
+ */
+function stripLegacyPositions(raw: Record<string, unknown>): Record<string, unknown> {
+  const visuals = raw['visuals']
+  if (!Array.isArray(visuals)) return raw
+  return {
+    ...raw,
+    visuals: visuals.map((v: unknown) => {
+      if (!v || typeof v !== 'object') return v
+      const visual = v as Record<string, unknown>
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { position, ...rest } = visual
+
+      // Strip x/y from node/component arrays inside initialState
+      const initialState = rest['initialState']
+      if (initialState && typeof initialState === 'object') {
+        const state = initialState as Record<string, unknown>
+        const stripped: Record<string, unknown> = { ...state }
+        for (const key of ['nodes', 'components']) {
+          if (Array.isArray(state[key])) {
+            stripped[key] = (state[key] as Array<Record<string, unknown>>).map(
+              ({ x: _x, y: _y, ...node }) => node,
+            )
+          }
+        }
+        return { ...rest, initialState: stripped }
+      }
+      return rest
+    }),
+  }
+}
+
 // ─── Errors ───────────────────────────────────────────────────────────────────
 
 export class SceneParseError extends Error {
@@ -57,9 +95,11 @@ export function normalizeScene(raw: Scene): Scene {
  *
  * This is a pure function with no side effects — safe to call repeatedly.
  *
- * The merge strategy is a shallow-key deep-object merge:
- * - Scalar values in params overwrite the matching key in state.
- * - Array values in params replace (not concat) the matching key in state.
+ * New universal format: each action.params is the complete visual state at
+ * that step — a shallow merge of params onto the running state is sufficient.
+ *
+ * Legacy format (action.action present) is also handled for backwards
+ * compatibility with any scenes not yet migrated to Phase 19 format.
  */
 export function computeVisualStateAtStep(
   scene: Scene,
@@ -80,82 +120,28 @@ export function computeVisualStateAtStep(
   for (const step of stepsUpTo) {
     for (const action of step.actions) {
       if (action.target !== visualId) continue
-      // Merge action params into the running state
-      state = applyAction(state, action.action, action.params)
+      // Universal format: shallow-merge params directly
+      state = { ...state, ...action.params }
     }
   }
 
   return state
 }
 
-/**
- * Applies a single named action to state. Unknown action names perform a
- * shallow-merge of params, acting as a generic "set" operation.
- */
-function applyAction(
-  state: VisualState,
-  actionName: string,
-  params: Record<string, unknown>,
-): VisualState {
-  switch (actionName) {
-    case 'set':
-      // Shallow-merge all params into state
-      return { ...state, ...params }
-
-    case 'set-value':
-      // Set a single 'value' key
-      return { ...state, value: params['value'] }
-
-    case 'push': {
-      // Append to an array field (default: 'items')
-      const field = (params['field'] as string | undefined) ?? 'items'
-      const current = Array.isArray(state[field]) ? (state[field] as unknown[]) : []
-      return { ...state, [field]: [...current, params['item']] }
-    }
-
-    case 'pop': {
-      const field = (params['field'] as string | undefined) ?? 'items'
-      const current = Array.isArray(state[field]) ? (state[field] as unknown[]) : []
-      return { ...state, [field]: current.slice(0, -1) }
-    }
-
-    case 'highlight':
-      // Set highlight on a specific index in an array field
-      return applyHighlight(state, params)
-
-    default:
-      // Generic shallow-merge for any unrecognised action
-      return { ...state, ...params }
-  }
-}
-
-function applyHighlight(
-  state: VisualState,
-  params: Record<string, unknown>,
-): VisualState {
-  const field = (params['field'] as string | undefined) ?? 'cells'
-  const index = params['index'] as number | undefined
-  const value = params['value'] as string | undefined
-
-  if (index === undefined || !Array.isArray(state[field])) {
-    return { ...state, ...params }
-  }
-
-  const arr = state[field] as Array<Record<string, unknown>>
-  const updated = arr.map((item, i) =>
-    i === index ? { ...item, highlight: value ?? 'active' } : item,
-  )
-  return { ...state, [field]: updated }
-}
-
 // ─── Public parse API ─────────────────────────────────────────────────────────
 
 /**
  * Validates and normalizes raw unknown input as a Scene.
+ * Applies legacy migration shims (strips position/x/y) before validation.
  * Throws SceneParseError if validation fails.
  */
 export function parseScene(raw: unknown): Scene {
-  const result = SceneSchema.safeParse(raw)
+  // Apply migration shims to strip legacy position/xy fields before validation
+  const migrated =
+    raw && typeof raw === 'object' && !Array.isArray(raw)
+      ? stripLegacyPositions(raw as Record<string, unknown>)
+      : raw
+  const result = SceneSchema.safeParse(migrated)
   if (!result.success) {
     throw new SceneParseError(
       `Invalid Scene JSON: ${result.error.issues.length} validation error(s)`,
@@ -167,12 +153,18 @@ export function parseScene(raw: unknown): Scene {
 
 /**
  * Safely validates and normalizes raw input without throwing.
+ * Applies legacy migration shims (strips position/x/y) before validation.
  * Returns { success: true, scene } or { success: false, error }.
  */
 export function safeParseScene(
   raw: unknown,
 ): { success: true; scene: Scene } | { success: false; error: ZodError } {
-  const result = SceneSchema.safeParse(raw)
+  // Apply migration shims to strip legacy position/xy fields before validation
+  const migrated =
+    raw && typeof raw === 'object' && !Array.isArray(raw)
+      ? stripLegacyPositions(raw as Record<string, unknown>)
+      : raw
+  const result = SceneSchema.safeParse(migrated)
   if (!result.success) {
     return { success: false, error: result.error }
   }
@@ -180,7 +172,6 @@ export function safeParseScene(
 }
 
 /**
- * Returns the scene unchanged or null — does not normalize.
  * @deprecated Prefer safeParseScene for consistent behaviour.
  */
 export function tryParseScene(raw: unknown): Scene | null {

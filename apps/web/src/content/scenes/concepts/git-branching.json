@@ -5,46 +5,54 @@
   "layout": "text-left-canvas-right",
   "description": "Visualize how Git branches, merges, rebases, and resets work — from your first commit to cherry-picking and reverting.",
   "category": "Git",
-  "tags": ["git", "branching", "merge", "rebase", "version-control"],
-
+  "tags": [
+    "git",
+    "branching",
+    "merge",
+    "rebase",
+    "version-control"
+  ],
   "visuals": [
     {
       "id": "commit-graph",
       "type": "graph",
       "label": "Commit Graph",
-      "position": { "x": 50, "y": 50 },
       "initialState": {
         "nodes": [],
         "edges": []
-      }
+      },
+      "layoutHint": "dagre-TB"
     },
     {
       "id": "head-badge",
       "type": "text-badge",
       "label": "HEAD",
-      "position": { "x": 50, "y": 5 },
       "initialState": {
         "text": "HEAD → (empty repo)",
         "style": "default"
-      }
+      },
+      "slot": "top-center"
     }
   ],
-
   "steps": [
     {
       "index": 0,
       "actions": [
         {
           "target": "head-badge",
-          "action": "set",
-          "params": { "text": "git commit → C1 (Initial commit)", "style": "highlight" }
+          "params": {
+            "text": "git commit → C1 (Initial commit)",
+            "style": "highlight"
+          }
         },
         {
           "target": "commit-graph",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "c1", "label": "C1", "x": 1, "y": 2 }
+              {
+                "id": "c1",
+                "label": "C1"
+              }
             ],
             "edges": []
           }
@@ -57,19 +65,31 @@
       "actions": [
         {
           "target": "head-badge",
-          "action": "set",
-          "params": { "text": "git commit → C2 — HEAD → main → C2", "style": "highlight" }
+          "params": {
+            "text": "git commit → C2 — HEAD → main → C2",
+            "style": "highlight"
+          }
         },
         {
           "target": "commit-graph",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "c1", "label": "C1", "x": 1, "y": 2 },
-              { "id": "c2", "label": "C2", "x": 3, "y": 2, "color": "#b79fff" }
+              {
+                "id": "c1",
+                "label": "C1"
+              },
+              {
+                "id": "c2",
+                "label": "C2",
+                "color": "#b79fff"
+              }
             ],
             "edges": [
-              { "from": "c1", "to": "c2", "directed": true }
+              {
+                "from": "c1",
+                "to": "c2",
+                "directed": true
+              }
             ]
           }
         }
@@ -81,21 +101,42 @@
       "actions": [
         {
           "target": "head-badge",
-          "action": "set",
-          "params": { "text": "git checkout -b feature — new pointer at C2", "style": "highlight" }
+          "params": {
+            "text": "git checkout -b feature — new pointer at C2",
+            "style": "highlight"
+          }
         },
         {
           "target": "commit-graph",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "c1", "label": "C1", "x": 1, "y": 2 },
-              { "id": "c2", "label": "C2\nmain", "x": 3, "y": 2, "color": "#b79fff" },
-              { "id": "feat-ptr", "label": "feature", "x": 3, "y": 4, "color": "#3adffA" }
+              {
+                "id": "c1",
+                "label": "C1"
+              },
+              {
+                "id": "c2",
+                "label": "C2\nmain",
+                "color": "#b79fff"
+              },
+              {
+                "id": "feat-ptr",
+                "label": "feature",
+                "color": "#3adffA"
+              }
             ],
             "edges": [
-              { "from": "c1", "to": "c2", "directed": true },
-              { "from": "feat-ptr", "to": "c2", "directed": true, "highlighted": true }
+              {
+                "from": "c1",
+                "to": "c2",
+                "directed": true
+              },
+              {
+                "from": "feat-ptr",
+                "to": "c2",
+                "directed": true,
+                "highlighted": true
+              }
             ]
           }
         }
@@ -107,21 +148,42 @@
       "actions": [
         {
           "target": "head-badge",
-          "action": "set",
-          "params": { "text": "git commit on feature → C3 — branches diverge", "style": "success" }
+          "params": {
+            "text": "git commit on feature → C3 — branches diverge",
+            "style": "success"
+          }
         },
         {
           "target": "commit-graph",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "c1", "label": "C1", "x": 1, "y": 2 },
-              { "id": "c2", "label": "C2", "x": 3, "y": 2, "color": "#b79fff" },
-              { "id": "c3", "label": "C3", "x": 5, "y": 4, "color": "#3adffA" }
+              {
+                "id": "c1",
+                "label": "C1"
+              },
+              {
+                "id": "c2",
+                "label": "C2",
+                "color": "#b79fff"
+              },
+              {
+                "id": "c3",
+                "label": "C3",
+                "color": "#3adffA"
+              }
             ],
             "edges": [
-              { "from": "c1", "to": "c2", "directed": true },
-              { "from": "c2", "to": "c3", "directed": true, "highlighted": true }
+              {
+                "from": "c1",
+                "to": "c2",
+                "directed": true
+              },
+              {
+                "from": "c2",
+                "to": "c3",
+                "directed": true,
+                "highlighted": true
+              }
             ]
           }
         }
@@ -133,23 +195,51 @@
       "actions": [
         {
           "target": "head-badge",
-          "action": "set",
-          "params": { "text": "git commit on main → C4 — divergence grows", "style": "highlight" }
+          "params": {
+            "text": "git commit on main → C4 — divergence grows",
+            "style": "highlight"
+          }
         },
         {
           "target": "commit-graph",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "c1", "label": "C1", "x": 1, "y": 2 },
-              { "id": "c2", "label": "C2", "x": 3, "y": 2 },
-              { "id": "c3", "label": "C3\n(feature)", "x": 5, "y": 4, "color": "#3adffA" },
-              { "id": "c4", "label": "C4\n(main)", "x": 5, "y": 2, "color": "#b79fff" }
+              {
+                "id": "c1",
+                "label": "C1"
+              },
+              {
+                "id": "c2",
+                "label": "C2"
+              },
+              {
+                "id": "c3",
+                "label": "C3\n(feature)",
+                "color": "#3adffA"
+              },
+              {
+                "id": "c4",
+                "label": "C4\n(main)",
+                "color": "#b79fff"
+              }
             ],
             "edges": [
-              { "from": "c1", "to": "c2", "directed": true },
-              { "from": "c2", "to": "c3", "directed": true },
-              { "from": "c2", "to": "c4", "directed": true, "highlighted": true }
+              {
+                "from": "c1",
+                "to": "c2",
+                "directed": true
+              },
+              {
+                "from": "c2",
+                "to": "c3",
+                "directed": true
+              },
+              {
+                "from": "c2",
+                "to": "c4",
+                "directed": true,
+                "highlighted": true
+              }
             ]
           }
         }
@@ -161,26 +251,67 @@
       "actions": [
         {
           "target": "head-badge",
-          "action": "set",
-          "params": { "text": "git merge feature — C5 merge commit joins both histories", "style": "success" }
+          "params": {
+            "text": "git merge feature — C5 merge commit joins both histories",
+            "style": "success"
+          }
         },
         {
           "target": "commit-graph",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "c1", "label": "C1", "x": 1, "y": 2 },
-              { "id": "c2", "label": "C2", "x": 3, "y": 2 },
-              { "id": "c3", "label": "C3", "x": 5, "y": 4, "color": "#3adffA" },
-              { "id": "c4", "label": "C4", "x": 5, "y": 2, "color": "#b79fff" },
-              { "id": "c5", "label": "C5\nmerge", "x": 7, "y": 2, "color": "#b79fff" }
+              {
+                "id": "c1",
+                "label": "C1"
+              },
+              {
+                "id": "c2",
+                "label": "C2"
+              },
+              {
+                "id": "c3",
+                "label": "C3",
+                "color": "#3adffA"
+              },
+              {
+                "id": "c4",
+                "label": "C4",
+                "color": "#b79fff"
+              },
+              {
+                "id": "c5",
+                "label": "C5\nmerge",
+                "color": "#b79fff"
+              }
             ],
             "edges": [
-              { "from": "c1", "to": "c2", "directed": true },
-              { "from": "c2", "to": "c3", "directed": true },
-              { "from": "c2", "to": "c4", "directed": true },
-              { "from": "c4", "to": "c5", "directed": true, "highlighted": true },
-              { "from": "c3", "to": "c5", "directed": true, "highlighted": true }
+              {
+                "from": "c1",
+                "to": "c2",
+                "directed": true
+              },
+              {
+                "from": "c2",
+                "to": "c3",
+                "directed": true
+              },
+              {
+                "from": "c2",
+                "to": "c4",
+                "directed": true
+              },
+              {
+                "from": "c4",
+                "to": "c5",
+                "directed": true,
+                "highlighted": true
+              },
+              {
+                "from": "c3",
+                "to": "c5",
+                "directed": true,
+                "highlighted": true
+              }
             ]
           }
         }
@@ -192,21 +323,42 @@
       "actions": [
         {
           "target": "head-badge",
-          "action": "set",
-          "params": { "text": "Fast-forward merge: no divergence — HEAD just moves forward", "style": "highlight" }
+          "params": {
+            "text": "Fast-forward merge: no divergence — HEAD just moves forward",
+            "style": "highlight"
+          }
         },
         {
           "target": "commit-graph",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "c1", "label": "C1", "x": 1, "y": 2 },
-              { "id": "c2", "label": "C2\nmain→", "x": 3, "y": 2, "color": "#b79fff" },
-              { "id": "c3", "label": "C3\nfeature", "x": 5, "y": 2, "color": "#3adffA" }
+              {
+                "id": "c1",
+                "label": "C1"
+              },
+              {
+                "id": "c2",
+                "label": "C2\nmain→",
+                "color": "#b79fff"
+              },
+              {
+                "id": "c3",
+                "label": "C3\nfeature",
+                "color": "#3adffA"
+              }
             ],
             "edges": [
-              { "from": "c1", "to": "c2", "directed": true },
-              { "from": "c2", "to": "c3", "directed": true, "highlighted": true }
+              {
+                "from": "c1",
+                "to": "c2",
+                "directed": true
+              },
+              {
+                "from": "c2",
+                "to": "c3",
+                "directed": true,
+                "highlighted": true
+              }
             ]
           }
         }
@@ -218,23 +370,50 @@
       "actions": [
         {
           "target": "head-badge",
-          "action": "set",
-          "params": { "text": "Merge conflict: both branches modified the same file", "style": "error" }
+          "params": {
+            "text": "Merge conflict: both branches modified the same file",
+            "style": "error"
+          }
         },
         {
           "target": "commit-graph",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "c1", "label": "C1", "x": 1, "y": 2 },
-              { "id": "c2", "label": "C2", "x": 3, "y": 2 },
-              { "id": "c3", "label": "C3\n⚠ conflict", "x": 5, "y": 4, "color": "#ff6e84" },
-              { "id": "c4", "label": "C4\n⚠ conflict", "x": 5, "y": 2, "color": "#ff6e84" }
+              {
+                "id": "c1",
+                "label": "C1"
+              },
+              {
+                "id": "c2",
+                "label": "C2"
+              },
+              {
+                "id": "c3",
+                "label": "C3\n⚠ conflict",
+                "color": "#ff6e84"
+              },
+              {
+                "id": "c4",
+                "label": "C4\n⚠ conflict",
+                "color": "#ff6e84"
+              }
             ],
             "edges": [
-              { "from": "c1", "to": "c2", "directed": true },
-              { "from": "c2", "to": "c3", "directed": true },
-              { "from": "c2", "to": "c4", "directed": true }
+              {
+                "from": "c1",
+                "to": "c2",
+                "directed": true
+              },
+              {
+                "from": "c2",
+                "to": "c3",
+                "directed": true
+              },
+              {
+                "from": "c2",
+                "to": "c4",
+                "directed": true
+              }
             ]
           }
         }
@@ -246,23 +425,51 @@
       "actions": [
         {
           "target": "head-badge",
-          "action": "set",
-          "params": { "text": "git rebase main: commits \"replayed\" onto latest main", "style": "highlight" }
+          "params": {
+            "text": "git rebase main: commits \"replayed\" onto latest main",
+            "style": "highlight"
+          }
         },
         {
           "target": "commit-graph",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "c1", "label": "C1", "x": 1, "y": 2 },
-              { "id": "c2", "label": "C2", "x": 3, "y": 2 },
-              { "id": "c4", "label": "C4\n(main)", "x": 5, "y": 2, "color": "#b79fff" },
-              { "id": "c3r", "label": "C3'\n(rebased)", "x": 7, "y": 2, "color": "#3adffA" }
+              {
+                "id": "c1",
+                "label": "C1"
+              },
+              {
+                "id": "c2",
+                "label": "C2"
+              },
+              {
+                "id": "c4",
+                "label": "C4\n(main)",
+                "color": "#b79fff"
+              },
+              {
+                "id": "c3r",
+                "label": "C3'\n(rebased)",
+                "color": "#3adffA"
+              }
             ],
             "edges": [
-              { "from": "c1", "to": "c2", "directed": true },
-              { "from": "c2", "to": "c4", "directed": true },
-              { "from": "c4", "to": "c3r", "directed": true, "highlighted": true }
+              {
+                "from": "c1",
+                "to": "c2",
+                "directed": true
+              },
+              {
+                "from": "c2",
+                "to": "c4",
+                "directed": true
+              },
+              {
+                "from": "c4",
+                "to": "c3r",
+                "directed": true,
+                "highlighted": true
+              }
             ]
           }
         }
@@ -274,25 +481,61 @@
       "actions": [
         {
           "target": "head-badge",
-          "action": "set",
-          "params": { "text": "git cherry-pick C3' — copy just one commit to main", "style": "success" }
+          "params": {
+            "text": "git cherry-pick C3' — copy just one commit to main",
+            "style": "success"
+          }
         },
         {
           "target": "commit-graph",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "c1", "label": "C1", "x": 1, "y": 2 },
-              { "id": "c2", "label": "C2", "x": 3, "y": 2 },
-              { "id": "c4", "label": "C4", "x": 5, "y": 2, "color": "#b79fff" },
-              { "id": "c3r", "label": "C3'", "x": 7, "y": 4, "color": "#3adffA" },
-              { "id": "c3cp", "label": "C3''\n(cherry)", "x": 7, "y": 2, "color": "#b79fff" }
+              {
+                "id": "c1",
+                "label": "C1"
+              },
+              {
+                "id": "c2",
+                "label": "C2"
+              },
+              {
+                "id": "c4",
+                "label": "C4",
+                "color": "#b79fff"
+              },
+              {
+                "id": "c3r",
+                "label": "C3'",
+                "color": "#3adffA"
+              },
+              {
+                "id": "c3cp",
+                "label": "C3''\n(cherry)",
+                "color": "#b79fff"
+              }
             ],
             "edges": [
-              { "from": "c1", "to": "c2", "directed": true },
-              { "from": "c2", "to": "c4", "directed": true },
-              { "from": "c4", "to": "c3cp", "directed": true, "highlighted": true },
-              { "from": "c4", "to": "c3r", "directed": true }
+              {
+                "from": "c1",
+                "to": "c2",
+                "directed": true
+              },
+              {
+                "from": "c2",
+                "to": "c4",
+                "directed": true
+              },
+              {
+                "from": "c4",
+                "to": "c3cp",
+                "directed": true,
+                "highlighted": true
+              },
+              {
+                "from": "c4",
+                "to": "c3r",
+                "directed": true
+              }
             ]
           }
         }
@@ -304,23 +547,51 @@
       "actions": [
         {
           "target": "head-badge",
-          "action": "set",
-          "params": { "text": "git reset --hard C4 — HEAD moves back, C3'' disappears", "style": "error" }
+          "params": {
+            "text": "git reset --hard C4 — HEAD moves back, C3'' disappears",
+            "style": "error"
+          }
         },
         {
           "target": "commit-graph",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "c1", "label": "C1", "x": 1, "y": 2 },
-              { "id": "c2", "label": "C2", "x": 3, "y": 2 },
-              { "id": "c4", "label": "C4\n← HEAD", "x": 5, "y": 2, "color": "#b79fff" },
-              { "id": "c3r", "label": "C3'", "x": 7, "y": 4, "color": "#3adffA" }
+              {
+                "id": "c1",
+                "label": "C1"
+              },
+              {
+                "id": "c2",
+                "label": "C2"
+              },
+              {
+                "id": "c4",
+                "label": "C4\n← HEAD",
+                "color": "#b79fff"
+              },
+              {
+                "id": "c3r",
+                "label": "C3'",
+                "color": "#3adffA"
+              }
             ],
             "edges": [
-              { "from": "c1", "to": "c2", "directed": true },
-              { "from": "c2", "to": "c4", "directed": true, "highlighted": true },
-              { "from": "c4", "to": "c3r", "directed": true }
+              {
+                "from": "c1",
+                "to": "c2",
+                "directed": true
+              },
+              {
+                "from": "c2",
+                "to": "c4",
+                "directed": true,
+                "highlighted": true
+              },
+              {
+                "from": "c4",
+                "to": "c3r",
+                "directed": true
+              }
             ]
           }
         }
@@ -332,25 +603,61 @@
       "actions": [
         {
           "target": "head-badge",
-          "action": "set",
-          "params": { "text": "git revert C4 — new commit C5 that undoes C4's changes", "style": "success" }
+          "params": {
+            "text": "git revert C4 — new commit C5 that undoes C4's changes",
+            "style": "success"
+          }
         },
         {
           "target": "commit-graph",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "c1", "label": "C1", "x": 1, "y": 2 },
-              { "id": "c2", "label": "C2", "x": 3, "y": 2 },
-              { "id": "c4", "label": "C4", "x": 5, "y": 2, "color": "#b79fff" },
-              { "id": "c3r", "label": "C3'", "x": 7, "y": 4, "color": "#3adffA" },
-              { "id": "c5rev", "label": "C5\nrevert", "x": 7, "y": 2, "color": "#b79fff" }
+              {
+                "id": "c1",
+                "label": "C1"
+              },
+              {
+                "id": "c2",
+                "label": "C2"
+              },
+              {
+                "id": "c4",
+                "label": "C4",
+                "color": "#b79fff"
+              },
+              {
+                "id": "c3r",
+                "label": "C3'",
+                "color": "#3adffA"
+              },
+              {
+                "id": "c5rev",
+                "label": "C5\nrevert",
+                "color": "#b79fff"
+              }
             ],
             "edges": [
-              { "from": "c1", "to": "c2", "directed": true },
-              { "from": "c2", "to": "c4", "directed": true },
-              { "from": "c4", "to": "c5rev", "directed": true, "highlighted": true },
-              { "from": "c4", "to": "c3r", "directed": true }
+              {
+                "from": "c1",
+                "to": "c2",
+                "directed": true
+              },
+              {
+                "from": "c2",
+                "to": "c4",
+                "directed": true
+              },
+              {
+                "from": "c4",
+                "to": "c5rev",
+                "directed": true,
+                "highlighted": true
+              },
+              {
+                "from": "c4",
+                "to": "c3r",
+                "directed": true
+              }
             ]
           }
         }
@@ -358,40 +665,57 @@
       "duration": 2000
     }
   ],
-
   "controls": [
     {
       "id": "btn-commit",
       "type": "button",
       "label": "Commit",
-      "config": { "variant": "primary", "defaultValue": null, "goToStep": 0 }
+      "config": {
+        "variant": "primary",
+        "defaultValue": null,
+        "goToStep": 0
+      }
     },
     {
       "id": "btn-branch",
       "type": "button",
       "label": "Create Branch",
-      "config": { "variant": "primary", "defaultValue": null, "goToStep": 2 }
+      "config": {
+        "variant": "primary",
+        "defaultValue": null,
+        "goToStep": 2
+      }
     },
     {
       "id": "branch-name",
       "type": "input",
       "label": "Branch Name",
-      "config": { "placeholder": "e.g. feature/auth", "defaultValue": "" }
+      "config": {
+        "placeholder": "e.g. feature/auth",
+        "defaultValue": ""
+      }
     },
     {
       "id": "btn-merge",
       "type": "button",
       "label": "Merge",
-      "config": { "variant": "primary", "defaultValue": null, "goToStep": 5 }
+      "config": {
+        "variant": "primary",
+        "defaultValue": null,
+        "goToStep": 5
+      }
     },
     {
       "id": "btn-rebase",
       "type": "button",
       "label": "Rebase",
-      "config": { "variant": "secondary", "defaultValue": null, "goToStep": 8 }
+      "config": {
+        "variant": "secondary",
+        "defaultValue": null,
+        "goToStep": 8
+      }
     }
   ],
-
   "explanation": [
     {
       "heading": "Commits are Snapshots",
@@ -426,7 +750,6 @@
       "appearsAtStep": 10
     }
   ],
-
   "popups": [
     {
       "id": "pop-branch-cheap",
@@ -435,8 +758,14 @@
       "showAtStep": 2,
       "hideAtStep": 3,
       "style": "info",
-      "anchor": { "x": 30, "y": 82 },
-      "targetPoint": { "x": 52, "y": 65 }
+      "anchor": {
+        "x": 30,
+        "y": 82
+      },
+      "targetPoint": {
+        "x": 52,
+        "y": 65
+      }
     },
     {
       "id": "pop-merge-commit",
@@ -445,8 +774,14 @@
       "showAtStep": 5,
       "hideAtStep": 6,
       "style": "info",
-      "anchor": { "x": 82, "y": 22 },
-      "targetPoint": { "x": 76, "y": 42 }
+      "anchor": {
+        "x": 82,
+        "y": 22
+      },
+      "targetPoint": {
+        "x": 76,
+        "y": 42
+      }
     },
     {
       "id": "pop-rebase-new-sha",
@@ -455,8 +790,14 @@
       "showAtStep": 8,
       "hideAtStep": 9,
       "style": "warning",
-      "anchor": { "x": 30, "y": 30 },
-      "targetPoint": { "x": 68, "y": 48 }
+      "anchor": {
+        "x": 30,
+        "y": 30
+      },
+      "targetPoint": {
+        "x": 68,
+        "y": 48
+      }
     },
     {
       "id": "pop-reset-danger",
@@ -465,11 +806,16 @@
       "showAtStep": 10,
       "hideAtStep": 11,
       "style": "warning",
-      "anchor": { "x": 25, "y": 22 },
-      "targetPoint": { "x": 60, "y": 42 }
+      "anchor": {
+        "x": 25,
+        "y": 22
+      },
+      "targetPoint": {
+        "x": 60,
+        "y": 42
+      }
     }
   ],
-
   "challenges": [
     {
       "id": "ch-merge-vs-rebase",

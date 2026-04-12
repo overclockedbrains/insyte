@@ -5,29 +5,42 @@
   "layout": "text-left-canvas-right",
   "description": "See how a Trie (Prefix Tree) enables O(m) search, insert, and startsWith — where m is the word length. Powers autocomplete in every search bar you've used.",
   "category": "Low Level Design",
-  "tags": ["trie", "prefix-tree", "autocomplete", "design", "lld", "tree"],
-
+  "tags": [
+    "trie",
+    "prefix-tree",
+    "autocomplete",
+    "design",
+    "lld",
+    "tree"
+  ],
   "visuals": [
     {
       "id": "trie-tree",
       "type": "tree",
       "label": "Trie Structure  (* = end of word)",
-      "position": { "x": 50, "y": 48 },
       "initialState": {
         "nodes": [
-          { "id": "root", "value": "·", "children": [], "x": 3, "y": 0 }
+          {
+            "id": "root",
+            "value": "·",
+            "children": []
+          }
         ],
         "rootId": "root"
-      }
+      },
+      "layoutHint": "tree-RT"
     },
     {
       "id": "char-badge",
       "type": "text-badge",
       "label": "Current Operation",
-      "initialState": { "text": "Empty Trie  —  root node (·) represents start", "style": "default" }
+      "initialState": {
+        "text": "Empty Trie  —  root node (·) represents start",
+        "style": "default"
+      },
+      "slot": "top-center"
     }
   ],
-
   "steps": [
     {
       "index": 0,
@@ -39,18 +52,44 @@
       "actions": [
         {
           "target": "char-badge",
-          "action": "set",
-          "params": { "text": "insert('app')  →  a → p → p*", "style": "highlight" }
+          "params": {
+            "text": "insert('app')  →  a → p → p*",
+            "style": "highlight"
+          }
         },
         {
           "target": "trie-tree",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "root", "value": "·", "children": ["a1"], "x": 3, "y": 0 },
-              { "id": "a1", "value": "a", "children": ["p1"], "x": 3, "y": 1, "highlight": "var(--color-primary)" },
-              { "id": "p1", "value": "p", "children": ["p2"], "x": 3, "y": 2, "highlight": "var(--color-primary)" },
-              { "id": "p2", "value": "p*", "children": [], "x": 3, "y": 3, "highlight": "var(--color-secondary)" }
+              {
+                "id": "root",
+                "value": "·",
+                "children": [
+                  "a1"
+                ]
+              },
+              {
+                "id": "a1",
+                "value": "a",
+                "children": [
+                  "p1"
+                ],
+                "highlight": "var(--color-primary)"
+              },
+              {
+                "id": "p1",
+                "value": "p",
+                "children": [
+                  "p2"
+                ],
+                "highlight": "var(--color-primary)"
+              },
+              {
+                "id": "p2",
+                "value": "p*",
+                "children": [],
+                "highlight": "var(--color-secondary)"
+              }
             ],
             "rootId": "root"
           }
@@ -63,20 +102,57 @@
       "actions": [
         {
           "target": "char-badge",
-          "action": "set",
-          "params": { "text": "insert('apple')  →  shared prefix 'app' + new l → e*", "style": "highlight" }
+          "params": {
+            "text": "insert('apple')  →  shared prefix 'app' + new l → e*",
+            "style": "highlight"
+          }
         },
         {
           "target": "trie-tree",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "root", "value": "·", "children": ["a1"], "x": 3, "y": 0 },
-              { "id": "a1", "value": "a", "children": ["p1"], "x": 3, "y": 1 },
-              { "id": "p1", "value": "p", "children": ["p2"], "x": 3, "y": 2 },
-              { "id": "p2", "value": "p*", "children": ["l1"], "x": 3, "y": 3 },
-              { "id": "l1", "value": "l", "children": ["e1"], "x": 3, "y": 4, "highlight": "var(--color-primary)" },
-              { "id": "e1", "value": "e*", "children": [], "x": 3, "y": 5, "highlight": "var(--color-secondary)" }
+              {
+                "id": "root",
+                "value": "·",
+                "children": [
+                  "a1"
+                ]
+              },
+              {
+                "id": "a1",
+                "value": "a",
+                "children": [
+                  "p1"
+                ]
+              },
+              {
+                "id": "p1",
+                "value": "p",
+                "children": [
+                  "p2"
+                ]
+              },
+              {
+                "id": "p2",
+                "value": "p*",
+                "children": [
+                  "l1"
+                ]
+              },
+              {
+                "id": "l1",
+                "value": "l",
+                "children": [
+                  "e1"
+                ],
+                "highlight": "var(--color-primary)"
+              },
+              {
+                "id": "e1",
+                "value": "e*",
+                "children": [],
+                "highlight": "var(--color-secondary)"
+              }
             ],
             "rootId": "root"
           }
@@ -89,23 +165,78 @@
       "actions": [
         {
           "target": "char-badge",
-          "action": "set",
-          "params": { "text": "insert('ban')  →  new branch: b → a → n*  (no shared prefix)", "style": "highlight" }
+          "params": {
+            "text": "insert('ban')  →  new branch: b → a → n*  (no shared prefix)",
+            "style": "highlight"
+          }
         },
         {
           "target": "trie-tree",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "root", "value": "·", "children": ["a1", "b1"], "x": 3, "y": 0 },
-              { "id": "a1", "value": "a", "children": ["p1"], "x": 1.5, "y": 1 },
-              { "id": "p1", "value": "p", "children": ["p2"], "x": 1.5, "y": 2 },
-              { "id": "p2", "value": "p*", "children": ["l1"], "x": 1.5, "y": 3 },
-              { "id": "l1", "value": "l", "children": ["e1"], "x": 1.5, "y": 4 },
-              { "id": "e1", "value": "e*", "children": [], "x": 1.5, "y": 5 },
-              { "id": "b1", "value": "b", "children": ["an1"], "x": 4.5, "y": 1, "highlight": "var(--color-primary)" },
-              { "id": "an1", "value": "a", "children": ["n1"], "x": 4.5, "y": 2, "highlight": "var(--color-primary)" },
-              { "id": "n1", "value": "n*", "children": [], "x": 4.5, "y": 3, "highlight": "var(--color-secondary)" }
+              {
+                "id": "root",
+                "value": "·",
+                "children": [
+                  "a1",
+                  "b1"
+                ]
+              },
+              {
+                "id": "a1",
+                "value": "a",
+                "children": [
+                  "p1"
+                ]
+              },
+              {
+                "id": "p1",
+                "value": "p",
+                "children": [
+                  "p2"
+                ]
+              },
+              {
+                "id": "p2",
+                "value": "p*",
+                "children": [
+                  "l1"
+                ]
+              },
+              {
+                "id": "l1",
+                "value": "l",
+                "children": [
+                  "e1"
+                ]
+              },
+              {
+                "id": "e1",
+                "value": "e*",
+                "children": []
+              },
+              {
+                "id": "b1",
+                "value": "b",
+                "children": [
+                  "an1"
+                ],
+                "highlight": "var(--color-primary)"
+              },
+              {
+                "id": "an1",
+                "value": "a",
+                "children": [
+                  "n1"
+                ],
+                "highlight": "var(--color-primary)"
+              },
+              {
+                "id": "n1",
+                "value": "n*",
+                "children": [],
+                "highlight": "var(--color-secondary)"
+              }
             ],
             "rootId": "root"
           }
@@ -118,23 +249,79 @@
       "actions": [
         {
           "target": "char-badge",
-          "action": "set",
-          "params": { "text": "search('app')  →  traverse root→a→p→p*  →  found (word end)  ✓", "style": "success" }
+          "params": {
+            "text": "search('app')  →  traverse root→a→p→p*  →  found (word end)  ✓",
+            "style": "success"
+          }
         },
         {
           "target": "trie-tree",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "root", "value": "·", "children": ["a1", "b1"], "x": 3, "y": 0, "highlight": "var(--color-secondary)" },
-              { "id": "a1", "value": "a", "children": ["p1"], "x": 1.5, "y": 1, "highlight": "var(--color-secondary)" },
-              { "id": "p1", "value": "p", "children": ["p2"], "x": 1.5, "y": 2, "highlight": "var(--color-secondary)" },
-              { "id": "p2", "value": "p*", "children": ["l1"], "x": 1.5, "y": 3, "highlight": "var(--color-secondary)" },
-              { "id": "l1", "value": "l", "children": ["e1"], "x": 1.5, "y": 4 },
-              { "id": "e1", "value": "e*", "children": [], "x": 1.5, "y": 5 },
-              { "id": "b1", "value": "b", "children": ["an1"], "x": 4.5, "y": 1 },
-              { "id": "an1", "value": "a", "children": ["n1"], "x": 4.5, "y": 2 },
-              { "id": "n1", "value": "n*", "children": [], "x": 4.5, "y": 3 }
+              {
+                "id": "root",
+                "value": "·",
+                "children": [
+                  "a1",
+                  "b1"
+                ],
+                "highlight": "var(--color-secondary)"
+              },
+              {
+                "id": "a1",
+                "value": "a",
+                "children": [
+                  "p1"
+                ],
+                "highlight": "var(--color-secondary)"
+              },
+              {
+                "id": "p1",
+                "value": "p",
+                "children": [
+                  "p2"
+                ],
+                "highlight": "var(--color-secondary)"
+              },
+              {
+                "id": "p2",
+                "value": "p*",
+                "children": [
+                  "l1"
+                ],
+                "highlight": "var(--color-secondary)"
+              },
+              {
+                "id": "l1",
+                "value": "l",
+                "children": [
+                  "e1"
+                ]
+              },
+              {
+                "id": "e1",
+                "value": "e*",
+                "children": []
+              },
+              {
+                "id": "b1",
+                "value": "b",
+                "children": [
+                  "an1"
+                ]
+              },
+              {
+                "id": "an1",
+                "value": "a",
+                "children": [
+                  "n1"
+                ]
+              },
+              {
+                "id": "n1",
+                "value": "n*",
+                "children": []
+              }
             ],
             "rootId": "root"
           }
@@ -147,23 +334,78 @@
       "actions": [
         {
           "target": "char-badge",
-          "action": "set",
-          "params": { "text": "startsWith('ap')  →  traverse root→a→p  →  prefix exists  ✓", "style": "success" }
+          "params": {
+            "text": "startsWith('ap')  →  traverse root→a→p  →  prefix exists  ✓",
+            "style": "success"
+          }
         },
         {
           "target": "trie-tree",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "root", "value": "·", "children": ["a1", "b1"], "x": 3, "y": 0, "highlight": "var(--color-secondary)" },
-              { "id": "a1", "value": "a", "children": ["p1"], "x": 1.5, "y": 1, "highlight": "var(--color-secondary)" },
-              { "id": "p1", "value": "p", "children": ["p2"], "x": 1.5, "y": 2, "highlight": "var(--color-secondary)" },
-              { "id": "p2", "value": "p*", "children": ["l1"], "x": 1.5, "y": 3 },
-              { "id": "l1", "value": "l", "children": ["e1"], "x": 1.5, "y": 4 },
-              { "id": "e1", "value": "e*", "children": [], "x": 1.5, "y": 5 },
-              { "id": "b1", "value": "b", "children": ["an1"], "x": 4.5, "y": 1 },
-              { "id": "an1", "value": "a", "children": ["n1"], "x": 4.5, "y": 2 },
-              { "id": "n1", "value": "n*", "children": [], "x": 4.5, "y": 3 }
+              {
+                "id": "root",
+                "value": "·",
+                "children": [
+                  "a1",
+                  "b1"
+                ],
+                "highlight": "var(--color-secondary)"
+              },
+              {
+                "id": "a1",
+                "value": "a",
+                "children": [
+                  "p1"
+                ],
+                "highlight": "var(--color-secondary)"
+              },
+              {
+                "id": "p1",
+                "value": "p",
+                "children": [
+                  "p2"
+                ],
+                "highlight": "var(--color-secondary)"
+              },
+              {
+                "id": "p2",
+                "value": "p*",
+                "children": [
+                  "l1"
+                ]
+              },
+              {
+                "id": "l1",
+                "value": "l",
+                "children": [
+                  "e1"
+                ]
+              },
+              {
+                "id": "e1",
+                "value": "e*",
+                "children": []
+              },
+              {
+                "id": "b1",
+                "value": "b",
+                "children": [
+                  "an1"
+                ]
+              },
+              {
+                "id": "an1",
+                "value": "a",
+                "children": [
+                  "n1"
+                ]
+              },
+              {
+                "id": "n1",
+                "value": "n*",
+                "children": []
+              }
             ],
             "rootId": "root"
           }
@@ -176,23 +418,78 @@
       "actions": [
         {
           "target": "char-badge",
-          "action": "set",
-          "params": { "text": "search('ap')  →  traverse root→a→p  →  p is NOT a word end  →  false", "style": "error" }
+          "params": {
+            "text": "search('ap')  →  traverse root→a→p  →  p is NOT a word end  →  false",
+            "style": "error"
+          }
         },
         {
           "target": "trie-tree",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "root", "value": "·", "children": ["a1", "b1"], "x": 3, "y": 0, "highlight": "var(--color-primary)" },
-              { "id": "a1", "value": "a", "children": ["p1"], "x": 1.5, "y": 1, "highlight": "var(--color-primary)" },
-              { "id": "p1", "value": "p", "children": ["p2"], "x": 1.5, "y": 2, "highlight": "var(--color-error)" },
-              { "id": "p2", "value": "p*", "children": ["l1"], "x": 1.5, "y": 3 },
-              { "id": "l1", "value": "l", "children": ["e1"], "x": 1.5, "y": 4 },
-              { "id": "e1", "value": "e*", "children": [], "x": 1.5, "y": 5 },
-              { "id": "b1", "value": "b", "children": ["an1"], "x": 4.5, "y": 1 },
-              { "id": "an1", "value": "a", "children": ["n1"], "x": 4.5, "y": 2 },
-              { "id": "n1", "value": "n*", "children": [], "x": 4.5, "y": 3 }
+              {
+                "id": "root",
+                "value": "·",
+                "children": [
+                  "a1",
+                  "b1"
+                ],
+                "highlight": "var(--color-primary)"
+              },
+              {
+                "id": "a1",
+                "value": "a",
+                "children": [
+                  "p1"
+                ],
+                "highlight": "var(--color-primary)"
+              },
+              {
+                "id": "p1",
+                "value": "p",
+                "children": [
+                  "p2"
+                ],
+                "highlight": "var(--color-error)"
+              },
+              {
+                "id": "p2",
+                "value": "p*",
+                "children": [
+                  "l1"
+                ]
+              },
+              {
+                "id": "l1",
+                "value": "l",
+                "children": [
+                  "e1"
+                ]
+              },
+              {
+                "id": "e1",
+                "value": "e*",
+                "children": []
+              },
+              {
+                "id": "b1",
+                "value": "b",
+                "children": [
+                  "an1"
+                ]
+              },
+              {
+                "id": "an1",
+                "value": "a",
+                "children": [
+                  "n1"
+                ]
+              },
+              {
+                "id": "n1",
+                "value": "n*",
+                "children": []
+              }
             ],
             "rootId": "root"
           }
@@ -205,26 +502,99 @@
       "actions": [
         {
           "target": "char-badge",
-          "action": "set",
-          "params": { "text": "insert('banana')  →  extends 'ban' with a→n→a*", "style": "highlight" }
+          "params": {
+            "text": "insert('banana')  →  extends 'ban' with a→n→a*",
+            "style": "highlight"
+          }
         },
         {
           "target": "trie-tree",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "root", "value": "·", "children": ["a1", "b1"], "x": 3, "y": 0 },
-              { "id": "a1", "value": "a", "children": ["p1"], "x": 1.5, "y": 1 },
-              { "id": "p1", "value": "p", "children": ["p2"], "x": 1.5, "y": 2 },
-              { "id": "p2", "value": "p*", "children": ["l1"], "x": 1.5, "y": 3 },
-              { "id": "l1", "value": "l", "children": ["e1"], "x": 1.5, "y": 4 },
-              { "id": "e1", "value": "e*", "children": [], "x": 1.5, "y": 5 },
-              { "id": "b1", "value": "b", "children": ["an1"], "x": 4.5, "y": 1 },
-              { "id": "an1", "value": "a", "children": ["n1"], "x": 4.5, "y": 2 },
-              { "id": "n1", "value": "n*", "children": ["na1"], "x": 4.5, "y": 3 },
-              { "id": "na1", "value": "a", "children": ["nan1"], "x": 4.5, "y": 4, "highlight": "var(--color-primary)" },
-              { "id": "nan1", "value": "n", "children": ["nana1"], "x": 4.5, "y": 5, "highlight": "var(--color-primary)" },
-              { "id": "nana1", "value": "a*", "children": [], "x": 4.5, "y": 6, "highlight": "var(--color-secondary)" }
+              {
+                "id": "root",
+                "value": "·",
+                "children": [
+                  "a1",
+                  "b1"
+                ]
+              },
+              {
+                "id": "a1",
+                "value": "a",
+                "children": [
+                  "p1"
+                ]
+              },
+              {
+                "id": "p1",
+                "value": "p",
+                "children": [
+                  "p2"
+                ]
+              },
+              {
+                "id": "p2",
+                "value": "p*",
+                "children": [
+                  "l1"
+                ]
+              },
+              {
+                "id": "l1",
+                "value": "l",
+                "children": [
+                  "e1"
+                ]
+              },
+              {
+                "id": "e1",
+                "value": "e*",
+                "children": []
+              },
+              {
+                "id": "b1",
+                "value": "b",
+                "children": [
+                  "an1"
+                ]
+              },
+              {
+                "id": "an1",
+                "value": "a",
+                "children": [
+                  "n1"
+                ]
+              },
+              {
+                "id": "n1",
+                "value": "n*",
+                "children": [
+                  "na1"
+                ]
+              },
+              {
+                "id": "na1",
+                "value": "a",
+                "children": [
+                  "nan1"
+                ],
+                "highlight": "var(--color-primary)"
+              },
+              {
+                "id": "nan1",
+                "value": "n",
+                "children": [
+                  "nana1"
+                ],
+                "highlight": "var(--color-primary)"
+              },
+              {
+                "id": "nana1",
+                "value": "a*",
+                "children": [],
+                "highlight": "var(--color-secondary)"
+              }
             ],
             "rootId": "root"
           }
@@ -237,26 +607,97 @@
       "actions": [
         {
           "target": "char-badge",
-          "action": "set",
-          "params": { "text": "search('xyz')  →  'x' not a child of root  →  immediately false  (O(m))", "style": "error" }
+          "params": {
+            "text": "search('xyz')  →  'x' not a child of root  →  immediately false  (O(m))",
+            "style": "error"
+          }
         },
         {
           "target": "trie-tree",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "root", "value": "·", "children": ["a1", "b1"], "x": 3, "y": 0, "highlight": "var(--color-error)" },
-              { "id": "a1", "value": "a", "children": ["p1"], "x": 1.5, "y": 1 },
-              { "id": "p1", "value": "p", "children": ["p2"], "x": 1.5, "y": 2 },
-              { "id": "p2", "value": "p*", "children": ["l1"], "x": 1.5, "y": 3 },
-              { "id": "l1", "value": "l", "children": ["e1"], "x": 1.5, "y": 4 },
-              { "id": "e1", "value": "e*", "children": [], "x": 1.5, "y": 5 },
-              { "id": "b1", "value": "b", "children": ["an1"], "x": 4.5, "y": 1 },
-              { "id": "an1", "value": "a", "children": ["n1"], "x": 4.5, "y": 2 },
-              { "id": "n1", "value": "n*", "children": ["na1"], "x": 4.5, "y": 3 },
-              { "id": "na1", "value": "a", "children": ["nan1"], "x": 4.5, "y": 4 },
-              { "id": "nan1", "value": "n", "children": ["nana1"], "x": 4.5, "y": 5 },
-              { "id": "nana1", "value": "a*", "children": [], "x": 4.5, "y": 6 }
+              {
+                "id": "root",
+                "value": "·",
+                "children": [
+                  "a1",
+                  "b1"
+                ],
+                "highlight": "var(--color-error)"
+              },
+              {
+                "id": "a1",
+                "value": "a",
+                "children": [
+                  "p1"
+                ]
+              },
+              {
+                "id": "p1",
+                "value": "p",
+                "children": [
+                  "p2"
+                ]
+              },
+              {
+                "id": "p2",
+                "value": "p*",
+                "children": [
+                  "l1"
+                ]
+              },
+              {
+                "id": "l1",
+                "value": "l",
+                "children": [
+                  "e1"
+                ]
+              },
+              {
+                "id": "e1",
+                "value": "e*",
+                "children": []
+              },
+              {
+                "id": "b1",
+                "value": "b",
+                "children": [
+                  "an1"
+                ]
+              },
+              {
+                "id": "an1",
+                "value": "a",
+                "children": [
+                  "n1"
+                ]
+              },
+              {
+                "id": "n1",
+                "value": "n*",
+                "children": [
+                  "na1"
+                ]
+              },
+              {
+                "id": "na1",
+                "value": "a",
+                "children": [
+                  "nan1"
+                ]
+              },
+              {
+                "id": "nan1",
+                "value": "n",
+                "children": [
+                  "nana1"
+                ]
+              },
+              {
+                "id": "nana1",
+                "value": "a*",
+                "children": []
+              }
             ],
             "rootId": "root"
           }
@@ -265,46 +706,62 @@
       "duration": 2000
     }
   ],
-
   "controls": [
     {
       "id": "btn-insert-app",
       "type": "button",
       "label": "insert('app')",
-      "config": { "variant": "primary", "goToStep": 1 }
+      "config": {
+        "variant": "primary",
+        "goToStep": 1
+      }
     },
     {
       "id": "btn-insert-apple",
       "type": "button",
       "label": "insert('apple')",
-      "config": { "variant": "primary", "goToStep": 2 }
+      "config": {
+        "variant": "primary",
+        "goToStep": 2
+      }
     },
     {
       "id": "btn-insert-ban",
       "type": "button",
       "label": "insert('ban')",
-      "config": { "variant": "primary", "goToStep": 3 }
+      "config": {
+        "variant": "primary",
+        "goToStep": 3
+      }
     },
     {
       "id": "btn-search-app",
       "type": "button",
       "label": "search('app') ✓",
-      "config": { "variant": "secondary", "goToStep": 4 }
+      "config": {
+        "variant": "secondary",
+        "goToStep": 4
+      }
     },
     {
       "id": "btn-starts-ap",
       "type": "button",
       "label": "startsWith('ap') ✓",
-      "config": { "variant": "secondary", "goToStep": 5 }
+      "config": {
+        "variant": "secondary",
+        "goToStep": 5
+      }
     },
     {
       "id": "btn-search-ap",
       "type": "button",
       "label": "search('ap') ✗",
-      "config": { "variant": "destructive", "goToStep": 6 }
+      "config": {
+        "variant": "destructive",
+        "goToStep": 6
+      }
     }
   ],
-
   "explanation": [
     {
       "heading": "What is a Trie?",
@@ -328,7 +785,6 @@
       "appearsAtStep": 6
     }
   ],
-
   "popups": [
     {
       "id": "pop-shared-prefix",
@@ -337,7 +793,10 @@
       "showAtStep": 2,
       "hideAtStep": 3,
       "style": "insight",
-      "anchor": { "x": 50, "y": 15 }
+      "anchor": {
+        "x": 50,
+        "y": 15
+      }
     },
     {
       "id": "pop-word-end",
@@ -346,10 +805,12 @@
       "showAtStep": 4,
       "hideAtStep": 6,
       "style": "info",
-      "anchor": { "x": 50, "y": 15 }
+      "anchor": {
+        "x": 50,
+        "y": 15
+      }
     }
   ],
-
   "challenges": [
     {
       "id": "ch-autocomplete",

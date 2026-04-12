@@ -45,64 +45,50 @@ export const ConditionSchema = z.object({
   equals: z.unknown(),
 })
 
+// ─── Layout ───────────────────────────────────────────────────────────────────
+
+export const LayoutHintSchema = z.enum([
+  'dagre-TB', 'dagre-LR', 'dagre-BT', 'tree-RT',
+  'linear-H', 'linear-V', 'grid-2d', 'hashmap-buckets', 'radial',
+])
+
+export const SlotPositionSchema = z.enum([
+  'top-left', 'top-center', 'top-right',
+  'bottom-left', 'bottom-center', 'bottom-right',
+  'left-center', 'right-center',
+  'overlay-top', 'overlay-bottom', 'center',
+])
+
 // ─── Visual ───────────────────────────────────────────────────────────────────
 
 // A permissive type trick to allow dynamic structured values without structured generation dropping them
 const DynamicObjectSchema = z.record(z.string(), z.any())
 
 export const VisualSchema = z.object({
-  id: z.string(),
+  id: z.string().min(1),
   type: VisualTypeSchema,
   label: z.string().optional(),
-  position: z.object({ x: z.number(), y: z.number() }).optional(),
+  layoutHint: LayoutHintSchema.optional(),
+  slot: SlotPositionSchema.optional(),
   initialState: DynamicObjectSchema.optional().describe('Visual-specific initial configuration, e.g. { "entries": [] } or { "text": "foo" }'),
   showWhen: ConditionSchema.optional(),
 }).describe('A visual primitive representing a core data structure or graphic element on the canvas (e.g. array, hashmap, tree, text-badge).')
 
 // ─── Action ───────────────────────────────────────────────────────────────────
 
-const BaseActionSchema = z.object({
+/**
+ * Universal state-snapshot action format.
+ * params contains the COMPLETE visual state at this step (not a delta).
+ * Applying the same action twice yields the same result (idempotent).
+ */
+export const ActionSchema = z.object({
   target: z.string(),
-})
-
-// Typed state shapes for the "set" action, one per visual type.
-// Using a union means the JSON Schema becomes anyOf with required fields —
-// the model cannot emit {} because it satisfies none of the branches.
-export const ActionSchema = z.discriminatedUnion('action', [
-  BaseActionSchema.extend({
-    action: z.literal('set'),
-    // z.record keeps the schema simple enough for Gemini's constrained decoding.
-    // Content correctness is enforced by the system prompt + post-generation validation.
-    params: z.record(z.string(), z.any()).describe('Visual state object. Must include the required field for the target visual type: text-badge→text, hashmap→entries[], linked-list→nodes[], array→cells[], stack/queue→items[], counter→value, tree→root, graph→nodes[]+edges[].'),
-  }),
-  BaseActionSchema.extend({
-    action: z.literal('set-value'),
-    params: z.object({
-      value: z.any().describe('The primitive scalar value to set (e.g. text string, counter number, or boolean).'),
-    }),
-  }),
-  BaseActionSchema.extend({
-    action: z.literal('push'),
-    params: z.object({
-      field: z.string().optional().describe('Target array field name (e.g. "items", "cells", "entries")'),
-      item: z.any().describe('The item to append to the array'),
-    }),
-  }),
-  BaseActionSchema.extend({
-    action: z.literal('pop'),
-    params: z.object({
-      field: z.string().optional(),
-    }),
-  }),
-  BaseActionSchema.extend({
-    action: z.literal('highlight'),
-    params: z.object({
-      field: z.string().optional(),
-      index: z.number().describe('Array index to target'),
-      value: z.any().optional().describe('The highlight payload (e.g. "hit", "miss", "active", or full object)'),
-    }),
-  }),
-]).describe('A mutation or animation mapping to a specific visual on the canvas during a particular step.')
+  params: z.record(z.string(), z.any()).describe(
+    'Complete visual state at this step. Must include the required field for the target visual type: ' +
+    'text-badge→text, hashmap→entries[], linked-list→nodes[], array→cells[], ' +
+    'stack/queue→items[], counter→value, tree→root, graph→nodes[]+edges[].'
+  ),
+}).describe('A state-snapshot mapping to a specific visual on the canvas during a particular step.')
 
 // ─── Step ─────────────────────────────────────────────────────────────────────
 

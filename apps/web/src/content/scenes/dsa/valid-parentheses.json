@@ -5,182 +5,405 @@
   "layout": "code-left-canvas-right",
   "description": "Validate bracket strings using a stack.",
   "category": "Data Structures & Algorithms",
-  "tags": ["stack", "parentheses", "strings"],
+  "tags": [
+    "stack",
+    "parentheses",
+    "strings"
+  ],
   "code": {
     "language": "python",
     "source": "def is_valid(s):\n    pairs = {')': '(', ']': '[', '}': '{'}\n    stack = []\n    for ch in s:\n        if ch in '([{':\n            stack.append(ch)\n        else:\n            if not stack or stack[-1] != pairs[ch]:\n                return False\n            stack.pop()\n    return len(stack) == 0\n\nfinalResult = is_valid('()[]{}')\n",
-    "highlightByStep": [0, 4, 5, 4, 8, 4, 8, 10]
+    "highlightByStep": [
+      0,
+      4,
+      5,
+      4,
+      8,
+      4,
+      8,
+      10
+    ]
   },
   "visuals": [
     {
       "id": "input",
       "type": "array",
       "label": "Input chars",
-      "position": { "x": 50, "y": 28 },
       "initialState": {
         "cells": [
-          { "value": "(", "highlight": "default" },
-          { "value": ")", "highlight": "default" },
-          { "value": "[", "highlight": "default" },
-          { "value": "]", "highlight": "default" },
-          { "value": "{", "highlight": "default" },
-          { "value": "}", "highlight": "default" }
+          {
+            "value": "(",
+            "highlight": "default"
+          },
+          {
+            "value": ")",
+            "highlight": "default"
+          },
+          {
+            "value": "[",
+            "highlight": "default"
+          },
+          {
+            "value": "]",
+            "highlight": "default"
+          },
+          {
+            "value": "{",
+            "highlight": "default"
+          },
+          {
+            "value": "}",
+            "highlight": "default"
+          }
         ]
-      }
+      },
+      "layoutHint": "linear-H"
     },
     {
       "id": "stack",
       "type": "stack",
       "label": "Stack",
-      "position": { "x": 50, "y": 65 },
-      "initialState": { "items": [] }
+      "initialState": {
+        "items": []
+      },
+      "layoutHint": "linear-V"
     },
     {
       "id": "op",
       "type": "text-badge",
       "label": "Operation",
-      "position": { "x": 50, "y": 12 },
-      "initialState": { "text": "Scan left to right", "style": "default" }
+      "initialState": {
+        "text": "Scan left to right",
+        "style": "default"
+      },
+      "slot": "top-center"
     }
   ],
   "steps": [
-    { "index": 0, "actions": [], "duration": 900 },
+    {
+      "index": 0,
+      "actions": [],
+      "duration": 900
+    },
     {
       "index": 1,
       "actions": [
-        { "target": "op", "action": "set", "params": { "text": "Read '(' -> push", "style": "highlight" } },
+        {
+          "target": "op",
+          "params": {
+            "text": "Read '(' -> push",
+            "style": "highlight"
+          }
+        },
         {
           "target": "input",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": "(", "highlight": "active" },
-              { "value": ")", "highlight": "default" },
-              { "value": "[", "highlight": "default" },
-              { "value": "]", "highlight": "default" },
-              { "value": "{", "highlight": "default" },
-              { "value": "}", "highlight": "default" }
+              {
+                "value": "(",
+                "highlight": "active"
+              },
+              {
+                "value": ")",
+                "highlight": "default"
+              },
+              {
+                "value": "[",
+                "highlight": "default"
+              },
+              {
+                "value": "]",
+                "highlight": "default"
+              },
+              {
+                "value": "{",
+                "highlight": "default"
+              },
+              {
+                "value": "}",
+                "highlight": "default"
+              }
             ]
           }
         },
-        { "target": "stack", "action": "set", "params": { "items": ["("], "highlight": 0 } }
+        {
+          "target": "stack",
+          "params": {
+            "items": [
+              "("
+            ],
+            "highlight": 0
+          }
+        }
       ],
       "duration": 1000
     },
     {
       "index": 2,
       "actions": [
-        { "target": "op", "action": "set", "params": { "text": "Read ')' -> top matches -> pop", "style": "success" } },
+        {
+          "target": "op",
+          "params": {
+            "text": "Read ')' -> top matches -> pop",
+            "style": "success"
+          }
+        },
         {
           "target": "input",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": "(", "highlight": "default" },
-              { "value": ")", "highlight": "active" },
-              { "value": "[", "highlight": "default" },
-              { "value": "]", "highlight": "default" },
-              { "value": "{", "highlight": "default" },
-              { "value": "}", "highlight": "default" }
+              {
+                "value": "(",
+                "highlight": "default"
+              },
+              {
+                "value": ")",
+                "highlight": "active"
+              },
+              {
+                "value": "[",
+                "highlight": "default"
+              },
+              {
+                "value": "]",
+                "highlight": "default"
+              },
+              {
+                "value": "{",
+                "highlight": "default"
+              },
+              {
+                "value": "}",
+                "highlight": "default"
+              }
             ]
           }
         },
-        { "target": "stack", "action": "set", "params": { "items": [] } }
+        {
+          "target": "stack",
+          "params": {
+            "items": []
+          }
+        }
       ],
       "duration": 1000
     },
     {
       "index": 3,
       "actions": [
-        { "target": "op", "action": "set", "params": { "text": "Read '[' -> push", "style": "highlight" } },
+        {
+          "target": "op",
+          "params": {
+            "text": "Read '[' -> push",
+            "style": "highlight"
+          }
+        },
         {
           "target": "input",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": "(", "highlight": "default" },
-              { "value": ")", "highlight": "default" },
-              { "value": "[", "highlight": "active" },
-              { "value": "]", "highlight": "default" },
-              { "value": "{", "highlight": "default" },
-              { "value": "}", "highlight": "default" }
+              {
+                "value": "(",
+                "highlight": "default"
+              },
+              {
+                "value": ")",
+                "highlight": "default"
+              },
+              {
+                "value": "[",
+                "highlight": "active"
+              },
+              {
+                "value": "]",
+                "highlight": "default"
+              },
+              {
+                "value": "{",
+                "highlight": "default"
+              },
+              {
+                "value": "}",
+                "highlight": "default"
+              }
             ]
           }
         },
-        { "target": "stack", "action": "set", "params": { "items": ["["], "highlight": 0 } }
+        {
+          "target": "stack",
+          "params": {
+            "items": [
+              "["
+            ],
+            "highlight": 0
+          }
+        }
       ],
       "duration": 900
     },
     {
       "index": 4,
       "actions": [
-        { "target": "op", "action": "set", "params": { "text": "Read ']' -> pop '['", "style": "success" } },
+        {
+          "target": "op",
+          "params": {
+            "text": "Read ']' -> pop '['",
+            "style": "success"
+          }
+        },
         {
           "target": "input",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": "(", "highlight": "default" },
-              { "value": ")", "highlight": "default" },
-              { "value": "[", "highlight": "default" },
-              { "value": "]", "highlight": "active" },
-              { "value": "{", "highlight": "default" },
-              { "value": "}", "highlight": "default" }
+              {
+                "value": "(",
+                "highlight": "default"
+              },
+              {
+                "value": ")",
+                "highlight": "default"
+              },
+              {
+                "value": "[",
+                "highlight": "default"
+              },
+              {
+                "value": "]",
+                "highlight": "active"
+              },
+              {
+                "value": "{",
+                "highlight": "default"
+              },
+              {
+                "value": "}",
+                "highlight": "default"
+              }
             ]
           }
         },
-        { "target": "stack", "action": "set", "params": { "items": [] } }
+        {
+          "target": "stack",
+          "params": {
+            "items": []
+          }
+        }
       ],
       "duration": 900
     },
     {
       "index": 5,
       "actions": [
-        { "target": "op", "action": "set", "params": { "text": "Read '{' -> push", "style": "highlight" } },
+        {
+          "target": "op",
+          "params": {
+            "text": "Read '{' -> push",
+            "style": "highlight"
+          }
+        },
         {
           "target": "input",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": "(", "highlight": "default" },
-              { "value": ")", "highlight": "default" },
-              { "value": "[", "highlight": "default" },
-              { "value": "]", "highlight": "default" },
-              { "value": "{", "highlight": "active" },
-              { "value": "}", "highlight": "default" }
+              {
+                "value": "(",
+                "highlight": "default"
+              },
+              {
+                "value": ")",
+                "highlight": "default"
+              },
+              {
+                "value": "[",
+                "highlight": "default"
+              },
+              {
+                "value": "]",
+                "highlight": "default"
+              },
+              {
+                "value": "{",
+                "highlight": "active"
+              },
+              {
+                "value": "}",
+                "highlight": "default"
+              }
             ]
           }
         },
-        { "target": "stack", "action": "set", "params": { "items": ["{"], "highlight": 0 } }
+        {
+          "target": "stack",
+          "params": {
+            "items": [
+              "{"
+            ],
+            "highlight": 0
+          }
+        }
       ],
       "duration": 900
     },
     {
       "index": 6,
       "actions": [
-        { "target": "op", "action": "set", "params": { "text": "Read '}' -> pop '{'", "style": "success" } },
+        {
+          "target": "op",
+          "params": {
+            "text": "Read '}' -> pop '{'",
+            "style": "success"
+          }
+        },
         {
           "target": "input",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": "(", "highlight": "default" },
-              { "value": ")", "highlight": "default" },
-              { "value": "[", "highlight": "default" },
-              { "value": "]", "highlight": "default" },
-              { "value": "{", "highlight": "default" },
-              { "value": "}", "highlight": "active" }
+              {
+                "value": "(",
+                "highlight": "default"
+              },
+              {
+                "value": ")",
+                "highlight": "default"
+              },
+              {
+                "value": "[",
+                "highlight": "default"
+              },
+              {
+                "value": "]",
+                "highlight": "default"
+              },
+              {
+                "value": "{",
+                "highlight": "default"
+              },
+              {
+                "value": "}",
+                "highlight": "active"
+              }
             ]
           }
         },
-        { "target": "stack", "action": "set", "params": { "items": [] } }
+        {
+          "target": "stack",
+          "params": {
+            "items": []
+          }
+        }
       ],
       "duration": 900
     },
     {
       "index": 7,
       "actions": [
-        { "target": "op", "action": "set", "params": { "text": "End of scan and stack empty -> valid", "style": "success" } }
+        {
+          "target": "op",
+          "params": {
+            "text": "End of scan and stack empty -> valid",
+            "style": "success"
+          }
+        }
       ],
       "duration": 900
     }
@@ -204,8 +427,22 @@
     }
   ],
   "popups": [
-    { "id": "vp-1", "attachTo": "stack", "text": "Push opening brackets", "showAtStep": 1, "hideAtStep": 3, "style": "info" },
-    { "id": "vp-2", "attachTo": "stack", "text": "Pop on valid close", "showAtStep": 2, "hideAtStep": 7, "style": "success" }
+    {
+      "id": "vp-1",
+      "attachTo": "stack",
+      "text": "Push opening brackets",
+      "showAtStep": 1,
+      "hideAtStep": 3,
+      "style": "info"
+    },
+    {
+      "id": "vp-2",
+      "attachTo": "stack",
+      "text": "Pop on valid close",
+      "showAtStep": 2,
+      "hideAtStep": 7,
+      "style": "success"
+    }
   ],
   "challenges": [
     {
@@ -227,5 +464,8 @@
       "type": "optimize"
     }
   ],
-  "complexity": { "time": "O(n)", "space": "O(n)" }
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  }
 }

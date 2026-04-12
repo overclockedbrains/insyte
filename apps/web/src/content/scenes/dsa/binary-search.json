@@ -5,66 +5,150 @@
   "layout": "code-left-canvas-right",
   "description": "Search in a sorted array by halving the range each step.",
   "category": "Data Structures & Algorithms",
-  "tags": ["binary-search", "array", "pointers"],
+  "tags": [
+    "binary-search",
+    "array",
+    "pointers"
+  ],
   "code": {
     "language": "python",
     "source": "def binary_search(nums, target):\n    lo, hi = 0, len(nums) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if nums[mid] == target:\n            return mid\n        if nums[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1\n\nfinalResult = binary_search([1, 3, 5, 7, 9, 11], 9)\n",
-    "highlightByStep": [0, 2, 3, 6, 3, 4]
+    "highlightByStep": [
+      0,
+      2,
+      3,
+      6,
+      3,
+      4
+    ]
   },
   "visuals": [
     {
       "id": "arr",
       "type": "array",
       "label": "sorted nums",
-      "position": { "x": 50, "y": 40 },
       "initialState": {
         "cells": [
-          { "value": 1, "highlight": "default" },
-          { "value": 3, "highlight": "default" },
-          { "value": 5, "highlight": "default" },
-          { "value": 7, "highlight": "default" },
-          { "value": 9, "highlight": "default" },
-          { "value": 11, "highlight": "default" }
+          {
+            "value": 1,
+            "highlight": "default"
+          },
+          {
+            "value": 3,
+            "highlight": "default"
+          },
+          {
+            "value": 5,
+            "highlight": "default"
+          },
+          {
+            "value": 7,
+            "highlight": "default"
+          },
+          {
+            "value": 9,
+            "highlight": "default"
+          },
+          {
+            "value": 11,
+            "highlight": "default"
+          }
         ],
         "pointers": [
-          { "index": 0, "label": "lo" },
-          { "index": 5, "label": "hi", "color": "#3adffa" },
-          { "index": 2, "label": "mid", "color": "#919bff" }
+          {
+            "index": 0,
+            "label": "lo"
+          },
+          {
+            "index": 5,
+            "label": "hi",
+            "color": "#3adffa"
+          },
+          {
+            "index": 2,
+            "label": "mid",
+            "color": "#919bff"
+          }
         ]
-      }
+      },
+      "layoutHint": "linear-H"
     },
     {
       "id": "op",
       "type": "text-badge",
       "label": "Operation",
-      "position": { "x": 50, "y": 12 },
-      "initialState": { "text": "Initialize search bounds", "style": "default" }
+      "initialState": {
+        "text": "Initialize search bounds",
+        "style": "default"
+      },
+      "slot": "top-center"
     }
   ],
   "steps": [
-    { "index": 0, "actions": [], "duration": 900 },
+    {
+      "index": 0,
+      "actions": [],
+      "duration": 900
+    },
     {
       "index": 1,
       "actions": [
-        { "target": "op", "action": "set", "params": { "text": "lo=0 hi=5 mid=2 (value=5)", "style": "highlight" } },
+        {
+          "target": "op",
+          "params": {
+            "text": "lo=0 hi=5 mid=2 (value=5)",
+            "style": "highlight"
+          }
+        },
         {
           "target": "arr",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": 1, "highlight": "default" },
-              { "value": 3, "highlight": "default" },
-              { "value": 5, "highlight": "active" },
-              { "value": 7, "highlight": "default" },
-              { "value": 9, "highlight": "default" },
-              { "value": 11, "highlight": "default" }
+              {
+                "value": 1,
+                "highlight": "default"
+              },
+              {
+                "value": 3,
+                "highlight": "default"
+              },
+              {
+                "value": 5,
+                "highlight": "active"
+              },
+              {
+                "value": 7,
+                "highlight": "default"
+              },
+              {
+                "value": 9,
+                "highlight": "default"
+              },
+              {
+                "value": 11,
+                "highlight": "default"
+              }
             ],
             "pointers": [
-              { "index": 0, "label": "lo" },
-              { "index": 5, "label": "hi", "color": "#3adffa" },
-              { "index": 2, "label": "mid", "color": "#919bff" }
+              {
+                "index": 0,
+                "label": "lo"
+              },
+              {
+                "index": 5,
+                "label": "hi",
+                "color": "#3adffa"
+              },
+              {
+                "index": 2,
+                "label": "mid",
+                "color": "#919bff"
+              }
             ],
-            "windowHighlight": { "start": 0, "end": 5 }
+            "windowHighlight": {
+              "start": 0,
+              "end": 5
+            }
           }
         }
       ],
@@ -73,25 +157,62 @@
     {
       "index": 2,
       "actions": [
-        { "target": "op", "action": "set", "params": { "text": "5 < 9 -> discard left half", "style": "highlight" } },
+        {
+          "target": "op",
+          "params": {
+            "text": "5 < 9 -> discard left half",
+            "style": "highlight"
+          }
+        },
         {
           "target": "arr",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": 1, "highlight": "miss" },
-              { "value": 3, "highlight": "miss" },
-              { "value": 5, "highlight": "miss" },
-              { "value": 7, "highlight": "default" },
-              { "value": 9, "highlight": "default" },
-              { "value": 11, "highlight": "default" }
+              {
+                "value": 1,
+                "highlight": "miss"
+              },
+              {
+                "value": 3,
+                "highlight": "miss"
+              },
+              {
+                "value": 5,
+                "highlight": "miss"
+              },
+              {
+                "value": 7,
+                "highlight": "default"
+              },
+              {
+                "value": 9,
+                "highlight": "default"
+              },
+              {
+                "value": 11,
+                "highlight": "default"
+              }
             ],
             "pointers": [
-              { "index": 3, "label": "lo" },
-              { "index": 5, "label": "hi", "color": "#3adffa" },
-              { "index": 2, "label": "mid", "color": "#919bff" }
+              {
+                "index": 3,
+                "label": "lo"
+              },
+              {
+                "index": 5,
+                "label": "hi",
+                "color": "#3adffa"
+              },
+              {
+                "index": 2,
+                "label": "mid",
+                "color": "#919bff"
+              }
             ],
-            "windowHighlight": { "start": 3, "end": 5 }
+            "windowHighlight": {
+              "start": 3,
+              "end": 5
+            }
           }
         }
       ],
@@ -100,25 +221,62 @@
     {
       "index": 3,
       "actions": [
-        { "target": "op", "action": "set", "params": { "text": "Recompute mid=4 (value=9)", "style": "highlight" } },
+        {
+          "target": "op",
+          "params": {
+            "text": "Recompute mid=4 (value=9)",
+            "style": "highlight"
+          }
+        },
         {
           "target": "arr",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": 1, "highlight": "miss" },
-              { "value": 3, "highlight": "miss" },
-              { "value": 5, "highlight": "miss" },
-              { "value": 7, "highlight": "default" },
-              { "value": 9, "highlight": "active" },
-              { "value": 11, "highlight": "default" }
+              {
+                "value": 1,
+                "highlight": "miss"
+              },
+              {
+                "value": 3,
+                "highlight": "miss"
+              },
+              {
+                "value": 5,
+                "highlight": "miss"
+              },
+              {
+                "value": 7,
+                "highlight": "default"
+              },
+              {
+                "value": 9,
+                "highlight": "active"
+              },
+              {
+                "value": 11,
+                "highlight": "default"
+              }
             ],
             "pointers": [
-              { "index": 3, "label": "lo" },
-              { "index": 5, "label": "hi", "color": "#3adffa" },
-              { "index": 4, "label": "mid", "color": "#919bff" }
+              {
+                "index": 3,
+                "label": "lo"
+              },
+              {
+                "index": 5,
+                "label": "hi",
+                "color": "#3adffa"
+              },
+              {
+                "index": 4,
+                "label": "mid",
+                "color": "#919bff"
+              }
             ],
-            "windowHighlight": { "start": 3, "end": 5 }
+            "windowHighlight": {
+              "start": 3,
+              "end": 5
+            }
           }
         }
       ],
@@ -127,23 +285,53 @@
     {
       "index": 4,
       "actions": [
-        { "target": "op", "action": "set", "params": { "text": "nums[mid] == target -> return 4", "style": "success" } },
+        {
+          "target": "op",
+          "params": {
+            "text": "nums[mid] == target -> return 4",
+            "style": "success"
+          }
+        },
         {
           "target": "arr",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": 1, "highlight": "default" },
-              { "value": 3, "highlight": "default" },
-              { "value": 5, "highlight": "default" },
-              { "value": 7, "highlight": "default" },
-              { "value": 9, "highlight": "hit" },
-              { "value": 11, "highlight": "default" }
+              {
+                "value": 1,
+                "highlight": "default"
+              },
+              {
+                "value": 3,
+                "highlight": "default"
+              },
+              {
+                "value": 5,
+                "highlight": "default"
+              },
+              {
+                "value": 7,
+                "highlight": "default"
+              },
+              {
+                "value": 9,
+                "highlight": "hit"
+              },
+              {
+                "value": 11,
+                "highlight": "default"
+              }
             ],
             "pointers": [
-              { "index": 4, "label": "mid", "color": "#919bff" }
+              {
+                "index": 4,
+                "label": "mid",
+                "color": "#919bff"
+              }
             ],
-            "windowHighlight": { "start": 4, "end": 4 }
+            "windowHighlight": {
+              "start": 4,
+              "end": 4
+            }
           }
         }
       ],
@@ -152,7 +340,13 @@
     {
       "index": 5,
       "actions": [
-        { "target": "op", "action": "set", "params": { "text": "Search complete in O(log n)", "style": "default" } }
+        {
+          "target": "op",
+          "params": {
+            "text": "Search complete in O(log n)",
+            "style": "default"
+          }
+        }
       ],
       "duration": 900
     }
@@ -176,8 +370,22 @@
     }
   ],
   "popups": [
-    { "id": "bs-1", "attachTo": "arr", "text": "Active search window", "showAtStep": 1, "hideAtStep": 4, "style": "info" },
-    { "id": "bs-2", "attachTo": "arr", "text": "Target located at index 4", "showAtStep": 4, "hideAtStep": 6, "style": "success" }
+    {
+      "id": "bs-1",
+      "attachTo": "arr",
+      "text": "Active search window",
+      "showAtStep": 1,
+      "hideAtStep": 4,
+      "style": "info"
+    },
+    {
+      "id": "bs-2",
+      "attachTo": "arr",
+      "text": "Target located at index 4",
+      "showAtStep": 4,
+      "hideAtStep": 6,
+      "style": "success"
+    }
   ],
   "challenges": [
     {
@@ -199,5 +407,8 @@
       "type": "optimize"
     }
   ],
-  "complexity": { "time": "O(log n)", "space": "O(1)" }
+  "complexity": {
+    "time": "O(log n)",
+    "space": "O(1)"
+  }
 }

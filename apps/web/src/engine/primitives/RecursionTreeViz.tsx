@@ -1,12 +1,9 @@
 /**
- * RecursionTreeViz — Phase 18: Coordinate System Unification
+ * RecursionTreeViz — Phase 19 bridge: auto-layout
  *
- * Rewritten from (DOM absolute + SVG overlay) dual-coordinate approach to a
- * single SVG viewBox + <foreignObject> pattern. SCALE_X / SCALE_Y constants
- * removed. Edges and node bodies live in the same coordinate space.
- *
- * Memoization highlights (pruned paths) are expressed as CSS classes inside
- * the foreignObject — no coordinate math required.
+ * x/y removed from scene JSON in Phase 19. This component now computes node
+ * positions using the same subtree-width centering algorithm as TreeViz.
+ * Phase 20 will replace this with computeLayout() from @insyte/scene-engine.
  */
 
 'use client'
@@ -16,11 +13,12 @@ import type { PrimitiveProps } from '.'
 import { computeViewBox } from '../CanvasContext'
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
-const NODE_UNIT = 90   // px per scene-coord unit (was SCALE_X=70, SCALE_Y=80 — unified)
-const NODE_W    = 80   // foreignObject width  (old fixed 80px)
-const NODE_H    = 48   // foreignObject height (old py-1 box, approx 2 lines × 24px)
-const HALF_W    = NODE_W / 2
-const HALF_H    = NODE_H / 2
+const NODE_UNIT_X = 96   // horizontal spread — wider than TreeViz to fit labels
+const NODE_UNIT_Y = 90   // vertical spacing
+const NODE_W      = 80
+const NODE_H      = 48
+const HALF_W      = NODE_W / 2
+const HALF_H      = NODE_H / 2
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface RecursionNode {
@@ -28,14 +26,48 @@ interface RecursionNode {
   label: string
   result?: string
   status: 'pending' | 'computing' | 'memoized' | 'complete'
-  children: string[]
-  x?: number
-  y?: number
+  children?: string[]
 }
 
 interface RecursionTreeState {
   nodes: RecursionNode[]
   rootId: string
+}
+
+// ─── Auto layout (subtree-width centering) ─────────────────────────────────────
+// TODO(Phase 20): replace with computeLayout() from @insyte/scene-engine
+
+function subtreeWidth(id: string, nodeMap: Map<string, RecursionNode>): number {
+  const node = nodeMap.get(id)
+  if (!node) return 1
+  const children = node.children ?? []
+  if (children.length === 0) return 1
+  return children.reduce((sum, cId) => sum + subtreeWidth(cId, nodeMap), 0)
+}
+
+function assignPositions(
+  id: string,
+  depth: number,
+  xStart: number,
+  nodeMap: Map<string, RecursionNode>,
+  out: Map<string, { x: number; y: number }>,
+): void {
+  const node = nodeMap.get(id)
+  if (!node) return
+  const children = node.children ?? []
+  if (children.length === 0) {
+    out.set(id, { x: xStart, y: depth })
+    return
+  }
+  let cursor = xStart
+  for (const cId of children) {
+    assignPositions(cId, depth + 1, cursor, nodeMap, out)
+    cursor += subtreeWidth(cId, nodeMap)
+  }
+  const first = out.get(children[0] ?? '')
+  const last  = out.get(children[children.length - 1] ?? '')
+  if (!first || !last) return
+  out.set(id, { x: (first.x + last.x) / 2, y: depth })
 }
 
 // ─── Edge path ─────────────────────────────────────────────────────────────────
@@ -44,9 +76,9 @@ function edgeBezier(
   to: { x: number; y: number },
 ): string {
   const sx = from.x
-  const sy = from.y + HALF_H        // bottom-center of parent
+  const sy = from.y + HALF_H
   const ex = to.x
-  const ey = to.y - HALF_H          // top-center of child
+  const ey = to.y - HALF_H
   const midY = (sy + ey) / 2
   return `M ${sx} ${sy} C ${sx} ${midY} ${ex} ${midY} ${ex} ${ey}`
 }
@@ -55,23 +87,29 @@ function edgeBezier(
 export function RecursionTreeViz({ state }: PrimitiveProps) {
   const { nodes = [], rootId } = state as RecursionTreeState
 
-  const getNode = (id: string) => nodes.find((n) => n.id === id)
+  if (nodes.length === 0) {
+    return (
+      <div className="flex items-center justify-center w-full min-h-[300px] text-sm text-on-surface-variant/50 italic">
+        Empty recursion tree
+      </div>
+    )
+  }
 
-  // Filter to nodes that have positions supplied by the scene JSON
-  const positionedNodes = nodes.filter(
-    (n) => n.x !== undefined && n.y !== undefined,
-  )
+  const nodeMap = new Map(nodes.map((n) => [n.id, n]))
+  const effectiveRootId = rootId ?? nodes[0]?.id
 
-  // Scale coords to SVG space
-  const scaledNodes = positionedNodes.map((n) => ({
-    ...n,
-    svgX: n.x! * NODE_UNIT,
-    svgY: n.y! * NODE_UNIT,
-  }))
+  const posMap = new Map<string, { x: number; y: number }>()
+  if (effectiveRootId) {
+    assignPositions(effectiveRootId, 0, 0, nodeMap, posMap)
+  }
 
-  const getScaled = (id: string) => scaledNodes.find((n) => n.id === id)
+  const scaledNodes = nodes.map((n) => {
+    const pos = posMap.get(n.id) ?? { x: 0, y: 0 }
+    return { ...n, svgX: pos.x * NODE_UNIT_X, svgY: pos.y * NODE_UNIT_Y }
+  })
 
-  // Build connections
+  const scaledMap = new Map(scaledNodes.map((n) => [n.id, n]))
+
   const connections: {
     from: { x: number; y: number }
     to: { x: number; y: number }
@@ -80,22 +118,22 @@ export function RecursionTreeViz({ state }: PrimitiveProps) {
   }[] = []
 
   scaledNodes.forEach((node) => {
-    const rawNode = getNode(node.id)!
-    rawNode.children.forEach((childId) => {
-      const child = getScaled(childId)
+    const children = node.children ?? []
+    children.forEach((childId) => {
+      const child = scaledMap.get(childId)
       if (child) {
         connections.push({
           from: { x: node.svgX, y: node.svgY },
-          to: { x: child.svgX, y: child.svgY },
-          id: `${node.id}-${childId}`,
+          to:   { x: child.svgX, y: child.svgY },
+          id:   `${node.id}-${childId}`,
           pruned: child.status === 'memoized',
         })
       }
     })
   })
 
-  const viewBoxNodes = scaledNodes.map((n) => ({ x: n.svgX, y: n.svgY }))
-  const viewBox = computeViewBox(viewBoxNodes, NODE_W, NODE_H, 32)
+  const vbNodes = scaledNodes.map((n) => ({ x: n.svgX, y: n.svgY }))
+  const viewBox = computeViewBox(vbNodes, NODE_W, NODE_H, 32)
   const [, , vw] = viewBox.split(' ').map(Number)
 
   return (
@@ -113,11 +151,7 @@ export function RecursionTreeViz({ state }: PrimitiveProps) {
           <motion.path
             key={conn.id}
             d={edgeBezier(conn.from, conn.to)}
-            stroke={
-              conn.pruned
-                ? 'var(--color-outline-variant)'
-                : 'var(--color-on-surface-variant)'
-            }
+            stroke={conn.pruned ? 'var(--color-outline-variant)' : 'var(--color-on-surface-variant)'}
             strokeWidth={2}
             strokeDasharray={conn.pruned ? '4 4' : undefined}
             fill="none"
@@ -129,11 +163,11 @@ export function RecursionTreeViz({ state }: PrimitiveProps) {
 
         {/* ── Nodes via foreignObject ── */}
         {scaledNodes.map((node) => {
-          const rawNode = getNode(node.id)!
-          const isComputing = rawNode.status === 'computing'
-          const isMemoized  = rawNode.status === 'memoized'
-          const isComplete  = rawNode.status === 'complete'
-          const isRoot      = node.id === rootId
+          const raw = nodeMap.get(node.id)!
+          const isComputing = raw.status === 'computing'
+          const isMemoized  = raw.status === 'memoized'
+          const isComplete  = raw.status === 'complete'
+          const isRoot      = node.id === effectiveRootId
 
           let bgColor     = 'var(--color-surface-container)'
           let borderColor = 'var(--color-outline-variant)'
@@ -158,74 +192,31 @@ export function RecursionTreeViz({ state }: PrimitiveProps) {
               x={node.svgX - HALF_W}
               y={node.svgY - HALF_H}
               width={NODE_W}
-              height={NODE_H + 16}   // +16 for the -top-5 badge overflow
+              height={NODE_H + 16}
               style={{ overflow: 'visible' }}
             >
-              <div
-                style={{
-                  width: NODE_W,
-                  position: 'relative',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                }}
-              >
-                {/* Root badge */}
+              <div style={{ width: NODE_W, position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 {isRoot && (
-                  <span style={{
-                    position: 'absolute',
-                    top: -20,
-                    fontSize: 9,
-                    fontFamily: 'monospace',
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    color: 'var(--color-primary)',
-                    background: 'var(--color-surface-container)',
-                    borderRadius: 4,
-                    padding: '0 3px',
-                  }}>
+                  <span style={{ position: 'absolute', top: -20, fontSize: 9, fontFamily: 'monospace', fontWeight: 700, textTransform: 'uppercase', color: 'var(--color-primary)', background: 'var(--color-surface-container)', borderRadius: 4, padding: '0 3px' }}>
                     root
                   </span>
                 )}
-                {/* Memoized badge */}
                 {isMemoized && (
-                  <span style={{
-                    position: 'absolute',
-                    top: -20,
-                    fontSize: 9,
-                    fontFamily: 'monospace',
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    color: 'var(--color-tertiary)',
-                    background: 'var(--color-surface-container-highest)',
-                    borderRadius: 4,
-                    padding: '0 3px',
-                  }}>
+                  <span style={{ position: 'absolute', top: -20, fontSize: 9, fontFamily: 'monospace', fontWeight: 700, textTransform: 'uppercase', color: 'var(--color-tertiary)', background: 'var(--color-surface-container-highest)', borderRadius: 4, padding: '0 3px' }}>
                     Cached
                   </span>
                 )}
-
                 <motion.div
-                  style={{
-                    width: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: 12,
-                    border: '2px solid',
-                    padding: '2px 0',
-                    textDecoration: isMemoized ? 'line-through' : 'none',
-                  }}
+                  style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: 12, border: '2px solid', padding: '2px 0', textDecoration: isMemoized ? 'line-through' : 'none' }}
                   animate={{ backgroundColor: bgColor, borderColor, color: textColor, boxShadow: shadow }}
                   transition={{ duration: 0.2 }}
                 >
                   <div style={{ fontSize: 12, fontFamily: 'monospace', fontWeight: 700, lineHeight: 1.2 }}>
-                    {rawNode.label}
+                    {raw.label}
                   </div>
-                  {rawNode.result && (
+                  {raw.result && (
                     <div style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--color-secondary)', marginTop: 2 }}>
-                      ={rawNode.result}
+                      ={raw.result}
                     </div>
                   )}
                 </motion.div>

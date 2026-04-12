@@ -19,6 +19,8 @@ export type {
   Condition,
   SceneCode,
   VisualState,
+  LayoutHint,
+  SlotPosition,
 } from './types'
 
 // SceneJSON namespace
@@ -40,6 +42,8 @@ export {
   ChallengeSchema,
   ConditionSchema,
   SceneCodeSchema,
+  LayoutHintSchema,
+  SlotPositionSchema,
   // Schema-level parse helpers (throw/safe variants)
   parseScene as parseSceneSchema,
   safeParseScene as safeParseSceneSchema,

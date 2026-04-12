@@ -40,13 +40,44 @@ export interface Condition {
   equals: unknown
 }
 
+// ─── Layout ───────────────────────────────────────────────────────────────────
+
+/** Which layout algorithm the engine uses to position this visual's nodes. */
+export type LayoutHint =
+  | 'dagre-TB'        // top-to-bottom hierarchical (dependency graphs, state machines)
+  | 'dagre-LR'        // left-to-right hierarchical (system diagrams)
+  | 'dagre-BT'        // bottom-to-top
+  | 'tree-RT'         // Reingold-Tilford (binary trees, recursion trees)
+  | 'linear-H'        // horizontal linear (arrays, queues, linked-lists)
+  | 'linear-V'        // vertical linear (stacks)
+  | 'grid-2d'         // 2D grid (DP tables, matrices)
+  | 'hashmap-buckets' // bucket rows (hashmaps)
+  | 'radial'          // circular/radial (hash rings, force-directed)
+
+/** Canvas-relative slot for info primitives (text-badge, counter). */
+export type SlotPosition =
+  | 'top-left'
+  | 'top-center'
+  | 'top-right'
+  | 'bottom-left'
+  | 'bottom-center'
+  | 'bottom-right'
+  | 'left-center'
+  | 'right-center'
+  | 'overlay-top'
+  | 'overlay-bottom'
+  | 'center'
+
 // ─── Visual ───────────────────────────────────────────────────────────────────
 
 export interface Visual {
   id: string
   type: VisualType
   label?: string
-  position?: { x: number; y: number }
+  /** Drives which layout algorithm computeLayout() uses for this visual's nodes. */
+  layoutHint?: LayoutHint
+  /** For info primitives (text-badge, counter) — canvas-relative slot position. */
+  slot?: SlotPosition
   /** The visual's initial data state before any actions are applied */
   initialState: unknown
   /** If present, this visual is only shown when the condition is true */
@@ -55,13 +86,14 @@ export interface Visual {
 
 // ─── Action ───────────────────────────────────────────────────────────────────
 
-/** A single mutation instruction applied to a visual at a step. */
+/**
+ * Universal state-snapshot action — contains the complete visual state at this
+ * step (not a delta). Applying the same action twice gives the same result.
+ */
 export interface Action {
   /** ID of the target Visual */
   target: string
-  /** Action name — e.g. 'set-cells', 'push', 'highlight', 'set-value' */
-  action: string
-  /** Action-specific parameters */
+  /** Complete visual state at this step. Shallow-merged onto running state. */
   params: Record<string, unknown>
 }
 
@@ -192,4 +224,6 @@ export namespace SceneJSON {
   export type ConditionItem = Condition
   export type Layout = SceneLayout
   export type Type = SceneType
+  export type LayoutHintValue = LayoutHint
+  export type SlotPositionValue = SlotPosition
 }

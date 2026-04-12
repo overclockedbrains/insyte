@@ -5,46 +5,101 @@
   "layout": "canvas-only",
   "description": "Why consistent hashing is critical for distributed systems — add or remove servers with minimal key redistribution. The algorithm behind DynamoDB, Cassandra, and Memcached.",
   "category": "System Design",
-  "tags": ["consistent-hashing", "distributed", "hld", "system-design", "ring", "dynamo"],
-
+  "tags": [
+    "consistent-hashing",
+    "distributed",
+    "hld",
+    "system-design",
+    "ring",
+    "dynamo"
+  ],
   "visuals": [
     {
       "id": "hash-ring",
       "type": "graph",
       "label": "Hash Ring  (servers = large nodes, keys = small cyan nodes)",
-      "position": { "x": 50, "y": 50 },
       "initialState": {
         "nodes": [
-          { "id": "sA", "label": "Server A", "x": 3.5, "y": 0.5, "color": "var(--color-primary)" },
-          { "id": "sB", "label": "Server B", "x": 5.7, "y": 4.2, "color": "var(--color-primary)" },
-          { "id": "sC", "label": "Server C", "x": 1.3, "y": 4.2, "color": "var(--color-primary)" },
-          { "id": "k1", "label": "k1", "x": 5.0, "y": 1.0, "color": "var(--color-secondary)" },
-          { "id": "k2", "label": "k2", "x": 6.0, "y": 3.0, "color": "var(--color-secondary)" },
-          { "id": "k3", "label": "k3", "x": 3.5, "y": 5.8, "color": "var(--color-secondary)" },
-          { "id": "k4", "label": "k4", "x": 1.0, "y": 2.5, "color": "var(--color-secondary)" },
-          { "id": "k5", "label": "k5", "x": 2.2, "y": 0.8, "color": "var(--color-secondary)" }
+          {
+            "id": "sA",
+            "label": "Server A",
+            "color": "var(--color-primary)"
+          },
+          {
+            "id": "sB",
+            "label": "Server B",
+            "color": "var(--color-primary)"
+          },
+          {
+            "id": "sC",
+            "label": "Server C",
+            "color": "var(--color-primary)"
+          },
+          {
+            "id": "k1",
+            "label": "k1",
+            "color": "var(--color-secondary)"
+          },
+          {
+            "id": "k2",
+            "label": "k2",
+            "color": "var(--color-secondary)"
+          },
+          {
+            "id": "k3",
+            "label": "k3",
+            "color": "var(--color-secondary)"
+          },
+          {
+            "id": "k4",
+            "label": "k4",
+            "color": "var(--color-secondary)"
+          },
+          {
+            "id": "k5",
+            "label": "k5",
+            "color": "var(--color-secondary)"
+          }
         ],
         "edges": [
-          { "from": "sA", "to": "sB" },
-          { "from": "sB", "to": "sC" },
-          { "from": "sC", "to": "sA" }
+          {
+            "from": "sA",
+            "to": "sB"
+          },
+          {
+            "from": "sB",
+            "to": "sC"
+          },
+          {
+            "from": "sC",
+            "to": "sA"
+          }
         ]
-      }
+      },
+      "layoutHint": "dagre-TB"
     },
     {
       "id": "ring-badge",
       "type": "text-badge",
       "label": "State",
-      "initialState": { "text": "Ring: 3 servers (A, B, C)  —  keys routed clockwise to next server", "style": "default" }
+      "initialState": {
+        "text": "Ring: 3 servers (A, B, C)  —  keys routed clockwise to next server",
+        "style": "default"
+      },
+      "slot": "top-center"
     },
     {
       "id": "keys-moved-counter",
       "type": "counter",
       "label": "Keys Moved",
-      "initialState": { "value": 0, "label": "Keys Moved", "color": "secondary" }
+      "initialState": {
+        "value": 0,
+        "label": "Keys Moved",
+        "color": "secondary"
+      },
+      "slot": "bottom-left"
     }
   ],
-
   "steps": [
     {
       "index": 0,
@@ -56,27 +111,72 @@
       "actions": [
         {
           "target": "ring-badge",
-          "action": "set",
-          "params": { "text": "Keys distributed: k1,k2 → Server B  |  k3 → Server C  |  k4,k5 → Server A", "style": "highlight" }
+          "params": {
+            "text": "Keys distributed: k1,k2 → Server B  |  k3 → Server C  |  k4,k5 → Server A",
+            "style": "highlight"
+          }
         },
         {
           "target": "hash-ring",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "sA", "label": "A (k4,k5)", "x": 3.5, "y": 0.5, "color": "var(--color-primary)" },
-              { "id": "sB", "label": "B (k1,k2)", "x": 5.7, "y": 4.2, "color": "var(--color-primary)" },
-              { "id": "sC", "label": "C (k3)", "x": 1.3, "y": 4.2, "color": "var(--color-primary)" },
-              { "id": "k1", "label": "k1", "x": 5.0, "y": 1.0, "color": "var(--color-secondary)" },
-              { "id": "k2", "label": "k2", "x": 6.0, "y": 3.0, "color": "var(--color-secondary)" },
-              { "id": "k3", "label": "k3", "x": 3.5, "y": 5.8, "color": "var(--color-secondary)" },
-              { "id": "k4", "label": "k4", "x": 1.0, "y": 2.5, "color": "var(--color-secondary)" },
-              { "id": "k5", "label": "k5", "x": 2.2, "y": 0.8, "color": "var(--color-secondary)" }
+              {
+                "id": "sA",
+                "label": "A (k4,k5)",
+                "color": "var(--color-primary)"
+              },
+              {
+                "id": "sB",
+                "label": "B (k1,k2)",
+                "color": "var(--color-primary)"
+              },
+              {
+                "id": "sC",
+                "label": "C (k3)",
+                "color": "var(--color-primary)"
+              },
+              {
+                "id": "k1",
+                "label": "k1",
+                "color": "var(--color-secondary)"
+              },
+              {
+                "id": "k2",
+                "label": "k2",
+                "color": "var(--color-secondary)"
+              },
+              {
+                "id": "k3",
+                "label": "k3",
+                "color": "var(--color-secondary)"
+              },
+              {
+                "id": "k4",
+                "label": "k4",
+                "color": "var(--color-secondary)"
+              },
+              {
+                "id": "k5",
+                "label": "k5",
+                "color": "var(--color-secondary)"
+              }
             ],
             "edges": [
-              { "from": "sA", "to": "sB", "highlighted": false },
-              { "from": "sB", "to": "sC", "highlighted": false },
-              { "from": "sC", "to": "sA", "highlighted": false }
+              {
+                "from": "sA",
+                "to": "sB",
+                "highlighted": false
+              },
+              {
+                "from": "sB",
+                "to": "sC",
+                "highlighted": false
+              },
+              {
+                "from": "sC",
+                "to": "sA",
+                "highlighted": false
+              }
             ]
           }
         }
@@ -88,36 +188,92 @@
       "actions": [
         {
           "target": "ring-badge",
-          "action": "set",
-          "params": { "text": "ADD Server D between A and B  →  only k1 moves from B to D  (minimal redistribution!)", "style": "success" }
+          "params": {
+            "text": "ADD Server D between A and B  →  only k1 moves from B to D  (minimal redistribution!)",
+            "style": "success"
+          }
         },
         {
           "target": "hash-ring",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "sA", "label": "A (k4,k5)", "x": 3.5, "y": 0.5, "color": "var(--color-primary)" },
-              { "id": "sD", "label": "Server D", "x": 5.5, "y": 1.5, "color": "var(--color-tertiary)" },
-              { "id": "sB", "label": "B (k2)", "x": 5.7, "y": 4.2, "color": "var(--color-primary)" },
-              { "id": "sC", "label": "C (k3)", "x": 1.3, "y": 4.2, "color": "var(--color-primary)" },
-              { "id": "k1", "label": "k1→D", "x": 5.0, "y": 1.0, "color": "var(--color-primary)" },
-              { "id": "k2", "label": "k2", "x": 6.0, "y": 3.0, "color": "var(--color-secondary)" },
-              { "id": "k3", "label": "k3", "x": 3.5, "y": 5.8, "color": "var(--color-secondary)" },
-              { "id": "k4", "label": "k4", "x": 1.0, "y": 2.5, "color": "var(--color-secondary)" },
-              { "id": "k5", "label": "k5", "x": 2.2, "y": 0.8, "color": "var(--color-secondary)" }
+              {
+                "id": "sA",
+                "label": "A (k4,k5)",
+                "color": "var(--color-primary)"
+              },
+              {
+                "id": "sD",
+                "label": "Server D",
+                "color": "var(--color-tertiary)"
+              },
+              {
+                "id": "sB",
+                "label": "B (k2)",
+                "color": "var(--color-primary)"
+              },
+              {
+                "id": "sC",
+                "label": "C (k3)",
+                "color": "var(--color-primary)"
+              },
+              {
+                "id": "k1",
+                "label": "k1→D",
+                "color": "var(--color-primary)"
+              },
+              {
+                "id": "k2",
+                "label": "k2",
+                "color": "var(--color-secondary)"
+              },
+              {
+                "id": "k3",
+                "label": "k3",
+                "color": "var(--color-secondary)"
+              },
+              {
+                "id": "k4",
+                "label": "k4",
+                "color": "var(--color-secondary)"
+              },
+              {
+                "id": "k5",
+                "label": "k5",
+                "color": "var(--color-secondary)"
+              }
             ],
             "edges": [
-              { "from": "sA", "to": "sD", "highlighted": true },
-              { "from": "sD", "to": "sB", "highlighted": true },
-              { "from": "sB", "to": "sC", "highlighted": false },
-              { "from": "sC", "to": "sA", "highlighted": false }
+              {
+                "from": "sA",
+                "to": "sD",
+                "highlighted": true
+              },
+              {
+                "from": "sD",
+                "to": "sB",
+                "highlighted": true
+              },
+              {
+                "from": "sB",
+                "to": "sC",
+                "highlighted": false
+              },
+              {
+                "from": "sC",
+                "to": "sA",
+                "highlighted": false
+              }
             ]
           }
         },
         {
           "target": "keys-moved-counter",
-          "action": "set",
-          "params": { "value": 1, "label": "Keys Moved", "color": "secondary" }
+          "params": {
+            "value": 1,
+            "label": "Keys Moved",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 2500
@@ -127,34 +283,82 @@
       "actions": [
         {
           "target": "ring-badge",
-          "action": "set",
-          "params": { "text": "REMOVE Server B  →  only B's keys (k2) shift to next server C  (1 key moved)", "style": "warning" }
+          "params": {
+            "text": "REMOVE Server B  →  only B's keys (k2) shift to next server C  (1 key moved)",
+            "style": "warning"
+          }
         },
         {
           "target": "hash-ring",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "sA", "label": "A (k4,k5)", "x": 3.5, "y": 0.5, "color": "var(--color-primary)" },
-              { "id": "sD", "label": "D (k1)", "x": 5.5, "y": 1.5, "color": "var(--color-primary)" },
-              { "id": "sC", "label": "C (k2,k3)", "x": 1.3, "y": 4.2, "color": "var(--color-primary)" },
-              { "id": "k1", "label": "k1", "x": 5.0, "y": 1.0, "color": "var(--color-secondary)" },
-              { "id": "k2", "label": "k2→C", "x": 6.0, "y": 3.0, "color": "var(--color-primary)" },
-              { "id": "k3", "label": "k3", "x": 3.5, "y": 5.8, "color": "var(--color-secondary)" },
-              { "id": "k4", "label": "k4", "x": 1.0, "y": 2.5, "color": "var(--color-secondary)" },
-              { "id": "k5", "label": "k5", "x": 2.2, "y": 0.8, "color": "var(--color-secondary)" }
+              {
+                "id": "sA",
+                "label": "A (k4,k5)",
+                "color": "var(--color-primary)"
+              },
+              {
+                "id": "sD",
+                "label": "D (k1)",
+                "color": "var(--color-primary)"
+              },
+              {
+                "id": "sC",
+                "label": "C (k2,k3)",
+                "color": "var(--color-primary)"
+              },
+              {
+                "id": "k1",
+                "label": "k1",
+                "color": "var(--color-secondary)"
+              },
+              {
+                "id": "k2",
+                "label": "k2→C",
+                "color": "var(--color-primary)"
+              },
+              {
+                "id": "k3",
+                "label": "k3",
+                "color": "var(--color-secondary)"
+              },
+              {
+                "id": "k4",
+                "label": "k4",
+                "color": "var(--color-secondary)"
+              },
+              {
+                "id": "k5",
+                "label": "k5",
+                "color": "var(--color-secondary)"
+              }
             ],
             "edges": [
-              { "from": "sA", "to": "sD", "highlighted": false },
-              { "from": "sD", "to": "sC", "highlighted": true },
-              { "from": "sC", "to": "sA", "highlighted": false }
+              {
+                "from": "sA",
+                "to": "sD",
+                "highlighted": false
+              },
+              {
+                "from": "sD",
+                "to": "sC",
+                "highlighted": true
+              },
+              {
+                "from": "sC",
+                "to": "sA",
+                "highlighted": false
+              }
             ]
           }
         },
         {
           "target": "keys-moved-counter",
-          "action": "set",
-          "params": { "value": 1, "label": "Keys Moved", "color": "secondary" }
+          "params": {
+            "value": 1,
+            "label": "Keys Moved",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 2500
@@ -164,74 +368,159 @@
       "actions": [
         {
           "target": "ring-badge",
-          "action": "set",
-          "params": { "text": "VIRTUAL NODES: Each server gets 3 ring positions — more uniform key distribution", "style": "highlight" }
+          "params": {
+            "text": "VIRTUAL NODES: Each server gets 3 ring positions — more uniform key distribution",
+            "style": "highlight"
+          }
         },
         {
           "target": "hash-ring",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "sA1", "label": "A-1", "x": 3.5, "y": 0.5, "color": "var(--color-primary)" },
-              { "id": "sA2", "label": "A-2", "x": 1.0, "y": 2.5, "color": "var(--color-primary)" },
-              { "id": "sA3", "label": "A-3", "x": 5.0, "y": 3.5, "color": "var(--color-primary)" },
-              { "id": "sB1", "label": "B-1", "x": 5.7, "y": 1.5, "color": "var(--color-secondary)" },
-              { "id": "sB2", "label": "B-2", "x": 5.5, "y": 4.8, "color": "var(--color-secondary)" },
-              { "id": "sB3", "label": "B-3", "x": 2.0, "y": 5.2, "color": "var(--color-secondary)" },
-              { "id": "sC1", "label": "C-1", "x": 1.3, "y": 4.2, "color": "var(--color-tertiary)" },
-              { "id": "sC2", "label": "C-2", "x": 6.5, "y": 2.5, "color": "var(--color-tertiary)" },
-              { "id": "sC3", "label": "C-3", "x": 2.5, "y": 0.8, "color": "var(--color-tertiary)" }
+              {
+                "id": "sA1",
+                "label": "A-1",
+                "color": "var(--color-primary)"
+              },
+              {
+                "id": "sA2",
+                "label": "A-2",
+                "color": "var(--color-primary)"
+              },
+              {
+                "id": "sA3",
+                "label": "A-3",
+                "color": "var(--color-primary)"
+              },
+              {
+                "id": "sB1",
+                "label": "B-1",
+                "color": "var(--color-secondary)"
+              },
+              {
+                "id": "sB2",
+                "label": "B-2",
+                "color": "var(--color-secondary)"
+              },
+              {
+                "id": "sB3",
+                "label": "B-3",
+                "color": "var(--color-secondary)"
+              },
+              {
+                "id": "sC1",
+                "label": "C-1",
+                "color": "var(--color-tertiary)"
+              },
+              {
+                "id": "sC2",
+                "label": "C-2",
+                "color": "var(--color-tertiary)"
+              },
+              {
+                "id": "sC3",
+                "label": "C-3",
+                "color": "var(--color-tertiary)"
+              }
             ],
             "edges": [
-              { "from": "sA1", "to": "sB1", "highlighted": false },
-              { "from": "sB1", "to": "sA3", "highlighted": false },
-              { "from": "sA3", "to": "sC2", "highlighted": false },
-              { "from": "sC2", "to": "sB2", "highlighted": false },
-              { "from": "sB2", "to": "sB3", "highlighted": false },
-              { "from": "sB3", "to": "sC1", "highlighted": false },
-              { "from": "sC1", "to": "sA2", "highlighted": false },
-              { "from": "sA2", "to": "sC3", "highlighted": false },
-              { "from": "sC3", "to": "sA1", "highlighted": false }
+              {
+                "from": "sA1",
+                "to": "sB1",
+                "highlighted": false
+              },
+              {
+                "from": "sB1",
+                "to": "sA3",
+                "highlighted": false
+              },
+              {
+                "from": "sA3",
+                "to": "sC2",
+                "highlighted": false
+              },
+              {
+                "from": "sC2",
+                "to": "sB2",
+                "highlighted": false
+              },
+              {
+                "from": "sB2",
+                "to": "sB3",
+                "highlighted": false
+              },
+              {
+                "from": "sB3",
+                "to": "sC1",
+                "highlighted": false
+              },
+              {
+                "from": "sC1",
+                "to": "sA2",
+                "highlighted": false
+              },
+              {
+                "from": "sA2",
+                "to": "sC3",
+                "highlighted": false
+              },
+              {
+                "from": "sC3",
+                "to": "sA1",
+                "highlighted": false
+              }
             ]
           }
         },
         {
           "target": "keys-moved-counter",
-          "action": "set",
-          "params": { "value": 0, "label": "Virtual Nodes", "color": "secondary" }
+          "params": {
+            "value": 0,
+            "label": "Virtual Nodes",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 2500
     }
   ],
-
   "controls": [
     {
       "id": "virtual-nodes",
       "type": "toggle",
       "label": "Virtual Nodes",
-      "config": { "defaultValue": false }
+      "config": {
+        "defaultValue": false
+      }
     },
     {
       "id": "btn-add-server",
       "type": "button",
       "label": "Add Server D",
-      "config": { "variant": "primary", "goToStep": 2 }
+      "config": {
+        "variant": "primary",
+        "goToStep": 2
+      }
     },
     {
       "id": "btn-remove-server",
       "type": "button",
       "label": "Remove Server B",
-      "config": { "variant": "destructive", "goToStep": 3 }
+      "config": {
+        "variant": "destructive",
+        "goToStep": 3
+      }
     },
     {
       "id": "btn-virtual",
       "type": "button",
       "label": "Show Virtual Nodes",
-      "config": { "variant": "secondary", "goToStep": 4 }
+      "config": {
+        "variant": "secondary",
+        "goToStep": 4
+      }
     }
   ],
-
   "explanation": [
     {
       "heading": "Why Consistent Hashing?",
@@ -254,7 +543,6 @@
       "appearsAtStep": 4
     }
   ],
-
   "popups": [
     {
       "id": "pop-clockwise",
@@ -263,7 +551,10 @@
       "showAtStep": 1,
       "hideAtStep": 2,
       "style": "info",
-      "anchor": { "x": 50, "y": 85 }
+      "anchor": {
+        "x": 50,
+        "y": 85
+      }
     },
     {
       "id": "pop-minimal",
@@ -272,10 +563,12 @@
       "showAtStep": 2,
       "hideAtStep": 3,
       "style": "success",
-      "anchor": { "x": 50, "y": 85 }
+      "anchor": {
+        "x": 50,
+        "y": 85
+      }
     }
   ],
-
   "challenges": [
     {
       "id": "ch-naive-vs-consistent",

@@ -5,61 +5,140 @@
   "layout": "code-left-canvas-right",
   "description": "Count ways to reach step n using bottom-up dynamic programming.",
   "category": "Data Structures & Algorithms",
-  "tags": ["dynamic-programming", "dp-table", "fibonacci"],
+  "tags": [
+    "dynamic-programming",
+    "dp-table",
+    "fibonacci"
+  ],
   "code": {
     "language": "python",
     "source": "def climb_stairs(n):\n    if n <= 2:\n        return n\n    dp = [0] * (n + 1)\n    dp[1], dp[2] = 1, 2\n    for i in range(3, n + 1):\n        dp[i] = dp[i - 1] + dp[i - 2]\n    return dp[n]\n\nfinalResult = climb_stairs(5)\n",
-    "highlightByStep": [0, 3, 4, 5, 6, 6, 6, 7]
+    "highlightByStep": [
+      0,
+      3,
+      4,
+      5,
+      6,
+      6,
+      6,
+      7
+    ]
   },
   "visuals": [
     {
       "id": "dp",
       "type": "dp-table",
       "label": "dp[i] = ways to reach i",
-      "position": { "x": 50, "y": 52 },
       "initialState": {
         "rows": 1,
         "cols": 6,
-        "cells": [[
-          { "value": 0, "highlight": "filled" },
-          { "value": 0, "highlight": "filled" },
-          { "value": 0, "highlight": "filled" },
-          { "value": "", "highlight": "filled" },
-          { "value": "", "highlight": "filled" },
-          { "value": "", "highlight": "filled" }
-        ]],
-        "colLabels": ["0", "1", "2", "3", "4", "5"]
-      }
+        "cells": [
+          [
+            {
+              "value": 0,
+              "highlight": "filled"
+            },
+            {
+              "value": 0,
+              "highlight": "filled"
+            },
+            {
+              "value": 0,
+              "highlight": "filled"
+            },
+            {
+              "value": "",
+              "highlight": "filled"
+            },
+            {
+              "value": "",
+              "highlight": "filled"
+            },
+            {
+              "value": "",
+              "highlight": "filled"
+            }
+          ]
+        ],
+        "colLabels": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+        ]
+      },
+      "layoutHint": "grid-2d"
     },
     {
       "id": "op",
       "type": "text-badge",
       "label": "Operation",
-      "position": { "x": 50, "y": 15 },
-      "initialState": { "text": "Initialize base cases", "style": "default" }
+      "initialState": {
+        "text": "Initialize base cases",
+        "style": "default"
+      },
+      "slot": "top-center"
     }
   ],
   "steps": [
-    { "index": 0, "actions": [], "duration": 900 },
+    {
+      "index": 0,
+      "actions": [],
+      "duration": 900
+    },
     {
       "index": 1,
       "actions": [
-        { "target": "op", "action": "set", "params": { "text": "dp[1]=1, dp[2]=2", "style": "highlight" } },
+        {
+          "target": "op",
+          "params": {
+            "text": "dp[1]=1, dp[2]=2",
+            "style": "highlight"
+          }
+        },
         {
           "target": "dp",
-          "action": "set",
           "params": {
             "rows": 1,
             "cols": 6,
-            "cells": [[
-              { "value": 0, "highlight": "filled" },
-              { "value": 1, "highlight": "current" },
-              { "value": 2, "highlight": "current" },
-              { "value": "", "highlight": "filled" },
-              { "value": "", "highlight": "filled" },
-              { "value": "", "highlight": "filled" }
-            ]],
-            "colLabels": ["0", "1", "2", "3", "4", "5"]
+            "cells": [
+              [
+                {
+                  "value": 0,
+                  "highlight": "filled"
+                },
+                {
+                  "value": 1,
+                  "highlight": "current"
+                },
+                {
+                  "value": 2,
+                  "highlight": "current"
+                },
+                {
+                  "value": "",
+                  "highlight": "filled"
+                },
+                {
+                  "value": "",
+                  "highlight": "filled"
+                },
+                {
+                  "value": "",
+                  "highlight": "filled"
+                }
+              ]
+            ],
+            "colLabels": [
+              "0",
+              "1",
+              "2",
+              "3",
+              "4",
+              "5"
+            ]
           }
         }
       ],
@@ -68,22 +147,54 @@
     {
       "index": 2,
       "actions": [
-        { "target": "op", "action": "set", "params": { "text": "i=3 -> dp[3] = dp[2] + dp[1] = 3", "style": "highlight" } },
+        {
+          "target": "op",
+          "params": {
+            "text": "i=3 -> dp[3] = dp[2] + dp[1] = 3",
+            "style": "highlight"
+          }
+        },
         {
           "target": "dp",
-          "action": "set",
           "params": {
             "rows": 1,
             "cols": 6,
-            "cells": [[
-              { "value": 0, "highlight": "filled" },
-              { "value": 1, "highlight": "dependency" },
-              { "value": 2, "highlight": "dependency" },
-              { "value": 3, "highlight": "current" },
-              { "value": "", "highlight": "filled" },
-              { "value": "", "highlight": "filled" }
-            ]],
-            "colLabels": ["0", "1", "2", "3", "4", "5"]
+            "cells": [
+              [
+                {
+                  "value": 0,
+                  "highlight": "filled"
+                },
+                {
+                  "value": 1,
+                  "highlight": "dependency"
+                },
+                {
+                  "value": 2,
+                  "highlight": "dependency"
+                },
+                {
+                  "value": 3,
+                  "highlight": "current"
+                },
+                {
+                  "value": "",
+                  "highlight": "filled"
+                },
+                {
+                  "value": "",
+                  "highlight": "filled"
+                }
+              ]
+            ],
+            "colLabels": [
+              "0",
+              "1",
+              "2",
+              "3",
+              "4",
+              "5"
+            ]
           }
         }
       ],
@@ -92,22 +203,54 @@
     {
       "index": 3,
       "actions": [
-        { "target": "op", "action": "set", "params": { "text": "i=4 -> dp[4] = dp[3] + dp[2] = 5", "style": "highlight" } },
+        {
+          "target": "op",
+          "params": {
+            "text": "i=4 -> dp[4] = dp[3] + dp[2] = 5",
+            "style": "highlight"
+          }
+        },
         {
           "target": "dp",
-          "action": "set",
           "params": {
             "rows": 1,
             "cols": 6,
-            "cells": [[
-              { "value": 0, "highlight": "filled" },
-              { "value": 1, "highlight": "filled" },
-              { "value": 2, "highlight": "dependency" },
-              { "value": 3, "highlight": "dependency" },
-              { "value": 5, "highlight": "current" },
-              { "value": "", "highlight": "filled" }
-            ]],
-            "colLabels": ["0", "1", "2", "3", "4", "5"]
+            "cells": [
+              [
+                {
+                  "value": 0,
+                  "highlight": "filled"
+                },
+                {
+                  "value": 1,
+                  "highlight": "filled"
+                },
+                {
+                  "value": 2,
+                  "highlight": "dependency"
+                },
+                {
+                  "value": 3,
+                  "highlight": "dependency"
+                },
+                {
+                  "value": 5,
+                  "highlight": "current"
+                },
+                {
+                  "value": "",
+                  "highlight": "filled"
+                }
+              ]
+            ],
+            "colLabels": [
+              "0",
+              "1",
+              "2",
+              "3",
+              "4",
+              "5"
+            ]
           }
         }
       ],
@@ -116,22 +259,54 @@
     {
       "index": 4,
       "actions": [
-        { "target": "op", "action": "set", "params": { "text": "i=5 -> dp[5] = dp[4] + dp[3] = 8", "style": "highlight" } },
+        {
+          "target": "op",
+          "params": {
+            "text": "i=5 -> dp[5] = dp[4] + dp[3] = 8",
+            "style": "highlight"
+          }
+        },
         {
           "target": "dp",
-          "action": "set",
           "params": {
             "rows": 1,
             "cols": 6,
-            "cells": [[
-              { "value": 0, "highlight": "filled" },
-              { "value": 1, "highlight": "filled" },
-              { "value": 2, "highlight": "filled" },
-              { "value": 3, "highlight": "dependency" },
-              { "value": 5, "highlight": "dependency" },
-              { "value": 8, "highlight": "current" }
-            ]],
-            "colLabels": ["0", "1", "2", "3", "4", "5"]
+            "cells": [
+              [
+                {
+                  "value": 0,
+                  "highlight": "filled"
+                },
+                {
+                  "value": 1,
+                  "highlight": "filled"
+                },
+                {
+                  "value": 2,
+                  "highlight": "filled"
+                },
+                {
+                  "value": 3,
+                  "highlight": "dependency"
+                },
+                {
+                  "value": 5,
+                  "highlight": "dependency"
+                },
+                {
+                  "value": 8,
+                  "highlight": "current"
+                }
+              ]
+            ],
+            "colLabels": [
+              "0",
+              "1",
+              "2",
+              "3",
+              "4",
+              "5"
+            ]
           }
         }
       ],
@@ -140,21 +315,39 @@
     {
       "index": 5,
       "actions": [
-        { "target": "op", "action": "set", "params": { "text": "DP table is fully populated", "style": "default" } }
+        {
+          "target": "op",
+          "params": {
+            "text": "DP table is fully populated",
+            "style": "default"
+          }
+        }
       ],
       "duration": 900
     },
     {
       "index": 6,
       "actions": [
-        { "target": "op", "action": "set", "params": { "text": "Return dp[5] = 8", "style": "success" } }
+        {
+          "target": "op",
+          "params": {
+            "text": "Return dp[5] = 8",
+            "style": "success"
+          }
+        }
       ],
       "duration": 900
     },
     {
       "index": 7,
       "actions": [
-        { "target": "op", "action": "set", "params": { "text": "Bottom-up DP avoids repeated recursion", "style": "default" } }
+        {
+          "target": "op",
+          "params": {
+            "text": "Bottom-up DP avoids repeated recursion",
+            "style": "default"
+          }
+        }
       ],
       "duration": 900
     }
@@ -178,8 +371,22 @@
     }
   ],
   "popups": [
-    { "id": "cs-1", "attachTo": "dp", "text": "Each cell uses two previous cells", "showAtStep": 2, "hideAtStep": 5, "style": "info" },
-    { "id": "cs-2", "attachTo": "dp", "text": "Answer is last filled cell", "showAtStep": 6, "hideAtStep": 8, "style": "success" }
+    {
+      "id": "cs-1",
+      "attachTo": "dp",
+      "text": "Each cell uses two previous cells",
+      "showAtStep": 2,
+      "hideAtStep": 5,
+      "style": "info"
+    },
+    {
+      "id": "cs-2",
+      "attachTo": "dp",
+      "text": "Answer is last filled cell",
+      "showAtStep": 6,
+      "hideAtStep": 8,
+      "style": "success"
+    }
   ],
   "challenges": [
     {
@@ -201,5 +408,8 @@
       "type": "scenario"
     }
   ],
-  "complexity": { "time": "O(n)", "space": "O(n)" }
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  }
 }

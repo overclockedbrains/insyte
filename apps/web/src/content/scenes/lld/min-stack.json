@@ -5,43 +5,56 @@
   "layout": "text-left-canvas-right",
   "description": "Design a stack that returns the minimum element in O(1) — without sorting. Uses a clever auxiliary stack to track minimums at every level.",
   "category": "Low Level Design",
-  "tags": ["stack", "min-stack", "design", "lld", "interview"],
-
+  "tags": [
+    "stack",
+    "min-stack",
+    "design",
+    "lld",
+    "interview"
+  ],
   "visuals": [
     {
       "id": "main-stack",
       "type": "stack",
       "label": "Main Stack",
-      "position": { "x": 30, "y": 45 },
       "initialState": {
         "items": [],
         "highlight": -1
-      }
+      },
+      "layoutHint": "linear-V"
     },
     {
       "id": "min-stack-viz",
       "type": "stack",
       "label": "Min Stack (tracks min per level)",
-      "position": { "x": 70, "y": 45 },
       "initialState": {
         "items": [],
         "highlight": -1
-      }
+      },
+      "layoutHint": "linear-V"
     },
     {
       "id": "current-min",
       "type": "counter",
       "label": "getMin()",
-      "initialState": { "value": 0, "label": "getMin()", "color": "secondary" }
+      "initialState": {
+        "value": 0,
+        "label": "getMin()",
+        "color": "secondary"
+      },
+      "slot": "bottom-left"
     },
     {
       "id": "op-badge",
       "type": "text-badge",
       "label": "Operation",
-      "initialState": { "text": "MinStack initialized — both stacks empty", "style": "default" }
+      "initialState": {
+        "text": "MinStack initialized — both stacks empty",
+        "style": "default"
+      },
+      "slot": "top-center"
     }
   ],
-
   "steps": [
     {
       "index": 0,
@@ -53,23 +66,36 @@
       "actions": [
         {
           "target": "op-badge",
-          "action": "set",
-          "params": { "text": "push(5)  →  Min stack: [5]  (5 is minimum so far)", "style": "highlight" }
+          "params": {
+            "text": "push(5)  →  Min stack: [5]  (5 is minimum so far)",
+            "style": "highlight"
+          }
         },
         {
           "target": "main-stack",
-          "action": "set",
-          "params": { "items": ["5"], "highlight": 0 }
+          "params": {
+            "items": [
+              "5"
+            ],
+            "highlight": 0
+          }
         },
         {
           "target": "min-stack-viz",
-          "action": "set",
-          "params": { "items": ["5"], "highlight": 0 }
+          "params": {
+            "items": [
+              "5"
+            ],
+            "highlight": 0
+          }
         },
         {
           "target": "current-min",
-          "action": "set",
-          "params": { "value": 5, "label": "getMin()", "color": "secondary" }
+          "params": {
+            "value": 5,
+            "label": "getMin()",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 1800
@@ -79,23 +105,38 @@
       "actions": [
         {
           "target": "op-badge",
-          "action": "set",
-          "params": { "text": "push(3)  →  3 < 5 (current min)  →  push 3 to min stack", "style": "highlight" }
+          "params": {
+            "text": "push(3)  →  3 < 5 (current min)  →  push 3 to min stack",
+            "style": "highlight"
+          }
         },
         {
           "target": "main-stack",
-          "action": "set",
-          "params": { "items": ["3", "5"], "highlight": 0 }
+          "params": {
+            "items": [
+              "3",
+              "5"
+            ],
+            "highlight": 0
+          }
         },
         {
           "target": "min-stack-viz",
-          "action": "set",
-          "params": { "items": ["3", "5"], "highlight": 0 }
+          "params": {
+            "items": [
+              "3",
+              "5"
+            ],
+            "highlight": 0
+          }
         },
         {
           "target": "current-min",
-          "action": "set",
-          "params": { "value": 3, "label": "getMin()", "color": "secondary" }
+          "params": {
+            "value": 3,
+            "label": "getMin()",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 1800
@@ -105,23 +146,40 @@
       "actions": [
         {
           "target": "op-badge",
-          "action": "set",
-          "params": { "text": "push(7)  →  7 > 3 (current min)  →  push 3 again to min stack", "style": "highlight" }
+          "params": {
+            "text": "push(7)  →  7 > 3 (current min)  →  push 3 again to min stack",
+            "style": "highlight"
+          }
         },
         {
           "target": "main-stack",
-          "action": "set",
-          "params": { "items": ["7", "3", "5"], "highlight": 0 }
+          "params": {
+            "items": [
+              "7",
+              "3",
+              "5"
+            ],
+            "highlight": 0
+          }
         },
         {
           "target": "min-stack-viz",
-          "action": "set",
-          "params": { "items": ["3", "3", "5"], "highlight": 0 }
+          "params": {
+            "items": [
+              "3",
+              "3",
+              "5"
+            ],
+            "highlight": 0
+          }
         },
         {
           "target": "current-min",
-          "action": "set",
-          "params": { "value": 3, "label": "getMin()", "color": "secondary" }
+          "params": {
+            "value": 3,
+            "label": "getMin()",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 2000
@@ -131,23 +189,42 @@
       "actions": [
         {
           "target": "op-badge",
-          "action": "set",
-          "params": { "text": "push(2)  →  2 < 3 (current min)  →  push 2 to min stack", "style": "highlight" }
+          "params": {
+            "text": "push(2)  →  2 < 3 (current min)  →  push 2 to min stack",
+            "style": "highlight"
+          }
         },
         {
           "target": "main-stack",
-          "action": "set",
-          "params": { "items": ["2", "7", "3", "5"], "highlight": 0 }
+          "params": {
+            "items": [
+              "2",
+              "7",
+              "3",
+              "5"
+            ],
+            "highlight": 0
+          }
         },
         {
           "target": "min-stack-viz",
-          "action": "set",
-          "params": { "items": ["2", "3", "3", "5"], "highlight": 0 }
+          "params": {
+            "items": [
+              "2",
+              "3",
+              "3",
+              "5"
+            ],
+            "highlight": 0
+          }
         },
         {
           "target": "current-min",
-          "action": "set",
-          "params": { "value": 2, "label": "getMin()", "color": "secondary" }
+          "params": {
+            "value": 2,
+            "label": "getMin()",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 1800
@@ -157,23 +234,42 @@
       "actions": [
         {
           "target": "op-badge",
-          "action": "set",
-          "params": { "text": "getMin()  →  peek top of min stack  →  returns 2  ✓ O(1)", "style": "success" }
+          "params": {
+            "text": "getMin()  →  peek top of min stack  →  returns 2  ✓ O(1)",
+            "style": "success"
+          }
         },
         {
           "target": "main-stack",
-          "action": "set",
-          "params": { "items": ["2", "7", "3", "5"], "highlight": -1 }
+          "params": {
+            "items": [
+              "2",
+              "7",
+              "3",
+              "5"
+            ],
+            "highlight": -1
+          }
         },
         {
           "target": "min-stack-viz",
-          "action": "set",
-          "params": { "items": ["2", "3", "3", "5"], "highlight": 0 }
+          "params": {
+            "items": [
+              "2",
+              "3",
+              "3",
+              "5"
+            ],
+            "highlight": 0
+          }
         },
         {
           "target": "current-min",
-          "action": "set",
-          "params": { "value": 2, "label": "getMin() = 2", "color": "secondary" }
+          "params": {
+            "value": 2,
+            "label": "getMin() = 2",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 2000
@@ -183,23 +279,40 @@
       "actions": [
         {
           "target": "op-badge",
-          "action": "set",
-          "params": { "text": "pop()  →  removes 2 from main stack + min stack  →  min is now 3", "style": "highlight" }
+          "params": {
+            "text": "pop()  →  removes 2 from main stack + min stack  →  min is now 3",
+            "style": "highlight"
+          }
         },
         {
           "target": "main-stack",
-          "action": "set",
-          "params": { "items": ["7", "3", "5"], "highlight": 0 }
+          "params": {
+            "items": [
+              "7",
+              "3",
+              "5"
+            ],
+            "highlight": 0
+          }
         },
         {
           "target": "min-stack-viz",
-          "action": "set",
-          "params": { "items": ["3", "3", "5"], "highlight": 0 }
+          "params": {
+            "items": [
+              "3",
+              "3",
+              "5"
+            ],
+            "highlight": 0
+          }
         },
         {
           "target": "current-min",
-          "action": "set",
-          "params": { "value": 3, "label": "getMin()", "color": "secondary" }
+          "params": {
+            "value": 3,
+            "label": "getMin()",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 2000
@@ -209,23 +322,38 @@
       "actions": [
         {
           "target": "op-badge",
-          "action": "set",
-          "params": { "text": "pop()  →  removes 7 from main  →  7 was not a min, pop min stack  →  min still 3", "style": "highlight" }
+          "params": {
+            "text": "pop()  →  removes 7 from main  →  7 was not a min, pop min stack  →  min still 3",
+            "style": "highlight"
+          }
         },
         {
           "target": "main-stack",
-          "action": "set",
-          "params": { "items": ["3", "5"], "highlight": 0 }
+          "params": {
+            "items": [
+              "3",
+              "5"
+            ],
+            "highlight": 0
+          }
         },
         {
           "target": "min-stack-viz",
-          "action": "set",
-          "params": { "items": ["3", "5"], "highlight": 0 }
+          "params": {
+            "items": [
+              "3",
+              "5"
+            ],
+            "highlight": 0
+          }
         },
         {
           "target": "current-min",
-          "action": "set",
-          "params": { "value": 3, "label": "getMin()", "color": "secondary" }
+          "params": {
+            "value": 3,
+            "label": "getMin()",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 2200
@@ -235,68 +363,97 @@
       "actions": [
         {
           "target": "op-badge",
-          "action": "set",
-          "params": { "text": "pop()  →  removes 3 (the actual min)  →  min stack reveals next min: 5", "style": "highlight" }
+          "params": {
+            "text": "pop()  →  removes 3 (the actual min)  →  min stack reveals next min: 5",
+            "style": "highlight"
+          }
         },
         {
           "target": "main-stack",
-          "action": "set",
-          "params": { "items": ["5"], "highlight": 0 }
+          "params": {
+            "items": [
+              "5"
+            ],
+            "highlight": 0
+          }
         },
         {
           "target": "min-stack-viz",
-          "action": "set",
-          "params": { "items": ["5"], "highlight": 0 }
+          "params": {
+            "items": [
+              "5"
+            ],
+            "highlight": 0
+          }
         },
         {
           "target": "current-min",
-          "action": "set",
-          "params": { "value": 5, "label": "getMin()", "color": "secondary" }
+          "params": {
+            "value": 5,
+            "label": "getMin()",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 2200
     }
   ],
-
   "controls": [
     {
       "id": "btn-push5",
       "type": "button",
       "label": "push(5)",
-      "config": { "variant": "primary", "goToStep": 1 }
+      "config": {
+        "variant": "primary",
+        "goToStep": 1
+      }
     },
     {
       "id": "btn-push3",
       "type": "button",
       "label": "push(3)",
-      "config": { "variant": "primary", "goToStep": 2 }
+      "config": {
+        "variant": "primary",
+        "goToStep": 2
+      }
     },
     {
       "id": "btn-push7",
       "type": "button",
       "label": "push(7)",
-      "config": { "variant": "primary", "goToStep": 3 }
+      "config": {
+        "variant": "primary",
+        "goToStep": 3
+      }
     },
     {
       "id": "btn-push2",
       "type": "button",
       "label": "push(2)",
-      "config": { "variant": "primary", "goToStep": 4 }
+      "config": {
+        "variant": "primary",
+        "goToStep": 4
+      }
     },
     {
       "id": "btn-getmin",
       "type": "button",
       "label": "getMin()",
-      "config": { "variant": "secondary", "goToStep": 5 }
+      "config": {
+        "variant": "secondary",
+        "goToStep": 5
+      }
     },
     {
       "id": "btn-pop",
       "type": "button",
       "label": "pop()",
-      "config": { "variant": "destructive", "goToStep": 6 }
+      "config": {
+        "variant": "destructive",
+        "goToStep": 6
+      }
     }
   ],
-
   "explanation": [
     {
       "heading": "The Problem",
@@ -320,7 +477,6 @@
       "appearsAtStep": 6
     }
   ],
-
   "popups": [
     {
       "id": "pop-sync",
@@ -329,7 +485,10 @@
       "showAtStep": 3,
       "hideAtStep": 5,
       "style": "info",
-      "anchor": { "x": 70, "y": 15 }
+      "anchor": {
+        "x": 70,
+        "y": 15
+      }
     },
     {
       "id": "pop-o1-get",
@@ -340,7 +499,6 @@
       "style": "success"
     }
   ],
-
   "challenges": [
     {
       "id": "ch-space-opt",

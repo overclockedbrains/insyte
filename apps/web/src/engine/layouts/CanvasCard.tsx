@@ -102,13 +102,11 @@ function CanvasVisualization({ scene, controlValues }: { scene: Scene; controlVa
       : null
 
   const hasHud = textBadges.length > 0 || counters.length > 0
-  const useAbsoluteLayout = canvasVisuals.some((v) => v.position != null)
 
-  // Phase 18: popup anchor uses toPx so it lives in the same px space as the primitives
+  // Phase 18/19: popup anchor uses toPx so it lives in the same px space as the primitives.
+  // position was removed from Visual in Phase 19 — fall back to canvas centre when no explicit anchor.
   function getPopupAnchorPx(popup: typeof visiblePopups[number]): { x: number; y: number } {
     if (popup.anchor) return toPx(popup.anchor)
-    const visual = canvasVisuals.find((v) => v.id === popup.attachTo)
-    if (visual?.position) return toPx({ x: visual.position.x, y: visual.position.y + 18 })
     return toPx({ x: 50, y: 75 })
   }
 
@@ -187,69 +185,28 @@ function CanvasVisualization({ scene, controlValues }: { scene: Scene; controlVa
             </p>
           )}
 
-          {useAbsoluteLayout ? (
-            <div className="relative w-full h-full min-h-[300px]">
-              {canvasVisuals.map((visual) => {
-                const PrimitiveComponent = PrimitiveRegistry[visual.type]
-                if (!PrimitiveComponent) return null
-                const state = computeVisualStateAtStep(scene, visual.id, currentStep)
-                const pos = visual.position ?? { x: 50, y: 50 }
-                const maxW = getMaxWidth(visual.type)
-                // Phase 18: positions are still expressed as % in Scene JSON;
-                // the CSS left/top still handle absolute-layout primitives.
-                // Complex primitives (graph/tree/etc.) own their own SVG viewBox
-                // and no longer rely on these CanvasCard-level pixel offsets.
-                return (
-                  <div
-                    key={visual.id}
-                    className={`absolute flex flex-col items-center${DEV_BORDERS ? ' border border-dashed border-primary/30' : ''}`}
-                    style={{
-                      left: `${pos.x}%`,
-                      top: `${pos.y}%`,
-                      transform: 'translate(-50%, -50%)',
-                      maxWidth: maxW,
-                      width: '100%',
-                    }}
-                  >
-                    {visual.label && (
-                      <div className="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant/60 mb-1 text-center select-none">
-                        {visual.label}
-                      </div>
-                    )}
-                    <PrimitiveComponent
-                      id={visual.id}
-                      state={state}
-                      step={currentStep}
-                      label={visual.label}
-                    />
-                  </div>
-                )
-              })}
-            </div>
-          ) : (
-            <div className="relative w-full h-full p-4 flex flex-col items-center justify-center gap-4">
-              {canvasVisuals.map((visual) => {
-                const PrimitiveComponent = PrimitiveRegistry[visual.type]
-                if (!PrimitiveComponent) return null
-                const state = computeVisualStateAtStep(scene, visual.id, currentStep)
-                return (
-                  <div key={visual.id} className={`flex flex-col items-center w-full${DEV_BORDERS ? ' border border-dashed border-primary/30' : ''}`}>
-                    {visual.label && (
-                      <div className="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant/60 mb-1 text-center select-none">
-                        {visual.label}
-                      </div>
-                    )}
-                    <PrimitiveComponent
-                      id={visual.id}
-                      state={state}
-                      step={currentStep}
-                      label={visual.label}
-                    />
-                  </div>
-                )
-              })}
-            </div>
-          )}
+          <div className="relative w-full h-full p-4 flex flex-col items-center justify-center gap-4">
+            {canvasVisuals.map((visual) => {
+              const PrimitiveComponent = PrimitiveRegistry[visual.type]
+              if (!PrimitiveComponent) return null
+              const state = computeVisualStateAtStep(scene, visual.id, currentStep)
+              return (
+                <div key={visual.id} className={`flex flex-col items-center w-full${DEV_BORDERS ? ' border border-dashed border-primary/30' : ''}`}>
+                  {visual.label && (
+                    <div className="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant/60 mb-1 text-center select-none">
+                      {visual.label}
+                    </div>
+                  )}
+                  <PrimitiveComponent
+                    id={visual.id}
+                    state={state}
+                    step={currentStep}
+                    label={visual.label}
+                  />
+                </div>
+              )
+            })}
+          </div>
 
           {/*
            * Phase 18: popup anchoring — positions derived via toPx() so they live

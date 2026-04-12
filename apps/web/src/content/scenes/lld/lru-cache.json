@@ -5,36 +5,45 @@
   "layout": "text-left-canvas-right",
   "description": "See how an LRU Cache achieves O(1) get and put using a doubly-linked list + hashmap — the same design used in Redis and CPU cache controllers.",
   "category": "Low Level Design",
-  "tags": ["lru", "cache", "linked-list", "hashmap", "design", "lld"],
-
+  "tags": [
+    "lru",
+    "cache",
+    "linked-list",
+    "hashmap",
+    "design",
+    "lld"
+  ],
   "visuals": [
     {
       "id": "lru-list",
       "type": "linked-list",
       "label": "Order List  (head = MRU ◀──── tail = LRU)",
-      "position": { "x": 50, "y": 30 },
       "initialState": {
         "nodes": [],
         "headId": null
-      }
+      },
+      "layoutHint": "linear-H"
     },
     {
       "id": "lru-map",
       "type": "hashmap",
       "label": "HashMap  key → node",
-      "position": { "x": 50, "y": 68 },
       "initialState": {
         "entries": []
-      }
+      },
+      "layoutHint": "hashmap-buckets"
     },
     {
       "id": "capacity-badge",
       "type": "text-badge",
       "label": "Status",
-      "initialState": { "text": "Cache empty  (capacity = 3)", "style": "default" }
+      "initialState": {
+        "text": "Cache empty  (capacity = 3)",
+        "style": "default"
+      },
+      "slot": "top-center"
     }
   ],
-
   "steps": [
     {
       "index": 0,
@@ -46,22 +55,34 @@
       "actions": [
         {
           "target": "capacity-badge",
-          "action": "set",
-          "params": { "text": "put(1, 'A')  →  insert at head  [1/3]", "style": "highlight" }
+          "params": {
+            "text": "put(1, 'A')  →  insert at head  [1/3]",
+            "style": "highlight"
+          }
         },
         {
           "target": "lru-list",
-          "action": "set",
           "params": {
-            "nodes": [{ "id": "n1", "value": "1→A", "next": null }],
+            "nodes": [
+              {
+                "id": "n1",
+                "value": "1→A",
+                "next": null
+              }
+            ],
             "headId": "n1"
           }
         },
         {
           "target": "lru-map",
-          "action": "set",
           "params": {
-            "entries": [{ "key": "1", "value": "A", "highlight": "insert" }]
+            "entries": [
+              {
+                "key": "1",
+                "value": "A",
+                "highlight": "insert"
+              }
+            ]
           }
         }
       ],
@@ -72,27 +93,42 @@
       "actions": [
         {
           "target": "capacity-badge",
-          "action": "set",
-          "params": { "text": "put(2, 'B')  →  insert at head  [2/3]", "style": "highlight" }
+          "params": {
+            "text": "put(2, 'B')  →  insert at head  [2/3]",
+            "style": "highlight"
+          }
         },
         {
           "target": "lru-list",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "n2", "value": "2→B", "next": "n1" },
-              { "id": "n1", "value": "1→A", "next": null }
+              {
+                "id": "n2",
+                "value": "2→B",
+                "next": "n1"
+              },
+              {
+                "id": "n1",
+                "value": "1→A",
+                "next": null
+              }
             ],
             "headId": "n2"
           }
         },
         {
           "target": "lru-map",
-          "action": "set",
           "params": {
             "entries": [
-              { "key": "1", "value": "A" },
-              { "key": "2", "value": "B", "highlight": "insert" }
+              {
+                "key": "1",
+                "value": "A"
+              },
+              {
+                "key": "2",
+                "value": "B",
+                "highlight": "insert"
+              }
             ]
           }
         }
@@ -104,29 +140,51 @@
       "actions": [
         {
           "target": "capacity-badge",
-          "action": "set",
-          "params": { "text": "put(3, 'C')  →  CACHE FULL  [3/3]", "style": "error" }
+          "params": {
+            "text": "put(3, 'C')  →  CACHE FULL  [3/3]",
+            "style": "error"
+          }
         },
         {
           "target": "lru-list",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "n3", "value": "3→C", "next": "n2" },
-              { "id": "n2", "value": "2→B", "next": "n1" },
-              { "id": "n1", "value": "1→A", "next": null }
+              {
+                "id": "n3",
+                "value": "3→C",
+                "next": "n2"
+              },
+              {
+                "id": "n2",
+                "value": "2→B",
+                "next": "n1"
+              },
+              {
+                "id": "n1",
+                "value": "1→A",
+                "next": null
+              }
             ],
             "headId": "n3"
           }
         },
         {
           "target": "lru-map",
-          "action": "set",
           "params": {
             "entries": [
-              { "key": "1", "value": "A" },
-              { "key": "2", "value": "B" },
-              { "key": "3", "value": "C", "highlight": "insert" }
+              {
+                "key": "1",
+                "value": "A"
+              },
+              {
+                "key": "2",
+                "value": "B"
+              },
+              {
+                "key": "3",
+                "value": "C",
+                "highlight": "insert"
+              }
             ]
           }
         }
@@ -138,29 +196,51 @@
       "actions": [
         {
           "target": "capacity-badge",
-          "action": "set",
-          "params": { "text": "get(1)  →  CACHE HIT ✓  →  move key 1 to front", "style": "success" }
+          "params": {
+            "text": "get(1)  →  CACHE HIT ✓  →  move key 1 to front",
+            "style": "success"
+          }
         },
         {
           "target": "lru-list",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "n1", "value": "1→A", "next": "n3" },
-              { "id": "n3", "value": "3→C", "next": "n2" },
-              { "id": "n2", "value": "2→B", "next": null }
+              {
+                "id": "n1",
+                "value": "1→A",
+                "next": "n3"
+              },
+              {
+                "id": "n3",
+                "value": "3→C",
+                "next": "n2"
+              },
+              {
+                "id": "n2",
+                "value": "2→B",
+                "next": null
+              }
             ],
             "headId": "n1"
           }
         },
         {
           "target": "lru-map",
-          "action": "set",
           "params": {
             "entries": [
-              { "key": "1", "value": "A", "highlight": "hit" },
-              { "key": "2", "value": "B" },
-              { "key": "3", "value": "C" }
+              {
+                "key": "1",
+                "value": "A",
+                "highlight": "hit"
+              },
+              {
+                "key": "2",
+                "value": "B"
+              },
+              {
+                "key": "3",
+                "value": "C"
+              }
             ]
           }
         }
@@ -172,30 +252,56 @@
       "actions": [
         {
           "target": "capacity-badge",
-          "action": "set",
-          "params": { "text": "put(4, 'D')  →  FULL! Evict LRU (key 2, tail)", "style": "error" }
+          "params": {
+            "text": "put(4, 'D')  →  FULL! Evict LRU (key 2, tail)",
+            "style": "error"
+          }
         },
         {
           "target": "lru-list",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "n4", "value": "4→D", "next": "n1" },
-              { "id": "n1", "value": "1→A", "next": "n3" },
-              { "id": "n3", "value": "3→C", "next": null }
+              {
+                "id": "n4",
+                "value": "4→D",
+                "next": "n1"
+              },
+              {
+                "id": "n1",
+                "value": "1→A",
+                "next": "n3"
+              },
+              {
+                "id": "n3",
+                "value": "3→C",
+                "next": null
+              }
             ],
             "headId": "n4"
           }
         },
         {
           "target": "lru-map",
-          "action": "set",
           "params": {
             "entries": [
-              { "key": "1", "value": "A" },
-              { "key": "2", "value": "B (evicted)", "highlight": "delete" },
-              { "key": "3", "value": "C" },
-              { "key": "4", "value": "D", "highlight": "insert" }
+              {
+                "key": "1",
+                "value": "A"
+              },
+              {
+                "key": "2",
+                "value": "B (evicted)",
+                "highlight": "delete"
+              },
+              {
+                "key": "3",
+                "value": "C"
+              },
+              {
+                "key": "4",
+                "value": "D",
+                "highlight": "insert"
+              }
             ]
           }
         }
@@ -207,30 +313,55 @@
       "actions": [
         {
           "target": "capacity-badge",
-          "action": "set",
-          "params": { "text": "get(2)  →  CACHE MISS ✗  →  returns -1", "style": "error" }
+          "params": {
+            "text": "get(2)  →  CACHE MISS ✗  →  returns -1",
+            "style": "error"
+          }
         },
         {
           "target": "lru-list",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "n4", "value": "4→D", "next": "n1" },
-              { "id": "n1", "value": "1→A", "next": "n3" },
-              { "id": "n3", "value": "3→C", "next": null }
+              {
+                "id": "n4",
+                "value": "4→D",
+                "next": "n1"
+              },
+              {
+                "id": "n1",
+                "value": "1→A",
+                "next": "n3"
+              },
+              {
+                "id": "n3",
+                "value": "3→C",
+                "next": null
+              }
             ],
             "headId": "n4"
           }
         },
         {
           "target": "lru-map",
-          "action": "set",
           "params": {
             "entries": [
-              { "key": "1", "value": "A" },
-              { "key": "3", "value": "C" },
-              { "key": "4", "value": "D" },
-              { "key": "2 (get)", "value": "MISS → -1", "highlight": "miss" }
+              {
+                "key": "1",
+                "value": "A"
+              },
+              {
+                "key": "3",
+                "value": "C"
+              },
+              {
+                "key": "4",
+                "value": "D"
+              },
+              {
+                "key": "2 (get)",
+                "value": "MISS → -1",
+                "highlight": "miss"
+              }
             ]
           }
         }
@@ -242,29 +373,51 @@
       "actions": [
         {
           "target": "capacity-badge",
-          "action": "set",
-          "params": { "text": "get(3)  →  CACHE HIT ✓  →  move key 3 to front", "style": "success" }
+          "params": {
+            "text": "get(3)  →  CACHE HIT ✓  →  move key 3 to front",
+            "style": "success"
+          }
         },
         {
           "target": "lru-list",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "n3", "value": "3→C", "next": "n4" },
-              { "id": "n4", "value": "4→D", "next": "n1" },
-              { "id": "n1", "value": "1→A", "next": null }
+              {
+                "id": "n3",
+                "value": "3→C",
+                "next": "n4"
+              },
+              {
+                "id": "n4",
+                "value": "4→D",
+                "next": "n1"
+              },
+              {
+                "id": "n1",
+                "value": "1→A",
+                "next": null
+              }
             ],
             "headId": "n3"
           }
         },
         {
           "target": "lru-map",
-          "action": "set",
           "params": {
             "entries": [
-              { "key": "1", "value": "A" },
-              { "key": "3", "value": "C", "highlight": "hit" },
-              { "key": "4", "value": "D" }
+              {
+                "key": "1",
+                "value": "A"
+              },
+              {
+                "key": "3",
+                "value": "C",
+                "highlight": "hit"
+              },
+              {
+                "key": "4",
+                "value": "D"
+              }
             ]
           }
         }
@@ -276,30 +429,56 @@
       "actions": [
         {
           "target": "capacity-badge",
-          "action": "set",
-          "params": { "text": "put(5, 'E')  →  FULL! Evict LRU (key 1, tail)", "style": "error" }
+          "params": {
+            "text": "put(5, 'E')  →  FULL! Evict LRU (key 1, tail)",
+            "style": "error"
+          }
         },
         {
           "target": "lru-list",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "n5", "value": "5→E", "next": "n3" },
-              { "id": "n3", "value": "3→C", "next": "n4" },
-              { "id": "n4", "value": "4→D", "next": null }
+              {
+                "id": "n5",
+                "value": "5→E",
+                "next": "n3"
+              },
+              {
+                "id": "n3",
+                "value": "3→C",
+                "next": "n4"
+              },
+              {
+                "id": "n4",
+                "value": "4→D",
+                "next": null
+              }
             ],
             "headId": "n5"
           }
         },
         {
           "target": "lru-map",
-          "action": "set",
           "params": {
             "entries": [
-              { "key": "1", "value": "A (evicted)", "highlight": "delete" },
-              { "key": "3", "value": "C" },
-              { "key": "4", "value": "D" },
-              { "key": "5", "value": "E", "highlight": "insert" }
+              {
+                "key": "1",
+                "value": "A (evicted)",
+                "highlight": "delete"
+              },
+              {
+                "key": "3",
+                "value": "C"
+              },
+              {
+                "key": "4",
+                "value": "D"
+              },
+              {
+                "key": "5",
+                "value": "E",
+                "highlight": "insert"
+              }
             ]
           }
         }
@@ -311,29 +490,51 @@
       "actions": [
         {
           "target": "capacity-badge",
-          "action": "set",
-          "params": { "text": "get(4)  →  CACHE HIT ✓  →  move key 4 to front", "style": "success" }
+          "params": {
+            "text": "get(4)  →  CACHE HIT ✓  →  move key 4 to front",
+            "style": "success"
+          }
         },
         {
           "target": "lru-list",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "n4", "value": "4→D", "next": "n5" },
-              { "id": "n5", "value": "5→E", "next": "n3" },
-              { "id": "n3", "value": "3→C", "next": null }
+              {
+                "id": "n4",
+                "value": "4→D",
+                "next": "n5"
+              },
+              {
+                "id": "n5",
+                "value": "5→E",
+                "next": "n3"
+              },
+              {
+                "id": "n3",
+                "value": "3→C",
+                "next": null
+              }
             ],
             "headId": "n4"
           }
         },
         {
           "target": "lru-map",
-          "action": "set",
           "params": {
             "entries": [
-              { "key": "3", "value": "C" },
-              { "key": "4", "value": "D", "highlight": "hit" },
-              { "key": "5", "value": "E" }
+              {
+                "key": "3",
+                "value": "C"
+              },
+              {
+                "key": "4",
+                "value": "D",
+                "highlight": "hit"
+              },
+              {
+                "key": "5",
+                "value": "E"
+              }
             ]
           }
         }
@@ -345,30 +546,56 @@
       "actions": [
         {
           "target": "capacity-badge",
-          "action": "set",
-          "params": { "text": "put(1, 'A')  →  FULL! Evict LRU (key 3, tail)", "style": "error" }
+          "params": {
+            "text": "put(1, 'A')  →  FULL! Evict LRU (key 3, tail)",
+            "style": "error"
+          }
         },
         {
           "target": "lru-list",
-          "action": "set",
           "params": {
             "nodes": [
-              { "id": "n1b", "value": "1→A", "next": "n4" },
-              { "id": "n4", "value": "4→D", "next": "n5" },
-              { "id": "n5", "value": "5→E", "next": null }
+              {
+                "id": "n1b",
+                "value": "1→A",
+                "next": "n4"
+              },
+              {
+                "id": "n4",
+                "value": "4→D",
+                "next": "n5"
+              },
+              {
+                "id": "n5",
+                "value": "5→E",
+                "next": null
+              }
             ],
             "headId": "n1b"
           }
         },
         {
           "target": "lru-map",
-          "action": "set",
           "params": {
             "entries": [
-              { "key": "1", "value": "A", "highlight": "insert" },
-              { "key": "3", "value": "C (evicted)", "highlight": "delete" },
-              { "key": "4", "value": "D" },
-              { "key": "5", "value": "E" }
+              {
+                "key": "1",
+                "value": "A",
+                "highlight": "insert"
+              },
+              {
+                "key": "3",
+                "value": "C (evicted)",
+                "highlight": "delete"
+              },
+              {
+                "key": "4",
+                "value": "D"
+              },
+              {
+                "key": "5",
+                "value": "E"
+              }
             ]
           }
         }
@@ -376,40 +603,53 @@
       "duration": 2000
     }
   ],
-
   "controls": [
     {
       "id": "btn-put1",
       "type": "button",
       "label": "put(1,'A')",
-      "config": { "variant": "primary", "goToStep": 1 }
+      "config": {
+        "variant": "primary",
+        "goToStep": 1
+      }
     },
     {
       "id": "btn-fill",
       "type": "button",
       "label": "Fill cache (put 2,3)",
-      "config": { "variant": "primary", "goToStep": 3 }
+      "config": {
+        "variant": "primary",
+        "goToStep": 3
+      }
     },
     {
       "id": "btn-get1",
       "type": "button",
       "label": "get(1) → HIT",
-      "config": { "variant": "secondary", "goToStep": 4 }
+      "config": {
+        "variant": "secondary",
+        "goToStep": 4
+      }
     },
     {
       "id": "btn-evict",
       "type": "button",
       "label": "put(4,'D') → Evict",
-      "config": { "variant": "destructive", "goToStep": 5 }
+      "config": {
+        "variant": "destructive",
+        "goToStep": 5
+      }
     },
     {
       "id": "btn-miss",
       "type": "button",
       "label": "get(2) → MISS",
-      "config": { "variant": "destructive", "goToStep": 6 }
+      "config": {
+        "variant": "destructive",
+        "goToStep": 6
+      }
     }
   ],
-
   "explanation": [
     {
       "heading": "What is an LRU Cache?",
@@ -438,7 +678,6 @@
       "appearsAtStep": 6
     }
   ],
-
   "popups": [
     {
       "id": "pop-head",
@@ -447,7 +686,10 @@
       "showAtStep": 1,
       "hideAtStep": 2,
       "style": "info",
-      "anchor": { "x": 50, "y": 18 }
+      "anchor": {
+        "x": 50,
+        "y": 18
+      }
     },
     {
       "id": "pop-full",
@@ -456,7 +698,10 @@
       "showAtStep": 3,
       "hideAtStep": 4,
       "style": "warning",
-      "anchor": { "x": 50, "y": 18 }
+      "anchor": {
+        "x": 50,
+        "y": 18
+      }
     },
     {
       "id": "pop-move-front",
@@ -465,7 +710,10 @@
       "showAtStep": 4,
       "hideAtStep": 5,
       "style": "success",
-      "anchor": { "x": 50, "y": 18 }
+      "anchor": {
+        "x": 50,
+        "y": 18
+      }
     },
     {
       "id": "pop-evict",
@@ -474,10 +722,12 @@
       "showAtStep": 5,
       "hideAtStep": 6,
       "style": "warning",
-      "anchor": { "x": 50, "y": 18 }
+      "anchor": {
+        "x": 50,
+        "y": 18
+      }
     }
   ],
-
   "challenges": [
     {
       "id": "ch-predict-evict",

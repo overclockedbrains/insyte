@@ -5,71 +5,165 @@
   "layout": "text-left-canvas-right",
   "description": "Watch how a domain name like insyte.amanarya.com gets resolved to an IP address — from browser cache to root servers and back.",
   "category": "Networking",
-  "tags": ["dns", "networking", "caching", "ttl", "http"],
-
+  "tags": [
+    "dns",
+    "networking",
+    "caching",
+    "ttl",
+    "http"
+  ],
   "visuals": [
     {
       "id": "dns-system",
       "type": "system-diagram",
       "label": "DNS Resolution Chain",
-      "position": { "x": 50, "y": 40 },
       "initialState": {
         "components": [
-          { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 240, "status": "normal" },
-          { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 250, "y": 240, "status": "normal" },
-          { "id": "root-ns", "label": "Root NS", "icon": "database", "x": 450, "y": 80, "status": "normal" },
-          { "id": "tld-ns", "label": ".com TLD NS", "icon": "database", "x": 450, "y": 240, "status": "normal" },
-          { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 450, "y": 400, "status": "normal" }
+          {
+            "id": "browser",
+            "label": "Browser",
+            "icon": "web",
+            "status": "normal"
+          },
+          {
+            "id": "resolver",
+            "label": "Recursive Resolver",
+            "icon": "compute",
+            "status": "normal"
+          },
+          {
+            "id": "root-ns",
+            "label": "Root NS",
+            "icon": "database",
+            "status": "normal"
+          },
+          {
+            "id": "tld-ns",
+            "label": ".com TLD NS",
+            "icon": "database",
+            "status": "normal"
+          },
+          {
+            "id": "auth-ns",
+            "label": "Authoritative NS",
+            "icon": "database",
+            "status": "normal"
+          }
         ],
         "connections": [
-          { "from": "browser", "to": "resolver", "active": false },
-          { "from": "resolver", "to": "root-ns", "active": false },
-          { "from": "resolver", "to": "tld-ns", "active": false },
-          { "from": "resolver", "to": "auth-ns", "active": false }
+          {
+            "from": "browser",
+            "to": "resolver",
+            "active": false
+          },
+          {
+            "from": "resolver",
+            "to": "root-ns",
+            "active": false
+          },
+          {
+            "from": "resolver",
+            "to": "tld-ns",
+            "active": false
+          },
+          {
+            "from": "resolver",
+            "to": "auth-ns",
+            "active": false
+          }
         ]
-      }
+      },
+      "layoutHint": "dagre-LR"
     },
     {
       "id": "cache-status",
       "type": "text-badge",
       "label": "Cache Status",
-      "position": { "x": 50, "y": 5 },
-      "initialState": { "text": "Looking up: insyte.amanarya.com", "style": "default" }
+      "initialState": {
+        "text": "Looking up: insyte.amanarya.com",
+        "style": "default"
+      },
+      "slot": "top-center"
     },
     {
       "id": "latency",
       "type": "counter",
       "label": "Total Latency",
-      "position": { "x": 80, "y": 90 },
-      "initialState": { "value": 0, "label": "Latency (ms)", "color": "secondary" }
+      "initialState": {
+        "value": 0,
+        "label": "Latency (ms)",
+        "color": "secondary"
+      },
+      "slot": "bottom-left"
     }
   ],
-
   "steps": [
     {
       "index": 0,
       "actions": [
         {
           "target": "cache-status",
-          "action": "set",
-          "params": { "text": "Browser: lookup insyte.amanarya.com → local cache MISS", "style": "error" }
+          "params": {
+            "text": "Browser: lookup insyte.amanarya.com → local cache MISS",
+            "style": "error"
+          }
         },
         {
           "target": "dns-system",
-          "action": "set",
           "params": {
             "components": [
-              { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 240, "status": "active" },
-              { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 250, "y": 240, "status": "normal" },
-              { "id": "root-ns", "label": "Root NS", "icon": "database", "x": 450, "y": 80, "status": "normal" },
-              { "id": "tld-ns", "label": ".com TLD NS", "icon": "database", "x": 450, "y": 240, "status": "normal" },
-              { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 450, "y": 400, "status": "normal" }
+              {
+                "id": "browser",
+                "label": "Browser",
+                "icon": "web",
+                "status": "active"
+              },
+              {
+                "id": "resolver",
+                "label": "Recursive Resolver",
+                "icon": "compute",
+                "status": "normal"
+              },
+              {
+                "id": "root-ns",
+                "label": "Root NS",
+                "icon": "database",
+                "status": "normal"
+              },
+              {
+                "id": "tld-ns",
+                "label": ".com TLD NS",
+                "icon": "database",
+                "status": "normal"
+              },
+              {
+                "id": "auth-ns",
+                "label": "Authoritative NS",
+                "icon": "database",
+                "status": "normal"
+              }
             ],
             "connections": [
-              { "from": "browser", "to": "resolver", "active": false },
-              { "from": "resolver", "to": "root-ns", "active": false },
-              { "from": "resolver", "to": "tld-ns", "active": false },
-              { "from": "resolver", "to": "auth-ns", "active": false }
+              {
+                "from": "browser",
+                "to": "resolver",
+                "active": false
+              },
+              {
+                "from": "resolver",
+                "to": "root-ns",
+                "active": false
+              },
+              {
+                "from": "resolver",
+                "to": "tld-ns",
+                "active": false
+              },
+              {
+                "from": "resolver",
+                "to": "auth-ns",
+                "active": false
+              }
             ]
           }
         }
@@ -81,32 +175,77 @@
       "actions": [
         {
           "target": "cache-status",
-          "action": "set",
-          "params": { "text": "Query sent to Recursive Resolver — resolver cache MISS", "style": "error" }
+          "params": {
+            "text": "Query sent to Recursive Resolver — resolver cache MISS",
+            "style": "error"
+          }
         },
         {
           "target": "dns-system",
-          "action": "set",
           "params": {
             "components": [
-              { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 240, "status": "active" },
-              { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 250, "y": 240, "status": "active" },
-              { "id": "root-ns", "label": "Root NS", "icon": "database", "x": 450, "y": 80, "status": "normal" },
-              { "id": "tld-ns", "label": ".com TLD NS", "icon": "database", "x": 450, "y": 240, "status": "normal" },
-              { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 450, "y": 400, "status": "normal" }
+              {
+                "id": "browser",
+                "label": "Browser",
+                "icon": "web",
+                "status": "active"
+              },
+              {
+                "id": "resolver",
+                "label": "Recursive Resolver",
+                "icon": "compute",
+                "status": "active"
+              },
+              {
+                "id": "root-ns",
+                "label": "Root NS",
+                "icon": "database",
+                "status": "normal"
+              },
+              {
+                "id": "tld-ns",
+                "label": ".com TLD NS",
+                "icon": "database",
+                "status": "normal"
+              },
+              {
+                "id": "auth-ns",
+                "label": "Authoritative NS",
+                "icon": "database",
+                "status": "normal"
+              }
             ],
             "connections": [
-              { "from": "browser", "to": "resolver", "active": true },
-              { "from": "resolver", "to": "root-ns", "active": false },
-              { "from": "resolver", "to": "tld-ns", "active": false },
-              { "from": "resolver", "to": "auth-ns", "active": false }
+              {
+                "from": "browser",
+                "to": "resolver",
+                "active": true
+              },
+              {
+                "from": "resolver",
+                "to": "root-ns",
+                "active": false
+              },
+              {
+                "from": "resolver",
+                "to": "tld-ns",
+                "active": false
+              },
+              {
+                "from": "resolver",
+                "to": "auth-ns",
+                "active": false
+              }
             ]
           }
         },
         {
           "target": "latency",
-          "action": "set",
-          "params": { "value": 5, "label": "Latency (ms)", "color": "secondary" }
+          "params": {
+            "value": 5,
+            "label": "Latency (ms)",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 1600
@@ -116,32 +255,77 @@
       "actions": [
         {
           "target": "cache-status",
-          "action": "set",
-          "params": { "text": "Resolver asks Root NS: Who handles .com?", "style": "highlight" }
+          "params": {
+            "text": "Resolver asks Root NS: Who handles .com?",
+            "style": "highlight"
+          }
         },
         {
           "target": "dns-system",
-          "action": "set",
           "params": {
             "components": [
-              { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 240, "status": "normal" },
-              { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 250, "y": 240, "status": "active" },
-              { "id": "root-ns", "label": "Root NS", "icon": "database", "x": 450, "y": 80, "status": "active" },
-              { "id": "tld-ns", "label": ".com TLD NS", "icon": "database", "x": 450, "y": 240, "status": "normal" },
-              { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 450, "y": 400, "status": "normal" }
+              {
+                "id": "browser",
+                "label": "Browser",
+                "icon": "web",
+                "status": "normal"
+              },
+              {
+                "id": "resolver",
+                "label": "Recursive Resolver",
+                "icon": "compute",
+                "status": "active"
+              },
+              {
+                "id": "root-ns",
+                "label": "Root NS",
+                "icon": "database",
+                "status": "active"
+              },
+              {
+                "id": "tld-ns",
+                "label": ".com TLD NS",
+                "icon": "database",
+                "status": "normal"
+              },
+              {
+                "id": "auth-ns",
+                "label": "Authoritative NS",
+                "icon": "database",
+                "status": "normal"
+              }
             ],
             "connections": [
-              { "from": "browser", "to": "resolver", "active": false },
-              { "from": "resolver", "to": "root-ns", "active": true },
-              { "from": "resolver", "to": "tld-ns", "active": false },
-              { "from": "resolver", "to": "auth-ns", "active": false }
+              {
+                "from": "browser",
+                "to": "resolver",
+                "active": false
+              },
+              {
+                "from": "resolver",
+                "to": "root-ns",
+                "active": true
+              },
+              {
+                "from": "resolver",
+                "to": "tld-ns",
+                "active": false
+              },
+              {
+                "from": "resolver",
+                "to": "auth-ns",
+                "active": false
+              }
             ]
           }
         },
         {
           "target": "latency",
-          "action": "set",
-          "params": { "value": 35, "label": "Latency (ms)", "color": "secondary" }
+          "params": {
+            "value": 35,
+            "label": "Latency (ms)",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 1800
@@ -151,32 +335,77 @@
       "actions": [
         {
           "target": "cache-status",
-          "action": "set",
-          "params": { "text": "Root NS replies: .com TLD NS is at a Verisign .com name server", "style": "success" }
+          "params": {
+            "text": "Root NS replies: .com TLD NS is at a Verisign .com name server",
+            "style": "success"
+          }
         },
         {
           "target": "dns-system",
-          "action": "set",
           "params": {
             "components": [
-              { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 240, "status": "normal" },
-              { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 250, "y": 240, "status": "active" },
-              { "id": "root-ns", "label": "Root NS ✓", "icon": "database", "x": 450, "y": 80, "status": "normal" },
-              { "id": "tld-ns", "label": ".com TLD NS", "icon": "database", "x": 450, "y": 240, "status": "active" },
-              { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 450, "y": 400, "status": "normal" }
+              {
+                "id": "browser",
+                "label": "Browser",
+                "icon": "web",
+                "status": "normal"
+              },
+              {
+                "id": "resolver",
+                "label": "Recursive Resolver",
+                "icon": "compute",
+                "status": "active"
+              },
+              {
+                "id": "root-ns",
+                "label": "Root NS ✓",
+                "icon": "database",
+                "status": "normal"
+              },
+              {
+                "id": "tld-ns",
+                "label": ".com TLD NS",
+                "icon": "database",
+                "status": "active"
+              },
+              {
+                "id": "auth-ns",
+                "label": "Authoritative NS",
+                "icon": "database",
+                "status": "normal"
+              }
             ],
             "connections": [
-              { "from": "browser", "to": "resolver", "active": false },
-              { "from": "resolver", "to": "root-ns", "active": false },
-              { "from": "resolver", "to": "tld-ns", "active": true },
-              { "from": "resolver", "to": "auth-ns", "active": false }
+              {
+                "from": "browser",
+                "to": "resolver",
+                "active": false
+              },
+              {
+                "from": "resolver",
+                "to": "root-ns",
+                "active": false
+              },
+              {
+                "from": "resolver",
+                "to": "tld-ns",
+                "active": true
+              },
+              {
+                "from": "resolver",
+                "to": "auth-ns",
+                "active": false
+              }
             ]
           }
         },
         {
           "target": "latency",
-          "action": "set",
-          "params": { "value": 70, "label": "Latency (ms)", "color": "secondary" }
+          "params": {
+            "value": 70,
+            "label": "Latency (ms)",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 1800
@@ -186,32 +415,77 @@
       "actions": [
         {
           "target": "cache-status",
-          "action": "set",
-          "params": { "text": "TLD NS replies: amanarya.com NS is at ns1.vercel-dns.com", "style": "success" }
+          "params": {
+            "text": "TLD NS replies: amanarya.com NS is at ns1.vercel-dns.com",
+            "style": "success"
+          }
         },
         {
           "target": "dns-system",
-          "action": "set",
           "params": {
             "components": [
-              { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 240, "status": "normal" },
-              { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 250, "y": 240, "status": "active" },
-              { "id": "root-ns", "label": "Root NS ✓", "icon": "database", "x": 450, "y": 80, "status": "normal" },
-              { "id": "tld-ns", "label": ".com TLD NS ✓", "icon": "database", "x": 450, "y": 240, "status": "normal" },
-              { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 450, "y": 400, "status": "active" }
+              {
+                "id": "browser",
+                "label": "Browser",
+                "icon": "web",
+                "status": "normal"
+              },
+              {
+                "id": "resolver",
+                "label": "Recursive Resolver",
+                "icon": "compute",
+                "status": "active"
+              },
+              {
+                "id": "root-ns",
+                "label": "Root NS ✓",
+                "icon": "database",
+                "status": "normal"
+              },
+              {
+                "id": "tld-ns",
+                "label": ".com TLD NS ✓",
+                "icon": "database",
+                "status": "normal"
+              },
+              {
+                "id": "auth-ns",
+                "label": "Authoritative NS",
+                "icon": "database",
+                "status": "active"
+              }
             ],
             "connections": [
-              { "from": "browser", "to": "resolver", "active": false },
-              { "from": "resolver", "to": "root-ns", "active": false },
-              { "from": "resolver", "to": "tld-ns", "active": false },
-              { "from": "resolver", "to": "auth-ns", "active": true }
+              {
+                "from": "browser",
+                "to": "resolver",
+                "active": false
+              },
+              {
+                "from": "resolver",
+                "to": "root-ns",
+                "active": false
+              },
+              {
+                "from": "resolver",
+                "to": "tld-ns",
+                "active": false
+              },
+              {
+                "from": "resolver",
+                "to": "auth-ns",
+                "active": true
+              }
             ]
           }
         },
         {
           "target": "latency",
-          "action": "set",
-          "params": { "value": 110, "label": "Latency (ms)", "color": "secondary" }
+          "params": {
+            "value": 110,
+            "label": "Latency (ms)",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 1800
@@ -221,32 +495,77 @@
       "actions": [
         {
           "target": "cache-status",
-          "action": "set",
-          "params": { "text": "Authoritative NS returns: insyte.amanarya.com → 76.76.21.21", "style": "success" }
+          "params": {
+            "text": "Authoritative NS returns: insyte.amanarya.com → 76.76.21.21",
+            "style": "success"
+          }
         },
         {
           "target": "dns-system",
-          "action": "set",
           "params": {
             "components": [
-              { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 240, "status": "active" },
-              { "id": "resolver", "label": "Recursive Resolver ✓", "icon": "compute", "x": 250, "y": 240, "status": "active" },
-              { "id": "root-ns", "label": "Root NS ✓", "icon": "database", "x": 450, "y": 80, "status": "normal" },
-              { "id": "tld-ns", "label": ".com TLD NS ✓", "icon": "database", "x": 450, "y": 240, "status": "normal" },
-              { "id": "auth-ns", "label": "Auth NS ✓", "icon": "database", "x": 450, "y": 400, "status": "normal" }
+              {
+                "id": "browser",
+                "label": "Browser",
+                "icon": "web",
+                "status": "active"
+              },
+              {
+                "id": "resolver",
+                "label": "Recursive Resolver ✓",
+                "icon": "compute",
+                "status": "active"
+              },
+              {
+                "id": "root-ns",
+                "label": "Root NS ✓",
+                "icon": "database",
+                "status": "normal"
+              },
+              {
+                "id": "tld-ns",
+                "label": ".com TLD NS ✓",
+                "icon": "database",
+                "status": "normal"
+              },
+              {
+                "id": "auth-ns",
+                "label": "Auth NS ✓",
+                "icon": "database",
+                "status": "normal"
+              }
             ],
             "connections": [
-              { "from": "browser", "to": "resolver", "active": true },
-              { "from": "resolver", "to": "root-ns", "active": false },
-              { "from": "resolver", "to": "tld-ns", "active": false },
-              { "from": "resolver", "to": "auth-ns", "active": false }
+              {
+                "from": "browser",
+                "to": "resolver",
+                "active": true
+              },
+              {
+                "from": "resolver",
+                "to": "root-ns",
+                "active": false
+              },
+              {
+                "from": "resolver",
+                "to": "tld-ns",
+                "active": false
+              },
+              {
+                "from": "resolver",
+                "to": "auth-ns",
+                "active": false
+              }
             ]
           }
         },
         {
           "target": "latency",
-          "action": "set",
-          "params": { "value": 145, "label": "Latency (ms)", "color": "secondary" }
+          "params": {
+            "value": 145,
+            "label": "Latency (ms)",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 1800
@@ -256,32 +575,77 @@
       "actions": [
         {
           "target": "cache-status",
-          "action": "set",
-          "params": { "text": "IP cached by browser (TTL: 300s) and resolver", "style": "highlight" }
+          "params": {
+            "text": "IP cached by browser (TTL: 300s) and resolver",
+            "style": "highlight"
+          }
         },
         {
           "target": "dns-system",
-          "action": "set",
           "params": {
             "components": [
-              { "id": "browser", "label": "Browser (cached)", "icon": "web", "x": 60, "y": 240, "status": "active" },
-              { "id": "resolver", "label": "Resolver (cached)", "icon": "compute", "x": 250, "y": 240, "status": "active" },
-              { "id": "root-ns", "label": "Root NS", "icon": "database", "x": 450, "y": 80, "status": "normal" },
-              { "id": "tld-ns", "label": ".com TLD NS", "icon": "database", "x": 450, "y": 240, "status": "normal" },
-              { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 450, "y": 400, "status": "normal" }
+              {
+                "id": "browser",
+                "label": "Browser (cached)",
+                "icon": "web",
+                "status": "active"
+              },
+              {
+                "id": "resolver",
+                "label": "Resolver (cached)",
+                "icon": "compute",
+                "status": "active"
+              },
+              {
+                "id": "root-ns",
+                "label": "Root NS",
+                "icon": "database",
+                "status": "normal"
+              },
+              {
+                "id": "tld-ns",
+                "label": ".com TLD NS",
+                "icon": "database",
+                "status": "normal"
+              },
+              {
+                "id": "auth-ns",
+                "label": "Authoritative NS",
+                "icon": "database",
+                "status": "normal"
+              }
             ],
             "connections": [
-              { "from": "browser", "to": "resolver", "active": false },
-              { "from": "resolver", "to": "root-ns", "active": false },
-              { "from": "resolver", "to": "tld-ns", "active": false },
-              { "from": "resolver", "to": "auth-ns", "active": false }
+              {
+                "from": "browser",
+                "to": "resolver",
+                "active": false
+              },
+              {
+                "from": "resolver",
+                "to": "root-ns",
+                "active": false
+              },
+              {
+                "from": "resolver",
+                "to": "tld-ns",
+                "active": false
+              },
+              {
+                "from": "resolver",
+                "to": "auth-ns",
+                "active": false
+              }
             ]
           }
         },
         {
           "target": "latency",
-          "action": "set",
-          "params": { "value": 150, "label": "Latency (ms)", "color": "secondary" }
+          "params": {
+            "value": 150,
+            "label": "Latency (ms)",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 2000
@@ -291,32 +655,77 @@
       "actions": [
         {
           "target": "cache-status",
-          "action": "set",
-          "params": { "text": "Second request: browser cache HIT → instant! (0ms)", "style": "success" }
+          "params": {
+            "text": "Second request: browser cache HIT → instant! (0ms)",
+            "style": "success"
+          }
         },
         {
           "target": "dns-system",
-          "action": "set",
           "params": {
             "components": [
-              { "id": "browser", "label": "Browser ✓ HIT", "icon": "web", "x": 60, "y": 240, "status": "active" },
-              { "id": "resolver", "label": "Resolver (skipped)", "icon": "compute", "x": 250, "y": 240, "status": "normal" },
-              { "id": "root-ns", "label": "Root NS (skipped)", "icon": "database", "x": 450, "y": 80, "status": "normal" },
-              { "id": "tld-ns", "label": ".com TLD (skipped)", "icon": "database", "x": 450, "y": 240, "status": "normal" },
-              { "id": "auth-ns", "label": "Auth NS (skipped)", "icon": "database", "x": 450, "y": 400, "status": "normal" }
+              {
+                "id": "browser",
+                "label": "Browser ✓ HIT",
+                "icon": "web",
+                "status": "active"
+              },
+              {
+                "id": "resolver",
+                "label": "Resolver (skipped)",
+                "icon": "compute",
+                "status": "normal"
+              },
+              {
+                "id": "root-ns",
+                "label": "Root NS (skipped)",
+                "icon": "database",
+                "status": "normal"
+              },
+              {
+                "id": "tld-ns",
+                "label": ".com TLD (skipped)",
+                "icon": "database",
+                "status": "normal"
+              },
+              {
+                "id": "auth-ns",
+                "label": "Auth NS (skipped)",
+                "icon": "database",
+                "status": "normal"
+              }
             ],
             "connections": [
-              { "from": "browser", "to": "resolver", "active": false },
-              { "from": "resolver", "to": "root-ns", "active": false },
-              { "from": "resolver", "to": "tld-ns", "active": false },
-              { "from": "resolver", "to": "auth-ns", "active": false }
+              {
+                "from": "browser",
+                "to": "resolver",
+                "active": false
+              },
+              {
+                "from": "resolver",
+                "to": "root-ns",
+                "active": false
+              },
+              {
+                "from": "resolver",
+                "to": "tld-ns",
+                "active": false
+              },
+              {
+                "from": "resolver",
+                "to": "auth-ns",
+                "active": false
+              }
             ]
           }
         },
         {
           "target": "latency",
-          "action": "set",
-          "params": { "value": 0, "label": "Latency (ms)", "color": "secondary" }
+          "params": {
+            "value": 0,
+            "label": "Latency (ms)",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 1800
@@ -326,32 +735,77 @@
       "actions": [
         {
           "target": "cache-status",
-          "action": "set",
-          "params": { "text": "TTL expired (300s elapsed) — cache cleared", "style": "error" }
+          "params": {
+            "text": "TTL expired (300s elapsed) — cache cleared",
+            "style": "error"
+          }
         },
         {
           "target": "dns-system",
-          "action": "set",
           "params": {
             "components": [
-              { "id": "browser", "label": "Browser (expired)", "icon": "web", "x": 60, "y": 240, "status": "normal" },
-              { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 250, "y": 240, "status": "normal" },
-              { "id": "root-ns", "label": "Root NS", "icon": "database", "x": 450, "y": 80, "status": "normal" },
-              { "id": "tld-ns", "label": ".com TLD NS", "icon": "database", "x": 450, "y": 240, "status": "normal" },
-              { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 450, "y": 400, "status": "normal" }
+              {
+                "id": "browser",
+                "label": "Browser (expired)",
+                "icon": "web",
+                "status": "normal"
+              },
+              {
+                "id": "resolver",
+                "label": "Recursive Resolver",
+                "icon": "compute",
+                "status": "normal"
+              },
+              {
+                "id": "root-ns",
+                "label": "Root NS",
+                "icon": "database",
+                "status": "normal"
+              },
+              {
+                "id": "tld-ns",
+                "label": ".com TLD NS",
+                "icon": "database",
+                "status": "normal"
+              },
+              {
+                "id": "auth-ns",
+                "label": "Authoritative NS",
+                "icon": "database",
+                "status": "normal"
+              }
             ],
             "connections": [
-              { "from": "browser", "to": "resolver", "active": false },
-              { "from": "resolver", "to": "root-ns", "active": false },
-              { "from": "resolver", "to": "tld-ns", "active": false },
-              { "from": "resolver", "to": "auth-ns", "active": false }
+              {
+                "from": "browser",
+                "to": "resolver",
+                "active": false
+              },
+              {
+                "from": "resolver",
+                "to": "root-ns",
+                "active": false
+              },
+              {
+                "from": "resolver",
+                "to": "tld-ns",
+                "active": false
+              },
+              {
+                "from": "resolver",
+                "to": "auth-ns",
+                "active": false
+              }
             ]
           }
         },
         {
           "target": "latency",
-          "action": "set",
-          "params": { "value": 0, "label": "Latency (ms)", "color": "secondary" }
+          "params": {
+            "value": 0,
+            "label": "Latency (ms)",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 1800
@@ -361,65 +815,121 @@
       "actions": [
         {
           "target": "cache-status",
-          "action": "set",
-          "params": { "text": "Fresh lookup needed — full resolution chain repeats", "style": "highlight" }
+          "params": {
+            "text": "Fresh lookup needed — full resolution chain repeats",
+            "style": "highlight"
+          }
         },
         {
           "target": "dns-system",
-          "action": "set",
           "params": {
             "components": [
-              { "id": "browser", "label": "Browser", "icon": "web", "x": 60, "y": 240, "status": "active" },
-              { "id": "resolver", "label": "Recursive Resolver", "icon": "compute", "x": 250, "y": 240, "status": "active" },
-              { "id": "root-ns", "label": "Root NS", "icon": "database", "x": 450, "y": 80, "status": "active" },
-              { "id": "tld-ns", "label": ".com TLD NS", "icon": "database", "x": 450, "y": 240, "status": "active" },
-              { "id": "auth-ns", "label": "Authoritative NS", "icon": "database", "x": 450, "y": 400, "status": "active" }
+              {
+                "id": "browser",
+                "label": "Browser",
+                "icon": "web",
+                "status": "active"
+              },
+              {
+                "id": "resolver",
+                "label": "Recursive Resolver",
+                "icon": "compute",
+                "status": "active"
+              },
+              {
+                "id": "root-ns",
+                "label": "Root NS",
+                "icon": "database",
+                "status": "active"
+              },
+              {
+                "id": "tld-ns",
+                "label": ".com TLD NS",
+                "icon": "database",
+                "status": "active"
+              },
+              {
+                "id": "auth-ns",
+                "label": "Authoritative NS",
+                "icon": "database",
+                "status": "active"
+              }
             ],
             "connections": [
-              { "from": "browser", "to": "resolver", "active": true },
-              { "from": "resolver", "to": "root-ns", "active": true },
-              { "from": "resolver", "to": "tld-ns", "active": true },
-              { "from": "resolver", "to": "auth-ns", "active": true }
+              {
+                "from": "browser",
+                "to": "resolver",
+                "active": true
+              },
+              {
+                "from": "resolver",
+                "to": "root-ns",
+                "active": true
+              },
+              {
+                "from": "resolver",
+                "to": "tld-ns",
+                "active": true
+              },
+              {
+                "from": "resolver",
+                "to": "auth-ns",
+                "active": true
+              }
             ]
           }
         },
         {
           "target": "latency",
-          "action": "set",
-          "params": { "value": 150, "label": "Latency (ms)", "color": "secondary" }
+          "params": {
+            "value": 150,
+            "label": "Latency (ms)",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 2000
     }
   ],
-
   "controls": [
     {
       "id": "cache-toggle",
       "type": "toggle",
       "label": "Browser Cache",
-      "config": { "defaultValue": true }
+      "config": {
+        "defaultValue": true
+      }
     },
     {
       "id": "latency-sim",
       "type": "slider",
       "label": "Simulated Latency per Hop (ms)",
-      "config": { "min": 10, "max": 200, "step": 10, "defaultValue": 30 }
+      "config": {
+        "min": 10,
+        "max": 200,
+        "step": 10,
+        "defaultValue": 30
+      }
     },
     {
       "id": "btn-query",
       "type": "button",
       "label": "Query Again",
-      "config": { "variant": "primary", "defaultValue": null }
+      "config": {
+        "variant": "primary",
+        "defaultValue": null
+      }
     },
     {
       "id": "btn-clear-cache",
       "type": "button",
       "label": "Clear Cache",
-      "config": { "variant": "secondary", "defaultValue": null }
+      "config": {
+        "variant": "secondary",
+        "defaultValue": null
+      }
     }
   ],
-
   "explanation": [
     {
       "heading": "What is DNS?",
@@ -449,7 +959,6 @@
       "appearsAtStep": 8
     }
   ],
-
   "popups": [
     {
       "id": "pop-miss-browser",
@@ -484,7 +993,6 @@
       "style": "insight"
     }
   ],
-
   "challenges": [
     {
       "id": "ch-cache-off",

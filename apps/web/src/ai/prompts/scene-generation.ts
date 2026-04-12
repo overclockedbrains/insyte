@@ -9,9 +9,55 @@ Generate a Scene JSON that a React engine will render as a live, step-by-step an
 
 ---
 
-## Params — required field by visual type
+## LAYOUT RULES (mandatory)
 
-Every "set" action must include the required field for its target visual. The full current state must be sent on every step (not just the delta).
+- **NEVER** include \`x\`, \`y\`, or \`position\` fields on ANY visual or graph/tree node.
+- Positions are computed automatically by the layout engine — you only declare intent.
+- For graph / system-diagram / tree / recursion-tree visuals: include \`layoutHint\` to declare the algorithm:
+  - \`"dagre-TB"\` — top-to-bottom hierarchical (dependency graphs, state machines)
+  - \`"dagre-LR"\` — left-to-right hierarchical (system diagrams, pipelines)
+  - \`"dagre-BT"\` — bottom-to-top
+  - \`"tree-RT"\`  — Reingold-Tilford (binary trees, recursion trees)
+  - \`"linear-H"\` — horizontal linear (arrays, queues, linked-lists)
+  - \`"linear-V"\` — vertical linear (stacks)
+  - \`"grid-2d"\`  — 2D grid (DP tables, matrices)
+  - \`"hashmap-buckets"\` — bucket rows (hashmaps)
+  - \`"radial"\`   — circular/radial (hash rings, force-directed)
+- For **text-badge** and **counter** visuals: include \`slot\` to declare canvas position:
+  - \`"top-left"\` | \`"top-center"\` | \`"top-right"\`
+  - \`"bottom-left"\` | \`"bottom-center"\` | \`"bottom-right"\`
+  - \`"left-center"\` | \`"right-center"\`
+  - \`"overlay-top"\` | \`"overlay-bottom"\` | \`"center"\`
+
+Default layoutHint by visual type (only override when the default is wrong):
+| Visual type    | Default layoutHint   |
+|----------------|----------------------|
+| array          | linear-H             |
+| linked-list    | linear-H             |
+| queue          | linear-H             |
+| stack          | linear-V             |
+| tree           | tree-RT              |
+| recursion-tree | tree-RT              |
+| graph          | dagre-TB             |
+| system-diagram | dagre-LR             |
+| dp-table       | grid-2d              |
+| grid           | grid-2d              |
+| hashmap        | hashmap-buckets      |
+
+---
+
+## ACTION FORMAT (mandatory)
+
+Every action must use the universal state-snapshot format:
+\`\`\`json
+{ "target": "<visual-id>", "params": { ...complete-state... } }
+\`\`\`
+- **params must contain the COMPLETE visual state** at that step (not just the changed fields).
+- **NEVER** use the old discriminated action format (\`"action": "set"\`, \`"action": "push"\`, etc.).
+
+---
+
+## Params — required field by visual type
 
 | Visual type      | Required field(s)              | Example params                                                                                      |
 |------------------|--------------------------------|-----------------------------------------------------------------------------------------------------|
@@ -23,11 +69,11 @@ Every "set" action must include the required field for its target visual. The fu
 | stack            | items                          | { "items": [{ "value": "frame3", "highlight": "active" }, { "value": "frame2", "highlight": "default" }] } |
 | queue            | items                          | { "items": [{ "value": "task1", "highlight": "active" }] }                                          |
 | tree             | root                           | { "root": { "value": "8", "highlight": "active", "left": null, "right": null } }                   |
-| graph            | nodes + edges                  | { "nodes": [{ "id": "a", "label": "A", "x": 1, "y": 1, "color": "#7c3aed" }], "edges": [{ "from": "a", "to": "b", "directed": true, "highlighted": false }] } |
-| system-diagram   | nodes + edges                  | { "nodes": [{ "id": "s1", "label": "Client", "x": 1, "y": 1 }], "edges": [{ "from": "s1", "to": "s2" }] } |
+| graph            | nodes + edges                  | { "nodes": [{ "id": "a", "label": "A", "color": "#7c3aed" }], "edges": [{ "from": "a", "to": "b", "directed": true, "highlighted": false }] } |
+| system-diagram   | components + connections       | { "components": [{ "id": "s1", "label": "Client", "icon": "web", "status": "active" }], "connections": [{ "from": "s1", "to": "s2", "active": true }] } |
 | dp-table         | rows + cols + cells            | { "rows": 3, "cols": 4, "cells": [[{ "value": 0, "highlight": "filled" }]], "rowLabels": [""], "colLabels": [""] } |
 | grid             | rows + cols + cells            | { "rows": 4, "cols": 4, "cells": [[{ "state": "empty" }, { "state": "wall" }]], "currentCell": { "row": 0, "col": 1 } } |
-| recursion-tree   | nodes + rootId                 | { "rootId": "n0", "nodes": [{ "id": "n0", "label": "fib(4)", "status": "computing", "children": ["n1","n2"], "x": 2, "y": 0 }] } |
+| recursion-tree   | nodes + rootId                 | { "rootId": "n0", "nodes": [{ "id": "n0", "label": "fib(4)", "status": "computing", "children": ["n1","n2"] }] } |
 
 **Highlights by type:**
 - array / hashmap / stack / queue: "default" | "active" | "insert" | "remove" | "hit" | "miss" | "error"

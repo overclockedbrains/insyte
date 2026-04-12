@@ -5,66 +5,82 @@
   "layout": "text-left-canvas-right",
   "description": "Explore how hash tables work — from hashing keys to handling collisions with chaining and open addressing.",
   "category": "Data Structures",
-  "tags": ["hash", "collision", "chaining", "open-addressing", "data-structures"],
-
+  "tags": [
+    "hash",
+    "collision",
+    "chaining",
+    "open-addressing",
+    "data-structures"
+  ],
   "visuals": [
     {
       "id": "bucket-array",
       "type": "array",
       "label": "Buckets",
-      "position": { "x": 50, "y": 20 },
       "initialState": {
         "cells": [
-          { "value": "—", "highlight": "default" },
-          { "value": "—", "highlight": "default" },
-          { "value": "—", "highlight": "default" },
-          { "value": "—", "highlight": "default" }
+          {
+            "value": "—",
+            "highlight": "default"
+          },
+          {
+            "value": "—",
+            "highlight": "default"
+          },
+          {
+            "value": "—",
+            "highlight": "default"
+          },
+          {
+            "value": "—",
+            "highlight": "default"
+          }
         ]
-      }
+      },
+      "layoutHint": "linear-H"
     },
     {
       "id": "hash-map",
       "type": "hashmap",
       "label": "Hash Table",
-      "position": { "x": 50, "y": 55 },
       "initialState": {
         "entries": []
-      }
+      },
+      "layoutHint": "hashmap-buckets"
     },
     {
       "id": "hash-fn-badge",
       "type": "text-badge",
       "label": "Current Operation",
-      "position": { "x": 50, "y": 10 },
       "initialState": {
         "text": "Ready — insert a key to begin",
         "style": "default"
-      }
+      },
+      "slot": "top-center"
     },
     {
       "id": "load-factor",
       "type": "counter",
       "label": "Load Factor",
-      "position": { "x": 20, "y": 90 },
       "initialState": {
         "value": 0,
         "label": "Load Factor",
         "color": "primary"
-      }
+      },
+      "slot": "bottom-left"
     },
     {
       "id": "collisions",
       "type": "counter",
       "label": "Collisions",
-      "position": { "x": 80, "y": 90 },
       "initialState": {
         "value": 0,
         "label": "Collisions",
         "color": "secondary"
-      }
+      },
+      "slot": "bottom-left"
     }
   ],
-
   "steps": [
     {
       "index": 0,
@@ -76,39 +92,61 @@
       "actions": [
         {
           "target": "hash-fn-badge",
-          "action": "set",
-          "params": { "text": "hash(\"alice\") → 5 % 4 = 1", "style": "highlight" }
+          "params": {
+            "text": "hash(\"alice\") → 5 % 4 = 1",
+            "style": "highlight"
+          }
         },
         {
           "target": "bucket-array",
-          "action": "highlight",
-          "params": { "field": "cells", "index": 1, "value": "insert" }
+          "params": {
+            "field": "cells",
+            "index": 1,
+            "value": "insert"
+          }
         },
         {
           "target": "hash-map",
-          "action": "set",
           "params": {
             "entries": [
-              { "key": "alice", "value": "28", "highlight": "insert" }
+              {
+                "key": "alice",
+                "value": "28",
+                "highlight": "insert"
+              }
             ]
           }
         },
         {
           "target": "bucket-array",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": "—", "highlight": "default" },
-              { "value": "alice", "highlight": "insert" },
-              { "value": "—", "highlight": "default" },
-              { "value": "—", "highlight": "default" }
+              {
+                "value": "—",
+                "highlight": "default"
+              },
+              {
+                "value": "alice",
+                "highlight": "insert"
+              },
+              {
+                "value": "—",
+                "highlight": "default"
+              },
+              {
+                "value": "—",
+                "highlight": "default"
+              }
             ]
           }
         },
         {
           "target": "load-factor",
-          "action": "set",
-          "params": { "value": 0.25, "label": "Load Factor", "color": "primary" }
+          "params": {
+            "value": 0.25,
+            "label": "Load Factor",
+            "color": "primary"
+          }
         }
       ],
       "duration": 1800
@@ -118,35 +156,57 @@
       "actions": [
         {
           "target": "hash-fn-badge",
-          "action": "set",
-          "params": { "text": "hash(\"bob\") → 3 % 4 = 3", "style": "highlight" }
+          "params": {
+            "text": "hash(\"bob\") → 3 % 4 = 3",
+            "style": "highlight"
+          }
         },
         {
           "target": "bucket-array",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": "—", "highlight": "default" },
-              { "value": "alice", "highlight": "default" },
-              { "value": "—", "highlight": "default" },
-              { "value": "bob", "highlight": "insert" }
+              {
+                "value": "—",
+                "highlight": "default"
+              },
+              {
+                "value": "alice",
+                "highlight": "default"
+              },
+              {
+                "value": "—",
+                "highlight": "default"
+              },
+              {
+                "value": "bob",
+                "highlight": "insert"
+              }
             ]
           }
         },
         {
           "target": "hash-map",
-          "action": "set",
           "params": {
             "entries": [
-              { "key": "alice", "value": "28" },
-              { "key": "bob", "value": "34", "highlight": "insert" }
+              {
+                "key": "alice",
+                "value": "28"
+              },
+              {
+                "key": "bob",
+                "value": "34",
+                "highlight": "insert"
+              }
             ]
           }
         },
         {
           "target": "load-factor",
-          "action": "set",
-          "params": { "value": 0.5, "label": "Load Factor", "color": "primary" }
+          "params": {
+            "value": 0.5,
+            "label": "Load Factor",
+            "color": "primary"
+          }
         }
       ],
       "duration": 1800
@@ -156,41 +216,69 @@
       "actions": [
         {
           "target": "hash-fn-badge",
-          "action": "set",
-          "params": { "text": "hash(\"carol\") → 5 % 4 = 1  ⚠ COLLISION!", "style": "error" }
+          "params": {
+            "text": "hash(\"carol\") → 5 % 4 = 1  ⚠ COLLISION!",
+            "style": "error"
+          }
         },
         {
           "target": "bucket-array",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": "—", "highlight": "default" },
-              { "value": "alice→carol", "highlight": "collision" },
-              { "value": "—", "highlight": "default" },
-              { "value": "bob", "highlight": "default" }
+              {
+                "value": "—",
+                "highlight": "default"
+              },
+              {
+                "value": "alice→carol",
+                "highlight": "collision"
+              },
+              {
+                "value": "—",
+                "highlight": "default"
+              },
+              {
+                "value": "bob",
+                "highlight": "default"
+              }
             ]
           }
         },
         {
           "target": "hash-map",
-          "action": "set",
           "params": {
             "entries": [
-              { "key": "alice", "value": "28" },
-              { "key": "bob", "value": "34" },
-              { "key": "carol", "value": "22", "highlight": "insert" }
+              {
+                "key": "alice",
+                "value": "28"
+              },
+              {
+                "key": "bob",
+                "value": "34"
+              },
+              {
+                "key": "carol",
+                "value": "22",
+                "highlight": "insert"
+              }
             ]
           }
         },
         {
           "target": "collisions",
-          "action": "set",
-          "params": { "value": 1, "label": "Collisions", "color": "error" }
+          "params": {
+            "value": 1,
+            "label": "Collisions",
+            "color": "error"
+          }
         },
         {
           "target": "load-factor",
-          "action": "set",
-          "params": { "value": 0.75, "label": "Load Factor", "color": "primary" }
+          "params": {
+            "value": 0.75,
+            "label": "Load Factor",
+            "color": "primary"
+          }
         }
       ],
       "duration": 2000
@@ -200,29 +288,51 @@
       "actions": [
         {
           "target": "hash-fn-badge",
-          "action": "set",
-          "params": { "text": "lookup(\"alice\") → bucket 1 → scan chain → HIT ✓", "style": "success" }
+          "params": {
+            "text": "lookup(\"alice\") → bucket 1 → scan chain → HIT ✓",
+            "style": "success"
+          }
         },
         {
           "target": "bucket-array",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": "—", "highlight": "default" },
-              { "value": "alice→carol", "highlight": "found" },
-              { "value": "—", "highlight": "default" },
-              { "value": "bob", "highlight": "default" }
+              {
+                "value": "—",
+                "highlight": "default"
+              },
+              {
+                "value": "alice→carol",
+                "highlight": "found"
+              },
+              {
+                "value": "—",
+                "highlight": "default"
+              },
+              {
+                "value": "bob",
+                "highlight": "default"
+              }
             ]
           }
         },
         {
           "target": "hash-map",
-          "action": "set",
           "params": {
             "entries": [
-              { "key": "alice", "value": "28", "highlight": "hit" },
-              { "key": "bob", "value": "34" },
-              { "key": "carol", "value": "22" }
+              {
+                "key": "alice",
+                "value": "28",
+                "highlight": "hit"
+              },
+              {
+                "key": "bob",
+                "value": "34"
+              },
+              {
+                "key": "carol",
+                "value": "22"
+              }
             ]
           }
         }
@@ -234,30 +344,55 @@
       "actions": [
         {
           "target": "hash-fn-badge",
-          "action": "set",
-          "params": { "text": "lookup(\"dave\") → bucket 0 → empty → MISS ✗", "style": "error" }
+          "params": {
+            "text": "lookup(\"dave\") → bucket 0 → empty → MISS ✗",
+            "style": "error"
+          }
         },
         {
           "target": "bucket-array",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": "—", "highlight": "miss" },
-              { "value": "alice→carol", "highlight": "default" },
-              { "value": "—", "highlight": "default" },
-              { "value": "bob", "highlight": "default" }
+              {
+                "value": "—",
+                "highlight": "miss"
+              },
+              {
+                "value": "alice→carol",
+                "highlight": "default"
+              },
+              {
+                "value": "—",
+                "highlight": "default"
+              },
+              {
+                "value": "bob",
+                "highlight": "default"
+              }
             ]
           }
         },
         {
           "target": "hash-map",
-          "action": "set",
           "params": {
             "entries": [
-              { "key": "alice", "value": "28" },
-              { "key": "bob", "value": "34" },
-              { "key": "carol", "value": "22" },
-              { "key": "dave", "value": "???", "highlight": "miss" }
+              {
+                "key": "alice",
+                "value": "28"
+              },
+              {
+                "key": "bob",
+                "value": "34"
+              },
+              {
+                "key": "carol",
+                "value": "22"
+              },
+              {
+                "key": "dave",
+                "value": "???",
+                "highlight": "miss"
+              }
             ]
           }
         }
@@ -269,23 +404,39 @@
       "actions": [
         {
           "target": "hash-fn-badge",
-          "action": "set",
-          "params": { "text": "Load factor ≥ 0.75 → Rehashing! Doubling table size…", "style": "highlight" }
+          "params": {
+            "text": "Load factor ≥ 0.75 → Rehashing! Doubling table size…",
+            "style": "highlight"
+          }
         },
         {
           "target": "load-factor",
-          "action": "set",
-          "params": { "value": 0.75, "label": "Load Factor", "color": "error" }
+          "params": {
+            "value": 0.75,
+            "label": "Load Factor",
+            "color": "error"
+          }
         },
         {
           "target": "bucket-array",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": "—", "highlight": "active" },
-              { "value": "—", "highlight": "active" },
-              { "value": "—", "highlight": "active" },
-              { "value": "—", "highlight": "active" }
+              {
+                "value": "—",
+                "highlight": "active"
+              },
+              {
+                "value": "—",
+                "highlight": "active"
+              },
+              {
+                "value": "—",
+                "highlight": "active"
+              },
+              {
+                "value": "—",
+                "highlight": "active"
+              }
             ]
           }
         }
@@ -297,43 +448,83 @@
       "actions": [
         {
           "target": "hash-fn-badge",
-          "action": "set",
-          "params": { "text": "Rehashed! New size: 8 — all keys redistributed", "style": "success" }
+          "params": {
+            "text": "Rehashed! New size: 8 — all keys redistributed",
+            "style": "success"
+          }
         },
         {
           "target": "bucket-array",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": "—", "highlight": "default" },
-              { "value": "alice", "highlight": "default" },
-              { "value": "—", "highlight": "default" },
-              { "value": "bob", "highlight": "default" },
-              { "value": "—", "highlight": "default" },
-              { "value": "carol", "highlight": "insert" },
-              { "value": "—", "highlight": "default" },
-              { "value": "—", "highlight": "default" }
+              {
+                "value": "—",
+                "highlight": "default"
+              },
+              {
+                "value": "alice",
+                "highlight": "default"
+              },
+              {
+                "value": "—",
+                "highlight": "default"
+              },
+              {
+                "value": "bob",
+                "highlight": "default"
+              },
+              {
+                "value": "—",
+                "highlight": "default"
+              },
+              {
+                "value": "carol",
+                "highlight": "insert"
+              },
+              {
+                "value": "—",
+                "highlight": "default"
+              },
+              {
+                "value": "—",
+                "highlight": "default"
+              }
             ]
           }
         },
         {
           "target": "load-factor",
-          "action": "set",
-          "params": { "value": 0.38, "label": "Load Factor", "color": "primary" }
+          "params": {
+            "value": 0.38,
+            "label": "Load Factor",
+            "color": "primary"
+          }
         },
         {
           "target": "collisions",
-          "action": "set",
-          "params": { "value": 0, "label": "Collisions", "color": "secondary" }
+          "params": {
+            "value": 0,
+            "label": "Collisions",
+            "color": "secondary"
+          }
         },
         {
           "target": "hash-map",
-          "action": "set",
           "params": {
             "entries": [
-              { "key": "alice", "value": "28" },
-              { "key": "bob", "value": "34" },
-              { "key": "carol", "value": "22", "highlight": "insert" }
+              {
+                "key": "alice",
+                "value": "28"
+              },
+              {
+                "key": "bob",
+                "value": "34"
+              },
+              {
+                "key": "carol",
+                "value": "22",
+                "highlight": "insert"
+              }
             ]
           }
         }
@@ -345,41 +536,81 @@
       "actions": [
         {
           "target": "hash-fn-badge",
-          "action": "set",
-          "params": { "text": "Open Addressing: insert \"dave\" → probe slot 0 → 1 → 2 (empty!)", "style": "highlight" }
+          "params": {
+            "text": "Open Addressing: insert \"dave\" → probe slot 0 → 1 → 2 (empty!)",
+            "style": "highlight"
+          }
         },
         {
           "target": "bucket-array",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": "—", "highlight": "miss" },
-              { "value": "alice", "highlight": "miss" },
-              { "value": "dave", "highlight": "insert" },
-              { "value": "bob", "highlight": "default" },
-              { "value": "—", "highlight": "default" },
-              { "value": "carol", "highlight": "default" },
-              { "value": "—", "highlight": "default" },
-              { "value": "—", "highlight": "default" }
+              {
+                "value": "—",
+                "highlight": "miss"
+              },
+              {
+                "value": "alice",
+                "highlight": "miss"
+              },
+              {
+                "value": "dave",
+                "highlight": "insert"
+              },
+              {
+                "value": "bob",
+                "highlight": "default"
+              },
+              {
+                "value": "—",
+                "highlight": "default"
+              },
+              {
+                "value": "carol",
+                "highlight": "default"
+              },
+              {
+                "value": "—",
+                "highlight": "default"
+              },
+              {
+                "value": "—",
+                "highlight": "default"
+              }
             ]
           }
         },
         {
           "target": "hash-map",
-          "action": "set",
           "params": {
             "entries": [
-              { "key": "alice", "value": "28" },
-              { "key": "bob", "value": "34" },
-              { "key": "carol", "value": "22" },
-              { "key": "dave", "value": "19", "highlight": "insert" }
+              {
+                "key": "alice",
+                "value": "28"
+              },
+              {
+                "key": "bob",
+                "value": "34"
+              },
+              {
+                "key": "carol",
+                "value": "22"
+              },
+              {
+                "key": "dave",
+                "value": "19",
+                "highlight": "insert"
+              }
             ]
           }
         },
         {
           "target": "load-factor",
-          "action": "set",
-          "params": { "value": 0.5, "label": "Load Factor", "color": "primary" }
+          "params": {
+            "value": 0.5,
+            "label": "Load Factor",
+            "color": "primary"
+          }
         }
       ],
       "duration": 2000
@@ -389,80 +620,138 @@
       "actions": [
         {
           "target": "hash-fn-badge",
-          "action": "set",
-          "params": { "text": "delete(\"alice\") → find slot 1 → mark as tombstone", "style": "default" }
+          "params": {
+            "text": "delete(\"alice\") → find slot 1 → mark as tombstone",
+            "style": "default"
+          }
         },
         {
           "target": "bucket-array",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": "—", "highlight": "default" },
-              { "value": "⌫", "highlight": "delete" },
-              { "value": "dave", "highlight": "default" },
-              { "value": "bob", "highlight": "default" },
-              { "value": "—", "highlight": "default" },
-              { "value": "carol", "highlight": "default" },
-              { "value": "—", "highlight": "default" },
-              { "value": "—", "highlight": "default" }
+              {
+                "value": "—",
+                "highlight": "default"
+              },
+              {
+                "value": "⌫",
+                "highlight": "delete"
+              },
+              {
+                "value": "dave",
+                "highlight": "default"
+              },
+              {
+                "value": "bob",
+                "highlight": "default"
+              },
+              {
+                "value": "—",
+                "highlight": "default"
+              },
+              {
+                "value": "carol",
+                "highlight": "default"
+              },
+              {
+                "value": "—",
+                "highlight": "default"
+              },
+              {
+                "value": "—",
+                "highlight": "default"
+              }
             ]
           }
         },
         {
           "target": "hash-map",
-          "action": "set",
           "params": {
             "entries": [
-              { "key": "bob", "value": "34" },
-              { "key": "carol", "value": "22" },
-              { "key": "dave", "value": "19" },
-              { "key": "alice", "value": "deleted", "highlight": "delete" }
+              {
+                "key": "bob",
+                "value": "34"
+              },
+              {
+                "key": "carol",
+                "value": "22"
+              },
+              {
+                "key": "dave",
+                "value": "19"
+              },
+              {
+                "key": "alice",
+                "value": "deleted",
+                "highlight": "delete"
+              }
             ]
           }
         },
         {
           "target": "load-factor",
-          "action": "set",
-          "params": { "value": 0.38, "label": "Load Factor", "color": "primary" }
+          "params": {
+            "value": 0.38,
+            "label": "Load Factor",
+            "color": "primary"
+          }
         }
       ],
       "duration": 1800
     }
   ],
-
   "controls": [
     {
       "id": "collision-mode",
       "type": "toggle-group",
       "label": "Collision Strategy",
-      "config": { "options": ["Chaining", "Open Addressing"], "defaultValue": "Chaining" }
+      "config": {
+        "options": [
+          "Chaining",
+          "Open Addressing"
+        ],
+        "defaultValue": "Chaining"
+      }
     },
     {
       "id": "table-size",
       "type": "slider",
       "label": "Table Size",
-      "config": { "min": 4, "max": 16, "step": 4, "defaultValue": 4 }
+      "config": {
+        "min": 4,
+        "max": 16,
+        "step": 4,
+        "defaultValue": 4
+      }
     },
     {
       "id": "insert-key",
       "type": "input",
       "label": "Key to Insert",
-      "config": { "placeholder": "e.g. alice", "defaultValue": "" }
+      "config": {
+        "placeholder": "e.g. alice",
+        "defaultValue": ""
+      }
     },
     {
       "id": "btn-insert",
       "type": "button",
       "label": "Insert",
-      "config": { "variant": "primary", "defaultValue": null }
+      "config": {
+        "variant": "primary",
+        "defaultValue": null
+      }
     },
     {
       "id": "btn-reset",
       "type": "button",
       "label": "Reset",
-      "config": { "variant": "secondary", "defaultValue": null }
+      "config": {
+        "variant": "secondary",
+        "defaultValue": null
+      }
     }
   ],
-
   "explanation": [
     {
       "heading": "What is a Hash Table?",
@@ -503,7 +792,6 @@
       "appearsAtStep": 9
     }
   ],
-
   "popups": [
     {
       "id": "pop-hash-alice",
@@ -546,7 +834,6 @@
       "style": "warning"
     }
   ],
-
   "challenges": [
     {
       "id": "ch-predict-collision",

@@ -5,61 +5,117 @@
   "layout": "text-left-canvas-right",
   "description": "Visualize how a Token Bucket rate limiter controls request throughput — the same algorithm used by Stripe, AWS API Gateway, and NGINX.",
   "category": "Low Level Design",
-  "tags": ["rate-limiter", "token-bucket", "throttling", "api", "lld"],
-
+  "tags": [
+    "rate-limiter",
+    "token-bucket",
+    "throttling",
+    "api",
+    "lld"
+  ],
   "visuals": [
     {
       "id": "token-bucket",
       "type": "array",
       "label": "Token Bucket  (T = available, · = consumed)",
-      "position": { "x": 50, "y": 25 },
       "initialState": {
         "cells": [
-          { "value": "T", "highlight": "active" },
-          { "value": "T", "highlight": "active" },
-          { "value": "T", "highlight": "active" },
-          { "value": "T", "highlight": "active" },
-          { "value": "T", "highlight": "active" }
+          {
+            "value": "T",
+            "highlight": "active"
+          },
+          {
+            "value": "T",
+            "highlight": "active"
+          },
+          {
+            "value": "T",
+            "highlight": "active"
+          },
+          {
+            "value": "T",
+            "highlight": "active"
+          },
+          {
+            "value": "T",
+            "highlight": "active"
+          }
         ]
-      }
+      },
+      "layoutHint": "linear-H"
     },
     {
       "id": "flow-diagram",
       "type": "system-diagram",
       "label": "Request Flow",
-      "position": { "x": 50, "y": 62 },
       "initialState": {
         "components": [
-          { "id": "client", "label": "Request", "icon": "web", "x": 80, "y": 120, "status": "normal" },
-          { "id": "limiter", "label": "Rate Limiter", "icon": "shield", "x": 240, "y": 120, "status": "normal" },
-          { "id": "api", "label": "API Server", "icon": "server", "x": 400, "y": 120, "status": "normal" }
+          {
+            "id": "client",
+            "label": "Request",
+            "icon": "web",
+            "status": "normal"
+          },
+          {
+            "id": "limiter",
+            "label": "Rate Limiter",
+            "icon": "shield",
+            "status": "normal"
+          },
+          {
+            "id": "api",
+            "label": "API Server",
+            "icon": "server",
+            "status": "normal"
+          }
         ],
         "connections": [
-          { "from": "client", "to": "limiter", "active": false },
-          { "from": "limiter", "to": "api", "active": false }
+          {
+            "from": "client",
+            "to": "limiter",
+            "active": false
+          },
+          {
+            "from": "limiter",
+            "to": "api",
+            "active": false
+          }
         ]
-      }
+      },
+      "layoutHint": "dagre-LR"
     },
     {
       "id": "status-badge",
       "type": "text-badge",
       "label": "Status",
-      "initialState": { "text": "Token bucket: 5/5 tokens  (READY)", "style": "default" }
+      "initialState": {
+        "text": "Token bucket: 5/5 tokens  (READY)",
+        "style": "default"
+      },
+      "slot": "top-center"
     },
     {
       "id": "allowed-counter",
       "type": "counter",
       "label": "Allowed",
-      "initialState": { "value": 0, "label": "Allowed", "color": "secondary" }
+      "initialState": {
+        "value": 0,
+        "label": "Allowed",
+        "color": "secondary"
+      },
+      "slot": "bottom-left"
     },
     {
       "id": "rejected-counter",
       "type": "counter",
       "label": "Rejected",
-      "initialState": { "value": 0, "label": "Rejected", "color": "error" }
+      "initialState": {
+        "value": 0,
+        "label": "Rejected",
+        "color": "error"
+      },
+      "slot": "bottom-left"
     }
   ],
-
   "steps": [
     {
       "index": 0,
@@ -71,41 +127,81 @@
       "actions": [
         {
           "target": "status-badge",
-          "action": "set",
-          "params": { "text": "Request #1 arrives  →  token available  →  ALLOWED", "style": "success" }
+          "params": {
+            "text": "Request #1 arrives  →  token available  →  ALLOWED",
+            "style": "success"
+          }
         },
         {
           "target": "token-bucket",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": "·" },
-              { "value": "T", "highlight": "active" },
-              { "value": "T", "highlight": "active" },
-              { "value": "T", "highlight": "active" },
-              { "value": "T", "highlight": "active" }
+              {
+                "value": "·"
+              },
+              {
+                "value": "T",
+                "highlight": "active"
+              },
+              {
+                "value": "T",
+                "highlight": "active"
+              },
+              {
+                "value": "T",
+                "highlight": "active"
+              },
+              {
+                "value": "T",
+                "highlight": "active"
+              }
             ]
           }
         },
         {
           "target": "flow-diagram",
-          "action": "set",
           "params": {
             "components": [
-              { "id": "client", "label": "Request", "icon": "web", "x": 80, "y": 120, "status": "active" },
-              { "id": "limiter", "label": "Rate Limiter", "icon": "shield", "x": 240, "y": 120, "status": "active" },
-              { "id": "api", "label": "API Server", "icon": "server", "x": 400, "y": 120, "status": "active" }
+              {
+                "id": "client",
+                "label": "Request",
+                "icon": "web",
+                "status": "active"
+              },
+              {
+                "id": "limiter",
+                "label": "Rate Limiter",
+                "icon": "shield",
+                "status": "active"
+              },
+              {
+                "id": "api",
+                "label": "API Server",
+                "icon": "server",
+                "status": "active"
+              }
             ],
             "connections": [
-              { "from": "client", "to": "limiter", "active": true },
-              { "from": "limiter", "to": "api", "active": true }
+              {
+                "from": "client",
+                "to": "limiter",
+                "active": true
+              },
+              {
+                "from": "limiter",
+                "to": "api",
+                "active": true
+              }
             ]
           }
         },
         {
           "target": "allowed-counter",
-          "action": "set",
-          "params": { "value": 1, "label": "Allowed", "color": "secondary" }
+          "params": {
+            "value": 1,
+            "label": "Allowed",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 2000
@@ -115,26 +211,42 @@
       "actions": [
         {
           "target": "status-badge",
-          "action": "set",
-          "params": { "text": "Requests #2 & #3  →  tokens consumed  →  ALLOWED", "style": "success" }
+          "params": {
+            "text": "Requests #2 & #3  →  tokens consumed  →  ALLOWED",
+            "style": "success"
+          }
         },
         {
           "target": "token-bucket",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": "·" },
-              { "value": "·" },
-              { "value": "·" },
-              { "value": "T", "highlight": "active" },
-              { "value": "T", "highlight": "active" }
+              {
+                "value": "·"
+              },
+              {
+                "value": "·"
+              },
+              {
+                "value": "·"
+              },
+              {
+                "value": "T",
+                "highlight": "active"
+              },
+              {
+                "value": "T",
+                "highlight": "active"
+              }
             ]
           }
         },
         {
           "target": "allowed-counter",
-          "action": "set",
-          "params": { "value": 3, "label": "Allowed", "color": "secondary" }
+          "params": {
+            "value": 3,
+            "label": "Allowed",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 2000
@@ -144,41 +256,77 @@
       "actions": [
         {
           "target": "status-badge",
-          "action": "set",
-          "params": { "text": "Burst! 2 more requests  →  bucket exhausted", "style": "error" }
+          "params": {
+            "text": "Burst! 2 more requests  →  bucket exhausted",
+            "style": "error"
+          }
         },
         {
           "target": "token-bucket",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": "·" },
-              { "value": "·" },
-              { "value": "·" },
-              { "value": "·" },
-              { "value": "·" }
+              {
+                "value": "·"
+              },
+              {
+                "value": "·"
+              },
+              {
+                "value": "·"
+              },
+              {
+                "value": "·"
+              },
+              {
+                "value": "·"
+              }
             ]
           }
         },
         {
           "target": "flow-diagram",
-          "action": "set",
           "params": {
             "components": [
-              { "id": "client", "label": "Request", "icon": "web", "x": 80, "y": 120, "status": "active" },
-              { "id": "limiter", "label": "Rate Limiter", "icon": "shield", "x": 240, "y": 120, "status": "overloaded" },
-              { "id": "api", "label": "API Server", "icon": "server", "x": 400, "y": 120, "status": "normal" }
+              {
+                "id": "client",
+                "label": "Request",
+                "icon": "web",
+                "status": "active"
+              },
+              {
+                "id": "limiter",
+                "label": "Rate Limiter",
+                "icon": "shield",
+                "status": "overloaded"
+              },
+              {
+                "id": "api",
+                "label": "API Server",
+                "icon": "server",
+                "status": "normal"
+              }
             ],
             "connections": [
-              { "from": "client", "to": "limiter", "active": true },
-              { "from": "limiter", "to": "api", "active": false }
+              {
+                "from": "client",
+                "to": "limiter",
+                "active": true
+              },
+              {
+                "from": "limiter",
+                "to": "api",
+                "active": false
+              }
             ]
           }
         },
         {
           "target": "allowed-counter",
-          "action": "set",
-          "params": { "value": 5, "label": "Allowed", "color": "secondary" }
+          "params": {
+            "value": 5,
+            "label": "Allowed",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 2200
@@ -188,28 +336,56 @@
       "actions": [
         {
           "target": "status-badge",
-          "action": "set",
-          "params": { "text": "Request #6  →  NO tokens  →  REJECTED (429)", "style": "error" }
+          "params": {
+            "text": "Request #6  →  NO tokens  →  REJECTED (429)",
+            "style": "error"
+          }
         },
         {
           "target": "flow-diagram",
-          "action": "set",
           "params": {
             "components": [
-              { "id": "client", "label": "Request", "icon": "web", "x": 80, "y": 120, "status": "overloaded" },
-              { "id": "limiter", "label": "Rate Limiter", "icon": "shield", "x": 240, "y": 120, "status": "overloaded" },
-              { "id": "api", "label": "API Server", "icon": "server", "x": 400, "y": 120, "status": "normal" }
+              {
+                "id": "client",
+                "label": "Request",
+                "icon": "web",
+                "status": "overloaded"
+              },
+              {
+                "id": "limiter",
+                "label": "Rate Limiter",
+                "icon": "shield",
+                "status": "overloaded"
+              },
+              {
+                "id": "api",
+                "label": "API Server",
+                "icon": "server",
+                "status": "normal"
+              }
             ],
             "connections": [
-              { "from": "client", "to": "limiter", "active": true, "style": "dashed" },
-              { "from": "limiter", "to": "api", "active": false }
+              {
+                "from": "client",
+                "to": "limiter",
+                "active": true,
+                "style": "dashed"
+              },
+              {
+                "from": "limiter",
+                "to": "api",
+                "active": false
+              }
             ]
           }
         },
         {
           "target": "rejected-counter",
-          "action": "set",
-          "params": { "value": 1, "label": "Rejected", "color": "error" }
+          "params": {
+            "value": 1,
+            "label": "Rejected",
+            "color": "error"
+          }
         }
       ],
       "duration": 2000
@@ -219,34 +395,69 @@
       "actions": [
         {
           "target": "status-badge",
-          "action": "set",
-          "params": { "text": "Refill interval!  →  2 tokens added  →  2/5", "style": "highlight" }
+          "params": {
+            "text": "Refill interval!  →  2 tokens added  →  2/5",
+            "style": "highlight"
+          }
         },
         {
           "target": "token-bucket",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": "T", "highlight": "insert" },
-              { "value": "T", "highlight": "insert" },
-              { "value": "·" },
-              { "value": "·" },
-              { "value": "·" }
+              {
+                "value": "T",
+                "highlight": "insert"
+              },
+              {
+                "value": "T",
+                "highlight": "insert"
+              },
+              {
+                "value": "·"
+              },
+              {
+                "value": "·"
+              },
+              {
+                "value": "·"
+              }
             ]
           }
         },
         {
           "target": "flow-diagram",
-          "action": "set",
           "params": {
             "components": [
-              { "id": "client", "label": "Request", "icon": "web", "x": 80, "y": 120, "status": "normal" },
-              { "id": "limiter", "label": "Rate Limiter", "icon": "shield", "x": 240, "y": 120, "status": "active" },
-              { "id": "api", "label": "API Server", "icon": "server", "x": 400, "y": 120, "status": "normal" }
+              {
+                "id": "client",
+                "label": "Request",
+                "icon": "web",
+                "status": "normal"
+              },
+              {
+                "id": "limiter",
+                "label": "Rate Limiter",
+                "icon": "shield",
+                "status": "active"
+              },
+              {
+                "id": "api",
+                "label": "API Server",
+                "icon": "server",
+                "status": "normal"
+              }
             ],
             "connections": [
-              { "from": "client", "to": "limiter", "active": false },
-              { "from": "limiter", "to": "api", "active": false }
+              {
+                "from": "client",
+                "to": "limiter",
+                "active": false
+              },
+              {
+                "from": "limiter",
+                "to": "api",
+                "active": false
+              }
             ]
           }
         }
@@ -258,41 +469,78 @@
       "actions": [
         {
           "target": "status-badge",
-          "action": "set",
-          "params": { "text": "Request #7  →  token available  →  ALLOWED again", "style": "success" }
+          "params": {
+            "text": "Request #7  →  token available  →  ALLOWED again",
+            "style": "success"
+          }
         },
         {
           "target": "token-bucket",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": "·" },
-              { "value": "T", "highlight": "active" },
-              { "value": "·" },
-              { "value": "·" },
-              { "value": "·" }
+              {
+                "value": "·"
+              },
+              {
+                "value": "T",
+                "highlight": "active"
+              },
+              {
+                "value": "·"
+              },
+              {
+                "value": "·"
+              },
+              {
+                "value": "·"
+              }
             ]
           }
         },
         {
           "target": "flow-diagram",
-          "action": "set",
           "params": {
             "components": [
-              { "id": "client", "label": "Request", "icon": "web", "x": 80, "y": 120, "status": "active" },
-              { "id": "limiter", "label": "Rate Limiter", "icon": "shield", "x": 240, "y": 120, "status": "active" },
-              { "id": "api", "label": "API Server", "icon": "server", "x": 400, "y": 120, "status": "active" }
+              {
+                "id": "client",
+                "label": "Request",
+                "icon": "web",
+                "status": "active"
+              },
+              {
+                "id": "limiter",
+                "label": "Rate Limiter",
+                "icon": "shield",
+                "status": "active"
+              },
+              {
+                "id": "api",
+                "label": "API Server",
+                "icon": "server",
+                "status": "active"
+              }
             ],
             "connections": [
-              { "from": "client", "to": "limiter", "active": true },
-              { "from": "limiter", "to": "api", "active": true }
+              {
+                "from": "client",
+                "to": "limiter",
+                "active": true
+              },
+              {
+                "from": "limiter",
+                "to": "api",
+                "active": true
+              }
             ]
           }
         },
         {
           "target": "allowed-counter",
-          "action": "set",
-          "params": { "value": 6, "label": "Allowed", "color": "secondary" }
+          "params": {
+            "value": 6,
+            "label": "Allowed",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 2000
@@ -302,19 +550,35 @@
       "actions": [
         {
           "target": "status-badge",
-          "action": "set",
-          "params": { "text": "Full refill  →  5/5 tokens  →  burst capacity restored", "style": "highlight" }
+          "params": {
+            "text": "Full refill  →  5/5 tokens  →  burst capacity restored",
+            "style": "highlight"
+          }
         },
         {
           "target": "token-bucket",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": "T", "highlight": "active" },
-              { "value": "T", "highlight": "active" },
-              { "value": "T", "highlight": "active" },
-              { "value": "T", "highlight": "active" },
-              { "value": "T", "highlight": "active" }
+              {
+                "value": "T",
+                "highlight": "active"
+              },
+              {
+                "value": "T",
+                "highlight": "active"
+              },
+              {
+                "value": "T",
+                "highlight": "active"
+              },
+              {
+                "value": "T",
+                "highlight": "active"
+              },
+              {
+                "value": "T",
+                "highlight": "active"
+              }
             ]
           }
         }
@@ -326,21 +590,40 @@
       "actions": [
         {
           "target": "status-badge",
-          "action": "set",
-          "params": { "text": "Steady state: 3 req/s arrive, 3 refill/s  →  no rejections", "style": "success" }
+          "params": {
+            "text": "Steady state: 3 req/s arrive, 3 refill/s  →  no rejections",
+            "style": "success"
+          }
         },
         {
           "target": "token-bucket",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": "T", "highlight": "active" },
-              { "value": "T", "highlight": "active" },
-              { "value": "·" },
-              { "value": "·" },
-              { "value": "·" }
+              {
+                "value": "T",
+                "highlight": "active"
+              },
+              {
+                "value": "T",
+                "highlight": "active"
+              },
+              {
+                "value": "·"
+              },
+              {
+                "value": "·"
+              },
+              {
+                "value": "·"
+              }
             ],
-            "pointers": [{ "index": 1, "label": "steady", "color": "secondary" }]
+            "pointers": [
+              {
+                "index": 1,
+                "label": "steady",
+                "color": "secondary"
+              }
+            ]
           }
         }
       ],
@@ -351,59 +634,101 @@
       "actions": [
         {
           "target": "status-badge",
-          "action": "set",
-          "params": { "text": "Overload: 8 req/s arrive, 3 refill/s  →  queue builds, then drops", "style": "error" }
+          "params": {
+            "text": "Overload: 8 req/s arrive, 3 refill/s  →  queue builds, then drops",
+            "style": "error"
+          }
         },
         {
           "target": "token-bucket",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": "·" },
-              { "value": "·" },
-              { "value": "·" },
-              { "value": "·" },
-              { "value": "·" }
+              {
+                "value": "·"
+              },
+              {
+                "value": "·"
+              },
+              {
+                "value": "·"
+              },
+              {
+                "value": "·"
+              },
+              {
+                "value": "·"
+              }
             ]
           }
         },
         {
           "target": "flow-diagram",
-          "action": "set",
           "params": {
             "components": [
-              { "id": "client", "label": "8 req/s", "icon": "web", "x": 80, "y": 120, "status": "overloaded" },
-              { "id": "limiter", "label": "Rate Limiter", "icon": "shield", "x": 240, "y": 120, "status": "overloaded" },
-              { "id": "api", "label": "API Server", "icon": "server", "x": 400, "y": 120, "status": "normal" }
+              {
+                "id": "client",
+                "label": "8 req/s",
+                "icon": "web",
+                "status": "overloaded"
+              },
+              {
+                "id": "limiter",
+                "label": "Rate Limiter",
+                "icon": "shield",
+                "status": "overloaded"
+              },
+              {
+                "id": "api",
+                "label": "API Server",
+                "icon": "server",
+                "status": "normal"
+              }
             ],
             "connections": [
-              { "from": "client", "to": "limiter", "active": true },
-              { "from": "limiter", "to": "api", "active": true }
+              {
+                "from": "client",
+                "to": "limiter",
+                "active": true
+              },
+              {
+                "from": "limiter",
+                "to": "api",
+                "active": true
+              }
             ]
           }
         },
         {
           "target": "rejected-counter",
-          "action": "set",
-          "params": { "value": 5, "label": "Rejected", "color": "error" }
+          "params": {
+            "value": 5,
+            "label": "Rejected",
+            "color": "error"
+          }
         },
         {
           "target": "allowed-counter",
-          "action": "set",
-          "params": { "value": 9, "label": "Allowed", "color": "secondary" }
+          "params": {
+            "value": 9,
+            "label": "Allowed",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 2000
     }
   ],
-
   "controls": [
     {
       "id": "algo",
       "type": "toggle-group",
       "label": "Algorithm",
       "config": {
-        "options": ["Token Bucket", "Fixed Window", "Sliding Window"],
+        "options": [
+          "Token Bucket",
+          "Fixed Window",
+          "Sliding Window"
+        ],
         "defaultValue": "Token Bucket"
       }
     },
@@ -411,28 +736,39 @@
       "id": "btn-request",
       "type": "button",
       "label": "Send Request",
-      "config": { "variant": "primary", "goToStep": 1 }
+      "config": {
+        "variant": "primary",
+        "goToStep": 1
+      }
     },
     {
       "id": "btn-burst",
       "type": "button",
       "label": "Burst 5 Requests",
-      "config": { "variant": "destructive", "goToStep": 3 }
+      "config": {
+        "variant": "destructive",
+        "goToStep": 3
+      }
     },
     {
       "id": "btn-refill",
       "type": "button",
       "label": "Token Refill",
-      "config": { "variant": "secondary", "goToStep": 5 }
+      "config": {
+        "variant": "secondary",
+        "goToStep": 5
+      }
     },
     {
       "id": "btn-overload",
       "type": "button",
       "label": "Overload System",
-      "config": { "variant": "destructive", "goToStep": 9 }
+      "config": {
+        "variant": "destructive",
+        "goToStep": 9
+      }
     }
   ],
-
   "explanation": [
     {
       "heading": "The Problem: Uncontrolled Traffic",
@@ -461,7 +797,6 @@
       "appearsAtStep": 8
     }
   ],
-
   "popups": [
     {
       "id": "pop-token-consumed",
@@ -470,7 +805,10 @@
       "showAtStep": 1,
       "hideAtStep": 3,
       "style": "info",
-      "anchor": { "x": 50, "y": 15 }
+      "anchor": {
+        "x": 50,
+        "y": 15
+      }
     },
     {
       "id": "pop-empty-bucket",
@@ -479,7 +817,10 @@
       "showAtStep": 3,
       "hideAtStep": 5,
       "style": "warning",
-      "anchor": { "x": 50, "y": 15 }
+      "anchor": {
+        "x": 50,
+        "y": 15
+      }
     },
     {
       "id": "pop-refilling",
@@ -488,10 +829,12 @@
       "showAtStep": 5,
       "hideAtStep": 7,
       "style": "success",
-      "anchor": { "x": 50, "y": 15 }
+      "anchor": {
+        "x": 50,
+        "y": 15
+      }
     }
   ],
-
   "challenges": [
     {
       "id": "ch-steady-50pct",

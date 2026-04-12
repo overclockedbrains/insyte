@@ -5,69 +5,118 @@
   "layout": "code-left-canvas-right",
   "description": "Trace the O(n) hashmap solution for Two Sum.",
   "category": "Data Structures & Algorithms",
-  "tags": ["array", "hashmap", "two-sum"],
+  "tags": [
+    "array",
+    "hashmap",
+    "two-sum"
+  ],
   "code": {
     "language": "python",
     "source": "def two_sum(nums, target):\n    seen = {}\n    for i, num in enumerate(nums):\n        need = target - num\n        if need in seen:\n            return [seen[need], i]\n        seen[num] = i\n    return []\n\nfinalResult = two_sum([2, 7, 11, 15], 9)\n",
-    "highlightByStep": [0, 2, 4, 5, 10]
+    "highlightByStep": [
+      0,
+      2,
+      4,
+      5,
+      10
+    ]
   },
   "visuals": [
     {
       "id": "nums",
       "type": "array",
       "label": "nums",
-      "position": { "x": 50, "y": 30 },
       "initialState": {
         "cells": [
-          { "value": 2, "highlight": "default" },
-          { "value": 7, "highlight": "default" },
-          { "value": 11, "highlight": "default" },
-          { "value": 15, "highlight": "default" }
+          {
+            "value": 2,
+            "highlight": "default"
+          },
+          {
+            "value": 7,
+            "highlight": "default"
+          },
+          {
+            "value": 11,
+            "highlight": "default"
+          },
+          {
+            "value": 15,
+            "highlight": "default"
+          }
         ]
-      }
+      },
+      "layoutHint": "linear-H"
     },
     {
       "id": "seen-map",
       "type": "hashmap",
       "label": "seen",
-      "position": { "x": 50, "y": 62 },
-      "initialState": { "entries": [] }
+      "initialState": {
+        "entries": []
+      },
+      "layoutHint": "hashmap-buckets"
     },
     {
       "id": "op",
       "type": "text-badge",
       "label": "Operation",
-      "position": { "x": 50, "y": 12 },
-      "initialState": { "text": "Start scan from left", "style": "default" }
+      "initialState": {
+        "text": "Start scan from left",
+        "style": "default"
+      },
+      "slot": "top-center"
     }
   ],
   "steps": [
-    { "index": 0, "actions": [], "duration": 900 },
+    {
+      "index": 0,
+      "actions": [],
+      "duration": 900
+    },
     {
       "index": 1,
       "actions": [
         {
           "target": "op",
-          "action": "set",
-          "params": { "text": "i=0, num=2, need=7, miss -> store 2:0", "style": "highlight" }
+          "params": {
+            "text": "i=0, num=2, need=7, miss -> store 2:0",
+            "style": "highlight"
+          }
         },
         {
           "target": "nums",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": 2, "highlight": "active" },
-              { "value": 7, "highlight": "default" },
-              { "value": 11, "highlight": "default" },
-              { "value": 15, "highlight": "default" }
+              {
+                "value": 2,
+                "highlight": "active"
+              },
+              {
+                "value": 7,
+                "highlight": "default"
+              },
+              {
+                "value": 11,
+                "highlight": "default"
+              },
+              {
+                "value": 15,
+                "highlight": "default"
+              }
             ]
           }
         },
         {
           "target": "seen-map",
-          "action": "set",
           "params": {
-            "entries": [{ "key": "2", "value": "0", "highlight": "insert" }]
+            "entries": [
+              {
+                "key": "2",
+                "value": "0",
+                "highlight": "insert"
+              }
+            ]
           }
         }
       ],
@@ -78,26 +127,44 @@
       "actions": [
         {
           "target": "op",
-          "action": "set",
-          "params": { "text": "i=1, num=7, need=2, hit in seen", "style": "success" }
+          "params": {
+            "text": "i=1, num=7, need=2, hit in seen",
+            "style": "success"
+          }
         },
         {
           "target": "nums",
-          "action": "set",
           "params": {
             "cells": [
-              { "value": 2, "highlight": "hit" },
-              { "value": 7, "highlight": "active" },
-              { "value": 11, "highlight": "default" },
-              { "value": 15, "highlight": "default" }
+              {
+                "value": 2,
+                "highlight": "hit"
+              },
+              {
+                "value": 7,
+                "highlight": "active"
+              },
+              {
+                "value": 11,
+                "highlight": "default"
+              },
+              {
+                "value": 15,
+                "highlight": "default"
+              }
             ]
           }
         },
         {
           "target": "seen-map",
-          "action": "set",
           "params": {
-            "entries": [{ "key": "2", "value": "0", "highlight": "hit" }]
+            "entries": [
+              {
+                "key": "2",
+                "value": "0",
+                "highlight": "hit"
+              }
+            ]
           }
         }
       ],
@@ -108,8 +175,10 @@
       "actions": [
         {
           "target": "op",
-          "action": "set",
-          "params": { "text": "Return indices [0, 1]", "style": "success" }
+          "params": {
+            "text": "Return indices [0, 1]",
+            "style": "success"
+          }
         }
       ],
       "duration": 900
@@ -119,8 +188,10 @@
       "actions": [
         {
           "target": "op",
-          "action": "set",
-          "params": { "text": "Done in one pass with hashmap", "style": "default" }
+          "params": {
+            "text": "Done in one pass with hashmap",
+            "style": "default"
+          }
         }
       ],
       "duration": 900
@@ -183,5 +254,8 @@
       "type": "optimize"
     }
   ],
-  "complexity": { "time": "O(n)", "space": "O(n)" }
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  }
 }

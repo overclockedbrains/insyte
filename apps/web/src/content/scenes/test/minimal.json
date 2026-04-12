@@ -5,26 +5,42 @@
   "layout": "text-left-canvas-right",
   "description": "A 3-step scene used to verify the Phase 4 simulation page layouts, ControlBar, and ChallengesSection.",
   "category": "Testing",
-  "tags": ["test", "array"],
-
+  "tags": [
+    "test",
+    "array"
+  ],
   "visuals": [
     {
       "id": "arr1",
       "type": "array",
       "label": "Input Array",
-      "position": { "x": 50, "y": 80 },
       "initialState": {
         "cells": [
-          { "value": 1, "highlight": "default" },
-          { "value": 2, "highlight": "default" },
-          { "value": 3, "highlight": "default" },
-          { "value": 4, "highlight": "default" },
-          { "value": 5, "highlight": "default" }
+          {
+            "value": 1,
+            "highlight": "default"
+          },
+          {
+            "value": 2,
+            "highlight": "default"
+          },
+          {
+            "value": 3,
+            "highlight": "default"
+          },
+          {
+            "value": 4,
+            "highlight": "default"
+          },
+          {
+            "value": 5,
+            "highlight": "default"
+          }
         ]
-      }
+      },
+      "layoutHint": "linear-H"
     }
   ],
-
   "steps": [
     {
       "index": 0,
@@ -36,8 +52,11 @@
       "actions": [
         {
           "target": "arr1",
-          "action": "highlight",
-          "params": { "field": "cells", "index": 2, "value": "active" }
+          "params": {
+            "field": "cells",
+            "index": 2,
+            "value": "active"
+          }
         }
       ],
       "duration": 1200
@@ -47,35 +66,49 @@
       "actions": [
         {
           "target": "arr1",
-          "action": "highlight",
-          "params": { "field": "cells", "index": 4, "value": "found" }
+          "params": {
+            "field": "cells",
+            "index": 4,
+            "value": "found"
+          }
         }
       ],
       "duration": 1200
     }
   ],
-
   "controls": [
     {
       "id": "speed-ctrl",
       "type": "slider",
       "label": "Animation Speed",
-      "config": { "min": 0.5, "max": 2, "step": 0.5, "defaultValue": 1 }
+      "config": {
+        "min": 0.5,
+        "max": 2,
+        "step": 0.5,
+        "defaultValue": 1
+      }
     },
     {
       "id": "show-values-ctrl",
       "type": "toggle",
       "label": "Show Values",
-      "config": { "defaultValue": true }
+      "config": {
+        "defaultValue": true
+      }
     },
     {
       "id": "search-method-ctrl",
       "type": "toggle-group",
       "label": "Search Method",
-      "config": { "options": ["Linear", "Binary"], "defaultValue": "Linear" }
+      "config": {
+        "options": [
+          "Linear",
+          "Binary"
+        ],
+        "defaultValue": "Linear"
+      }
     }
   ],
-
   "explanation": [
     {
       "heading": "Step 0 — Initial State",
@@ -95,7 +128,6 @@
       "callout": "Target located at index 4. Search complete!"
     }
   ],
-
   "popups": [
     {
       "id": "pop-1",
@@ -121,7 +153,6 @@
       "style": "success"
     }
   ],
-
   "challenges": [
     {
       "id": "ch-1",

@@ -5,76 +5,104 @@
   "layout": "code-left-canvas-right",
   "description": "See exactly how JavaScript handles async code — call stack, Web APIs, microtask queue, and callback queue all in one visual.",
   "category": "JavaScript",
-  "tags": ["event-loop", "async", "promises", "setTimeout", "javascript"],
-
+  "tags": [
+    "event-loop",
+    "async",
+    "promises",
+    "setTimeout",
+    "javascript"
+  ],
   "code": {
     "language": "javascript",
     "source": "console.log('start');\n\nsetTimeout(() => {\n  console.log('setTimeout');\n}, 0);\n\nPromise.resolve()\n  .then(() => {\n    console.log('Promise');\n  });\n\nconsole.log('end');",
-    "highlightByStep": [0, 0, 0, 2, 4, 6, 11, 11, 8, 8, 3, 3]
+    "highlightByStep": [
+      0,
+      0,
+      0,
+      2,
+      4,
+      6,
+      11,
+      11,
+      8,
+      8,
+      3,
+      3
+    ]
   },
-
   "visuals": [
     {
       "id": "call-stack",
       "type": "stack",
       "label": "Call Stack",
-      "position": { "x": 20, "y": 50 },
       "initialState": {
         "items": [],
         "highlight": null
-      }
+      },
+      "layoutHint": "linear-V"
     },
     {
       "id": "microtask-queue",
       "type": "queue",
       "label": "Microtask Queue",
-      "position": { "x": 50, "y": 30 },
       "initialState": {
         "items": []
-      }
+      },
+      "layoutHint": "linear-H"
     },
     {
       "id": "callback-queue",
       "type": "queue",
       "label": "Callback Queue (Macrotask)",
-      "position": { "x": 50, "y": 70 },
       "initialState": {
         "items": []
-      }
+      },
+      "layoutHint": "linear-H"
     },
     {
       "id": "current-phase",
       "type": "text-badge",
       "label": "Event Loop Phase",
-      "position": { "x": 50, "y": 5 },
       "initialState": {
         "text": "Executing script…",
         "style": "default"
-      }
+      },
+      "slot": "top-center"
     },
     {
       "id": "web-apis",
       "type": "system-diagram",
       "label": "Web APIs",
-      "position": { "x": 80, "y": 50 },
       "initialState": {
         "components": [
-          { "id": "web-api-box", "label": "Web APIs", "icon": "compute", "x": 200, "y": 120, "status": "normal" },
-          { "id": "timer-box", "label": "Timer (0ms)", "icon": "compute", "x": 200, "y": 240, "status": "normal" }
+          {
+            "id": "web-api-box",
+            "label": "Web APIs",
+            "icon": "compute",
+            "status": "normal"
+          },
+          {
+            "id": "timer-box",
+            "label": "Timer (0ms)",
+            "icon": "compute",
+            "status": "normal"
+          }
         ],
         "connections": []
-      }
+      },
+      "layoutHint": "dagre-LR"
     }
   ],
-
   "steps": [
     {
       "index": 0,
       "actions": [
         {
           "target": "current-phase",
-          "action": "set",
-          "params": { "text": "Script starts — call stack empty", "style": "default" }
+          "params": {
+            "text": "Script starts — call stack empty",
+            "style": "default"
+          }
         }
       ],
       "duration": 1600
@@ -84,13 +112,17 @@
       "actions": [
         {
           "target": "current-phase",
-          "action": "set",
-          "params": { "text": "console.log('start') → pushed to call stack", "style": "highlight" }
+          "params": {
+            "text": "console.log('start') → pushed to call stack",
+            "style": "highlight"
+          }
         },
         {
           "target": "call-stack",
-          "action": "push",
-          "params": { "field": "items", "item": "console.log('start')" }
+          "params": {
+            "field": "items",
+            "item": "console.log('start')"
+          }
         }
       ],
       "duration": 1600
@@ -100,13 +132,16 @@
       "actions": [
         {
           "target": "current-phase",
-          "action": "set",
-          "params": { "text": "console.log('start') executed → popped", "style": "success" }
+          "params": {
+            "text": "console.log('start') executed → popped",
+            "style": "success"
+          }
         },
         {
           "target": "call-stack",
-          "action": "pop",
-          "params": { "field": "items" }
+          "params": {
+            "field": "items"
+          }
         }
       ],
       "duration": 1600
@@ -116,24 +151,41 @@
       "actions": [
         {
           "target": "current-phase",
-          "action": "set",
-          "params": { "text": "setTimeout(fn, 0) → pushed, then handed to Web APIs", "style": "highlight" }
+          "params": {
+            "text": "setTimeout(fn, 0) → pushed, then handed to Web APIs",
+            "style": "highlight"
+          }
         },
         {
           "target": "call-stack",
-          "action": "push",
-          "params": { "field": "items", "item": "setTimeout(fn, 0)" }
+          "params": {
+            "field": "items",
+            "item": "setTimeout(fn, 0)"
+          }
         },
         {
           "target": "web-apis",
-          "action": "set",
           "params": {
             "components": [
-              { "id": "web-api-box", "label": "Web APIs", "icon": "compute", "x": 200, "y": 120, "status": "active" },
-              { "id": "timer-box", "label": "Timer (0ms)", "icon": "compute", "x": 200, "y": 240, "status": "active" }
+              {
+                "id": "web-api-box",
+                "label": "Web APIs",
+                "icon": "compute",
+                "status": "active"
+              },
+              {
+                "id": "timer-box",
+                "label": "Timer (0ms)",
+                "icon": "compute",
+                "status": "active"
+              }
             ],
             "connections": [
-              { "from": "web-api-box", "to": "timer-box", "active": true }
+              {
+                "from": "web-api-box",
+                "to": "timer-box",
+                "active": true
+              }
             ]
           }
         }
@@ -145,13 +197,16 @@
       "actions": [
         {
           "target": "current-phase",
-          "action": "set",
-          "params": { "text": "setTimeout registered → popped from stack", "style": "default" }
+          "params": {
+            "text": "setTimeout registered → popped from stack",
+            "style": "default"
+          }
         },
         {
           "target": "call-stack",
-          "action": "pop",
-          "params": { "field": "items" }
+          "params": {
+            "field": "items"
+          }
         }
       ],
       "duration": 1400
@@ -161,18 +216,24 @@
       "actions": [
         {
           "target": "current-phase",
-          "action": "set",
-          "params": { "text": "Promise.resolve().then(fn) → microtask queued immediately", "style": "highlight" }
+          "params": {
+            "text": "Promise.resolve().then(fn) → microtask queued immediately",
+            "style": "highlight"
+          }
         },
         {
           "target": "call-stack",
-          "action": "push",
-          "params": { "field": "items", "item": "Promise.resolve().then(fn)" }
+          "params": {
+            "field": "items",
+            "item": "Promise.resolve().then(fn)"
+          }
         },
         {
           "target": "microtask-queue",
-          "action": "push",
-          "params": { "field": "items", "item": "Promise callback" }
+          "params": {
+            "field": "items",
+            "item": "Promise callback"
+          }
         }
       ],
       "duration": 1800
@@ -182,18 +243,23 @@
       "actions": [
         {
           "target": "current-phase",
-          "action": "set",
-          "params": { "text": "console.log('end') → pushed and executed", "style": "highlight" }
+          "params": {
+            "text": "console.log('end') → pushed and executed",
+            "style": "highlight"
+          }
         },
         {
           "target": "call-stack",
-          "action": "pop",
-          "params": { "field": "items" }
+          "params": {
+            "field": "items"
+          }
         },
         {
           "target": "call-stack",
-          "action": "push",
-          "params": { "field": "items", "item": "console.log('end')" }
+          "params": {
+            "field": "items",
+            "item": "console.log('end')"
+          }
         }
       ],
       "duration": 1600
@@ -203,29 +269,43 @@
       "actions": [
         {
           "target": "current-phase",
-          "action": "set",
-          "params": { "text": "Call stack empty → event loop checks microtask queue FIRST", "style": "highlight" }
+          "params": {
+            "text": "Call stack empty → event loop checks microtask queue FIRST",
+            "style": "highlight"
+          }
         },
         {
           "target": "call-stack",
-          "action": "pop",
-          "params": { "field": "items" }
+          "params": {
+            "field": "items"
+          }
         },
         {
           "target": "web-apis",
-          "action": "set",
           "params": {
             "components": [
-              { "id": "web-api-box", "label": "Web APIs", "icon": "compute", "x": 200, "y": 120, "status": "normal" },
-              { "id": "timer-box", "label": "Timer done!", "icon": "compute", "x": 200, "y": 240, "status": "normal" }
+              {
+                "id": "web-api-box",
+                "label": "Web APIs",
+                "icon": "compute",
+                "status": "normal"
+              },
+              {
+                "id": "timer-box",
+                "label": "Timer done!",
+                "icon": "compute",
+                "status": "normal"
+              }
             ],
             "connections": []
           }
         },
         {
           "target": "callback-queue",
-          "action": "push",
-          "params": { "field": "items", "item": "setTimeout callback" }
+          "params": {
+            "field": "items",
+            "item": "setTimeout callback"
+          }
         }
       ],
       "duration": 2000
@@ -235,18 +315,23 @@
       "actions": [
         {
           "target": "current-phase",
-          "action": "set",
-          "params": { "text": "Microtask runs first — Promise callback → call stack", "style": "success" }
+          "params": {
+            "text": "Microtask runs first — Promise callback → call stack",
+            "style": "success"
+          }
         },
         {
           "target": "microtask-queue",
-          "action": "pop",
-          "params": { "field": "items" }
+          "params": {
+            "field": "items"
+          }
         },
         {
           "target": "call-stack",
-          "action": "push",
-          "params": { "field": "items", "item": "Promise callback" }
+          "params": {
+            "field": "items",
+            "item": "Promise callback"
+          }
         }
       ],
       "duration": 1800
@@ -256,13 +341,16 @@
       "actions": [
         {
           "target": "current-phase",
-          "action": "set",
-          "params": { "text": "Promise callback completes → now check callback queue", "style": "default" }
+          "params": {
+            "text": "Promise callback completes → now check callback queue",
+            "style": "default"
+          }
         },
         {
           "target": "call-stack",
-          "action": "pop",
-          "params": { "field": "items" }
+          "params": {
+            "field": "items"
+          }
         }
       ],
       "duration": 1600
@@ -272,18 +360,23 @@
       "actions": [
         {
           "target": "current-phase",
-          "action": "set",
-          "params": { "text": "Macrotask: setTimeout callback → call stack", "style": "highlight" }
+          "params": {
+            "text": "Macrotask: setTimeout callback → call stack",
+            "style": "highlight"
+          }
         },
         {
           "target": "callback-queue",
-          "action": "pop",
-          "params": { "field": "items" }
+          "params": {
+            "field": "items"
+          }
         },
         {
           "target": "call-stack",
-          "action": "push",
-          "params": { "field": "items", "item": "setTimeout callback" }
+          "params": {
+            "field": "items",
+            "item": "setTimeout callback"
+          }
         }
       ],
       "duration": 1800
@@ -293,26 +386,32 @@
       "actions": [
         {
           "target": "current-phase",
-          "action": "set",
-          "params": { "text": "Done! Order: 'start' → 'end' → Promise → setTimeout", "style": "success" }
+          "params": {
+            "text": "Done! Order: 'start' → 'end' → Promise → setTimeout",
+            "style": "success"
+          }
         },
         {
           "target": "call-stack",
-          "action": "pop",
-          "params": { "field": "items" }
+          "params": {
+            "field": "items"
+          }
         }
       ],
       "duration": 2000
     }
   ],
-
   "controls": [
     {
       "id": "snippet-toggle",
       "type": "toggle-group",
       "label": "Code Snippet",
       "config": {
-        "options": ["setTimeout + Promise", "async/await", "Nested Microtasks"],
+        "options": [
+          "setTimeout + Promise",
+          "async/await",
+          "Nested Microtasks"
+        ],
         "defaultValue": "setTimeout + Promise"
       }
     },
@@ -320,10 +419,13 @@
       "id": "btn-run",
       "type": "button",
       "label": "Run Snippet",
-      "config": { "variant": "primary", "defaultValue": null, "goToStep": 0 }
+      "config": {
+        "variant": "primary",
+        "defaultValue": null,
+        "goToStep": 0
+      }
     }
   ],
-
   "explanation": [
     {
       "heading": "JavaScript is Single-Threaded",
@@ -358,7 +460,6 @@
       "appearsAtStep": 11
     }
   ],
-
   "popups": [
     {
       "id": "pop-start",
@@ -393,7 +494,6 @@
       "style": "insight"
     }
   ],
-
   "challenges": [
     {
       "id": "ch-predict-order",

@@ -1,14 +1,12 @@
 /**
- * TreeViz — Phase 18: Coordinate System Unification
+ * TreeViz — Phase 19: Automatic layout
+ *
+ * x/y are no longer in scene JSON (removed in Phase 19).
+ * Positions are now computed here from the tree structure using a simple
+ * recursive algorithm: subtree-width centering (core of Reingold-Tilford).
  *
  * Uses a single SVG viewBox + <foreignObject> — edges and node bodies share
  * the same coordinate space so alignment is perfect at any container size.
- *
- * Sizing: SVG uses width:100% + height:auto (respects viewBox aspect ratio).
- * The outer div carries min-h so the element never collapses to nothing.
- *
- * Edges: the old straight-line look is preserved (matches the original design
- * screenshot). Straight lines look cleaner than beziers for binary trees.
  */
 
 'use client'
@@ -18,13 +16,9 @@ import type { PrimitiveProps } from '.'
 import { computeViewBox } from '../CanvasContext'
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
-// NODE_UNIT: px per scene-coordinate unit in SVG space.
-// Scene JSON uses grid coords (e.g. x: -3…2, y: 0…2).
-// Larger unit → bigger tree; 90 gives roughly the same visual size
-// as the old SCALE_X=60/SCALE_Y=80 pair (which were different, causing stretch).
-const NODE_UNIT_X = 88   // slightly wider spread than vertical
-const NODE_UNIT_Y = 90   // vertical spacing
-const NODE_W      = 48   // node circle diameter (matches old w-12 h-12)
+const NODE_UNIT_X = 88   // horizontal spread per tree unit
+const NODE_UNIT_Y = 90   // vertical spacing per level
+const NODE_W      = 48   // node circle diameter
 const NODE_H      = 48
 const HALF_W      = NODE_W / 2
 const HALF_H      = NODE_H / 2
@@ -33,10 +27,11 @@ const HALF_H      = NODE_H / 2
 interface TreeNode {
   id: string
   value: string
-  children: string[]
+  children?: string[]
   highlight?: string
-  x: number
-  y: number
+  // x/y are legacy — no longer read from JSON, computed below
+  x?: number
+  y?: number
 }
 
 interface TreeState {
@@ -44,38 +39,99 @@ interface TreeState {
   rootId: string
 }
 
+// ─── Auto layout ───────────────────────────────────────────────────────────────
+
+/** Returns the total leaf count of the subtree (minimum 1 per node). */
+function subtreeWidth(id: string, nodeMap: Map<string, TreeNode>): number {
+  const node = nodeMap.get(id)
+  if (!node) return 1
+  const children = node.children ?? []
+  if (children.length === 0) return 1
+  return children.reduce((sum, cId) => sum + subtreeWidth(cId, nodeMap), 0)
+}
+
+/**
+ * Recursively assigns grid positions (integer x, integer y = depth).
+ * Parent is centred over its children.
+ * Returns a map of id → { x, y } in tree-grid units.
+ */
+function assignPositions(
+  id: string,
+  depth: number,
+  xStart: number,
+  nodeMap: Map<string, TreeNode>,
+  out: Map<string, { x: number; y: number }>,
+): void {
+  const node = nodeMap.get(id)
+  if (!node) return
+
+  const children = node.children ?? []
+
+  if (children.length === 0) {
+    out.set(id, { x: xStart, y: depth })
+    return
+  }
+
+  // Place children left-to-right, then centre parent over them
+  let cursor = xStart
+  for (const cId of children) {
+    assignPositions(cId, depth + 1, cursor, nodeMap, out)
+    cursor += subtreeWidth(cId, nodeMap)
+  }
+
+  const firstChild = out.get(children[0] ?? '')
+  const lastChild  = out.get(children[children.length - 1] ?? '')
+  if (!firstChild || !lastChild) return
+  out.set(id, { x: (firstChild.x + lastChild.x) / 2, y: depth })
+}
+
 // ─── Component ─────────────────────────────────────────────────────────────────
 export function TreeViz({ state }: PrimitiveProps) {
   const { nodes = [], rootId } = state as TreeState
 
-  const getNode = (id: string) => nodes.find((n) => n.id === id)
+  if (nodes.length === 0) {
+    return (
+      <div className="flex items-center justify-center w-full min-h-[280px] text-sm text-on-surface-variant/50 italic">
+        Empty tree
+      </div>
+    )
+  }
 
-  // Scale scene grid coords → SVG pixel coords.
-  const scaledNodes = nodes.map((n) => ({
-    ...n,
-    svgX: n.x * NODE_UNIT_X,
-    svgY: n.y * NODE_UNIT_Y,
-  }))
+  const nodeMap = new Map(nodes.map((n) => [n.id, n]))
 
-  const getScaled = (id: string) => scaledNodes.find((n) => n.id === id)
+  // Determine root: prefer rootId, fall back to first node
+  const effectiveRootId = rootId ?? nodes[0]?.id
 
-  // Build straight-line connections (center → center matches the original look)
-  const connections: {
-    x1: number; y1: number
-    x2: number; y2: number
-    id: string
-  }[] = []
+  // Compute positions automatically
+  const posMap = new Map<string, { x: number; y: number }>()
+  if (effectiveRootId) {
+    assignPositions(effectiveRootId, 0, 0, nodeMap, posMap)
+  }
 
+  // Scale grid units → SVG pixels
+  const scaledNodes = nodes.map((n) => {
+    const pos = posMap.get(n.id) ?? { x: 0, y: 0 }
+    return {
+      ...n,
+      svgX: pos.x * NODE_UNIT_X,
+      svgY: pos.y * NODE_UNIT_Y,
+    }
+  })
+
+  const scaledMap = new Map(scaledNodes.map((n) => [n.id, n]))
+
+  // Build straight-line connections (parent bottom-center → child top-center)
+  const connections: { x1: number; y1: number; x2: number; y2: number; id: string }[] = []
   scaledNodes.forEach((node) => {
-    const rawNode = getNode(node.id)!
-    rawNode.children.forEach((childId) => {
-      const child = getScaled(childId)
+    const children = node.children ?? []
+    children.forEach((childId) => {
+      const child = scaledMap.get(childId)
       if (child) {
         connections.push({
           x1: node.svgX,
-          y1: node.svgY + HALF_H,   // bottom-center of parent
+          y1: node.svgY + HALF_H,
           x2: child.svgX,
-          y2: child.svgY - HALF_H,  // top-center  of child
+          y2: child.svgY - HALF_H,
           id: `${node.id}-${childId}`,
         })
       }
@@ -87,12 +143,6 @@ export function TreeViz({ state }: PrimitiveProps) {
   const [, , vw] = viewBox.split(' ').map(Number)
 
   return (
-    /*
-     * Outer div: min-h ensures layout has room even before SVG paints.
-     * SVG uses width:100% + height:auto → grows to fill the container width
-     * and scales height proportionally from the viewBox aspect ratio.
-     * maxWidth prevents small trees from stretching huge on wide screens.
-     */
     <div className="flex items-center justify-center w-full min-h-[280px] overflow-visible">
       <svg
         viewBox={viewBox}
@@ -102,7 +152,7 @@ export function TreeViz({ state }: PrimitiveProps) {
         preserveAspectRatio="xMidYMid meet"
         aria-label="Tree visualization"
       >
-        {/* ── Edges (straight lines, matching original visual style) ── */}
+        {/* ── Edges ── */}
         {connections.map((conn) => (
           <line
             key={conn.id}
@@ -117,8 +167,8 @@ export function TreeViz({ state }: PrimitiveProps) {
 
         {/* ── Nodes via foreignObject ── */}
         {scaledNodes.map((node) => {
-          const rawNode = getNode(node.id)!
-          const isRoot = node.id === rootId
+          const raw = nodeMap.get(node.id)!
+          const isRoot = node.id === effectiveRootId
 
           return (
             <foreignObject
@@ -136,28 +186,28 @@ export function TreeViz({ state }: PrimitiveProps) {
                   animate={{
                     opacity: 1,
                     scale: 1,
-                    backgroundColor: rawNode.highlight
-                      ? rawNode.highlight
+                    backgroundColor: raw.highlight
+                      ? raw.highlight
                       : 'var(--color-surface-container)',
-                    borderColor: isRoot && !rawNode.highlight
+                    borderColor: isRoot && !raw.highlight
                       ? 'var(--color-primary)'
-                      : rawNode.highlight
-                        ? rawNode.highlight
+                      : raw.highlight
+                        ? raw.highlight
                         : 'var(--color-outline-variant)',
-                    color: rawNode.highlight
+                    color: raw.highlight
                       ? 'var(--color-on-primary-fixed)'
                       : 'var(--color-on-surface)',
-                    boxShadow: rawNode.highlight
-                      ? rawNode.highlight.startsWith('var')
-                        ? `0 0 16px color-mix(in srgb, ${rawNode.highlight} 38%, transparent)`
-                        : `0 0 16px ${rawNode.highlight}60`
+                    boxShadow: raw.highlight
+                      ? raw.highlight.startsWith('var')
+                        ? `0 0 16px color-mix(in srgb, ${raw.highlight} 38%, transparent)`
+                        : `0 0 16px ${raw.highlight}60`
                       : isRoot
                         ? '0 0 10px color-mix(in srgb, var(--color-primary) 30%, transparent)'
                         : 'none',
                   }}
                   transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                 >
-                  {rawNode.value}
+                  {raw.value}
                 </motion.div>
               </div>
             </foreignObject>

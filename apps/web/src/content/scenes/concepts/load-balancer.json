@@ -5,60 +5,120 @@
   "layout": "text-left-canvas-right",
   "description": "See how load balancers distribute traffic across servers using Round Robin, Least Connections, and Weighted algorithms.",
   "category": "System Design",
-  "tags": ["load-balancing", "system-design", "round-robin", "distributed-systems", "hld"],
-
+  "tags": [
+    "load-balancing",
+    "system-design",
+    "round-robin",
+    "distributed-systems",
+    "hld"
+  ],
   "visuals": [
     {
       "id": "lb-system",
       "type": "system-diagram",
       "label": "Load Balancer System",
-      "position": { "x": 50, "y": 40 },
       "initialState": {
         "components": [
-          { "id": "client", "label": "Client", "icon": "web", "x": 80, "y": 180, "status": "normal" },
-          { "id": "lb", "label": "Load Balancer", "icon": "compute", "x": 260, "y": 180, "status": "normal" },
-          { "id": "s1", "label": "Server 1", "icon": "server", "x": 460, "y": 80, "status": "normal" },
-          { "id": "s2", "label": "Server 2", "icon": "server", "x": 460, "y": 180, "status": "normal" },
-          { "id": "s3", "label": "Server 3", "icon": "server", "x": 460, "y": 280, "status": "normal" }
+          {
+            "id": "client",
+            "label": "Client",
+            "icon": "web",
+            "status": "normal"
+          },
+          {
+            "id": "lb",
+            "label": "Load Balancer",
+            "icon": "compute",
+            "status": "normal"
+          },
+          {
+            "id": "s1",
+            "label": "Server 1",
+            "icon": "server",
+            "status": "normal"
+          },
+          {
+            "id": "s2",
+            "label": "Server 2",
+            "icon": "server",
+            "status": "normal"
+          },
+          {
+            "id": "s3",
+            "label": "Server 3",
+            "icon": "server",
+            "status": "normal"
+          }
         ],
         "connections": [
-          { "from": "client", "to": "lb", "active": false },
-          { "from": "lb", "to": "s1", "active": false },
-          { "from": "lb", "to": "s2", "active": false },
-          { "from": "lb", "to": "s3", "active": false }
+          {
+            "from": "client",
+            "to": "lb",
+            "active": false
+          },
+          {
+            "from": "lb",
+            "to": "s1",
+            "active": false
+          },
+          {
+            "from": "lb",
+            "to": "s2",
+            "active": false
+          },
+          {
+            "from": "lb",
+            "to": "s3",
+            "active": false
+          }
         ]
-      }
+      },
+      "layoutHint": "dagre-LR"
     },
     {
       "id": "s1-count",
       "type": "counter",
       "label": "Server 1 Reqs",
-      "position": { "x": 20, "y": 85 },
-      "initialState": { "value": 0, "label": "Server 1", "color": "primary" }
+      "initialState": {
+        "value": 0,
+        "label": "Server 1",
+        "color": "primary"
+      },
+      "slot": "bottom-left"
     },
     {
       "id": "s2-count",
       "type": "counter",
       "label": "Server 2 Reqs",
-      "position": { "x": 50, "y": 85 },
-      "initialState": { "value": 0, "label": "Server 2", "color": "secondary" }
+      "initialState": {
+        "value": 0,
+        "label": "Server 2",
+        "color": "secondary"
+      },
+      "slot": "bottom-left"
     },
     {
       "id": "s3-count",
       "type": "counter",
       "label": "Server 3 Reqs",
-      "position": { "x": 80, "y": 85 },
-      "initialState": { "value": 0, "label": "Server 3", "color": "primary" }
+      "initialState": {
+        "value": 0,
+        "label": "Server 3",
+        "color": "primary"
+      },
+      "slot": "bottom-left"
     },
     {
       "id": "algo-badge",
       "type": "text-badge",
       "label": "Current Algorithm",
-      "position": { "x": 50, "y": 5 },
-      "initialState": { "text": "Algorithm: Round Robin", "style": "highlight" }
+      "initialState": {
+        "text": "Algorithm: Round Robin",
+        "style": "highlight"
+      },
+      "slot": "top-center"
     }
   ],
-
   "steps": [
     {
       "index": 0,
@@ -70,32 +130,77 @@
       "actions": [
         {
           "target": "algo-badge",
-          "action": "set",
-          "params": { "text": "Round Robin — Request 1 → Server 1", "style": "highlight" }
+          "params": {
+            "text": "Round Robin — Request 1 → Server 1",
+            "style": "highlight"
+          }
         },
         {
           "target": "lb-system",
-          "action": "set",
           "params": {
             "components": [
-              { "id": "client", "label": "Client", "icon": "web", "x": 80, "y": 180, "status": "active" },
-              { "id": "lb", "label": "Load Balancer", "icon": "compute", "x": 260, "y": 180, "status": "active" },
-              { "id": "s1", "label": "Server 1", "icon": "server", "x": 460, "y": 80, "status": "active" },
-              { "id": "s2", "label": "Server 2", "icon": "server", "x": 460, "y": 180, "status": "normal" },
-              { "id": "s3", "label": "Server 3", "icon": "server", "x": 460, "y": 280, "status": "normal" }
+              {
+                "id": "client",
+                "label": "Client",
+                "icon": "web",
+                "status": "active"
+              },
+              {
+                "id": "lb",
+                "label": "Load Balancer",
+                "icon": "compute",
+                "status": "active"
+              },
+              {
+                "id": "s1",
+                "label": "Server 1",
+                "icon": "server",
+                "status": "active"
+              },
+              {
+                "id": "s2",
+                "label": "Server 2",
+                "icon": "server",
+                "status": "normal"
+              },
+              {
+                "id": "s3",
+                "label": "Server 3",
+                "icon": "server",
+                "status": "normal"
+              }
             ],
             "connections": [
-              { "from": "client", "to": "lb", "active": true },
-              { "from": "lb", "to": "s1", "active": true },
-              { "from": "lb", "to": "s2", "active": false },
-              { "from": "lb", "to": "s3", "active": false }
+              {
+                "from": "client",
+                "to": "lb",
+                "active": true
+              },
+              {
+                "from": "lb",
+                "to": "s1",
+                "active": true
+              },
+              {
+                "from": "lb",
+                "to": "s2",
+                "active": false
+              },
+              {
+                "from": "lb",
+                "to": "s3",
+                "active": false
+              }
             ]
           }
         },
         {
           "target": "s1-count",
-          "action": "set",
-          "params": { "value": 1, "label": "Server 1", "color": "primary" }
+          "params": {
+            "value": 1,
+            "label": "Server 1",
+            "color": "primary"
+          }
         }
       ],
       "duration": 1800
@@ -105,32 +210,77 @@
       "actions": [
         {
           "target": "algo-badge",
-          "action": "set",
-          "params": { "text": "Round Robin — Request 2 → Server 2", "style": "highlight" }
+          "params": {
+            "text": "Round Robin — Request 2 → Server 2",
+            "style": "highlight"
+          }
         },
         {
           "target": "lb-system",
-          "action": "set",
           "params": {
             "components": [
-              { "id": "client", "label": "Client", "icon": "web", "x": 80, "y": 180, "status": "active" },
-              { "id": "lb", "label": "Load Balancer", "icon": "compute", "x": 260, "y": 180, "status": "active" },
-              { "id": "s1", "label": "Server 1", "icon": "server", "x": 460, "y": 80, "status": "normal" },
-              { "id": "s2", "label": "Server 2", "icon": "server", "x": 460, "y": 180, "status": "active" },
-              { "id": "s3", "label": "Server 3", "icon": "server", "x": 460, "y": 280, "status": "normal" }
+              {
+                "id": "client",
+                "label": "Client",
+                "icon": "web",
+                "status": "active"
+              },
+              {
+                "id": "lb",
+                "label": "Load Balancer",
+                "icon": "compute",
+                "status": "active"
+              },
+              {
+                "id": "s1",
+                "label": "Server 1",
+                "icon": "server",
+                "status": "normal"
+              },
+              {
+                "id": "s2",
+                "label": "Server 2",
+                "icon": "server",
+                "status": "active"
+              },
+              {
+                "id": "s3",
+                "label": "Server 3",
+                "icon": "server",
+                "status": "normal"
+              }
             ],
             "connections": [
-              { "from": "client", "to": "lb", "active": true },
-              { "from": "lb", "to": "s1", "active": false },
-              { "from": "lb", "to": "s2", "active": true },
-              { "from": "lb", "to": "s3", "active": false }
+              {
+                "from": "client",
+                "to": "lb",
+                "active": true
+              },
+              {
+                "from": "lb",
+                "to": "s1",
+                "active": false
+              },
+              {
+                "from": "lb",
+                "to": "s2",
+                "active": true
+              },
+              {
+                "from": "lb",
+                "to": "s3",
+                "active": false
+              }
             ]
           }
         },
         {
           "target": "s2-count",
-          "action": "set",
-          "params": { "value": 1, "label": "Server 2", "color": "secondary" }
+          "params": {
+            "value": 1,
+            "label": "Server 2",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 1800
@@ -140,32 +290,77 @@
       "actions": [
         {
           "target": "algo-badge",
-          "action": "set",
-          "params": { "text": "Round Robin — Request 3 → Server 3", "style": "highlight" }
+          "params": {
+            "text": "Round Robin — Request 3 → Server 3",
+            "style": "highlight"
+          }
         },
         {
           "target": "lb-system",
-          "action": "set",
           "params": {
             "components": [
-              { "id": "client", "label": "Client", "icon": "web", "x": 80, "y": 180, "status": "active" },
-              { "id": "lb", "label": "Load Balancer", "icon": "compute", "x": 260, "y": 180, "status": "active" },
-              { "id": "s1", "label": "Server 1", "icon": "server", "x": 460, "y": 80, "status": "normal" },
-              { "id": "s2", "label": "Server 2", "icon": "server", "x": 460, "y": 180, "status": "normal" },
-              { "id": "s3", "label": "Server 3", "icon": "server", "x": 460, "y": 280, "status": "active" }
+              {
+                "id": "client",
+                "label": "Client",
+                "icon": "web",
+                "status": "active"
+              },
+              {
+                "id": "lb",
+                "label": "Load Balancer",
+                "icon": "compute",
+                "status": "active"
+              },
+              {
+                "id": "s1",
+                "label": "Server 1",
+                "icon": "server",
+                "status": "normal"
+              },
+              {
+                "id": "s2",
+                "label": "Server 2",
+                "icon": "server",
+                "status": "normal"
+              },
+              {
+                "id": "s3",
+                "label": "Server 3",
+                "icon": "server",
+                "status": "active"
+              }
             ],
             "connections": [
-              { "from": "client", "to": "lb", "active": true },
-              { "from": "lb", "to": "s1", "active": false },
-              { "from": "lb", "to": "s2", "active": false },
-              { "from": "lb", "to": "s3", "active": true }
+              {
+                "from": "client",
+                "to": "lb",
+                "active": true
+              },
+              {
+                "from": "lb",
+                "to": "s1",
+                "active": false
+              },
+              {
+                "from": "lb",
+                "to": "s2",
+                "active": false
+              },
+              {
+                "from": "lb",
+                "to": "s3",
+                "active": true
+              }
             ]
           }
         },
         {
           "target": "s3-count",
-          "action": "set",
-          "params": { "value": 1, "label": "Server 3", "color": "primary" }
+          "params": {
+            "value": 1,
+            "label": "Server 3",
+            "color": "primary"
+          }
         }
       ],
       "duration": 1800
@@ -175,32 +370,77 @@
       "actions": [
         {
           "target": "algo-badge",
-          "action": "set",
-          "params": { "text": "Round Robin cycles — Request 4 → Server 1 again", "style": "highlight" }
+          "params": {
+            "text": "Round Robin cycles — Request 4 → Server 1 again",
+            "style": "highlight"
+          }
         },
         {
           "target": "lb-system",
-          "action": "set",
           "params": {
             "components": [
-              { "id": "client", "label": "Client", "icon": "web", "x": 80, "y": 180, "status": "active" },
-              { "id": "lb", "label": "Load Balancer", "icon": "compute", "x": 260, "y": 180, "status": "active" },
-              { "id": "s1", "label": "Server 1", "icon": "server", "x": 460, "y": 80, "status": "active" },
-              { "id": "s2", "label": "Server 2", "icon": "server", "x": 460, "y": 180, "status": "normal" },
-              { "id": "s3", "label": "Server 3", "icon": "server", "x": 460, "y": 280, "status": "normal" }
+              {
+                "id": "client",
+                "label": "Client",
+                "icon": "web",
+                "status": "active"
+              },
+              {
+                "id": "lb",
+                "label": "Load Balancer",
+                "icon": "compute",
+                "status": "active"
+              },
+              {
+                "id": "s1",
+                "label": "Server 1",
+                "icon": "server",
+                "status": "active"
+              },
+              {
+                "id": "s2",
+                "label": "Server 2",
+                "icon": "server",
+                "status": "normal"
+              },
+              {
+                "id": "s3",
+                "label": "Server 3",
+                "icon": "server",
+                "status": "normal"
+              }
             ],
             "connections": [
-              { "from": "client", "to": "lb", "active": true },
-              { "from": "lb", "to": "s1", "active": true },
-              { "from": "lb", "to": "s2", "active": false },
-              { "from": "lb", "to": "s3", "active": false }
+              {
+                "from": "client",
+                "to": "lb",
+                "active": true
+              },
+              {
+                "from": "lb",
+                "to": "s1",
+                "active": true
+              },
+              {
+                "from": "lb",
+                "to": "s2",
+                "active": false
+              },
+              {
+                "from": "lb",
+                "to": "s3",
+                "active": false
+              }
             ]
           }
         },
         {
           "target": "s1-count",
-          "action": "set",
-          "params": { "value": 2, "label": "Server 1", "color": "primary" }
+          "params": {
+            "value": 2,
+            "label": "Server 1",
+            "color": "primary"
+          }
         }
       ],
       "duration": 1800
@@ -210,32 +450,77 @@
       "actions": [
         {
           "target": "algo-badge",
-          "action": "set",
-          "params": { "text": "Least Connections — Server 2 has fewest → route there", "style": "highlight" }
+          "params": {
+            "text": "Least Connections — Server 2 has fewest → route there",
+            "style": "highlight"
+          }
         },
         {
           "target": "lb-system",
-          "action": "set",
           "params": {
             "components": [
-              { "id": "client", "label": "Client", "icon": "web", "x": 80, "y": 180, "status": "active" },
-              { "id": "lb", "label": "Load Balancer", "icon": "compute", "x": 260, "y": 180, "status": "active" },
-              { "id": "s1", "label": "Server 1 (2)", "icon": "server", "x": 460, "y": 80, "status": "normal" },
-              { "id": "s2", "label": "Server 2 (1)", "icon": "server", "x": 460, "y": 180, "status": "active" },
-              { "id": "s3", "label": "Server 3 (1)", "icon": "server", "x": 460, "y": 280, "status": "normal" }
+              {
+                "id": "client",
+                "label": "Client",
+                "icon": "web",
+                "status": "active"
+              },
+              {
+                "id": "lb",
+                "label": "Load Balancer",
+                "icon": "compute",
+                "status": "active"
+              },
+              {
+                "id": "s1",
+                "label": "Server 1 (2)",
+                "icon": "server",
+                "status": "normal"
+              },
+              {
+                "id": "s2",
+                "label": "Server 2 (1)",
+                "icon": "server",
+                "status": "active"
+              },
+              {
+                "id": "s3",
+                "label": "Server 3 (1)",
+                "icon": "server",
+                "status": "normal"
+              }
             ],
             "connections": [
-              { "from": "client", "to": "lb", "active": true },
-              { "from": "lb", "to": "s1", "active": false },
-              { "from": "lb", "to": "s2", "active": true },
-              { "from": "lb", "to": "s3", "active": false }
+              {
+                "from": "client",
+                "to": "lb",
+                "active": true
+              },
+              {
+                "from": "lb",
+                "to": "s1",
+                "active": false
+              },
+              {
+                "from": "lb",
+                "to": "s2",
+                "active": true
+              },
+              {
+                "from": "lb",
+                "to": "s3",
+                "active": false
+              }
             ]
           }
         },
         {
           "target": "s2-count",
-          "action": "set",
-          "params": { "value": 2, "label": "Server 2", "color": "secondary" }
+          "params": {
+            "value": 2,
+            "label": "Server 2",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 2000
@@ -245,42 +530,93 @@
       "actions": [
         {
           "target": "algo-badge",
-          "action": "set",
-          "params": { "text": "Server 2 killed — requests re-route to Server 1 and 3", "style": "error" }
+          "params": {
+            "text": "Server 2 killed — requests re-route to Server 1 and 3",
+            "style": "error"
+          }
         },
         {
           "target": "lb-system",
-          "action": "set",
           "params": {
             "components": [
-              { "id": "client", "label": "Client", "icon": "web", "x": 80, "y": 180, "status": "active" },
-              { "id": "lb", "label": "Load Balancer", "icon": "compute", "x": 260, "y": 180, "status": "active" },
-              { "id": "s1", "label": "Server 1", "icon": "server", "x": 460, "y": 80, "status": "active" },
-              { "id": "s2", "label": "Server 2", "icon": "server", "x": 460, "y": 180, "status": "dead" },
-              { "id": "s3", "label": "Server 3", "icon": "server", "x": 460, "y": 280, "status": "active" }
+              {
+                "id": "client",
+                "label": "Client",
+                "icon": "web",
+                "status": "active"
+              },
+              {
+                "id": "lb",
+                "label": "Load Balancer",
+                "icon": "compute",
+                "status": "active"
+              },
+              {
+                "id": "s1",
+                "label": "Server 1",
+                "icon": "server",
+                "status": "active"
+              },
+              {
+                "id": "s2",
+                "label": "Server 2",
+                "icon": "server",
+                "status": "dead"
+              },
+              {
+                "id": "s3",
+                "label": "Server 3",
+                "icon": "server",
+                "status": "active"
+              }
             ],
             "connections": [
-              { "from": "client", "to": "lb", "active": true },
-              { "from": "lb", "to": "s1", "active": true },
-              { "from": "lb", "to": "s2", "active": false },
-              { "from": "lb", "to": "s3", "active": true }
+              {
+                "from": "client",
+                "to": "lb",
+                "active": true
+              },
+              {
+                "from": "lb",
+                "to": "s1",
+                "active": true
+              },
+              {
+                "from": "lb",
+                "to": "s2",
+                "active": false
+              },
+              {
+                "from": "lb",
+                "to": "s3",
+                "active": true
+              }
             ]
           }
         },
         {
           "target": "s1-count",
-          "action": "set",
-          "params": { "value": 4, "label": "Server 1", "color": "primary" }
+          "params": {
+            "value": 4,
+            "label": "Server 1",
+            "color": "primary"
+          }
         },
         {
           "target": "s2-count",
-          "action": "set",
-          "params": { "value": 0, "label": "Server 2 ✗", "color": "error" }
+          "params": {
+            "value": 0,
+            "label": "Server 2 ✗",
+            "color": "error"
+          }
         },
         {
           "target": "s3-count",
-          "action": "set",
-          "params": { "value": 3, "label": "Server 3", "color": "primary" }
+          "params": {
+            "value": 3,
+            "label": "Server 3",
+            "color": "primary"
+          }
         }
       ],
       "duration": 2000
@@ -290,32 +626,77 @@
       "actions": [
         {
           "target": "algo-badge",
-          "action": "set",
-          "params": { "text": "Server 2 back online — load redistributes", "style": "success" }
+          "params": {
+            "text": "Server 2 back online — load redistributes",
+            "style": "success"
+          }
         },
         {
           "target": "lb-system",
-          "action": "set",
           "params": {
             "components": [
-              { "id": "client", "label": "Client", "icon": "web", "x": 80, "y": 180, "status": "normal" },
-              { "id": "lb", "label": "Load Balancer", "icon": "compute", "x": 260, "y": 180, "status": "active" },
-              { "id": "s1", "label": "Server 1", "icon": "server", "x": 460, "y": 80, "status": "normal" },
-              { "id": "s2", "label": "Server 2", "icon": "server", "x": 460, "y": 180, "status": "active" },
-              { "id": "s3", "label": "Server 3", "icon": "server", "x": 460, "y": 280, "status": "normal" }
+              {
+                "id": "client",
+                "label": "Client",
+                "icon": "web",
+                "status": "normal"
+              },
+              {
+                "id": "lb",
+                "label": "Load Balancer",
+                "icon": "compute",
+                "status": "active"
+              },
+              {
+                "id": "s1",
+                "label": "Server 1",
+                "icon": "server",
+                "status": "normal"
+              },
+              {
+                "id": "s2",
+                "label": "Server 2",
+                "icon": "server",
+                "status": "active"
+              },
+              {
+                "id": "s3",
+                "label": "Server 3",
+                "icon": "server",
+                "status": "normal"
+              }
             ],
             "connections": [
-              { "from": "client", "to": "lb", "active": false },
-              { "from": "lb", "to": "s1", "active": false },
-              { "from": "lb", "to": "s2", "active": true },
-              { "from": "lb", "to": "s3", "active": false }
+              {
+                "from": "client",
+                "to": "lb",
+                "active": false
+              },
+              {
+                "from": "lb",
+                "to": "s1",
+                "active": false
+              },
+              {
+                "from": "lb",
+                "to": "s2",
+                "active": true
+              },
+              {
+                "from": "lb",
+                "to": "s3",
+                "active": false
+              }
             ]
           }
         },
         {
           "target": "s2-count",
-          "action": "set",
-          "params": { "value": 2, "label": "Server 2", "color": "secondary" }
+          "params": {
+            "value": 2,
+            "label": "Server 2",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 1800
@@ -325,32 +706,77 @@
       "actions": [
         {
           "target": "algo-badge",
-          "action": "set",
-          "params": { "text": "Weighted: Server 3 is 2× powerful → gets 2× requests", "style": "highlight" }
+          "params": {
+            "text": "Weighted: Server 3 is 2× powerful → gets 2× requests",
+            "style": "highlight"
+          }
         },
         {
           "target": "lb-system",
-          "action": "set",
           "params": {
             "components": [
-              { "id": "client", "label": "Client", "icon": "web", "x": 80, "y": 180, "status": "active" },
-              { "id": "lb", "label": "Load Balancer", "icon": "compute", "x": 260, "y": 180, "status": "active" },
-              { "id": "s1", "label": "Server 1 (w:1)", "icon": "server", "x": 460, "y": 80, "status": "normal" },
-              { "id": "s2", "label": "Server 2 (w:1)", "icon": "server", "x": 460, "y": 180, "status": "normal" },
-              { "id": "s3", "label": "Server 3 (w:2)", "icon": "server", "x": 460, "y": 280, "status": "active" }
+              {
+                "id": "client",
+                "label": "Client",
+                "icon": "web",
+                "status": "active"
+              },
+              {
+                "id": "lb",
+                "label": "Load Balancer",
+                "icon": "compute",
+                "status": "active"
+              },
+              {
+                "id": "s1",
+                "label": "Server 1 (w:1)",
+                "icon": "server",
+                "status": "normal"
+              },
+              {
+                "id": "s2",
+                "label": "Server 2 (w:1)",
+                "icon": "server",
+                "status": "normal"
+              },
+              {
+                "id": "s3",
+                "label": "Server 3 (w:2)",
+                "icon": "server",
+                "status": "active"
+              }
             ],
             "connections": [
-              { "from": "client", "to": "lb", "active": true },
-              { "from": "lb", "to": "s1", "active": false },
-              { "from": "lb", "to": "s2", "active": false },
-              { "from": "lb", "to": "s3", "active": true }
+              {
+                "from": "client",
+                "to": "lb",
+                "active": true
+              },
+              {
+                "from": "lb",
+                "to": "s1",
+                "active": false
+              },
+              {
+                "from": "lb",
+                "to": "s2",
+                "active": false
+              },
+              {
+                "from": "lb",
+                "to": "s3",
+                "active": true
+              }
             ]
           }
         },
         {
           "target": "s3-count",
-          "action": "set",
-          "params": { "value": 6, "label": "Server 3 (2×)", "color": "secondary" }
+          "params": {
+            "value": 6,
+            "label": "Server 3 (2×)",
+            "color": "secondary"
+          }
         }
       ],
       "duration": 2000
@@ -360,55 +786,109 @@
       "actions": [
         {
           "target": "algo-badge",
-          "action": "set",
-          "params": { "text": "Traffic spike! All servers overloaded", "style": "error" }
+          "params": {
+            "text": "Traffic spike! All servers overloaded",
+            "style": "error"
+          }
         },
         {
           "target": "lb-system",
-          "action": "set",
           "params": {
             "components": [
-              { "id": "client", "label": "Client", "icon": "web", "x": 80, "y": 180, "status": "active" },
-              { "id": "lb", "label": "Load Balancer", "icon": "compute", "x": 260, "y": 180, "status": "active" },
-              { "id": "s1", "label": "Server 1", "icon": "server", "x": 460, "y": 80, "status": "overloaded" },
-              { "id": "s2", "label": "Server 2", "icon": "server", "x": 460, "y": 180, "status": "overloaded" },
-              { "id": "s3", "label": "Server 3", "icon": "server", "x": 460, "y": 280, "status": "overloaded" }
+              {
+                "id": "client",
+                "label": "Client",
+                "icon": "web",
+                "status": "active"
+              },
+              {
+                "id": "lb",
+                "label": "Load Balancer",
+                "icon": "compute",
+                "status": "active"
+              },
+              {
+                "id": "s1",
+                "label": "Server 1",
+                "icon": "server",
+                "status": "overloaded"
+              },
+              {
+                "id": "s2",
+                "label": "Server 2",
+                "icon": "server",
+                "status": "overloaded"
+              },
+              {
+                "id": "s3",
+                "label": "Server 3",
+                "icon": "server",
+                "status": "overloaded"
+              }
             ],
             "connections": [
-              { "from": "client", "to": "lb", "active": true },
-              { "from": "lb", "to": "s1", "active": true },
-              { "from": "lb", "to": "s2", "active": true },
-              { "from": "lb", "to": "s3", "active": true }
+              {
+                "from": "client",
+                "to": "lb",
+                "active": true
+              },
+              {
+                "from": "lb",
+                "to": "s1",
+                "active": true
+              },
+              {
+                "from": "lb",
+                "to": "s2",
+                "active": true
+              },
+              {
+                "from": "lb",
+                "to": "s3",
+                "active": true
+              }
             ]
           }
         },
         {
           "target": "s1-count",
-          "action": "set",
-          "params": { "value": 99, "label": "Server 1", "color": "error" }
+          "params": {
+            "value": 99,
+            "label": "Server 1",
+            "color": "error"
+          }
         },
         {
           "target": "s2-count",
-          "action": "set",
-          "params": { "value": 99, "label": "Server 2", "color": "error" }
+          "params": {
+            "value": 99,
+            "label": "Server 2",
+            "color": "error"
+          }
         },
         {
           "target": "s3-count",
-          "action": "set",
-          "params": { "value": 99, "label": "Server 3", "color": "error" }
+          "params": {
+            "value": 99,
+            "label": "Server 3",
+            "color": "error"
+          }
         }
       ],
       "duration": 2000
     }
   ],
-
   "controls": [
     {
       "id": "algorithm",
       "type": "toggle-group",
       "label": "Algorithm",
       "config": {
-        "options": ["Round Robin", "Least Connections", "Weighted"],
+        "options": [
+          "Round Robin",
+          "Least Connections",
+          "Weighted"
+        ],
         "defaultValue": "Round Robin"
       }
     },
@@ -416,28 +896,44 @@
       "id": "rps",
       "type": "slider",
       "label": "Requests / sec",
-      "config": { "min": 1, "max": 20, "step": 1, "defaultValue": 5 }
+      "config": {
+        "min": 1,
+        "max": 20,
+        "step": 1,
+        "defaultValue": 5
+      }
     },
     {
       "id": "btn-kill-s2",
       "type": "button",
       "label": "Kill Server 2",
-      "config": { "variant": "destructive", "defaultValue": null, "goToStep": 6 }
+      "config": {
+        "variant": "destructive",
+        "defaultValue": null,
+        "goToStep": 6
+      }
     },
     {
       "id": "btn-add-server",
       "type": "button",
       "label": "Add Server",
-      "config": { "variant": "primary", "defaultValue": null, "goToStep": 7 }
+      "config": {
+        "variant": "primary",
+        "defaultValue": null,
+        "goToStep": 7
+      }
     },
     {
       "id": "btn-spike",
       "type": "button",
       "label": "Traffic Spike",
-      "config": { "variant": "destructive", "defaultValue": null, "goToStep": 9 }
+      "config": {
+        "variant": "destructive",
+        "defaultValue": null,
+        "goToStep": 9
+      }
     }
   ],
-
   "explanation": [
     {
       "heading": "What is a Load Balancer?",
@@ -472,7 +968,6 @@
       "appearsAtStep": 9
     }
   ],
-
   "popups": [
     {
       "id": "pop-rr-cycle",
@@ -498,7 +993,6 @@
       "style": "insight"
     }
   ],
-
   "challenges": [
     {
       "id": "ch-sticky-session",

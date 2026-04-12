@@ -1,14 +1,9 @@
 /**
- * SystemDiagramViz — Phase 18: Coordinate System Unification
+ * SystemDiagramViz — Phase 19 bridge: grid auto-layout
  *
- * Rewritten from (DOM absolute pos + SVG overlay) dual-coordinate approach to a
- * single SVG viewBox + <foreignObject> pattern.  The minWidth hard-cap and
- * manual pixel-offset computation are removed — the SVG viewBox absorbs
- * all fitting automatically at any container size.
- *
- * Component boxes are <foreignObject> containing full React/Tailwind.
- * Connection beziers are <path> elements in the same coordinate space.
- * Both use component (cx, cy) as center points in SVG-unit space.
+ * x/y removed from scene JSON in Phase 19. Positions are now computed here
+ * using a left-to-right grid arrangement.
+ * Phase 20 will replace this with computeLayout() / dagre from @insyte/scene-engine.
  */
 
 'use client'
@@ -31,23 +26,26 @@ import type { PrimitiveProps } from '.'
 import { computeViewBox } from '../CanvasContext'
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
-//
-// Component x/y in scene JSON are absolute pixel values (legacy format from the
-// old DOM absolute-positioning approach).  We keep them as-is here since the
-// SVG viewBox auto-fits — no scaling factor needed.
-//
-const NODE_W = 120  // component box width  (matches old ~110px + padding)
-const NODE_H = 72   // component box height
+const NODE_W    = 120  // component box width
+const NODE_H    = 72   // component box height
+const COL_GAP   = 80   // horizontal gap between component centres
+const ROW_GAP   = 100  // vertical gap between component centres
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface SystemComponent {
   id: string
   label: string
   icon?: string
-  x: number
-  y: number
+  // x/y no longer in scene JSON — positions computed by bridge layout below
+  x?: number
+  y?: number
   status?: 'normal' | 'active' | 'overloaded' | 'dead'
   sublabel?: string
+}
+
+interface PositionedComponent extends SystemComponent {
+  cx: number  // computed center x
+  cy: number  // computed center y
 }
 
 interface SystemConnection {
@@ -100,10 +98,18 @@ function systemEdgePath(
 export function SystemDiagramViz({ state }: PrimitiveProps) {
   const { components = [], connections = [] } = state as SystemDiagramState
 
-  const getComp = (id: string) => components.find((c) => c.id === id)
+  // TODO(Phase 20): replace with computeLayout() / dagre from @insyte/scene-engine
+  // Bridge: left-to-right grid, ceil(sqrt(n)) columns
+  const cols = Math.max(1, Math.ceil(Math.sqrt(components.length)))
+  const positioned: PositionedComponent[] = components.map((c, i) => ({
+    ...c,
+    cx: (i % cols) * (NODE_W + COL_GAP) + NODE_W / 2 + COL_GAP / 2,
+    cy: Math.floor(i / cols) * (NODE_H + ROW_GAP) + NODE_H / 2 + ROW_GAP / 2,
+  }))
 
-  // viewBox fits all components with padding
-  const centerPoints = components.map((c) => ({ x: c.x, y: c.y }))
+  const getComp = (id: string) => positioned.find((c) => c.id === id)
+
+  const centerPoints = positioned.map((c) => ({ x: c.cx, y: c.cy }))
   const viewBox = computeViewBox(centerPoints, NODE_W, NODE_H, 36)
   const [, , vw] = viewBox.split(' ').map(Number)
 
@@ -140,13 +146,13 @@ export function SystemDiagramViz({ state }: PrimitiveProps) {
           const strokeColor = isActive
             ? 'var(--color-secondary)'
             : 'var(--color-outline-variant)'
-          const midX = (from.x + to.x) / 2
-          const midY = (from.y + to.y) / 2
+          const midX = (from.cx + to.cx) / 2
+          const midY = (from.cy + to.cy) / 2
 
           return (
             <g key={`conn-${idx}`}>
               <motion.path
-                d={systemEdgePath(from, to)}
+                d={systemEdgePath({ x: from.cx, y: from.cy }, { x: to.cx, y: to.cy })}
                 fill="none"
                 stroke={strokeColor}
                 strokeWidth={isActive ? 2.5 : 1.8}
@@ -184,7 +190,7 @@ export function SystemDiagramViz({ state }: PrimitiveProps) {
         })}
 
         {/* ── Components via foreignObject ── */}
-        {components.map((comp) => {
+        {positioned.map((comp) => {
           const isOverloaded = comp.status === 'overloaded'
           const isDead       = comp.status === 'dead'
           const isActive     = comp.status === 'active'
@@ -205,9 +211,8 @@ export function SystemDiagramViz({ state }: PrimitiveProps) {
           return (
             <foreignObject
               key={comp.id}
-              // Center the box on comp.x, comp.y
-              x={comp.x - NODE_W / 2}
-              y={comp.y - NODE_H / 2}
+              x={comp.cx - NODE_W / 2}
+              y={comp.cy - NODE_H / 2}
               width={NODE_W}
               height={NODE_H}
               style={{ overflow: 'visible' }}
