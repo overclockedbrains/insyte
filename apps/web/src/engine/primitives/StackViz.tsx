@@ -18,12 +18,11 @@ interface StackState {
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
-/** Normalise items array: accept both plain strings and {value, highlight} objects */
-function normaliseItem(item: string | StackItem, fallbackHighlightIdx: number, highlightIdx: number | undefined): StackItem {
+function normaliseItem(item: string | StackItem, idx: number, highlightIdx: number | undefined): StackItem {
   if (typeof item === 'string') {
     return {
       value: item,
-      highlight: highlightIdx === fallbackHighlightIdx ? 'active' : undefined,
+      highlight: highlightIdx === idx ? 'active' : undefined,
     }
   }
   return item
@@ -31,47 +30,85 @@ function normaliseItem(item: string | StackItem, fallbackHighlightIdx: number, h
 
 // ─── StackViz ──────────────────────────────────────────────────────────────────
 //
-// Phase 27: stable slot-based keys (index-only) so duplicate values don't
-// cause keying collisions. resolveHighlight() replaces inline hex colors.
+// Renders a vertical call stack — items[0] = bottom, last item = top.
+// flex-col-reverse so pushed frames appear at the top of the container.
 
 export function StackViz({ id, state }: PrimitiveProps) {
   const { items = [], highlight } = state as StackState
 
   return (
-    <div className="flex flex-col items-center justify-end p-4 h-[260px] w-full">
-      <div className="text-xs font-mono font-bold text-primary mb-2 tracking-widest uppercase">
-        TOP
-      </div>
-      <div className="flex flex-col-reverse justify-start border-x-2 border-b-2 border-outline-variant/30 rounded-b-xl w-[200px] relative bg-surface-container-lowest overflow-hidden min-h-[48px]">
-        <AnimatePresence>
-          {items.map((rawItem, idx) => {
-            const item = normaliseItem(rawItem, idx, highlight)
-            const colors = resolveHighlight(item.highlight)
-            const isHighlighted = !!item.highlight && item.highlight !== 'default'
+    <div className="flex flex-col items-center p-4 w-full">
+      <div className="w-full max-w-[400px]">
 
-            return (
+        {/* ── Top-of-stack label ── */}
+        <div className="flex items-center gap-2 mb-1.5 px-1">
+          <div className="flex-1 h-px bg-outline-variant/25" />
+          <span className="text-[10px] font-mono font-bold text-primary/60 tracking-[0.14em] uppercase">
+            top of stack
+          </span>
+          <div className="flex-1 h-px bg-outline-variant/25" />
+        </div>
+
+        {/* ── Frame container — open top, closed bottom & sides ── */}
+        {/* rounded-[8px] explicit to avoid --radius:1rem making corners huge */}
+        <div className="border-x-2 border-b-2 border-outline-variant/40 rounded-b-[8px] bg-surface-container-low overflow-hidden min-h-[52px]">
+          <AnimatePresence>
+            {items.length === 0 && (
               <motion.div
-                key={`${id}-slot-${idx}`}
-                layout
-                initial={{ opacity: 0, scale: 0, y: -40 }}
-                animate={{
-                  opacity: 1,
-                  scale: 1,
-                  y: 0,
-                  backgroundColor: colors.bg,
-                  borderColor: colors.border,
-                  boxShadow: isHighlighted ? `0 0 8px ${colors.border}60` : 'none',
-                }}
-                exit={{ opacity: 0, scale: 0, transition: { duration: 0.2 } }}
-                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                className="w-full h-12 border-b border-outline-variant/20 flex items-center justify-center font-mono text-sm font-bold first:border-b-0"
-                style={{ color: colors.text }}
+                key="empty"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="py-3 text-center text-[11px] font-mono text-outline-variant/40 select-none"
               >
-                <span className="truncate px-2" title={item.value}>{item.value}</span>
+                — empty —
               </motion.div>
-            )
-          })}
-        </AnimatePresence>
+            )}
+
+            {/* flex-col-reverse: items[last] appears at top, items[0] at bottom */}
+            {[...items].reverse().map((rawItem, reversedIdx) => {
+              const originalIdx = items.length - 1 - reversedIdx
+              const item = normaliseItem(rawItem, originalIdx, highlight)
+              const colors = resolveHighlight(item.highlight)
+              const isHighlighted = !!item.highlight && item.highlight !== 'default'
+
+              return (
+                <motion.div
+                  key={`${id}-slot-${originalIdx}`}
+                  layout
+                  initial={{ opacity: 0, y: -16, scaleY: 0.7 }}
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                    scaleY: 1,
+                    backgroundColor: colors.bg,
+                    boxShadow: isHighlighted
+                      ? `inset 3px 0 0 ${colors.border}, 0 1px 0 ${colors.border}20`
+                      : 'inset 3px 0 0 #48474d30',
+                  }}
+                  exit={{ opacity: 0, x: 32, scaleY: 0.5, transition: { duration: 0.15 } }}
+                  transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+                  className="w-full h-10 border-b border-outline-variant/20 last:border-b-0 flex items-center px-3 gap-2 shrink-0"
+                  style={{ color: colors.text }}
+                >
+                  <span className="font-mono text-xs truncate" title={item.value}>
+                    {item.value}
+                  </span>
+                </motion.div>
+              )
+            })}
+          </AnimatePresence>
+        </div>
+
+        {/* ── Call stack footer label ── */}
+        <div className="flex items-center gap-2 mt-1 px-1">
+          <div className="flex-1 h-px bg-outline-variant/15" />
+          <span className="text-[10px] font-mono text-outline-variant/35 tracking-[0.12em] uppercase">
+            call stack
+          </span>
+          <div className="flex-1 h-px bg-outline-variant/15" />
+        </div>
+
       </div>
     </div>
   )

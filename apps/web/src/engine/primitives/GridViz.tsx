@@ -56,9 +56,10 @@ export function GridViz({ id, state }: PrimitiveProps) {
 
   return (
     <div className="relative flex flex-col items-center justify-center p-8 w-full overflow-auto max-h-[600px]">
-      <div className="relative inline-flex flex-col gap-1 p-2 bg-surface-container-lowest rounded-xl border border-outline-variant/20">
+      {/* Container: bg-surface-container-low (#131319) — NOT lowest (#000000 pure black) */}
+      <div className="relative inline-flex flex-col gap-1.5 p-3 bg-surface-container-low rounded-[12px] border border-outline-variant/30">
         {Array.from({ length: rows }).map((_, rIdx) => (
-          <div key={`gr-${rIdx}`} className="flex gap-1">
+          <div key={`gr-${rIdx}`} className="flex gap-1.5">
             {Array.from({ length: cols }).map((_, cIdx) => {
               const cell      = cells[rIdx]?.[cIdx]
               const cellState = (cell?.state ?? 'empty') as CellState
@@ -68,10 +69,11 @@ export function GridViz({ id, state }: PrimitiveProps) {
               const { bg, border, text, shadow } = resolveCellColors(cellState)
 
               return (
-                <div key={`gc-${rIdx}-${cIdx}`} className="relative w-8 h-8">
+                <div key={`gc-${rIdx}-${cIdx}`} className="relative w-9 h-9">
+                  {/* rounded-[4px] — explicit px to avoid --radius: 1rem making cells circular */}
                   <motion.div
                     layout
-                    className="absolute inset-0 rounded flex items-center justify-center font-mono text-xs font-bold border"
+                    className="absolute inset-0 rounded-[4px] flex items-center justify-center font-mono text-xs font-bold border"
                     animate={{
                       backgroundColor: bg,
                       borderColor:     border,
@@ -83,14 +85,17 @@ export function GridViz({ id, state }: PrimitiveProps) {
                     {value !== undefined ? value : ''}
                   </motion.div>
 
-                  {/* Current-cell cursor — FLIP-animated as it moves */}
+                  {/* Cursor: glow derived from this cell's own border color */}
                   {isCurrent && (
                     <motion.div
                       layoutId={`${id}-cursor`}
-                      className="absolute inset-[-4px] rounded-lg border-2 border-primary pointer-events-none z-10"
+                      className="absolute inset-[-4px] rounded-[7px] border-2 pointer-events-none z-10"
                       initial={false}
                       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                      style={{ boxShadow: '0 0 12px color-mix(in srgb, var(--color-primary) 80%, transparent)' }}
+                      style={{
+                        borderColor: border,
+                        boxShadow: `0 0 14px ${border}99`,
+                      }}
                     />
                   )}
                 </div>

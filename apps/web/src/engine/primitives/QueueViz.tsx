@@ -10,7 +10,7 @@ interface QueueItem {
 }
 
 interface QueueState {
-  /** items[0] = front of queue */
+  /** items[0] = front of queue (dequeued first) */
   items: (string | QueueItem)[]
   /** Legacy: index-based highlight for backward compatibility */
   highlight?: number
@@ -30,56 +30,88 @@ function normaliseItem(item: string | QueueItem, idx: number, highlightIdx: numb
 
 // ─── QueueViz ──────────────────────────────────────────────────────────────────
 //
-// Phase 27: stable slot-based keys. resolveHighlight() replaces inline hex colors.
+// Horizontal queue: items[0] = front (left, exits first), last = back (right, enters last).
+// Items enter from the right (enqueue) and exit from the left (dequeue).
 
 export function QueueViz({ id, state }: PrimitiveProps) {
   const { items = [], highlight } = state as QueueState
 
   return (
-    <div className="flex items-center justify-center p-4 w-full min-h-[160px]">
-      <div className="text-xs font-mono font-bold text-secondary mr-4 tracking-widest uppercase flex flex-col items-center">
-        <span>FRONT</span>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="rotate-180 mt-1" stroke="currentColor">
-          <path d="M14 5l7 7m0 0l-7 7m7-7H3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </div>
+    <div className="flex flex-col items-center p-4 w-full">
+      <div className="w-full max-w-[560px]">
 
-      <div className="flex flex-row items-center justify-end border-y-2 border-outline-variant/30 w-full max-w-[600px] h-16 min-w-[64px] bg-surface-container-lowest overflow-hidden shadow-inner">
-        <AnimatePresence>
-          {items.map((rawItem, idx) => {
-            const item = normaliseItem(rawItem, idx, highlight)
-            const colors = resolveHighlight(item.highlight)
-            const isHighlighted = !!item.highlight && item.highlight !== 'default'
+        {/* ── Direction labels ── */}
+        <div className="flex justify-between mb-1.5 px-0.5">
+          <span className="text-[10px] font-mono font-bold text-secondary/65 tracking-[0.12em] uppercase">
+            ← dequeue
+          </span>
+          <span className="text-[10px] font-mono text-outline-variant/35 tracking-[0.12em] uppercase">
+            queue
+          </span>
+          <span className="text-[10px] font-mono font-bold text-primary/55 tracking-[0.12em] uppercase">
+            enqueue →
+          </span>
+        </div>
 
-            return (
+        {/* ── Queue body — full border, explicit rounded-[8px] ── */}
+        <div className="flex flex-row items-stretch border-2 border-outline-variant/40 rounded-[8px] bg-surface-container-low overflow-hidden min-h-[56px]">
+          <AnimatePresence>
+            {items.length === 0 && (
               <motion.div
-                key={`${id}-slot-${idx}`}
-                layout
-                initial={{ opacity: 0, scale: 0.8, x: 40 }}
-                animate={{
-                  opacity: 1,
-                  scale: 1,
-                  x: 0,
-                  backgroundColor: colors.bg,
-                  boxShadow: isHighlighted ? `0 0 8px ${colors.border}60` : 'none',
-                }}
-                exit={{ opacity: 0, x: -40, scale: 0.5, transition: { duration: 0.2 } }}
-                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                className="min-w-[56px] h-full border-l border-outline-variant/20 flex items-center justify-center font-mono text-sm font-bold first:border-l-0 shrink-0"
-                style={{ color: colors.text }}
+                key="empty"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex-1 flex items-center justify-center text-[11px] font-mono text-outline-variant/40 select-none py-3"
               >
-                {item.value}
+                — empty —
               </motion.div>
-            )
-          })}
-        </AnimatePresence>
-      </div>
+            )}
 
-      <div className="text-xs font-mono font-bold text-primary ml-4 tracking-widest uppercase flex flex-col items-center">
-        <span>BACK</span>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="rotate-180 mt-1" stroke="currentColor">
-          <path d="M14 5l7 7m0 0l-7 7m7-7H3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+            {items.map((rawItem, idx) => {
+              const item = normaliseItem(rawItem, idx, highlight)
+              const colors = resolveHighlight(item.highlight)
+              const isHighlighted = !!item.highlight && item.highlight !== 'default'
+
+              return (
+                <motion.div
+                  key={`${id}-slot-${idx}`}
+                  layout
+                  initial={{ opacity: 0, x: 32, scaleX: 0.75 }}
+                  animate={{
+                    opacity: 1,
+                    x: 0,
+                    scaleX: 1,
+                    backgroundColor: colors.bg,
+                    // Top accent stripe mirrors StackViz's left stripe convention
+                    boxShadow: isHighlighted
+                      ? `inset 0 3px 0 ${colors.border}, 0 0 8px ${colors.border}20`
+                      : 'inset 0 3px 0 #48474d30',
+                  }}
+                  exit={{ opacity: 0, x: -32, scaleX: 0.5, transition: { duration: 0.15 } }}
+                  transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+                  className="flex-1 min-w-[90px] border-r border-outline-variant/20 last:border-r-0 flex items-center justify-center px-3 py-2 shrink-0"
+                  style={{ color: colors.text }}
+                >
+                  <span className="font-mono text-xs text-center leading-tight break-words" title={item.value}>
+                    {item.value}
+                  </span>
+                </motion.div>
+              )
+            })}
+          </AnimatePresence>
+        </div>
+
+        {/* ── FRONT / BACK footer ── */}
+        <div className="flex justify-between mt-1 px-0.5">
+          <span className="text-[10px] font-mono text-secondary/40 tracking-[0.1em] uppercase">
+            front
+          </span>
+          <span className="text-[10px] font-mono text-primary/30 tracking-[0.1em] uppercase">
+            back
+          </span>
+        </div>
+
       </div>
     </div>
   )
