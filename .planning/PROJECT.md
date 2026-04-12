@@ -45,13 +45,25 @@ R1 released on 8 April 2026 and R2 is in progress
 | **Phase 13** | ✅ | Polish + Responsive |
 | **Phase 14** | ✅ | Complete Deploy |
 
-### Release 2 (R2)
+### Release 2 (R2) - Architecture Overhaul
 
 | Phase | Status | Description |
 |-------|--------|-------------|
 | **Phase 15** | ✅ | R1 Fixes + UI Tweaks |
 | **Phase 16** | ✅ | Core Correctness + Runtime Hardening |
 | **Phase 17** | ✅ | Local & Custom LLM Support (Ollama + OpenAI-compatible endpoints) |
+| **Phase 18** | 🔲 | Coordinate System Unification (fix dual-coordinate edge/node misalignment) |
+| **Phase 19** | 🔲 | Scene JSON Schema Redesign (LayoutHint, SlotPosition, simplified Action) |
+| **Phase 20** | 🔲 | Layout Engine (SPACING constants, per-primitive sizing, dagre/d3-hierarchy/arithmetic algorithms) |
+| **Phase 21** | 🔲 | Step Engine (applyStepActionsUpTo, computeTopologyAtStep, evaluateCondition, step validation) |
+| **Phase 22** | 🔲 | Scene Graph Architecture (SceneGraph types, SceneGraphDiff, DOMRenderer extracted) |
+| **Phase 23** | 🔲 | Scene Runtime & Caching (unified cache layer: layout + scene graph + ELK; useSceneRuntime hook; playback bridge) |
+| **Phase 24** | 🔲 | ISCL Grammar & Parser (purpose-built DSL, deterministic parser, cross-ref validation) |
+| **Phase 25** | 🔲 | Multi-Stage AI Pipeline (5-stage generator, per-stage retry, partial-success recovery, error events) |
+| **Phase 26** | 🔲 | Progressive Streaming Generation UX (skeleton → primitives → annotations → complete) |
+| **Phase 27** | 🔲 | Visual Quality & Animation System (HIGHLIGHT_COLORS, sub-step choreography, diff-driven animations) |
+| **Phase 28** | 🔲 | ELK Integration & System Diagram Quality (orthogonal routing, Web Worker, progressive enhancement) |
+| **Phase 29** | 🔲 | Zoom/Pan Viewport & Interactive Canvas (CSS transform, pinch-to-zoom, zoom-to-fit) |
 
 ---
 
@@ -386,6 +398,213 @@ _OG Images_
 **Note:** Ollama generation runs browser-direct (not through Vercel) — users on the production site can use their locally-running Ollama instance. Requires `OLLAMA_ORIGINS=https://insyte.amanarya.com` set when starting Ollama. Cloud providers always run server-side for API key protection.
 
 **Plan:** [→ phases/phase-17/PLAN.md](phases/phase-17/PLAN.md)
+
+---
+
+### Phase 18 — Coordinate System Unification
+**Goal:** Fix the root cause of edge/node misalignment — eliminate the dual-coordinate system where DOM nodes use `left: ${x}%` and SVG edges use `x * SCALE_X px`. Establish a single pixel-coordinate system driven by `ResizeObserver`, and unify complex primitives (GraphViz, TreeViz, RecursionTreeViz, SystemDiagramViz) onto a shared SVG viewBox + `<foreignObject>` pattern.
+
+**Estimated effort:** 6–8 days
+
+**Deliverables:**
+- `CanvasContext` with `toPx()` function (percent → absolute pixel via ResizeObserver)
+- `computeViewBox(nodes, padding=40): string` helper
+- GraphViz, TreeViz, RecursionTreeViz, SystemDiagramViz unified onto SVG viewBox + foreignObject
+- StepPopup anchoring via `getBoundingClientRect()` (not percent positioning)
+- Safari foreignObject compatibility verified
+
+**Plan:** [→ phases/phase-18/PLAN.md](phases/phase-18/PLAN.md)
+
+---
+
+### Phase 19 — Scene JSON Schema Redesign
+**Goal:** Replace ad-hoc position coordinates and raw discriminated union actions with a clean, layout-driven schema. AI no longer specifies XY positions — it specifies layout hints. Actions are simplified to `{ target, params }`.
+
+**Estimated effort:** 4–5 days
+
+**Deliverables:**
+- `LayoutHint` union type (9 values: dagre-TB/LR/BT, tree-RT, linear-H/V, grid-2d, hashmap-buckets, radial)
+- `SlotPosition` union type (11 named positions)
+- Simplified `Action: { target: string; params: Record<string, unknown> }`
+- Migration script `scripts/migrate-scene-json.ts` for all 24 existing scene JSON files
+- Parser shim: silently drops `position` if present; Zod schema updated
+
+**Plan:** [→ phases/phase-19/PLAN.md](phases/phase-19/PLAN.md)
+
+---
+
+### Phase 20 — Layout Engine
+**Goal:** Build the deterministic layout engine that positions all visual primitives from layout hints — no more hardcoded coordinates. Includes SPACING/PRIMITIVE_SIZING constants; `computeLayout()` dispatcher; dagre, d3-hierarchy, arithmetic, and radial algorithms. Lives in `packages/scene-engine/src/layout/`.
+
+**Estimated effort:** 6–8 days
+
+**Deliverables:**
+- `SPACING` constants (4/8/16/24/32/48px base-8 system)
+- `PRIMITIVE_SIZING` per visual type (nodeWidth, nodeHeight, ranksep, nodesep, cellSize, etc.)
+- `computeLayout(visual, state, containerW, containerH): LayoutResult` dispatcher
+- Layout algorithms: `applyDagreLayout`, `applyD3HierarchyLayout`, `applyLinearLayout`, `applyStackLayout`, `applyGridLayout`, `applyHashmapLayout`, `applySlotLayout`, `applyRadialLayout`
+- `utils.ts` with `computeLayoutResult`, `emptyLayoutResult`, `computeViewBox` (breaks circular dependency)
+
+**Plan:** [→ phases/phase-20/PLAN.md](phases/phase-20/PLAN.md)
+
+---
+
+### Phase 21 — Step Engine
+**Goal:** Extract step execution into a clean, dedicated layer. Provides the deterministic functions for computing visual state at any step index, evaluating topology, and handling `showWhen` conditions. All downstream consumers (Scene Graph, Scene Runtime, animations) build on this foundation.
+
+**Estimated effort:** 3–4 days
+
+**Deliverables:**
+- `applyStepActionsUpTo(visuals, steps, stepIndex): StateMap` — replays actions 0…N, returns state per visual
+- `computeTopologyAtStep(visuals, steps, stepIndex): Visual[]` — filters visuals by `showWhen` at this step
+- `evaluateCondition(condition, steps, stepIndex): boolean` — full `showWhen` evaluator (currently missing implementation)
+- `validateStepSequence(steps): ValidationResult` — monotonic indices, valid action targets
+- Lives in `packages/scene-engine/src/step-engine/`; exported from `@insyte/scene-engine`
+
+**Plan:** [→ phases/phase-21/PLAN.md](phases/phase-21/PLAN.md)
+
+---
+
+### Phase 22 — Scene Graph Architecture
+**Goal:** Introduce a typed runtime scene graph (`SceneGraph`, `SceneNode`, `SceneEdge`, `SceneGroup`) computed from the Scene JSON at each step using the Step Engine and Layout Engine. Enables `diffSceneGraphs()` for targeted Framer Motion transitions — only changed nodes animate.
+
+**Estimated effort:** 4–5 days
+
+**Deliverables:**
+- `SceneGraph`, `SceneNode`, `SceneEdge`, `SceneGroup`, `Viewport`, `SceneGraphDiff` types
+- `computeSceneGraphAtStep(scene, stepIndex, containerW, containerH): SceneGraph` — calls Step Engine + Layout Engine
+- `diffSceneGraphs(prev, next): SceneGraphDiff` (added/removed/moved/changed nodes + edges)
+- `DOMRenderer.tsx` extracted from CanvasCard, rendering at group level (group.bbox positioning)
+- `SceneRenderer` abstraction interface
+
+**Plan:** [→ phases/phase-22/PLAN.md](phases/phase-22/PLAN.md)
+
+---
+
+### Phase 23 — Scene Runtime & Caching
+**Goal:** Centralize all runtime caching into one coordination layer. Consolidates the layout topology cache (Phase 20), scene-graph LRU (Phase 22), and ELK async upgrade subscription (Phase 28) into a single `useSceneRuntime()` hook. Handles playback-store ↔ scene-graph bridge and pre-computation of adjacent steps.
+
+**Estimated effort:** 3–4 days
+
+**Deliverables:**
+- `useSceneRuntime(scene, stepIndex, dims): SceneRuntimeState` — unified hook consumed by CanvasCard
+- Topology-hash layout cache lifecycle (invalidation on scene change, pre-warm on mount)
+- Scene-graph LRU cache (50-entry max) consolidated here from Phase 22's `useSceneGraph`
+- Pre-computation of steps ±1 from current index for smooth scrubbing performance
+- `subscribeELKReady` integration point (Phase 28 registers here)
+- Playback-store subscription: cache cleared on scene reset, pre-computed on play start
+
+**Plan:** [→ phases/phase-23/PLAN.md](phases/phase-23/PLAN.md)
+
+---
+
+### Phase 24 — ISCL Grammar & Parser
+**Goal:** Implement ISCL (Insyte Scene Language) — a purpose-built text DSL for AI scene generation. Replaces direct Scene JSON output. The deterministic parser validates all cross-references; the grammar physically cannot express XY coordinates, eliminating the AI position hallucination problem.
+
+**Estimated effort:** 5–6 days
+
+**Deliverables:**
+- Complete ISCL grammar (SCENE, TYPE, LAYOUT, VISUAL, STEP, SET, EXPLANATION, POPUP, CHALLENGES, CONTROL blocks)
+- `parseISCL(script: string): ISCLParseResult` parser (~200 lines TypeScript) in `packages/scene-engine`
+- All types: `ISCLParsed`, `ISCLVisualDecl`, `ISCLStep`, `ISCLSet`, `ISCLExplanationEntry`, `ISCLPopup`, `ISCLChallenge`, `ISCLControl`
+- Cross-reference validation: duplicate IDs, non-monotonic steps, out-of-range explanation indices, unknown visual IDs in SET lines
+- Unit tests covering all validation rules
+
+**Plan:** [→ phases/phase-24/PLAN.md](phases/phase-24/PLAN.md)
+
+---
+
+### Phase 25 — Multi-Stage AI Pipeline
+**Goal:** Replace the single monolithic AI call with a robust 5-stage async generator pipeline. Stages 2a+2b run in parallel. Per-stage retry (max 2×) with `ValidationError` carrying stage ID. Stage 2a/2b partial-success recovery — a failed parallel stage does not discard the sibling's output.
+
+**Estimated effort:** 10–12 days
+
+**Deliverables:**
+- `GenerationEvent` discriminated union type (plan/content/annotations/misc/complete/error)
+- `generateScene(topic, mode, modelConfig): AsyncGenerator<GenerationEvent>` orchestrator
+- `retryStage<T>(stageN, fn, maxRetries=2): Promise<T>` — wraps each stage call with retry + backoff
+- `ValidationError` class with `stage: number` field — surfaces as `{ type: 'error', stage, message }` GenerationEvent
+- Stage 2a/2b recovery: if one fails after retries, emit partial scene with placeholder for the failed side; do not abort the other
+- Stage prompt builders: `buildStage1Prompt`, `buildStage2aPrompt`, `buildStage2bPrompt`, `buildStage3Prompt`, `buildStage4Prompt`
+- Per-stage validators: `validateStates()`, `validateSteps()`, `validateAnnotations()`
+- `assembleScene()` — Stage 5 deterministic assembly (ISCL parsed → Scene JSON)
+- `/api/generate/route.ts` rewritten as SSE stream
+
+**Plan:** [→ phases/phase-25/PLAN.md](phases/phase-25/PLAN.md)
+
+---
+
+### Phase 26 — Progressive Streaming Generation UX
+**Goal:** Expose the 5-stage pipeline as first-class UX. User sees a skeleton from Stage 1 (~1.5s), primitive nodes from Stage 2 (~5s), explanation panel from Stage 3 (~7s), and complete scene at ~8–10s. Stage-specific error messages from `ValidationError.stage` field.
+
+**Estimated effort:** 4–5 days
+
+**Deliverables:**
+- `generation-store.ts`: `GenerationPhase` state machine (idle → plan → content → annotations → complete → error)
+- `GenerationSkeleton.tsx`: shimmer placeholder cards × visualCount with stage progress dots
+- `GenerationProgress.tsx`: stage-by-stage dot indicators (green completed, purple pulsing active)
+- `GenerationError.tsx`: stage-specific error messages with retry button; error copy keyed by `stage` field
+- `CanvasCard.tsx` updated to handle all generation phases
+- Play button disabled (spinner) until `phase === 'complete'`
+
+**Plan:** [→ phases/phase-26/PLAN.md](phases/phase-26/PLAN.md)
+
+---
+
+### Phase 27 — Visual Quality & Animation System
+**Goal:** Professional visual quality across all primitives. Semantic color system replaces ad-hoc hex strings. Sub-step choreography (prepare → act → settle) replaces instant state changes. Scene-graph diff (from Phase 22) drives targeted animations — added/removed/moved/changed nodes each get distinct Framer Motion treatments.
+
+**Estimated effort:** 5–6 days
+
+**Prerequisite:** Phase 22 (scene graph diff) + Phase 25 (pipeline producing correct data)
+
+**Deliverables:**
+- `HIGHLIGHT_COLORS` with 12 semantic states (active, insert, remove, hit, miss, mru, lru, current, filled, pivot, error, default)
+- `resolveHighlight(h)` helper for CSS variable → hex mapping
+- Typography CSS classes (`.viz-label-primary`, `.viz-label-secondary`, `.viz-popup-text`, `.viz-stat-value`, `.viz-index-label`)
+- `useAnimateStep(speed)` hook: prepare (100ms) → act (300ms) → settle (200ms) per step
+- Diff-driven animations: added nodes scale in, removed scale out, changed nodes color-transition, added edges draw via `pathLength`
+- `usePlaybackKeyboard()` hook: Space, ArrowLeft/Right, Home, 1/2/3/4 speed keys
+
+**Plan:** [→ phases/phase-27/PLAN.md](phases/phase-27/PLAN.md)
+
+---
+
+### Phase 28 — ELK Integration & System Diagram Quality
+**Goal:** Upgrade system-diagram and complex graph layouts from dagre to ELK (Eclipse Layout Kernel) for orthogonal (Manhattan) edge routing and Lucidchart-quality layouts. Progressive enhancement: dagre returned immediately (sync), ELK upgrades layout when worker resolves (async). 2MB WASM bundle lazy-loaded in Web Worker.
+
+**Estimated effort:** 4–5 days
+
+**Prerequisite:** Phase 20 (layout engine) + Phase 23 (Scene Runtime registers ELK upgrade subscription)
+
+**Deliverables:**
+- `elk-worker.ts` (Web Worker): ELK WASM instance, `self.onmessage` handler
+- `elk-client.ts`: singleton worker + promise bridge
+- `applyELKLayout(input, runELK): Promise<LayoutResult>` with full ELK graph construction
+- `subscribeELKReady` pub/sub in layout index; Scene Runtime (Phase 23) subscribes
+- `orthogonalEdgePath(waypoints)` for SVG path rendering in SystemDiagramViz
+- HLD + LLD scene JSON files updated to `layoutHint: 'elk-layered'`
+
+**Plan:** [→ phases/phase-28/PLAN.md](phases/phase-28/PLAN.md)
+
+---
+
+### Phase 29 — Zoom/Pan Viewport & Interactive Canvas
+**Goal:** Add zoom and pan to the canvas zone, enabling navigation of large graphs, system diagrams, and recursion trees that exceed the visible area. CSS transform viewport approach — zero React re-renders during pan/zoom. Includes zoom-to-fit on scene load and mobile pinch-to-zoom.
+
+**Estimated effort:** 4–5 days
+
+**Prerequisite:** Phase 22 (scene graph provides bounding box for zoom-to-fit)
+
+**Deliverables:**
+- `viewport-store.ts`: `setTranslate()`, `setScale(newScale, originX, originY)` (zoom toward cursor), `zoomToFit(bbox, containerW, containerH)`, `reset()`
+- `ViewportContainer.tsx`: CSS transform applied imperatively via `innerRef.current.style.transform`; `willChange: 'transform'` for GPU compositing layer
+- Pointer events for drag pan; wheel event (`passive: false`) for zoom; touch events for pinch-to-zoom
+- `ViewportControls.tsx`: zoom-in/zoom-out/fit HUD buttons + scale percentage display
+- `useAutoFit()` hook: auto zoom-to-fit when content exceeds 90% of container dimensions
+- Keyboard controls: `+/=` zoom in, `-` zoom out, `0` zoom-to-fit
+
+**Plan:** [→ phases/phase-29/PLAN.md](phases/phase-29/PLAN.md)
 
 ---
 
