@@ -1,10 +1,8 @@
 import { motion } from 'framer-motion'
-import type { PrimitiveProps } from '.';
+import type { PrimitiveProps } from '.'
+import { resolveHighlight } from '../styles/colors'
 
 // ─── State ────────────────────────────────────────────────────────────────────
-// Each cell carries its own highlight state so the parser's 'highlight' action
-// (which mutates cells[index].highlight) works correctly.
-
 interface CellItem {
   value: string | number
   highlight?: string
@@ -16,52 +14,10 @@ interface ArrayState {
   windowHighlight?: { start: number; end: number }
 }
 
-// ─── Highlight → visual token ─────────────────────────────────────────────────
-
-function getCellStyle(highlight?: string): {
-  bg: string
-  shadow: string
-  borderColor: string
-} {
-  switch (highlight) {
-    case 'active':
-    case 'insert':
-      return {
-        bg: 'rgba(183, 159, 255, 0.2)',
-        shadow: '0 0 6px rgba(183, 159, 255, 0.3)',
-        borderColor: 'var(--color-primary)',
-      }
-    case 'found':
-    case 'hit':
-      return {
-        bg: 'rgba(58, 223, 250, 0.2)',
-        shadow: '0 0 6px rgba(58, 223, 250, 0.3)',
-        borderColor: 'var(--color-secondary)',
-      }
-    case 'miss':
-    case 'collision':
-    case 'delete':
-      return {
-        bg: 'rgba(255, 110, 132, 0.2)',
-        shadow: '0 0 6px rgba(255, 110, 132, 0.3)',
-        borderColor: 'var(--color-error)',
-      }
-    case 'compare':
-      return {
-        bg: 'rgba(145, 155, 255, 0.2)',
-        shadow: '0 0 6px rgba(145, 155, 255, 0.3)',
-        borderColor: 'var(--color-tertiary, #cf9fff)',
-      }
-    default:
-      return {
-        bg: '#25252d',
-        shadow: 'none',
-        borderColor: 'var(--color-outline-variant)',
-      }
-  }
-}
-
 // ─── ArrayViz ──────────────────────────────────────────────────────────────────
+//
+// Phase 27: stable slot-based keys so that value changes at a slot animate
+// in-place (no remount). layoutId enables FLIP when the array grows/shrinks.
 
 export function ArrayViz({ id, state }: PrimitiveProps) {
   const { cells = [], pointers = [], windowHighlight } = state as ArrayState
@@ -86,23 +42,50 @@ export function ArrayViz({ id, state }: PrimitiveProps) {
         />
       )}
 
-      {/* Cells */}
+      {/* Cells
+       * Phase 27: key = "${id}-slot-${idx}" (slot identity, not value).
+       * When the value at slot i changes, the div stays mounted and animates
+       * backgroundColor / borderColor in-place. No remount = no flash.
+       * layoutId enables FLIP when the array is resized across steps.
+       */}
       <div className="flex gap-2 relative z-10">
         {cells.map((cell, idx) => {
-          const { bg, shadow, borderColor } = getCellStyle(cell.highlight)
+          const colors = resolveHighlight(cell.highlight)
+          const isHighlighted = !!cell.highlight && cell.highlight !== 'default'
           return (
             <motion.div
-              key={`${id}-cell-${idx}`}
-              className="min-w-[48px] h-12 border flex items-center justify-center font-mono text-sm rounded-md relative"
-              initial={{ backgroundColor: bg, boxShadow: shadow, borderColor }}
-              animate={{ backgroundColor: bg, boxShadow: shadow, borderColor }}
+              key={`${id}-slot-${idx}`}
+              layoutId={`${id}-slot-${idx}`}
+              className="min-w-[48px] h-12 border flex items-center justify-center rounded-md relative"
+              initial={false}
+              animate={{
+                backgroundColor: colors.bg,
+                borderColor: colors.border,
+                boxShadow: isHighlighted ? `0 0 8px ${colors.border}60` : 'none',
+              }}
               transition={{ type: 'spring', stiffness: 300, damping: 25 }}
             >
-              <span className="text-on-surface font-bold">{cell.value}</span>
+              <span className="viz-label-primary" style={{ color: colors.text }}>
+                {cell.value}
+              </span>
             </motion.div>
           )
         })}
       </div>
+
+      {/* Index labels */}
+      {cells.length > 0 && (
+        <div className="flex gap-2 mt-1 relative z-10">
+          {cells.map((_, idx) => (
+            <div
+              key={`${id}-idx-${idx}`}
+              className="min-w-[48px] flex items-center justify-center"
+            >
+              <span className="viz-index-label">{idx}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Pointers (e.g. i, j, lo, hi) */}
       {pointers.length > 0 && (
@@ -132,7 +115,7 @@ export function ArrayViz({ id, state }: PrimitiveProps) {
                 />
               </svg>
               <span
-                className="mt-1 font-mono text-[10px] uppercase font-bold"
+                className="mt-1 viz-index-label uppercase font-bold"
                 style={{ color: ptr.color ?? 'var(--color-primary)' }}
               >
                 {ptr.label}

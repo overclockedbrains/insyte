@@ -1,32 +1,37 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import type { PrimitiveProps } from '.'
+import { resolveHighlight } from '../styles/colors'
 
+// ─── Types ─────────────────────────────────────────────────────────────────────
 interface TextBadgeState {
   text: string
   style?: 'default' | 'highlight' | 'success' | 'error'
 }
 
+/** Map TextBadge style names to semantic highlight tokens */
+function styleToHighlight(style: TextBadgeState['style']): string | undefined {
+  switch (style) {
+    case 'highlight': return 'active'
+    case 'success':   return 'hit'
+    case 'error':     return 'error'
+    default:          return undefined
+  }
+}
+
+// ─── TextBadgeViz ─────────────────────────────────────────────────────────────
+//
+// Phase 27: resolveHighlight() + viz-popup-text typography class.
+
 export function TextBadgeViz({ state }: PrimitiveProps) {
   const { text, style = 'default' } = state as TextBadgeState
 
-  let bgColor = 'rgba(25, 25, 31, 0.6)' // glass-panel base
-  let borderColor = 'rgba(72, 71, 77, 0.8)' // outline-variant
-  const textColor = 'var(--color-on-surface)' // on-surface
-  let shadow = 'none'
+  const highlightToken = styleToHighlight(style)
+  const colors = resolveHighlight(highlightToken)
+  const isHighlighted = !!highlightToken
 
-  if (style === 'highlight') {
-    bgColor = 'rgba(183, 159, 255, 0.1)'
-    borderColor = 'var(--color-primary)'
-    shadow = '0 0 15px rgba(183, 159, 255, 0.2)'
-  } else if (style === 'success') {
-    bgColor = 'rgba(58, 223, 250, 0.1)'
-    borderColor = 'var(--color-secondary)'
-    shadow = '0 0 15px rgba(58, 223, 250, 0.2)'
-  } else if (style === 'error') {
-    bgColor = 'rgba(255, 110, 132, 0.1)'
-    borderColor = 'var(--color-error)'
-    shadow = '0 0 15px rgba(255, 110, 132, 0.2)'
-  }
+  const bgColor     = isHighlighted ? colors.bg : 'rgba(25, 25, 31, 0.6)'
+  const borderColor = isHighlighted ? colors.border : 'rgba(72, 71, 77, 0.8)'
+  const shadow      = isHighlighted ? `0 0 15px ${colors.border}50` : 'none'
 
   return (
     <div className="relative inline-flex z-20">
@@ -42,10 +47,9 @@ export function TextBadgeViz({ state }: PrimitiveProps) {
             backgroundColor: bgColor,
             borderColor,
             boxShadow: shadow,
-            color: textColor,
           }}
         >
-          <span className="font-mono text-sm tracking-wide font-medium">{text}</span>
+          <span className="viz-popup-text tracking-wide">{text}</span>
         </motion.div>
       </AnimatePresence>
     </div>

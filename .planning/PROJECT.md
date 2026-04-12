@@ -60,8 +60,8 @@ R1 released on 8 April 2026 and R2 is in progress
 | **Phase 23** | ✅ | Scene Runtime & Caching (unified cache layer: layout + scene graph + ELK; useSceneRuntime hook; playback bridge) |
 | **Phase 24** | ✅ | ISCL Grammar & Parser (purpose-built DSL, deterministic parser, cross-ref validation) |
 | **Phase 25** | ✅ | Multi-Stage AI Pipeline (5-stage generator, per-stage retry, partial-success recovery, error events) — **Note:** generation quality not yet stable; AI still hallucinating invalid ISCL (bad SLOT/HINT values, multi-line STEPs, init-step SET noise). Soft-drop fixes applied as stop-gap; prompt engineering + validation feedback loop needed before quality is production-ready. |
-| **Phase 26** | ⏸️ | Progressive Streaming Generation UX — **Skipped until Phase 25 generation quality is stable.** Plan documented in `.planning/phases/phase-26/PLAN.md`. |
-| **Phase 27** | 🔲 | Visual Quality & Animation System (HIGHLIGHT_COLORS, sub-step choreography, diff-driven animations) |
+| **Phase 26** | ⏸️ | Progressive Streaming Generation UX — **Skipped until Phase 25 generation quality is stable.** |
+| **Phase 27** | ✅ | Visual Quality & Animation System (HIGHLIGHT_COLORS semantic color system, resolveHighlight across all 12 primitives, stable slot-based keys in ArrayViz/StackViz/QueueViz, DPTableViz cell-remounting fix via useAnimate+data-cell, typography.css hierarchy, useAnimateStep choreography hook, keyboard playback controls) |
 | **Phase 28** | 🔲 | ELK Integration & System Diagram Quality (orthogonal routing, Web Worker, progressive enhancement) |
 | **Phase 29** | 🔲 | Zoom/Pan Viewport & Interactive Canvas (CSS transform, pinch-to-zoom, zoom-to-fit) |
 
@@ -650,7 +650,7 @@ _OG Images_
 | 21 | `url-shortener` | URL Shortener | hld | 10 |
 | 22 | `twitter-feed` | Twitter Feed (Fanout) | hld | 10 |
 | 23 | `consistent-hashing` | Consistent Hashing | hld | 10 |
-| 24 | `chat-system` | Chat System (WebSocket) | hld | 10 |
+| 24 | `chat-system` | Chat System (WebSocket) | hld | 10 |s
 
 ---
 

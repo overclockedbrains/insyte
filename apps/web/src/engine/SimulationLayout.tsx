@@ -10,6 +10,7 @@ import { TextLeftCanvasRight } from './layouts/TextLeftCanvasRight'
 import { CodeLeftCanvasRight } from './layouts/CodeLeftCanvasRight'
 import { CanvasOnly } from './layouts/CanvasOnly'
 import { usePlaybackTick } from './hooks/usePlayback'
+import { usePlaybackKeyboard } from '@/src/hooks/usePlaybackKeyboard'
 
 const ChatCard = dynamic(
   () => import('@/components/chat/ChatCard').then((mod) => mod.ChatCard),
@@ -70,6 +71,7 @@ export function SimulationLayout({
   onRerunWithCustomInput = null,
 }: SimulationLayoutProps) {
   usePlaybackTick()
+  usePlaybackKeyboard()
 
   const toggleExpanded = useBoundStore((s) => s.toggleExpanded)
   const isExpanded = useBoundStore((s) => s.isExpanded)

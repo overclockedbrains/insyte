@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { render } from '@testing-library/react'
-import { ArrayViz } from './ArrayViz'
+import { ArrayViz } from '../ArrayViz'
 
 describe('ArrayViz primitive', () => {
   it('renders standard cells without crashing', () => {

@@ -1,0 +1,47 @@
+/**
+ * Phase 27 — Visualization typography hierarchy.
+ * Import in globals.css after @theme.
+ * All primitives use these classes instead of hardcoded font styles.
+ */
+
+/* Node value labels — value inside array cell, node label in tree/graph */
+.viz-label-primary {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--color-on-surface);
+}
+
+/* Secondary labels — key in hashmap, edge label, index numbers */
+.viz-label-secondary {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--color-on-surface-variant);
+}
+
+/* Step popup text */
+.viz-popup-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--color-on-surface);
+}
+
+/* Counter / stat values — large, prominent */
+.viz-stat-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* Array index labels */
+.viz-index-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--color-on-surface-variant);
+}

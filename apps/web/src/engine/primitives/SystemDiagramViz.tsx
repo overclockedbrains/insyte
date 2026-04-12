@@ -1,5 +1,6 @@
 /**
  * SystemDiagramViz — Phase 20: computeLayout() / dagre LR from @insyte/scene-engine
+ * Phase 27: resolveHighlight() for component status colors. Stable node IDs.
  *
  * Positions are computed by the dagre left-to-right layout engine. The SVG
  * viewBox is set from the bounding box so content is never clipped. Phase 28
@@ -26,9 +27,9 @@ import {
 import type { PrimitiveProps } from '.'
 import { computeLayout } from '@insyte/scene-engine'
 import { useCanvas } from '../CanvasContext'
+import { resolveHighlight } from '../styles/colors'
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
-// NODE_W / NODE_H must match PRIMITIVE_SIZING.systemDiagram in the layout engine
 const NODE_W = 120
 const NODE_H = 48
 
@@ -67,7 +68,18 @@ const IconMap: Record<string, React.ElementType> = {
   zap:      Zap,
 }
 
-// ─── Edge path from dagre waypoints ────────────────────────────────────────────
+/** Map component status → semantic highlight token */
+function statusToHighlight(status: SystemComponent['status']): string | undefined {
+  switch (status) {
+    case 'active':     return 'active'
+    case 'overloaded': return 'error'
+    case 'dead':
+    case 'normal':
+    default:           return undefined
+  }
+}
+
+// ─── Edge path helpers ─────────────────────────────────────────────────────────
 function waypointsToPath(waypoints: { x: number; y: number }[]): string {
   if (waypoints.length < 2) return ''
   const [first, ...rest] = waypoints
@@ -78,9 +90,6 @@ function waypointsToPath(waypoints: { x: number; y: number }[]): string {
   return d.join(' ')
 }
 
-/**
- * S-curve bezier fallback when dagre provides no waypoints.
- */
 function sCurvePath(
   from: { x: number; y: number },
   to: { x: number; y: number },
@@ -106,8 +115,8 @@ export function SystemDiagramViz({ id, state, visual }: PrimitiveProps) {
     [resolvedVisual.id, state, canvasW, canvasH],
   )
 
-  const posById  = new Map(layout.nodes.map(n => [n.id, n]))
-  const rawById  = new Map(components.map(c => [c.id, c]))
+  const posById = new Map(layout.nodes.map(n => [n.id, n]))
+  const rawById = new Map(components.map(c => [c.id, c]))
 
   const idBase = `sys-${components.map(c => c.id).join('').slice(0, 8)}`
 
@@ -186,24 +195,22 @@ export function SystemDiagramViz({ id, state, visual }: PrimitiveProps) {
           )
         })}
 
-        {/* ── Components ── */}
+        {/* ── Components ──
+         * Phase 27: stable key = posNode.id. Status → resolveHighlight colors.
+         */}
         {layout.nodes.map((posNode) => {
           const comp = rawById.get(posNode.id)
           if (!comp) return null
 
+          const isDead = comp.status === 'dead'
           const isOverloaded = comp.status === 'overloaded'
-          const isDead       = comp.status === 'dead'
-          const isActive     = comp.status === 'active'
 
-          let borderColor = 'var(--color-outline-variant)'
-          let shadow      = 'none'
-          if (isActive) {
-            borderColor = 'var(--color-primary)'
-            shadow      = '0 0 16px rgba(183, 159, 255, 0.20)'
-          } else if (isOverloaded) {
-            borderColor = 'var(--color-error)'
-            shadow      = '0 0 12px rgba(255, 110, 132, 0.25)'
-          }
+          const highlightToken = statusToHighlight(comp.status)
+          const colors = resolveHighlight(highlightToken)
+          const isHighlighted = !!highlightToken
+
+          const borderColor = isHighlighted ? colors.border : 'var(--color-outline-variant)'
+          const shadow      = isHighlighted ? `0 0 16px ${colors.border}40` : 'none'
 
           const IconToUse = comp.icon && IconMap[comp.icon] ? IconMap[comp.icon]! : Server
           const Icon = IconToUse as React.ElementType
@@ -240,11 +247,16 @@ export function SystemDiagramViz({ id, state, visual }: PrimitiveProps) {
                     </div>
                   )}
 
-                  <div className={`mb-1.5 ${isActive ? 'text-primary' : isOverloaded ? 'text-error' : 'text-on-surface-variant'}`}>
+                  <div
+                    className="mb-1.5"
+                    style={{ color: isHighlighted ? colors.text : 'var(--color-on-surface-variant)' }}
+                  >
                     <Icon size={22} />
                   </div>
 
-                  <span className={`text-[12px] font-bold tracking-wide text-center leading-tight ${isDead ? 'line-through text-on-surface-variant' : 'text-on-surface'}`}>
+                  <span
+                    className={`text-[12px] font-bold tracking-wide text-center leading-tight ${isDead ? 'line-through text-on-surface-variant' : 'text-on-surface'}`}
+                  >
                     {comp.label}
                   </span>
 
@@ -259,7 +271,7 @@ export function SystemDiagramViz({ id, state, visual }: PrimitiveProps) {
                       <AlertTriangle size={12} />
                     </div>
                   )}
-                  {isActive && (
+                  {comp.status === 'active' && (
                     <div className="absolute -top-2.5 -right-2.5 bg-primary text-on-primary rounded-full p-0.5">
                       <Activity size={12} />
                     </div>

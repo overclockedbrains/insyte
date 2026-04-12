@@ -1,5 +1,6 @@
 /**
  * TreeViz — Phase 20: computeLayout() from @insyte/scene-engine
+ * Phase 27: resolveHighlight() replaces raw color strings for consistent semantics.
  *
  * Positions are computed by the deterministic Reingold-Tilford algorithm
  * (d3-hierarchy) inside the layout engine. The SVG viewBox is set from the
@@ -13,6 +14,7 @@ import { motion } from 'framer-motion'
 import type { PrimitiveProps } from '.'
 import { computeLayout } from '@insyte/scene-engine'
 import { useCanvas } from '../CanvasContext'
+import { resolveHighlight } from '../styles/colors'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface TreeNode {
@@ -80,10 +82,15 @@ export function TreeViz({ id, state, visual }: PrimitiveProps) {
           )
         })}
 
-        {/* ── Nodes ── */}
+        {/* ── Nodes ──
+         * Phase 27: stable key = posNode.id (content ID, not array index).
+         * resolveHighlight maps semantic tokens to consistent colors.
+         */}
         {layout.nodes.map((posNode) => {
           const raw = rawById.get(posNode.id)
           const isRoot = posNode.id === effectiveRootId
+          const colors = resolveHighlight(raw?.highlight)
+          const isHighlighted = !!raw?.highlight && raw.highlight !== 'default'
 
           return (
             <foreignObject
@@ -101,21 +108,13 @@ export function TreeViz({ id, state, visual }: PrimitiveProps) {
                   animate={{
                     opacity: 1,
                     scale: 1,
-                    backgroundColor: raw?.highlight
-                      ? raw.highlight
-                      : 'var(--color-surface-container)',
-                    borderColor: isRoot && !raw?.highlight
+                    backgroundColor: colors.bg,
+                    borderColor: isRoot && !isHighlighted
                       ? 'var(--color-primary)'
-                      : raw?.highlight
-                        ? raw.highlight
-                        : 'var(--color-outline-variant)',
-                    color: raw?.highlight
-                      ? 'var(--color-on-primary-fixed)'
-                      : 'var(--color-on-surface)',
-                    boxShadow: raw?.highlight
-                      ? raw.highlight.startsWith('var')
-                        ? `0 0 16px color-mix(in srgb, ${raw.highlight} 38%, transparent)`
-                        : `0 0 16px ${raw.highlight}60`
+                      : colors.border,
+                    color: colors.text,
+                    boxShadow: isHighlighted
+                      ? `0 0 16px ${colors.border}60`
                       : isRoot
                         ? '0 0 10px color-mix(in srgb, var(--color-primary) 30%, transparent)'
                         : 'none',

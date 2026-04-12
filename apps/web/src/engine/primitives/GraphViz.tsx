@@ -1,5 +1,8 @@
 /**
  * GraphViz — Phase 20: computeLayout() from @insyte/scene-engine
+ * Phase 27: resolveHighlight() for node colors. Accepts both `highlight`
+ * (semantic token) and legacy `color` (raw hex) so existing scenes keep
+ * working. `highlight` takes precedence.
  *
  * Positions are now computed by the deterministic layout engine (dagre for
  * TB/LR/BT, radial arithmetic for radial hint). The SVG viewBox is derived
@@ -13,11 +16,15 @@ import { motion } from 'framer-motion'
 import type { PrimitiveProps } from '.'
 import { computeLayout } from '@insyte/scene-engine'
 import { useCanvas } from '../CanvasContext'
+import { resolveHighlight } from '../styles/colors'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface GraphNode {
   id: string
   label: string
+  /** Phase 27: semantic highlight token ('active', 'insert', 'remove', …) */
+  highlight?: string
+  /** Legacy: raw hex color — kept for backwards compatibility */
   color?: string
 }
 
@@ -30,11 +37,6 @@ interface GraphEdge {
 }
 
 // ─── Edge path from dagre waypoints ────────────────────────────────────────────
-/**
- * Builds an SVG path string from dagre-computed waypoints.
- * For directed edges, the path ends short of the target center so the
- * arrowhead marker sits on the node boundary (not inside it).
- */
 function waypointsToPath(waypoints: { x: number; y: number }[]): string {
   if (waypoints.length < 2) return ''
   const [first, ...rest] = waypoints
@@ -45,9 +47,6 @@ function waypointsToPath(waypoints: { x: number; y: number }[]): string {
   return d.join(' ')
 }
 
-/**
- * Straight line between two node centers (fallback when dagre provides no waypoints).
- */
 function straightEdgePath(
   from: { x: number; y: number },
   to: { x: number; y: number },
@@ -71,7 +70,6 @@ export function GraphViz({ id, state, visual }: PrimitiveProps) {
   const { width: canvasW, height: canvasH } = useCanvas()
   const { nodes = [], edges = [] } = state as { nodes: GraphNode[]; edges: GraphEdge[] }
 
-  // Construct a synthetic Visual if not provided (e.g., in Storybook / unit tests)
   const resolvedVisual = visual ?? { id, type: 'graph' as const, initialState: {} }
 
   const layout = useMemo(
@@ -85,9 +83,8 @@ export function GraphViz({ id, state, visual }: PrimitiveProps) {
 
   const [nodeW, nodeH] = [layout.nodes[0]?.width ?? 56, layout.nodes[0]?.height ?? 56]
 
-  // Stable, unique marker IDs scoped to this graph instance
-  const markerKey  = nodes.map(n => n.id).sort().join('-').slice(0, 20)
-  const markerId   = `graph-arrow-${markerKey}`
+  const markerKey   = nodes.map(n => n.id).sort().join('-').slice(0, 20)
+  const markerId    = `graph-arrow-${markerKey}`
   const markerDimId = `${markerId}-dim`
 
   const [,, vw] = layout.viewBox.split(' ').map(Number)
@@ -151,9 +148,38 @@ export function GraphViz({ id, state, visual }: PrimitiveProps) {
           )
         })}
 
-        {/* ── Nodes ── */}
+        {/* ── Nodes ──
+         * Phase 27: `highlight` (semantic token) takes precedence over legacy `color`.
+         * Stable key = posNode.id so the node persists across steps.
+         */}
         {layout.nodes.map((posNode) => {
           const raw = rawById.get(posNode.id)
+
+          // Resolve colors: prefer semantic highlight, fall back to legacy raw color
+          let bgColor: string
+          let borderColor: string
+          let textColor: string
+          let shadow: string
+
+          if (raw?.highlight) {
+            const hColors = resolveHighlight(raw.highlight)
+            bgColor     = hColors.bg
+            borderColor = hColors.border
+            textColor   = hColors.text
+            shadow      = `0 0 16px ${hColors.border}60`
+          } else if (raw?.color) {
+            // Legacy raw-color fallback
+            bgColor     = raw.color
+            borderColor = raw.color
+            textColor   = '#000000'
+            shadow      = `0 0 16px ${raw.color}60`
+          } else {
+            bgColor     = 'var(--color-surface-container)'
+            borderColor = 'var(--color-outline-variant)'
+            textColor   = 'var(--color-on-surface)'
+            shadow      = 'none'
+          }
+
           return (
             <foreignObject
               key={posNode.id}
@@ -171,10 +197,10 @@ export function GraphViz({ id, state, visual }: PrimitiveProps) {
                   animate={{
                     opacity: 1,
                     scale: 1,
-                    backgroundColor: raw?.color ?? 'var(--color-surface-container)',
-                    borderColor: raw?.color ?? 'var(--color-outline-variant)',
-                    color: raw?.color ? '#000000' : 'var(--color-on-surface)',
-                    boxShadow: raw?.color ? `0 0 16px ${raw.color}60` : 'none',
+                    backgroundColor: bgColor,
+                    borderColor,
+                    color: textColor,
+                    boxShadow: shadow,
                   }}
                   transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                 >

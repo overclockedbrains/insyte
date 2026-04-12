@@ -104,7 +104,7 @@ export function useStreamScene(): UseStreamSceneResult {
   const streamedFields = useBoundStore((s) => s.streamedFields)
 
   // Stable ref so retry callbacks always call the latest runStream
-  const runStreamRef = useRef<(topic: string, slug?: string) => void>(() => {})
+  const runStreamRef = useRef<(topic: string, slug?: string) => void>(() => { })
 
   // ─── handleScene ─────────────────────────────────────────────────────────
 
@@ -282,7 +282,7 @@ export function useStreamScene(): UseStreamSceneResult {
         }
       })()
     },
-    [setStreaming, setScene, clearScene, handleScene],
+    [setStreaming, clearScene, handleScene],
   )
 
   // Keep ref up to date for retry callbacks

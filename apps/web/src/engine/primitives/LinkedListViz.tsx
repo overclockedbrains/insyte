@@ -1,26 +1,36 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import type { PrimitiveProps } from '.'
+import { resolveHighlight } from '../styles/colors'
+
+// ─── Types ─────────────────────────────────────────────────────────────────────
+interface LinkedListNode {
+  id: string
+  value: string
+  next: string | null
+  /** Phase 27: semantic highlight token ('active', 'insert', 'remove', …) */
+  highlight?: string
+}
 
 interface LinkedListState {
-  nodes: {
-    id: string
-    value: string
-    next: string | null
-  }[]
+  nodes: LinkedListNode[]
   headId: string | null
 }
+
+// ─── LinkedListViz ─────────────────────────────────────────────────────────────
+//
+// Phase 27: resolveHighlight() for node color states. Stable key = node.id.
 
 export function LinkedListViz({ state }: PrimitiveProps) {
   const { nodes = [], headId } = state as LinkedListState
 
-  // Simple horizontal layout: just order nodes based on standard array order provided by backend
-  // The backend's parser will output nodes array in insertion/visual order.
   return (
     <div className="flex items-center gap-8 p-8 relative min-h-[120px]">
       <AnimatePresence mode="popLayout">
         {nodes.map((node) => {
           const isHead = node.id === headId
           const hasNext = !!node.next
+          const colors = resolveHighlight(node.highlight)
+          const isHighlighted = !!node.highlight && node.highlight !== 'default'
 
           return (
             <motion.div
@@ -42,15 +52,27 @@ export function LinkedListViz({ state }: PrimitiveProps) {
                     HEAD
                   </motion.span>
                 )}
+
                 {/* Node Box */}
-                <div className="flex border-2 border-outline-variant rounded-xl overflow-hidden bg-surface-container shadow-[0_0_15px_rgba(0,0,0,0.5)]">
-                  <div className="px-4 py-3 min-w-[48px] text-center font-mono text-on-surface font-bold border-r border-outline-variant/30">
+                <motion.div
+                  className="flex border-2 rounded-xl overflow-hidden shadow-[0_0_15px_rgba(0,0,0,0.5)]"
+                  animate={{
+                    borderColor: isHighlighted ? colors.border : 'var(--color-outline-variant)',
+                    backgroundColor: isHighlighted ? colors.bg : 'var(--color-surface-container)',
+                    boxShadow: isHighlighted ? `0 0 12px ${colors.border}50` : '0 0 15px rgba(0,0,0,0.5)',
+                  }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                >
+                  <div
+                    className="px-4 py-3 min-w-[48px] text-center font-mono font-bold border-r border-outline-variant/30"
+                    style={{ color: isHighlighted ? colors.text : 'var(--color-on-surface)' }}
+                  >
                     {node.value}
                   </div>
                   <div className="px-2 py-3 bg-surface-container-high flex items-center justify-center">
                     <div className="w-2 h-2 rounded-full bg-outline-variant/50" />
                   </div>
-                </div>
+                </motion.div>
               </div>
 
               {/* Arrow Connection */}

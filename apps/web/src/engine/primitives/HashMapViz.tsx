@@ -1,14 +1,24 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import type { PrimitiveProps } from '.'
+import { resolveHighlight } from '../styles/colors'
+
+// ─── Types ─────────────────────────────────────────────────────────────────────
+interface HashMapEntry {
+  key: string
+  value: string
+  /** Phase 27: semantic token ('insert', 'hit', 'miss', 'delete', 'remove', …) */
+  highlight?: string
+}
 
 interface HashMapState {
-  entries: {
-    key: string
-    value: string
-    highlight?: 'insert' | 'hit' | 'miss' | 'delete'
-  }[]
+  entries: HashMapEntry[]
   label?: string
 }
+
+// ─── HashMapViz ────────────────────────────────────────────────────────────────
+//
+// Phase 27: resolveHighlight() replaces per-entry inline hex color strings.
+// Stable key = entry.key so rows survive value updates without remounting.
 
 export function HashMapViz({ id, state }: PrimitiveProps) {
   const { entries = [] } = state as HashMapState
@@ -37,22 +47,17 @@ export function HashMapViz({ id, state }: PrimitiveProps) {
               </motion.div>
             ) : (
               entries.map((entry, i) => {
-                let bgColor = i % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0)'
-                let borderLeft = '3px solid transparent'
+                const colors = resolveHighlight(entry.highlight)
+                const isHighlighted = !!entry.highlight && entry.highlight !== 'default'
+                const isDelete = entry.highlight === 'delete' || entry.highlight === 'remove'
 
-                if (entry.highlight === 'hit') {
-                  bgColor = 'rgba(58, 223, 250, 0.08)'
-                  borderLeft = '3px solid rgba(58, 223, 250, 0.6)'
-                } else if (entry.highlight === 'miss') {
-                  bgColor = 'rgba(255, 110, 132, 0.08)'
-                  borderLeft = '3px solid rgba(255, 110, 132, 0.6)'
-                } else if (entry.highlight === 'insert') {
-                  bgColor = 'rgba(183, 159, 255, 0.1)'
-                  borderLeft = '3px solid rgba(183, 159, 255, 0.6)'
-                } else if (entry.highlight === 'delete') {
-                  bgColor = 'rgba(255, 110, 132, 0.06)'
-                  borderLeft = '3px solid rgba(255, 110, 132, 0.4)'
-                }
+                const bgColor = isHighlighted
+                  ? `${colors.bg}`
+                  : i % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0)'
+
+                const borderLeft = isHighlighted
+                  ? `3px solid ${colors.border}`
+                  : '3px solid transparent'
 
                 return (
                   <motion.div
@@ -60,7 +65,7 @@ export function HashMapViz({ id, state }: PrimitiveProps) {
                     layout
                     initial={{ opacity: 0, x: -8 }}
                     animate={{
-                      opacity: entry.highlight === 'delete' ? 0.45 : 1,
+                      opacity: isDelete ? 0.45 : 1,
                       x: 0,
                       backgroundColor: bgColor,
                     }}
@@ -69,10 +74,16 @@ export function HashMapViz({ id, state }: PrimitiveProps) {
                     className="flex w-full border-b border-outline-variant/10 last:border-b-0 font-mono text-sm"
                     style={{ borderLeft }}
                   >
-                    <div className="flex-1 px-3 py-2 border-r border-outline-variant/10 text-on-surface/80 text-[13px]">
+                    <div
+                      className="flex-1 px-3 py-2 border-r border-outline-variant/10 text-[13px]"
+                      style={{ color: isHighlighted ? colors.text : 'var(--color-on-surface)' }}
+                    >
                       {entry.key}
                     </div>
-                    <div className={`flex-1 px-3 py-2 text-[13px] truncate ${entry.highlight === 'delete' ? 'text-on-surface/40 line-through' : 'text-on-surface'}`}>
+                    <div
+                      className={`flex-1 px-3 py-2 text-[13px] truncate ${isDelete ? 'line-through' : ''}`}
+                      style={{ color: isDelete ? 'var(--color-on-surface-variant)' : 'var(--color-on-surface)' }}
+                    >
                       {entry.value}
                     </div>
                   </motion.div>

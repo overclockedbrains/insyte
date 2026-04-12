@@ -1,9 +1,9 @@
 /**
  * RecursionTreeViz — Phase 20: computeLayout() from @insyte/scene-engine
+ * Phase 27: resolveHighlight() for status-based colors. Stable node IDs.
  *
  * Positions are computed by the deterministic Reingold-Tilford algorithm
- * (d3-hierarchy) inside the layout engine. This replaces the custom
- * subtree-width centering algorithm that was the Phase 19 bridge.
+ * (d3-hierarchy) inside the layout engine.
  */
 
 'use client'
@@ -13,6 +13,7 @@ import { motion } from 'framer-motion'
 import type { PrimitiveProps } from '.'
 import { computeLayout } from '@insyte/scene-engine'
 import { useCanvas } from '../CanvasContext'
+import { resolveHighlight } from '../styles/colors'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface RecursionNode {
@@ -26,6 +27,17 @@ interface RecursionNode {
 interface RecursionTreeState {
   nodes: RecursionNode[]
   rootId: string
+}
+
+/** Map recursion status → semantic highlight token */
+function statusToHighlight(status: RecursionNode['status']): string | undefined {
+  switch (status) {
+    case 'computing': return 'active'
+    case 'complete':  return 'hit'
+    case 'memoized':  return 'mru'
+    case 'pending':
+    default:          return undefined
+  }
 }
 
 // ─── Component ─────────────────────────────────────────────────────────────────
@@ -89,30 +101,18 @@ export function RecursionTreeViz({ id, state, visual }: PrimitiveProps) {
           )
         })}
 
-        {/* ── Nodes ── */}
+        {/* ── Nodes ──
+         * Phase 27: status → semantic highlight token → resolveHighlight colors.
+         * Stable key = posNode.id.
+         */}
         {layout.nodes.map((posNode) => {
           const raw = rawById.get(posNode.id)
-          const isComputing = raw?.status === 'computing'
-          const isMemoized  = raw?.status === 'memoized'
-          const isComplete  = raw?.status === 'complete'
-          const isRoot      = posNode.id === effectiveRootId
+          const isMemoized = raw?.status === 'memoized'
+          const isRoot     = posNode.id === effectiveRootId
 
-          let bgColor     = 'var(--color-surface-container)'
-          let borderColor = 'var(--color-outline-variant)'
-          let textColor   = 'var(--color-on-surface)'
-          let shadow      = 'none'
-
-          if (isComputing) {
-            bgColor     = 'rgba(183, 159, 255, 0.2)'
-            borderColor = 'var(--color-primary)'
-            shadow      = '0 0 16px rgba(183, 159, 255, 0.4)'
-          } else if (isComplete) {
-            bgColor     = 'rgba(58, 223, 250, 0.15)'
-            borderColor = 'var(--color-secondary)'
-          } else if (isMemoized) {
-            bgColor   = 'var(--color-surface-container-highest)'
-            textColor = 'var(--color-on-surface-variant)'
-          }
+          const highlightToken = statusToHighlight(raw?.status ?? 'pending')
+          const colors = resolveHighlight(highlightToken)
+          const isHighlighted = !!highlightToken
 
           return (
             <foreignObject
@@ -130,13 +130,18 @@ export function RecursionTreeViz({ id, state, visual }: PrimitiveProps) {
                   </span>
                 )}
                 {isMemoized && (
-                  <span style={{ position: 'absolute', top: -20, fontSize: 9, fontFamily: 'monospace', fontWeight: 700, textTransform: 'uppercase', color: 'var(--color-tertiary)', background: 'var(--color-surface-container-highest)', borderRadius: 4, padding: '0 3px' }}>
+                  <span style={{ position: 'absolute', top: -20, fontSize: 9, fontFamily: 'monospace', fontWeight: 700, textTransform: 'uppercase', color: colors.text, background: 'var(--color-surface-container-highest)', borderRadius: 4, padding: '0 3px' }}>
                     Cached
                   </span>
                 )}
                 <motion.div
                   style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: 12, border: '2px solid', padding: '2px 0', textDecoration: isMemoized ? 'line-through' : 'none' }}
-                  animate={{ backgroundColor: bgColor, borderColor, color: textColor, boxShadow: shadow }}
+                  animate={{
+                    backgroundColor: colors.bg,
+                    borderColor: colors.border,
+                    color: colors.text,
+                    boxShadow: isHighlighted ? `0 0 16px ${colors.border}60` : 'none',
+                  }}
                   transition={{ duration: 0.2 }}
                 >
                   <div style={{ fontSize: 12, fontFamily: 'monospace', fontWeight: 700, lineHeight: 1.2 }}>

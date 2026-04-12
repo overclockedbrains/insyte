@@ -1,10 +1,38 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import type { PrimitiveProps } from '.'
+import { resolveHighlight } from '../styles/colors'
+
+// ─── Types ─────────────────────────────────────────────────────────────────────
+interface StackItem {
+  value: string
+  /** Phase 27: semantic highlight token ('active', 'insert', 'remove', …) */
+  highlight?: string
+}
 
 interface StackState {
-  items: string[]
-  highlight?: number // index to highlight
+  /** items[0] = bottom of stack, items[items.length-1] = top */
+  items: (string | StackItem)[]
+  /** Legacy: index-based highlight for backward compatibility */
+  highlight?: number
 }
+
+// ─── Helpers ───────────────────────────────────────────────────────────────────
+
+/** Normalise items array: accept both plain strings and {value, highlight} objects */
+function normaliseItem(item: string | StackItem, fallbackHighlightIdx: number, highlightIdx: number | undefined): StackItem {
+  if (typeof item === 'string') {
+    return {
+      value: item,
+      highlight: highlightIdx === fallbackHighlightIdx ? 'active' : undefined,
+    }
+  }
+  return item
+}
+
+// ─── StackViz ──────────────────────────────────────────────────────────────────
+//
+// Phase 27: stable slot-based keys (index-only) so duplicate values don't
+// cause keying collisions. resolveHighlight() replaces inline hex colors.
 
 export function StackViz({ id, state }: PrimitiveProps) {
   const { items = [], highlight } = state as StackState
@@ -16,26 +44,30 @@ export function StackViz({ id, state }: PrimitiveProps) {
       </div>
       <div className="flex flex-col-reverse justify-start border-x-2 border-b-2 border-outline-variant/30 rounded-b-xl w-[200px] relative bg-surface-container-lowest overflow-hidden min-h-[48px]">
         <AnimatePresence>
-          {items.map((item, idx) => {
-            const isHighlight = highlight === idx
+          {items.map((rawItem, idx) => {
+            const item = normaliseItem(rawItem, idx, highlight)
+            const colors = resolveHighlight(item.highlight)
+            const isHighlighted = !!item.highlight && item.highlight !== 'default'
+
             return (
               <motion.div
-                key={`${id}-item-${item}-${idx}`} // Use idx to differentiate same items
+                key={`${id}-slot-${idx}`}
                 layout
                 initial={{ opacity: 0, scale: 0, y: -40 }}
                 animate={{
                   opacity: 1,
                   scale: 1,
                   y: 0,
-                  backgroundColor: isHighlight ? 'rgba(58, 223, 250, 0.2)' : '#19191f',
-                  borderColor: isHighlight ? '#3adffa' : '#48474d',
-                  boxShadow: isHighlight ? '0 0 8px rgba(58, 223, 250, 0.35)' : 'none',
+                  backgroundColor: colors.bg,
+                  borderColor: colors.border,
+                  boxShadow: isHighlighted ? `0 0 8px ${colors.border}60` : 'none',
                 }}
                 exit={{ opacity: 0, scale: 0, transition: { duration: 0.2 } }}
                 transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                className="w-full h-12 border-b border-outline-variant/20 flex items-center justify-center font-mono text-sm font-bold text-on-surface first:border-b-0"
+                className="w-full h-12 border-b border-outline-variant/20 flex items-center justify-center font-mono text-sm font-bold first:border-b-0"
+                style={{ color: colors.text }}
               >
-                <span className="truncate px-2" title={item}>{item}</span>
+                <span className="truncate px-2" title={item.value}>{item.value}</span>
               </motion.div>
             )
           })}

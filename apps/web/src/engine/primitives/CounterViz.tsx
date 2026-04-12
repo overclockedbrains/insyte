@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import type { PrimitiveProps } from '.'
 
+// ─── Types ─────────────────────────────────────────────────────────────────────
 interface CounterState {
   value: number
   label: string
@@ -8,10 +9,14 @@ interface CounterState {
 }
 
 const COLOR_MAP = {
-  primary: '#b79fff',
-  secondary: '#3adffa',
-  error: '#ff6e84',
+  primary:   'var(--color-primary)',
+  secondary: 'var(--color-secondary)',
+  error:     'var(--color-error)',
 }
+
+// ─── CounterViz ────────────────────────────────────────────────────────────────
+//
+// Phase 27: typography classes applied.
 
 export function CounterViz({ state }: PrimitiveProps) {
   const { value, label, color = 'primary' } = state as CounterState
@@ -19,10 +24,12 @@ export function CounterViz({ state }: PrimitiveProps) {
 
   return (
     <div className="flex items-center gap-1.5">
-      <span className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant/55">
+      {/* Label — secondary typography */}
+      <span className="viz-label-secondary uppercase tracking-wider opacity-55">
         {label}
       </span>
-      <div className="relative h-4 overflow-hidden inline-flex justify-center items-center min-w-[20px]">
+      {/* Value — stat typography with tick-up animation */}
+      <div className="relative h-5 overflow-hidden inline-flex justify-center items-center min-w-[20px]">
         <AnimatePresence mode="popLayout">
           <motion.span
             key={value}
@@ -30,8 +37,8 @@ export function CounterViz({ state }: PrimitiveProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-            className="text-[13px] font-mono font-semibold"
-            style={{ color: numColor }}
+            className="viz-stat-value"
+            style={{ color: numColor, fontSize: 13 }}
           >
             {value}
           </motion.span>
