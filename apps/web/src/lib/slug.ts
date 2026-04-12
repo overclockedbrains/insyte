@@ -19,23 +19,23 @@ export function generateSlug(topic: string): string {
     .replace(/^-|-$/g, '')          // trim leading/trailing dashes
     .slice(0, 60)                   // max 60 chars before suffix
 
-  return `${base}-${nanoid(6)}`
+  return `${base}--${nanoid(6)}`
 }
 
 // ─── Slug classification ──────────────────────────────────────────────────────
 
 /**
  * Returns true if the slug appears to be AI-generated (has a nanoid suffix).
- * AI-generated: "how-does-a-b-tree-work-x7k2p1"
+ * AI-generated: "how-does-a-b-tree-work--x7k2p1"
  * Pre-built: "hash-tables", "dns-resolution"
  */
 export function isGeneratedSlug(slug: string): boolean {
-  return /^.+-[a-zA-Z0-9]{6}$/.test(slug)
+  return /^.+--[a-zA-Z0-9_-]{6}$/.test(slug)
 }
 
 /**
  * Extracts a human-readable topic from a generated slug.
- * "how-does-a-b-tree-work-x7k2p1" → "How does a b tree work"
+ * "how-does-a-b-tree-work--x7k2p1" → "How does a b tree work"
  * Falls back to the full slug if it doesn't look AI-generated.
  */
 export function extractTopicFromSlug(slug: string): string {
@@ -43,7 +43,7 @@ export function extractTopicFromSlug(slug: string): string {
 
   // Strip the 6-char nanoid suffix if present
   if (isGeneratedSlug(slug)) {
-    base = slug.slice(0, slug.length - 7) // remove trailing "-xxxxxx"
+    base = slug.slice(0, slug.length - 8) // remove trailing "--xxxxxx"
   }
 
   // Dashes → spaces, capitalise first letter

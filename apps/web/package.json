@@ -10,6 +10,7 @@
     "lint": "eslint",
     "supabase:types": "supabase gen types typescript --project-id %SUPABASE_PROJECT_ID% --schema public > lib/database.types.ts",
     "type-check": "tsc --noEmit",
+    "test": "vitest run",
     "validate-scenes": "tsx scripts/validate-scenes.ts",
     "seed": "dotenv -e .env.local -- tsx scripts/seed-topic-index.ts",
     "seed-scenes": "dotenv -e .env.local -- tsx scripts/seed-scenes.ts"
@@ -49,15 +50,21 @@
   "devDependencies": {
     "@insyte/tsconfig": "workspace:*",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.0.1",
     "dotenv": "^16.6.1",
     "dotenv-cli": "^8.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.2",
+    "jsdom": "^29.0.2",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.4"
   }
 }

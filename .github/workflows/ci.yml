@@ -2,9 +2,13 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - master
   pull_request:
-    branches: [main]
+    branches:
+      - main
+      - master
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -12,7 +16,7 @@ concurrency:
 
 jobs:
   ci:
-    name: Type-check, Lint & Build
+    name: Type-check, Lint Build & Test
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -34,11 +38,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Type-check
-        run: pnpm type-check
-
-      - name: Lint
+      - name: Run linting
         run: pnpm lint
 
-      - name: Build
+      - name: Verify build
         run: pnpm build
+
+      - name: Run type checking
+        run: pnpm type-check
+
+      - name: Run unit tests
+        run: pnpm test
+
