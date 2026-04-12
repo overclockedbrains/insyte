@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useCallback, useState } from 'react'
+import { useEffect, useCallback, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Scene } from '@insyte/scene-engine'
@@ -14,6 +14,7 @@ import { computeVisualStateAtStep } from '@insyte/scene-engine'
 import { usePlayback } from '../hooks/usePlayback'
 import { useControlValues, type ControlValue } from '../hooks/useControls'
 import ReactMarkdown from 'react-markdown'
+import { CanvasContext } from '../CanvasContext'
 
 // ─── CanvasCard ────────────────────────────────────────────────────────────────
 // The dark card container that wraps the simulation canvas visuals.
@@ -37,6 +38,40 @@ const DEV_BORDERS = process.env.NEXT_PUBLIC_DEV_BORDERS === 'true'
 
 function CanvasVisualization({ scene, controlValues }: { scene: Scene; controlValues: Record<string, ControlValue> }) {
   const { currentStep } = usePlayback()
+
+  // ── Phase 18: ResizeObserver for unified coordinate system ──────────────────
+  const canvasZoneRef = useRef<HTMLDivElement>(null)
+  const [dims, setDims] = useState({ w: 0, h: 0 })
+
+  useEffect(() => {
+    const el = canvasZoneRef.current
+    if (!el) return
+    // Initial measurement
+    setDims({ w: el.clientWidth, h: el.clientHeight })
+    const ro = new ResizeObserver((entries) => {
+      const entry = entries[0]
+      if (!entry) return
+      setDims({
+        w: entry.contentRect.width,
+        h: entry.contentRect.height,
+      })
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  // toPx converts percentage-based (0–100) scene positions to container pixels.
+  // Memoised on dims so primitives only re-render when the container actually resizes.
+  const toPx = useCallback(
+    (pos: { x: number; y: number }) => ({
+      x: (pos.x / 100) * (dims.w || 800),
+      y: (pos.y / 100) * (dims.h || 600),
+    }),
+    [dims],
+  )
+
+  const canvasContextValue = { width: dims.w || 800, height: dims.h || 600, toPx }
+  // ────────────────────────────────────────────────────────────────────────────
 
   // Evaluate a visual's showWhen condition against current control values
   const isVisible = (visual: { showWhen?: { control: string; equals: unknown } }) => {
@@ -69,185 +104,207 @@ function CanvasVisualization({ scene, controlValues }: { scene: Scene; controlVa
   const hasHud = textBadges.length > 0 || counters.length > 0
   const useAbsoluteLayout = canvasVisuals.some((v) => v.position != null)
 
-  function getPopupAnchor(popup: typeof visiblePopups[number]): { x: number; y: number } {
-    if (popup.anchor) return popup.anchor
+  // Phase 18: popup anchor uses toPx so it lives in the same px space as the primitives
+  function getPopupAnchorPx(popup: typeof visiblePopups[number]): { x: number; y: number } {
+    if (popup.anchor) return toPx(popup.anchor)
     const visual = canvasVisuals.find((v) => v.id === popup.attachTo)
-    if (visual?.position) return { x: visual.position.x, y: visual.position.y + 18 }
-    return { x: 50, y: 75 }
+    if (visual?.position) return toPx({ x: visual.position.x, y: visual.position.y + 18 })
+    return toPx({ x: 50, y: 75 })
   }
 
   function getMaxWidth(type: string): string {
-    if (type === 'system-diagram') return '460px'
+    if (type === 'system-diagram') return '100%'
     if (type === 'queue') return '320px'
-    if (type === 'graph') return '480px'
-    return '260px'
+    if (type === 'graph') return '100%'
+    if (type === 'tree' || type === 'recursion-tree') return '100%'
+    return '100%'
   }
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
-      {/* Dot grid spans the full area */}
-      <div className="absolute inset-0 pointer-events-none">
-        <DotGridBackground opacity={0.3} />
-      </div>
+    // Phase 18: wrap the whole visualization in CanvasContext so every child
+    // primitive can read the measured pixel dimensions without prop-drilling.
+    <CanvasContext.Provider value={canvasContextValue}>
+      <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+        {/* Dot grid spans the full area */}
+        <div className="absolute inset-0 pointer-events-none">
+          <DotGridBackground opacity={0.3} />
+        </div>
 
-      {/* ── HUD zone: badges + counters, fixed at top, never overlaps canvas ── */}
-      {hasHud && (
-        <>
-          <div className="relative z-20 flex flex-wrap items-center gap-x-4 gap-y-2.5 px-4 pt-3 pb-2 pointer-events-none flex-shrink-0">
-            {textBadges.map((visual) => {
-              const PrimitiveComponent = PrimitiveRegistry[visual.type]
-              if (!PrimitiveComponent) return null
-              const state = computeVisualStateAtStep(scene, visual.id, currentStep)
-              return (
-                <PrimitiveComponent
-                  key={visual.id}
-                  id={visual.id}
-                  state={state}
-                  step={currentStep}
-                  label={visual.label}
-                />
-              )
-            })}
-            {counters.length > 0 && (
-              <div className="flex items-center gap-4 flex-shrink-0 ml-auto">
-                {counters.map((visual) => {
-                  const PrimitiveComponent = PrimitiveRegistry[visual.type]
-                  if (!PrimitiveComponent) return null
-                  const state = computeVisualStateAtStep(scene, visual.id, currentStep)
-                  return (
+        {/* ── HUD zone: badges + counters, fixed at top, never overlaps canvas ── */}
+        {hasHud && (
+          <>
+            <div className="relative z-20 flex flex-wrap items-center gap-x-4 gap-y-2.5 px-4 pt-3 pb-2 pointer-events-none flex-shrink-0">
+              {textBadges.map((visual) => {
+                const PrimitiveComponent = PrimitiveRegistry[visual.type]
+                if (!PrimitiveComponent) return null
+                const state = computeVisualStateAtStep(scene, visual.id, currentStep)
+                return (
+                  <PrimitiveComponent
+                    key={visual.id}
+                    id={visual.id}
+                    state={state}
+                    step={currentStep}
+                    label={visual.label}
+                  />
+                )
+              })}
+              {counters.length > 0 && (
+                <div className="flex items-center gap-4 flex-shrink-0 ml-auto">
+                  {counters.map((visual) => {
+                    const PrimitiveComponent = PrimitiveRegistry[visual.type]
+                    if (!PrimitiveComponent) return null
+                    const state = computeVisualStateAtStep(scene, visual.id, currentStep)
+                    return (
+                      <PrimitiveComponent
+                        key={visual.id}
+                        id={visual.id}
+                        state={state}
+                        step={currentStep}
+                        label={visual.label}
+                      />
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+            {/* Divider */}
+            <div className="relative z-20 flex-shrink-0 px-6">
+              <div className="h-px bg-outline-variant/20" />
+            </div>
+          </>
+        )}
+
+        {/*
+         * ── Canvas zone ──────────────────────────────────────────────────────
+         * Phase 18: this ref is observed by ResizeObserver above so dims stay
+         * accurate at every container size change (window resize, panel resize,
+         * expand/collapse toggle).
+         */}
+        <div ref={canvasZoneRef} className="relative flex-1 min-h-0 overflow-auto z-10">
+          {canvasVisuals.length === 0 && (
+            <p className="absolute inset-0 flex items-center justify-center text-sm text-on-surface-variant italic">
+              No visuals defined in this scene.
+            </p>
+          )}
+
+          {useAbsoluteLayout ? (
+            <div className="relative w-full h-full min-h-[300px]">
+              {canvasVisuals.map((visual) => {
+                const PrimitiveComponent = PrimitiveRegistry[visual.type]
+                if (!PrimitiveComponent) return null
+                const state = computeVisualStateAtStep(scene, visual.id, currentStep)
+                const pos = visual.position ?? { x: 50, y: 50 }
+                const maxW = getMaxWidth(visual.type)
+                // Phase 18: positions are still expressed as % in Scene JSON;
+                // the CSS left/top still handle absolute-layout primitives.
+                // Complex primitives (graph/tree/etc.) own their own SVG viewBox
+                // and no longer rely on these CanvasCard-level pixel offsets.
+                return (
+                  <div
+                    key={visual.id}
+                    className={`absolute flex flex-col items-center${DEV_BORDERS ? ' border border-dashed border-primary/30' : ''}`}
+                    style={{
+                      left: `${pos.x}%`,
+                      top: `${pos.y}%`,
+                      transform: 'translate(-50%, -50%)',
+                      maxWidth: maxW,
+                      width: '100%',
+                    }}
+                  >
+                    {visual.label && (
+                      <div className="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant/60 mb-1 text-center select-none">
+                        {visual.label}
+                      </div>
+                    )}
                     <PrimitiveComponent
-                      key={visual.id}
                       id={visual.id}
                       state={state}
                       step={currentStep}
                       label={visual.label}
                     />
-                  )
-                })}
-              </div>
-            )}
-          </div>
-          {/* Divider */}
-          <div className="relative z-20 flex-shrink-0 px-6">
-            <div className="h-px bg-outline-variant/20" />
-          </div>
-        </>
-      )}
-
-      {/* ── Canvas zone: fills remaining space, positions relative to this area ── */}
-      <div className="relative flex-1 min-h-0 overflow-auto z-10">
-        {canvasVisuals.length === 0 && (
-          <p className="absolute inset-0 flex items-center justify-center text-sm text-on-surface-variant italic">
-            No visuals defined in this scene.
-          </p>
-        )}
-
-        {useAbsoluteLayout ? (
-          <div className="relative w-full h-full min-h-[300px]">
-            {canvasVisuals.map((visual) => {
-              const PrimitiveComponent = PrimitiveRegistry[visual.type]
-              if (!PrimitiveComponent) return null
-              const state = computeVisualStateAtStep(scene, visual.id, currentStep)
-              const pos = visual.position ?? { x: 50, y: 50 }
-              const maxW = getMaxWidth(visual.type)
-              return (
-                <div
-                  key={visual.id}
-                  className={`absolute flex flex-col items-center${DEV_BORDERS ? ' border border-dashed border-primary/30' : ''}`}
-                  style={{
-                    left: `${pos.x}%`,
-                    top: `${pos.y}%`,
-                    transform: 'translate(-50%, -50%)',
-                    maxWidth: maxW,
-                    width: '100%',
-                  }}
-                >
-                  {visual.label && (
-                    <div className="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant/60 mb-1 text-center select-none">
-                      {visual.label}
-                    </div>
-                  )}
-                  <PrimitiveComponent
-                    id={visual.id}
-                    state={state}
-                    step={currentStep}
-                    label={visual.label}
-                  />
-                </div>
-              )
-            })}
-          </div>
-        ) : (
-          <div className="relative w-full h-full p-4 flex flex-col items-center justify-center gap-4">
-            {canvasVisuals.map((visual) => {
-              const PrimitiveComponent = PrimitiveRegistry[visual.type]
-              if (!PrimitiveComponent) return null
-              const state = computeVisualStateAtStep(scene, visual.id, currentStep)
-              return (
-                <div key={visual.id} className={`flex flex-col items-center w-full${DEV_BORDERS ? ' border border-dashed border-primary/30' : ''}`}>
-                  {visual.label && (
-                    <div className="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant/60 mb-1 text-center select-none">
-                      {visual.label}
-                    </div>
-                  )}
-                  <PrimitiveComponent
-                    id={visual.id}
-                    state={state}
-                    step={currentStep}
-                    label={visual.label}
-                  />
-                </div>
-              )
-            })}
-          </div>
-        )}
-
-        {/* Popup annotations — simple absolute label near the attached visual */}
-        {visiblePopups.map((popup) => {
-          const pos = getPopupAnchor(popup)
-          return (
-            <div
-              key={popup.id}
-              className="absolute z-30 pointer-events-none"
-              style={{ left: `${pos.x}%`, top: `${pos.y}%`, transform: 'translate(-50%, -50%)' }}
-            >
-              <StepPopup text={popup.text} style={popup.style} visible={true} />
-            </div>
-          )
-        })}
-
-        {/* Floating explanation card for canvas-only HLD scenes */}
-        <AnimatePresence mode="wait">
-          {floatingExplanation && (
-            <motion.div
-              key={floatingExplanation.heading}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 4 }}
-              transition={{ type: 'spring', stiffness: 340, damping: 30 }}
-              className="absolute z-40 pointer-events-none bottom-3 left-3 right-3 max-w-none md:bottom-4 md:left-4 md:right-auto md:max-w-[280px]"
-            >
-              <div className="glass-panel rounded-2xl border border-primary/15 px-4 py-3 shadow-lg"
-                style={{ boxShadow: '0 0 20px rgba(183,159,255,0.10)' }}>
-                <p className="text-[11px] font-semibold text-primary mb-1 uppercase tracking-widest">
-                  {floatingExplanation.heading}
-                </p>
-                <div className="text-[11px] text-on-surface-variant leading-relaxed prose prose-invert prose-p:mb-1 prose-strong:text-on-surface max-w-none">
-                  <ReactMarkdown>{floatingExplanation.body}</ReactMarkdown>
-                </div>
-                {floatingExplanation.callout && (
-                  <div className="mt-2 bg-primary/8 rounded px-2 py-1.5 text-[10px] text-on-surface border border-primary/10">
-                    <span className="font-semibold text-primary mr-1">▸</span>
-                    {floatingExplanation.callout}
                   </div>
-                )}
-              </div>
-            </motion.div>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="relative w-full h-full p-4 flex flex-col items-center justify-center gap-4">
+              {canvasVisuals.map((visual) => {
+                const PrimitiveComponent = PrimitiveRegistry[visual.type]
+                if (!PrimitiveComponent) return null
+                const state = computeVisualStateAtStep(scene, visual.id, currentStep)
+                return (
+                  <div key={visual.id} className={`flex flex-col items-center w-full${DEV_BORDERS ? ' border border-dashed border-primary/30' : ''}`}>
+                    {visual.label && (
+                      <div className="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant/60 mb-1 text-center select-none">
+                        {visual.label}
+                      </div>
+                    )}
+                    <PrimitiveComponent
+                      id={visual.id}
+                      state={state}
+                      step={currentStep}
+                      label={visual.label}
+                    />
+                  </div>
+                )
+              })}
+            </div>
           )}
-        </AnimatePresence>
 
+          {/*
+           * Phase 18: popup anchoring — positions derived via toPx() so they live
+           * in the same absolute-pixel space as the SVG viewBox primitives.
+           */}
+          {visiblePopups.map((popup) => {
+            const posPx = getPopupAnchorPx(popup)
+            return (
+              <div
+                key={popup.id}
+                className="absolute z-30 pointer-events-none"
+                style={{
+                  left: posPx.x,
+                  top: posPx.y,
+                  transform: 'translate(-50%, -50%)',
+                }}
+              >
+                <StepPopup text={popup.text} style={popup.style} visible={true} />
+              </div>
+            )
+          })}
+
+          {/* Floating explanation card for canvas-only HLD scenes */}
+          <AnimatePresence mode="wait">
+            {floatingExplanation && (
+              <motion.div
+                key={floatingExplanation.heading}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 4 }}
+                transition={{ type: 'spring', stiffness: 340, damping: 30 }}
+                className="absolute z-40 pointer-events-none bottom-3 left-3 right-3 max-w-none md:bottom-4 md:left-4 md:right-auto md:max-w-[280px]"
+              >
+                <div className="glass-panel rounded-2xl border border-primary/15 px-4 py-3 shadow-lg"
+                  style={{ boxShadow: '0 0 20px rgba(183,159,255,0.10)' }}>
+                  <p className="text-[11px] font-semibold text-primary mb-1 uppercase tracking-widest">
+                    {floatingExplanation.heading}
+                  </p>
+                  <div className="text-[11px] text-on-surface-variant leading-relaxed prose prose-invert prose-p:mb-1 prose-strong:text-on-surface max-w-none">
+                    <ReactMarkdown>{floatingExplanation.body}</ReactMarkdown>
+                  </div>
+                  {floatingExplanation.callout && (
+                    <div className="mt-2 bg-primary/8 rounded px-2 py-1.5 text-[10px] text-on-surface border border-primary/10">
+                      <span className="font-semibold text-primary mr-1">▸</span>
+                      {floatingExplanation.callout}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+        </div>
       </div>
-    </div>
+    </CanvasContext.Provider>
   )
 }
 

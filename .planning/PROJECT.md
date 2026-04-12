@@ -52,7 +52,7 @@ R1 released on 8 April 2026 and R2 is in progress
 | **Phase 15** | ✅ | R1 Fixes + UI Tweaks |
 | **Phase 16** | ✅ | Core Correctness + Runtime Hardening |
 | **Phase 17** | ✅ | Local & Custom LLM Support (Ollama + OpenAI-compatible endpoints) |
-| **Phase 18** | 🔲 | Coordinate System Unification (fix dual-coordinate edge/node misalignment) |
+| **Phase 18** | ✅ | Coordinate System Unification (fix dual-coordinate edge/node misalignment) |
 | **Phase 19** | 🔲 | Scene JSON Schema Redesign (LayoutHint, SlotPosition, simplified Action) |
 | **Phase 20** | 🔲 | Layout Engine (SPACING constants, per-primitive sizing, dagre/d3-hierarchy/arithmetic algorithms) |
 | **Phase 21** | 🔲 | Step Engine (applyStepActionsUpTo, computeTopologyAtStep, evaluateCondition, step validation) |

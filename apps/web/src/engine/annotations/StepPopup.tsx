@@ -1,3 +1,12 @@
+/**
+ * StepPopup — pure presentational popup attached to a scene element.
+ *
+ * Phase 18 (Coordinate System Unification): This component itself is unchanged.
+ * Positioning is now handled by CanvasCard, which converts popup anchor
+ * coordinates via toPx() (px, not %) before passing them to the wrapper div.
+ * No coordinate math lives here.
+ */
+
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface StepPopupProps {
