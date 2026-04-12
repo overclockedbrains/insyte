@@ -77,3 +77,16 @@ export {
   validateStepSequence,
 } from './step-engine'
 export type { StepValidationResult } from './step-engine'
+
+// ─── Scene Graph ──────────────────────────────────────────────────────────────
+export {
+  computeSceneGraphAtStep,
+  diffSceneGraphs,
+} from './scene-graph'
+export type {
+  SceneNode,
+  SceneEdge,
+  SceneGroup,
+  SceneGraph,
+  SceneGraphDiff,
+} from './scene-graph'
