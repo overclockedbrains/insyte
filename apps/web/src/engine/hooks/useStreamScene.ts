@@ -1,19 +1,33 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { experimental_useObject as useObject } from '@ai-sdk/react'
-import type { DeepPartial } from 'ai'
+import { useCallback, useRef, useState } from 'react'
 import type { Scene } from '@insyte/scene-engine'
-import { SceneSchema, VisualSchema, StepSchema, ControlSchema, ExplanationSectionSchema, ChallengeSchema, PopupSchema } from '@insyte/scene-engine'
+import { safeParseScene } from '@insyte/scene-engine'
 import { useBoundStore } from '@/src/stores/store'
-import { validateGeneratedScene } from '@/src/ai/generateScene'
 import { aiLog } from '@/lib/ai-logger'
 import { va } from '@/src/lib/analytics'
+import type { GenerationEvent } from '@/src/ai/pipeline'
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+/**
+ * How many times the client will automatically re-fire /api/generate on a
+ * retryable failure before surfacing the error to the user.
+ *
+ * Set NEXT_PUBLIC_CLIENT_MAX_RETRIES=0 in .env.local to disable auto-retry
+ * entirely (useful in development to avoid burning tokens on repeated attempts).
+ * Defaults to 1 (one automatic retry).
+ */
+const CLIENT_MAX_RETRIES = Math.max(
+  0,
+  parseInt(process.env.NEXT_PUBLIC_CLIENT_MAX_RETRIES ?? '1', 10) || 1,
+)
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface UseStreamSceneResult {
   isStreaming: boolean
+  /** For Phase 26 progressive rendering — empty in Phase 25, filled on complete */
   streamedFields: Set<string>
   error: string | null
   startStreaming: (topic: string, slug?: string) => void
@@ -21,131 +35,103 @@ export interface UseStreamSceneResult {
   abort: () => void
 }
 
-// ─── Field promotion helpers ──────────────────────────────────────────────────
+// ─── SSE reader ───────────────────────────────────────────────────────────────
 
-function promoteFields(
-  draft: DeepPartial<Scene>,
-  promoteDraftField: (field: keyof Scene) => void,
-): Set<keyof Scene> {
-  const promoted = new Set<keyof Scene>()
+/**
+ * Reads a text/event-stream response body and yields each parsed GenerationEvent.
+ * Handles chunked delivery and multi-line data.
+ */
+async function* readSSE(
+  response: Response,
+  signal: AbortSignal,
+): AsyncGenerator<GenerationEvent> {
+  if (!response.body) return
 
-  if (typeof draft.title === 'string' && draft.title.length > 0) {
-    promoteDraftField('title')
-    promoted.add('title')
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+
+  try {
+    while (true) {
+      if (signal.aborted) break
+
+      const { done, value } = await reader.read()
+      if (done) break
+
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n')
+      // Keep the last (potentially incomplete) line in the buffer
+      buffer = lines.pop() ?? ''
+
+      for (const line of lines) {
+        const trimmed = line.trim()
+        if (trimmed.startsWith('data: ')) {
+          try {
+            const event = JSON.parse(trimmed.slice(6)) as GenerationEvent
+            yield event
+          } catch {
+            // Malformed SSE line — skip silently
+          }
+        }
+      }
+    }
+  } finally {
+    reader.releaseLock()
   }
-
-  if (Array.isArray(draft.visuals)) {
-    const valid = draft.visuals.filter((v) => v && VisualSchema.safeParse(v).success)
-    if (valid.length > 0) { promoteDraftField('visuals'); promoted.add('visuals') }
-  }
-
-  if (Array.isArray(draft.steps)) {
-    const valid = draft.steps.filter((s) => s && StepSchema.safeParse(s).success)
-    if (valid.length > 0) { promoteDraftField('steps'); promoted.add('steps') }
-  }
-
-  if (Array.isArray(draft.controls)) {
-    const valid = draft.controls.filter((c) => c && ControlSchema.safeParse(c).success)
-    if (valid.length > 0) { promoteDraftField('controls'); promoted.add('controls') }
-  }
-
-  if (Array.isArray(draft.explanation)) {
-    const valid = draft.explanation.filter((e) => e && ExplanationSectionSchema.safeParse(e).success)
-    if (valid.length > 0) { promoteDraftField('explanation'); promoted.add('explanation') }
-  }
-
-  if (Array.isArray(draft.challenges)) {
-    const valid = draft.challenges.filter((c) => c && ChallengeSchema.safeParse(c).success)
-    if (valid.length > 0) { promoteDraftField('challenges'); promoted.add('challenges') }
-  }
-
-  if (Array.isArray(draft.popups)) {
-    const valid = draft.popups.filter((p) => p && PopupSchema.safeParse(p).success)
-    if (valid.length > 0) { promoteDraftField('popups'); promoted.add('popups') }
-  }
-
-  return promoted
 }
 
 // ─── useStreamScene ───────────────────────────────────────────────────────────
 
+/**
+ * Drives the AI pipeline SSE stream from the client.
+ *
+ * Phase 25 implementation: consumes GenerationEvent stream from /api/generate,
+ * handles 'complete' (validate + store scene) and 'error' events.
+ * 'plan', 'content', 'annotations', 'misc' events are received but not yet
+ * applied progressively — Phase 26 will add skeleton rendering.
+ */
 export function useStreamScene(): UseStreamSceneResult {
   const [error, setError] = useState<string | null>(null)
   const lastTopicRef = useRef<string>('')
   const lastSlugRef = useRef<string | undefined>(undefined)
   const retryCountRef = useRef(0)
-  // Per-run state flags, reset on each startStreaming call
-  const hasInitializedSceneRef = useRef(false)
-  const hasLoggedFirstPartialRef = useRef(false)
-  const loggedPromotionsRef = useRef(new Set<keyof Scene>())
-  // Ref so retry callbacks always see the latest runStream without circular deps
-  const runStreamRef = useRef<(topic: string, slug?: string) => void>(() => { })
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   const setScene = useBoundStore((s) => s.setScene)
   const clearScene = useBoundStore((s) => s.clearScene)
-  const setDraftScene = useBoundStore((s) => s.setDraftScene)
-  const promoteDraftField = useBoundStore((s) => s.promoteDraftField)
   const setStreaming = useBoundStore((s) => s.setStreaming)
   const isStreaming = useBoundStore((s) => s.isStreaming)
   const streamedFields = useBoundStore((s) => s.streamedFields)
 
-  // ─── Core stream logic ────────────────────────────────────────────────────
+  // Stable ref so retry callbacks always call the latest runStream
+  const runStreamRef = useRef<(topic: string, slug?: string) => void>(() => {})
 
-  const handlePartial = useCallback(
-    (partial: DeepPartial<Scene>) => {
-      setDraftScene(partial)
+  // ─── handleScene ─────────────────────────────────────────────────────────
 
-      if (!hasLoggedFirstPartialRef.current) {
-        hasLoggedFirstPartialRef.current = true
-        aiLog.stream.firstPartial()
-      }
-
-      if (
-        !hasInitializedSceneRef.current &&
-        partial.id &&
-        partial.title &&
-        partial.type &&
-        partial.layout
-      ) {
-        hasInitializedSceneRef.current = true
-        aiLog.stream.sceneInit(partial.title as string)
-      }
-
-      const promoted = promoteFields(partial, promoteDraftField)
-      for (const field of promoted) {
-        if (!loggedPromotionsRef.current.has(field)) {
-          loggedPromotionsRef.current.add(field)
-          aiLog.stream.promote(field)
-        }
-      }
-    },
-    [setDraftScene, promoteDraftField],
-  )
-
-  const handleComplete = useCallback(
-    (raw: unknown, topic: string) => {
-      try {
-        const validatedScene = validateGeneratedScene(raw)
+  const handleScene = useCallback(
+    (raw: Scene, topic: string) => {
+      const result = safeParseScene(raw)
+      if (result.success) {
         const { provider, model, apiKeys } = useBoundStore.getState()
         aiLog.stream.validated(true)
         va.track('scene_generated', {
           provider,
           model,
           byok: Boolean(apiKeys[provider]),
-          scene_type: validatedScene.type,
-          layout: validatedScene.layout,
-          steps: validatedScene.steps.length,
-          visuals: validatedScene.visuals.length,
+          scene_type: result.scene.type,
+          layout: result.scene.layout,
+          steps: result.scene.steps.length,
+          visuals: result.scene.visuals.length,
         })
-        setScene(validatedScene)
-        aiLog.store.setScene('final', validatedScene.title)
+        setScene(result.scene)
+        aiLog.store.setScene('final', result.scene.title)
         setStreaming(false)
         aiLog.store.setStreaming(false)
         aiLog.stream.complete()
         retryCountRef.current = 0
-      } catch (err) {
+      } else {
         aiLog.stream.validated(false)
-        if (retryCountRef.current < 1) {
+        if (retryCountRef.current < CLIENT_MAX_RETRIES) {
           retryCountRef.current++
           aiLog.stream.retry(retryCountRef.current, 'validation')
           setError('Validation failed — retrying...')
@@ -156,7 +142,7 @@ export function useStreamScene(): UseStreamSceneResult {
           aiLog.store.setStreaming(false)
           clearScene()
           aiLog.store.clearScene()
-          const msg = err instanceof Error ? err.message : 'Scene validation failed'
+          const msg = 'Scene validation failed after pipeline assembly'
           aiLog.stream.error(msg)
           setError(msg)
         }
@@ -165,111 +151,144 @@ export function useStreamScene(): UseStreamSceneResult {
     [setScene, clearScene, setStreaming],
   )
 
-  // Stable refs so useObject callbacks (defined at hook init) can always access
-  // the latest handlePartial / handleComplete without being re-created every render.
-  const handlePartialRef = useRef(handlePartial)
-  const handleCompleteRef = useRef(handleComplete)
-  useEffect(() => { handlePartialRef.current = handlePartial }, [handlePartial])
-  useEffect(() => { handleCompleteRef.current = handleComplete }, [handleComplete])
+  // ─── runStream ────────────────────────────────────────────────────────────
 
-  // ─── useObject ────────────────────────────────────────────────────────────
-  // experimental_useObject consumes the toTextStreamResponse() stream from
-  // /api/generate and progressively parses it into a typed DeepPartial<Scene>.
-  //
-  // headers is a function — called at submit() time — so it always reads the
-  // latest settings from the store without re-initialising the hook.
-  // BYOK keys are forwarded as x-api-key / x-provider / x-model headers;
-  // the route uses them if present, otherwise falls back to the server key.
-  //
-  // IMPORTANT: toTextStreamResponse() is what useObject expects.
-  // Do NOT change the server to toDataStreamResponse() — that is for useChat.
+  const runStream = useCallback(
+    (topic: string, slug?: string) => {
+      aiLog.stream.start(topic, slug)
+      setError(null)
+      setStreaming(true)
+      aiLog.store.setStreaming(true)
 
-  const { submit, stop } = useObject({
-    api: '/api/generate',
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    schema: SceneSchema as any,
-    headers: (): Record<string, string> => {
-      const { provider, model, apiKeys, user, ollamaBaseURL, customBaseURL, customApiKey } =
-        useBoundStore.getState()
+      // Cancel any in-flight stream
+      abortControllerRef.current?.abort()
+      const controller = new AbortController()
+      abortControllerRef.current = controller
+
+      // Build BYOK headers from store (same logic as before)
+      const {
+        provider,
+        model,
+        apiKeys,
+        user,
+        ollamaBaseURL,
+        customBaseURL,
+        customApiKey,
+      } = useBoundStore.getState()
       const key = apiKeys[provider]
-      const headers: Record<string, string> = {}
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
 
       if (provider === 'ollama') {
-        // Ollama: no API key, but needs provider + model + base URL
         headers['x-provider'] = 'ollama'
         if (model) headers['x-model'] = model
         headers['x-base-url'] = ollamaBaseURL || 'http://localhost:11434/v1'
       } else if (provider === 'custom') {
-        // Custom endpoint: optional API key, required base URL + model
         headers['x-provider'] = 'custom'
         if (model) headers['x-model'] = model
         if (customBaseURL) headers['x-base-url'] = customBaseURL
         if (customApiKey) headers['x-api-key'] = customApiKey
       } else if (key) {
-        // Standard BYOK providers (Gemini, OpenAI, Anthropic, Groq)
         headers['x-api-key'] = key
         headers['x-provider'] = provider
         headers['x-model'] = model
       }
 
-      if (user?.id) {
-        headers['x-user-id'] = user.id
-      }
+      if (user?.id) headers['x-user-id'] = user.id
 
-      return headers
+      // Fire the fetch and consume the SSE stream
+      void (async () => {
+        try {
+          const response = await fetch('/api/generate', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ topic, slug }),
+            signal: controller.signal,
+          })
+
+          if (!response.ok) {
+            // Non-2xx (e.g. 429 rate limit, 400 bad request)
+            const text = await response.text().catch(() => '')
+            let msg = `Generation failed (${response.status})`
+            try {
+              const json = JSON.parse(text)
+              if (json.error) msg = json.error
+            } catch { /* use default msg */ }
+            throw new Error(msg)
+          }
+
+          for await (const event of readSSE(response, controller.signal)) {
+            if (controller.signal.aborted) break
+
+            switch (event.type) {
+              case 'plan':
+                aiLog.stream.sceneInit(event.title)
+                break
+
+              case 'content':
+                aiLog.stream.firstPartial()
+                break
+
+              case 'complete':
+                handleScene(event.scene, topic)
+                return  // stream done, handleScene manages setStreaming(false)
+
+              case 'error':
+                if (event.retryable && retryCountRef.current < CLIENT_MAX_RETRIES) {
+                  retryCountRef.current++
+                  aiLog.stream.retry(retryCountRef.current, `stage-${event.stage}`)
+                  setError(`Stage ${event.stage} failed — retrying...`)
+                  setTimeout(() => runStreamRef.current(topic, slug), 800)
+                } else {
+                  retryCountRef.current = 0
+                  setStreaming(false)
+                  aiLog.store.setStreaming(false)
+                  clearScene()
+                  aiLog.store.clearScene()
+                  aiLog.stream.error(event.message)
+                  setError(event.message)
+                }
+                return
+            }
+          }
+
+          // Stream closed without a 'complete' event — treat as an error
+          if (!controller.signal.aborted) {
+            throw new Error('Pipeline stream closed without completing')
+          }
+        } catch (err) {
+          if (controller.signal.aborted) {
+            // User-initiated abort — clean up silently
+            setStreaming(false)
+            aiLog.store.setStreaming(false)
+            return
+          }
+
+          const msg = err instanceof Error ? err.message : 'Generation failed'
+
+          if (retryCountRef.current < CLIENT_MAX_RETRIES) {
+            retryCountRef.current++
+            aiLog.stream.retry(retryCountRef.current, 'fetch-error')
+            setError('Generation failed — retrying...')
+            setTimeout(() => runStreamRef.current(topic, slug), 800)
+          } else {
+            retryCountRef.current = 0
+            setStreaming(false)
+            aiLog.store.setStreaming(false)
+            clearScene()
+            aiLog.store.clearScene()
+            aiLog.stream.error(msg)
+            setError(msg)
+          }
+        }
+      })()
     },
-    onFinish: ({ object }) => {
-      handleCompleteRef.current(object, lastTopicRef.current)
-    },
-    onError: (err) => {
-      if (retryCountRef.current < 1) {
-        retryCountRef.current++
-        aiLog.stream.retry(retryCountRef.current, 'server-error')
-        setError('Generation failed — retrying...')
-        setTimeout(
-          () => runStreamRef.current(lastTopicRef.current, lastSlugRef.current),
-          800,
-        )
-      } else {
-        retryCountRef.current = 0
-        setStreaming(false)
-        aiLog.store.setStreaming(false)
-        clearScene()
-        aiLog.store.clearScene()
-        aiLog.stream.error(err.message)
-        setError(err.message)
-      }
-    },
-  })
-
-  // Note: we do NOT sync hookIsLoading to setStreaming via effects or during render.
-  // Instead, setStreaming(true) is called right before submit(), and setStreaming(false)
-  // is handled reliably by onFinish (via handleComplete), onError, and abort().
-
-  // ─── runStream ────────────────────────────────────────────────────────────
-
-  const runStream = useCallback(
-    (topic: string, slug?: string) => {
-      hasInitializedSceneRef.current = false
-      hasLoggedFirstPartialRef.current = false
-      loggedPromotionsRef.current = new Set()
-
-      aiLog.stream.start(topic, slug)
-      setError(null)
-      setDraftScene({})
-      setStreaming(true)
-      aiLog.store.setStreaming(true)
-
-      // All generation goes through /api/generate.
-      // BYOK headers are injected via the headers function above.
-      submit({ topic, slug })
-    },
-    [setDraftScene, setStreaming, submit],
+    [setStreaming, setScene, clearScene, handleScene],
   )
 
-  useEffect(() => {
-    runStreamRef.current = runStream
-  }, [runStream])
+  // Keep ref up to date for retry callbacks
+  runStreamRef.current = runStream
+
+  // ─── Public API ───────────────────────────────────────────────────────────
 
   const startStreaming = useCallback(
     (topic: string, slug?: string) => {
@@ -290,10 +309,10 @@ export function useStreamScene(): UseStreamSceneResult {
 
   const abort = useCallback(() => {
     aiLog.stream.abort()
-    stop()
+    abortControllerRef.current?.abort()
     setStreaming(false)
     aiLog.store.setStreaming(false)
-  }, [stop, setStreaming])
+  }, [setStreaming])
 
   return { isStreaming, streamedFields, error, startStreaming, retry, abort }
 }

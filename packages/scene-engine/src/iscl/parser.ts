@@ -48,37 +48,19 @@ export function parseISCL(script: string): ISCLParseResult {
 
   ctx.stepCount = ctx.steps.length
 
-  // Validate EXPLANATION step indices
-  for (const exp of ctx.explanation) {
-    if (exp.stepIndex >= ctx.stepCount) {
-      return {
-        ok: false,
-        error: { line: 0, message: `Explanation references step ${exp.stepIndex} but only ${ctx.stepCount} steps exist (max: ${ctx.stepCount - 1})` }
-      }
-    }
-  }
+  // Filter EXPLANATION entries with out-of-range step indices.
+  // Non-fatal: drop bad entries rather than failing the whole parse.
+  // Explanations are decorative — a missing one is better than a failed generation.
+  ctx.explanation = ctx.explanation.filter(exp => exp.stepIndex < ctx.stepCount)
 
-  // Validate POPUP references
-  for (const popup of ctx.popups) {
-    if (!ctx.visualIds.has(popup.attachId)) {
-      return {
-        ok: false,
-        error: { line: 0, message: `POPUP references unknown visual ID "${popup.attachId}". Declared IDs: ${[...ctx.visualIds].join(', ')}` }
-      }
-    }
-    if (popup.showAt >= ctx.stepCount) {
-      return {
-        ok: false,
-        error: { line: 0, message: `POPUP AT ${popup.showAt} exceeds step count ${ctx.stepCount}` }
-      }
-    }
-    if (popup.hideAt !== undefined && popup.hideAt > ctx.stepCount) {
-      return {
-        ok: false,
-        error: { line: 0, message: `POPUP UNTIL ${popup.hideAt} exceeds step count ${ctx.stepCount}` }
-      }
-    }
-  }
+  // Filter POPUP entries that reference undeclared visual IDs or out-of-range steps.
+  // Non-fatal: AI hallucinating a popup target is common; drop and continue.
+  // SET targets in steps remain a hard error because they are structural.
+  ctx.popups = ctx.popups.filter(popup =>
+    ctx.visualIds.has(popup.attachId) &&
+    popup.showAt < ctx.stepCount &&
+    (popup.hideAt === undefined || popup.hideAt <= ctx.stepCount)
+  )
 
   // Validate SET references in steps
   for (const step of ctx.steps) {
@@ -159,14 +141,22 @@ function parseVisualLine(rest: string, lineNum: number, ctx: ParserContext): voi
   let layoutHint: string | undefined
   let slot: string | undefined
 
+  // HINT and SLOT are decorative — silently drop unknown values rather than
+  // failing the whole parse (AI hallucinating e.g. "overlay-top-left" is common).
   const hintIdx = parts.indexOf('HINT')
   if (hintIdx !== -1 && parts[hintIdx + 1]) {
-    layoutHint = parseEnum(parts[hintIdx + 1]!, VALID_LAYOUT_HINTS, lineNum)
+    const hintVal = parts[hintIdx + 1]!
+    if ((VALID_LAYOUT_HINTS as readonly string[]).includes(hintVal)) {
+      layoutHint = hintVal as any
+    }
   }
 
   const slotIdx = parts.indexOf('SLOT')
   if (slotIdx !== -1 && parts[slotIdx + 1]) {
-    slot = parseEnum(parts[slotIdx + 1]!, VALID_SLOTS, lineNum)
+    const slotVal = parts[slotIdx + 1]!
+    if ((VALID_SLOTS as readonly string[]).includes(slotVal)) {
+      slot = slotVal as any
+    }
   }
 
   ctx.visualDecls.push({ id, type, layoutHint: layoutHint as any, slot: slot as any })

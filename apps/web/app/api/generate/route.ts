@@ -1,8 +1,11 @@
 import type { NextRequest } from 'next/server'
 import { Agent, fetch as undiciFetch } from 'undici'
-import { generateScene } from '@/src/ai/generateScene'
 import { resolveModel } from '@/src/ai/providers'
+import { REGISTRY } from '@/src/ai/registry'
 import type { Provider } from '@/src/ai/registry'
+import { generateScene } from '@/src/ai/pipeline'
+import type { ModelConfig } from '@/src/ai/client'
+import type { SceneType } from '@insyte/scene-engine'
 import {
   checkAndIncrementRateLimit,
   saveScene,
@@ -11,7 +14,6 @@ import {
   recordUserGeneration,
 } from '@/lib/supabase'
 import { generateSlug } from '@/src/lib/slug'
-import { safeParseScene } from '@insyte/scene-engine'
 import { aiLog } from '@/lib/ai-logger'
 
 // Allow streaming for up to 5 minutes
@@ -19,8 +21,8 @@ export const maxDuration = 300
 
 // Custom HTTP agent with extended timeouts for long-running AI generation.
 const longRunningAgent = new Agent({
-  headersTimeout: 10 * 60 * 1000, // 10 minutes
-  bodyTimeout: 10 * 60 * 1000,    // 10 minutes
+  headersTimeout: 10 * 60 * 1000,
+  bodyTimeout: 10 * 60 * 1000,
 })
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -42,10 +44,12 @@ export async function POST(req: NextRequest) {
   // Parse body
   let topic: string
   let slug: string | undefined
+  let mode: SceneType | undefined
   try {
     const body = await req.json()
     topic = body?.topic?.trim() ?? ''
     slug = body?.slug?.trim() || undefined
+    mode = body?.mode ?? undefined
   } catch {
     return new Response('Invalid JSON body', { status: 400 })
   }
@@ -63,7 +67,6 @@ export async function POST(req: NextRequest) {
   if (!byokKey && !byokBaseURL) {
     const existingSlug = await getCachedSlugForQuery(topic)
     if (existingSlug) {
-      // Return a redirect response — client should load from /s/[existingSlug]
       return Response.json(
         { cached: true, slug: existingSlug },
         { status: 200, headers: { 'X-Cache': 'HIT' } },
@@ -72,7 +75,6 @@ export async function POST(req: NextRequest) {
   }
 
   // Rate limit only applies to the free tier (our server key).
-  // BYOK and local/custom endpoint users consume their own quota — no limit imposed.
   if (!byokKey && !byokBaseURL) {
     const ip =
       req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
@@ -86,57 +88,68 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const provider = byokProvider ?? 'gemini'
-  const model = resolveModel(provider, byokModel, byokKey, longRunningFetch, byokBaseURL)
-  const modelId = byokModel ?? (byokKey ? provider : 'gemini-2.5-flash')
-  aiLog.server.request(topic, modelId)
+  const provider = (byokProvider ?? 'gemini') as Provider
+  const languageModel = resolveModel(provider, byokModel, byokKey, longRunningFetch, byokBaseURL)
+  const modelConfig: ModelConfig = {
+    model: languageModel,
+    providerOptions: REGISTRY[provider]?.providerOptions ?? {},
+  }
 
-  try {
-    const result = generateScene(topic, model, provider)
+  aiLog.server.request(topic, byokModel ?? REGISTRY[provider]?.defaultModel ?? 'unknown')
 
-    // Fire-and-forget: background logging + scene persistence once generation finishes.
-    void (async () => {
+  // ── SSE stream from async generator ──────────────────────────────────────
+  const encoder = new TextEncoder()
+  const saveSlug = slug ?? generateSlug(topic)
+
+  const stream = new ReadableStream({
+    async start(controller) {
       try {
-        const usage = await result.usage
-        const finishReason = await result.finishReason
+        for await (const event of generateScene(topic, mode, modelConfig)) {
+          const line = `data: ${JSON.stringify(event)}\n\n`
+          controller.enqueue(encoder.encode(line))
 
-        aiLog.server.complete(
-          {
-            inputTokens: usage.inputTokens,
-            outputTokens: usage.outputTokens,
-            reasoningTokens: (usage as { outputTokenDetails?: { reasoningTokens?: number } }).outputTokenDetails?.reasoningTokens,
-            textTokens: (usage as { outputTokenDetails?: { textTokens?: number } }).outputTokenDetails?.textTokens,
-          },
-          finishReason,
-        )
-
-        const obj = await result.output
-        const parsed = safeParseScene(obj)
-        if (parsed.success) {
-          const saveSlug = slug ?? generateSlug(topic)
-          await saveScene(saveSlug, parsed.scene)
-          // Save query → slug mapping for deduplication
-          saveQueryHash(topic, saveSlug)
-          // Record in user history if signed in
-          if (userId) {
-            recordUserGeneration(userId, topic, saveSlug)
+          // Background persistence: save the scene to Supabase on 'complete'
+          if (event.type === 'complete') {
+            aiLog.server.complete({ inputTokens: 0, outputTokens: 0 }, 'stop')
+            void (async () => {
+              try {
+                await saveScene(saveSlug, event.scene)
+                saveQueryHash(topic, saveSlug)
+                if (userId) {
+                  recordUserGeneration(userId, topic, saveSlug)
+                }
+                aiLog.server.cache('saved', saveSlug)
+              } catch (err) {
+                aiLog.server.cache('failed', err instanceof Error ? err.message : err)
+              }
+            })()
           }
-          aiLog.server.cache('saved', saveSlug)
-        } else {
-          aiLog.server.cache('skipped', 'scene failed schema validation')
+
+          if (event.type === 'error') {
+            aiLog.server.error(`stage-${event.stage}`, event.message)
+          }
         }
       } catch (err) {
-        aiLog.server.error('stream-complete', err)
-        aiLog.server.cache('failed', err instanceof Error ? err.message : err)
+        // Unexpected error outside the generator — emit an error event
+        const errorEvent = {
+          type: 'error',
+          stage: 0,
+          message: err instanceof Error ? err.message : 'Unexpected pipeline error',
+          retryable: true,
+        }
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify(errorEvent)}\n\n`))
+        aiLog.server.error('pipeline', err)
+      } finally {
+        controller.close()
       }
-    })()
+    },
+  })
 
-    return result.toTextStreamResponse()
-  } catch (err) {
-    aiLog.server.error('generation', err)
-    return new Response(
-      JSON.stringify({ error: 'Generation failed', retryable: true }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } },
-    )
-  }
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+    },
+  })
 }

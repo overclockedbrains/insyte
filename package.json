@@ -14,7 +14,8 @@
     "img:webp": "node scripts/image-to-webp.mjs",
     "clean": "turbo clean && pnpm -r exec rimraf .next dist .turbo tsconfig.tsbuildinfo",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "setup-symlinks": "bash scripts/setup-symlinks.sh"
+    "setup-symlinks": "bash scripts/setup-symlinks.sh",
+    "qa": "pnpm install && pnpm lint && pnpm build && pnpm type-check && pnpm test"
   },
   "repository": {
     "type": "git",

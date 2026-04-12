@@ -180,7 +180,7 @@ function CanvasVisualization({ scene, controlValues }: { scene: Scene; controlVa
          * expand/collapse toggle).
          */}
         <div ref={canvasZoneRef} className="relative flex-1 min-h-0 overflow-auto z-10">
-          {canvasVisuals.length === 0 && (
+          {canvasVisuals.length === 0 && !hasHud && (
             <p className="absolute inset-0 flex items-center justify-center text-sm text-on-surface-variant italic">
               No visuals defined in this scene.
             </p>

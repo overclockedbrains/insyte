@@ -17,12 +17,12 @@ User prompt (topic)
   │
   ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  Stage 1: ISCL Generation (~700 tokens output, ~1.5s)              │
+│  Stage 1: ISCL Generation (~700 tokens output, ~1.5s)               │
 │  AI generates Insyte Scene Language script                          │
-│  → parseISCL() validates: visual IDs, step count, references       │
-│  → ISCLParseResult: { visualIds, stepCount, visualDecls, steps }   │
-│  → yield: { type: 'plan', title, visualCount, stepCount, layout }  │
-└─────────────────────────┬───────────────────────────────────────────┘
+│  → parseISCL() validates: visual IDs, step count, references        │
+│  → ISCLParseResult: { visualIds, stepCount, visualDecls, steps }    │
+│  → yield: { type: 'plan', title, visualCount, stepCount, layout }   │
+└──────────────────────────┬──────────────────────────────────────────┘
                            │
               ┌────────────┴────────────┐  (parallel)
               │                         │
@@ -36,30 +36,30 @@ User prompt (topic)
 │   State per visual      │   │   in each STEP                       │
 │ (no positions)          │   │ → validates: all targets ∈ visualIds │
 └────────────┬────────────┘   └───────────────┬──────────────────────┘
-             │                                 │
-             └──────────────┬──────────────────┘
+             │                                │
+             └──────────────┬─────────────────┘
                             │ (partial-success recovery if one fails)
                             ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │ Stage 3: Annotations (~600 tokens, ~2s)                             │
-│ AI receives: visualIds, stepCount — INJECTED AS HARD CONSTRAINTS   │
+│ AI receives: visualIds, stepCount — INJECTED AS HARD CONSTRAINTS    │
 │ AI generates: explanation[] + popups[]                              │
 │ → all stepIndex values validated < stepCount                        │
-│ → all attachTo IDs validated ∈ visualIds                           │
+│ → all attachTo IDs validated ∈ visualIds                            │
 └─────────────────────────────────────────────────────────────────────┘
                             │
                             ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│ Stage 4: Misc (~250 tokens, ~1s)                                   │
+│ Stage 4: Misc (~250 tokens, ~1s)                                    │
 │ AI generates: challenges[] + controls[]                             │
 │ Fully independent — no cross-references to validate                 │
 └─────────────────────────────────────────────────────────────────────┘
                             │
                             ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│ Stage 5: Deterministic Assembly (0 AI tokens, <100ms)              │
+│ Stage 5: Deterministic Assembly (0 AI tokens, <100ms)               │
 │ → Merge all stage outputs into Scene JSON                           │
-│ → Run semanticValidate() — catch any remaining cross-ref errors    │
+│ → Run semanticValidate() — catch any remaining cross-ref errors     │
 │ → Run computeLayout() — compute pixel positions                     │
 │ → yield: { type: 'complete', scene }                                │
 └─────────────────────────────────────────────────────────────────────┘

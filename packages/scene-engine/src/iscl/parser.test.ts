@@ -38,11 +38,12 @@ describe('parseISCL', () => {
     expect(result.error!.message).toContain('unknown-id')
   })
 
-  it('rejects out-of-range explanation step index', () => {
+  it('silently drops out-of-range explanation step index (non-fatal)', () => {
+    // step index 5 is out of range (only 1 step). Parser drops it instead of failing.
     const script = ['SCENE "Test"', 'TYPE concept', 'LAYOUT canvas-only', 'VISUAL array arr', 'STEP 0 : init', 'EXPLANATION', '  5 : "Bad" | "Too high"'].join('\n')
     const result = parseISCL(script)
-    expect(result.ok).toBe(false)
-    expect(result.error!.message).toContain('step 5')
+    expect(result.ok).toBe(true)
+    expect(result.parsed!.explanation).toHaveLength(0)
   })
 
   it('rejects duplicate visual IDs', () => {
@@ -59,19 +60,20 @@ describe('parseISCL', () => {
     expect(result.error!.message).toContain('numbered sequentially')
   })
 
-  it('rejects POPUP referencing unknown visual', () => {
+  it('silently drops POPUP referencing unknown visual (non-fatal)', () => {
+    // "bad" is not a declared visual. Parser drops the popup instead of failing.
     const script = ['SCENE "Test"', 'TYPE concept', 'LAYOUT canvas-only', 'VISUAL array arr', 'STEP 0 : init', 'POPUP bad AT 0 : "Hello"'].join('\n')
     const result = parseISCL(script)
-    expect(result.ok).toBe(false)
-    expect(result.error!.message).toContain('unknown visual ID "bad"')
+    expect(result.ok).toBe(true)
+    expect(result.parsed!.popups).toHaveLength(0)
   })
 
-  it('rejects POPUP showing out of bounds', () => {
+  it('silently drops POPUP with out-of-bounds showAt (non-fatal)', () => {
+    // Only 1 step (index 0). AT 1 is beyond bounds — popup is dropped, not a parse error.
     const script = ['SCENE "Test"', 'TYPE concept', 'LAYOUT canvas-only', 'VISUAL array arr', 'STEP 0 : init', 'POPUP arr AT 1 : "Hello"'].join('\n')
     const result = parseISCL(script)
-    expect(result.ok).toBe(false)
-    // Only 1 step (index 0). showing at 1 is beyond bounds
-    expect(result.error!.message).toContain('exceeds step count 1')
+    expect(result.ok).toBe(true)
+    expect(result.parsed!.popups).toHaveLength(0)
   })
 
   it('rejects STEP 0 that is not init', () => {
@@ -88,6 +90,21 @@ describe('parseISCL', () => {
     const result = parseISCL(script)
     expect(result.ok).toBe(true)
     expect(result.parsed!.visualDecls).toHaveLength(13)
+  })
+
+  it('silently drops invalid SLOT value (non-fatal)', () => {
+    // AI hallucinated "overlay-top-left" which is not a valid SLOT — should parse ok with no slot
+    const script = ['SCENE "Test"', 'TYPE concept', 'LAYOUT canvas-only', 'VISUAL array arr SLOT overlay-top-left', 'STEP 0 : init'].join('\n')
+    const result = parseISCL(script)
+    expect(result.ok).toBe(true)
+    expect(result.parsed!.visualDecls[0]!.slot).toBeUndefined()
+  })
+
+  it('silently drops invalid HINT value (non-fatal)', () => {
+    const script = ['SCENE "Test"', 'TYPE concept', 'LAYOUT canvas-only', 'VISUAL array arr HINT sideways', 'STEP 0 : init'].join('\n')
+    const result = parseISCL(script)
+    expect(result.ok).toBe(true)
+    expect(result.parsed!.visualDecls[0]!.layoutHint).toBeUndefined()
   })
 
   it('parses all control types (slider/toggle/button)', () => {
