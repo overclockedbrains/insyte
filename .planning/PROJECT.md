@@ -62,7 +62,7 @@ R1 released on 8 April 2026 and R2 is in progress
 | **Phase 25** | ✅ | Multi-Stage AI Pipeline (5-stage generator, per-stage retry, partial-success recovery, error events) — **Note:** generation quality not yet stable; AI still hallucinating invalid ISCL (bad SLOT/HINT values, multi-line STEPs, init-step SET noise). Soft-drop fixes applied as stop-gap; prompt engineering + validation feedback loop needed before quality is production-ready. |
 | **Phase 26** | ⏸️ | Progressive Streaming Generation UX — **Skipped until Phase 25 generation quality is stable.** |
 | **Phase 27** | ✅ | Visual Quality & Animation System (HIGHLIGHT_COLORS semantic color system, resolveHighlight across all 12 primitives, stable slot-based keys in ArrayViz/StackViz/QueueViz, DPTableViz cell-remounting fix via useAnimate+data-cell, typography.css hierarchy, useAnimateStep choreography hook, keyboard playback controls) |
-| **Phase 28** | 🌿 | ELK Integration & System Diagram Quality — **implemented on `feature/phase-28-elk`, not merged to main.** Dagre S-curves look more polished in insyte's dark glassmorphism aesthetic than ELK's orthogonal connectors. Branch preserved for future use (e.g. optional toggle or different scene type). |
+| **Phase 28** | ✅ | ELK Integration & System Diagram Quality (orthogonal routing, Web Worker, progressive enhancement) |
 | **Phase 29** | 🔲 | Zoom/Pan Viewport & Interactive Canvas (CSS transform, pinch-to-zoom, zoom-to-fit) |
 
 ---

@@ -1,10 +1,12 @@
 /**
- * SystemDiagramViz — Phase 20: computeLayout() / dagre LR from @insyte/scene-engine
- * Phase 27: resolveHighlight() for component status colors. Stable node IDs.
+ * SystemDiagramViz — Phase 28: ELK orthogonal edge routing.
  *
- * Positions are computed by the dagre left-to-right layout engine. The SVG
- * viewBox is set from the bounding box so content is never clipped. Phase 28
- * will upgrade this to ELK for orthogonal routing.
+ * Layout is computed by computeLayout() which returns a dagre result on the
+ * first synchronous call and upgrades to ELK (Manhattan orthogonal routing) on
+ * the next render once the Web Worker finishes.  Edges use <path> with L
+ * segments so they look clean with right-angle bends.
+ *
+ * Phase 27: resolveHighlight() semantic color tokens, stable node keys.
  */
 
 'use client'
@@ -23,6 +25,9 @@ import {
   Shield,
   Layers,
   Zap,
+  List,
+  Monitor,
+  Box,
 } from 'lucide-react'
 import type { PrimitiveProps } from '.'
 import { computeLayout } from '@insyte/scene-engine'
@@ -56,16 +61,24 @@ interface SystemDiagramState {
 }
 
 // ─── Icon map ──────────────────────────────────────────────────────────────────
+// Maps the `icon` field on a component to a lucide-react icon.
+// Expanded in Phase 28 to include client/cdn/queue/load-balancer variants.
 const IconMap: Record<string, React.ElementType> = {
-  server:   Server,
-  database: Database,
-  mobile:   Smartphone,
-  web:      Globe,
-  compute:  Cpu,
-  cloud:    Cloud,
-  shield:   Shield,
-  layers:   Layers,
-  zap:      Zap,
+  server:          Server,
+  database:        Database,
+  mobile:          Smartphone,
+  web:             Globe,
+  compute:         Cpu,
+  cloud:           Cloud,
+  shield:          Shield,
+  layers:          Layers,
+  zap:             Zap,
+  queue:           List,
+  cdn:             Globe,
+  client:          Monitor,
+  'load-balancer': Layers,
+  cache:           Zap,
+  box:             Box,
 }
 
 /** Map component status → semantic highlight token */
@@ -80,19 +93,28 @@ function statusToHighlight(status: SystemComponent['status']): string | undefine
 }
 
 // ─── Edge path helpers ─────────────────────────────────────────────────────────
+
+/**
+ * Build an SVG path string from a waypoints array.
+ * When ELK provides orthogonal waypoints (all right-angle bends) this renders
+ * Manhattan-style connectors.  Falls back to a simple line for 2-point arrays.
+ */
 function waypointsToPath(waypoints: { x: number; y: number }[]): string {
   if (waypoints.length < 2) return ''
   const [first, ...rest] = waypoints
-  const d = [`M ${first!.x} ${first!.y}`]
+  const parts = [`M ${first!.x} ${first!.y}`]
   for (const p of rest) {
-    d.push(`L ${p.x} ${p.y}`)
+    parts.push(`L ${p.x} ${p.y}`)
   }
-  return d.join(' ')
+  return parts.join(' ')
 }
 
+/**
+ * Cubic-bezier S-curve fallback for edges without ELK waypoints (dagre phase).
+ */
 function sCurvePath(
   from: { x: number; y: number },
-  to: { x: number; y: number },
+  to:   { x: number; y: number },
 ): string {
   const sx = from.x + NODE_W / 2
   const sy = from.y
@@ -147,14 +169,17 @@ export function SystemDiagramViz({ id, state, visual }: PrimitiveProps) {
           if (!fromNode || !toNode) return null
 
           const layoutEdge = layout.edges.find(e => e.from === conn.from && e.to === conn.to)
-          const pathD = layoutEdge?.waypoints.length
+
+          // ELK edges have ≥2 waypoints (start + optional bends + end).
+          // Fall back to the dagre S-curve when waypoints are absent.
+          const pathD = layoutEdge?.waypoints && layoutEdge.waypoints.length >= 2
             ? waypointsToPath(layoutEdge.waypoints)
             : sCurvePath(fromNode, toNode)
 
           if (!pathD) return null
 
-          const isDashed  = conn.style === 'dashed'
-          const isActive  = !!conn.active
+          const isDashed   = conn.style === 'dashed'
+          const isActive   = !!conn.active
           const strokeColor = isActive ? 'var(--color-secondary)' : 'var(--color-outline-variant)'
           const midX = (fromNode.x + toNode.x) / 2
           const midY = (fromNode.y + toNode.y) / 2
@@ -167,6 +192,7 @@ export function SystemDiagramViz({ id, state, visual }: PrimitiveProps) {
                 stroke={strokeColor}
                 strokeWidth={isActive ? 2.5 : 1.8}
                 strokeDasharray={isActive ? '8 5' : isDashed ? '6 4' : undefined}
+                strokeLinejoin="round"
                 markerEnd={isActive ? `url(#${idBase}-arrow-active)` : `url(#${idBase}-arrow)`}
                 style={{
                   filter: isActive ? 'drop-shadow(0 0 5px var(--color-secondary))' : 'none',
@@ -197,23 +223,24 @@ export function SystemDiagramViz({ id, state, visual }: PrimitiveProps) {
 
         {/* ── Components ──
          * Phase 27: stable key = posNode.id. Status → resolveHighlight colors.
+         * Phase 28: expanded icon map; icon lookup is case-insensitive-friendly.
          */}
         {layout.nodes.map((posNode) => {
           const comp = rawById.get(posNode.id)
           if (!comp) return null
 
-          const isDead = comp.status === 'dead'
+          const isDead       = comp.status === 'dead'
           const isOverloaded = comp.status === 'overloaded'
 
           const highlightToken = statusToHighlight(comp.status)
-          const colors = resolveHighlight(highlightToken)
-          const isHighlighted = !!highlightToken
+          const colors         = resolveHighlight(highlightToken)
+          const isHighlighted  = !!highlightToken
 
           const borderColor = isHighlighted ? colors.border : 'var(--color-outline-variant)'
           const shadow      = isHighlighted ? `0 0 16px ${colors.border}40` : 'none'
 
-          const IconToUse = comp.icon && IconMap[comp.icon] ? IconMap[comp.icon]! : Server
-          const Icon = IconToUse as React.ElementType
+          const iconKey = comp.icon?.toLowerCase() as keyof typeof IconMap | undefined
+          const IconToUse: React.ElementType = (iconKey && IconMap[iconKey]) ? IconMap[iconKey]! : Server
 
           return (
             <foreignObject
@@ -257,7 +284,7 @@ export function SystemDiagramViz({ id, state, visual }: PrimitiveProps) {
                     className="mb-1.5"
                     style={{ color: isHighlighted ? colors.text : 'var(--color-on-surface-variant)' }}
                   >
-                    <Icon size={22} />
+                    <IconToUse size={22} />
                   </div>
 
                   <span

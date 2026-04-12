@@ -64,7 +64,12 @@ export {
 } from './parser'
 
 // ─── Layout Engine ────────────────────────────────────────────────────────────
-export { computeLayout, computeViewBox } from './layout/index'
+export {
+  computeLayout,
+  computeViewBox,
+  setELKRunner,
+  subscribeELKReady,
+} from './layout/index'
 export type { LayoutResult, PositionedNode, PositionedEdge } from './layout/types'
 
 // ─── Step Engine ──────────────────────────────────────────────────────────────

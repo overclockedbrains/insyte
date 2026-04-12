@@ -77,7 +77,7 @@
           }
         ]
       },
-      "layoutHint": "dagre-LR"
+      "layoutHint": "elk-layered"
     },
     {
       "id": "url-system-no-cache",
@@ -122,7 +122,7 @@
           }
         ]
       },
-      "layoutHint": "dagre-LR"
+      "layoutHint": "elk-layered"
     },
     {
       "id": "stats-total",

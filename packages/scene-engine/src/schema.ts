@@ -53,6 +53,7 @@ export const ConditionSchema = z.discriminatedUnion('type', [
 export const LayoutHintSchema = z.enum([
   'dagre-TB', 'dagre-LR', 'dagre-BT', 'tree-RT',
   'linear-H', 'linear-V', 'grid-2d', 'hashmap-buckets', 'radial',
+  'elk-layered', 'elk-radial',
 ])
 
 export const SlotPositionSchema = z.enum([

@@ -100,7 +100,7 @@
           }
         ]
       },
-      "layoutHint": "dagre-LR"
+      "layoutHint": "elk-layered"
     },
     {
       "id": "delivery-badge",

@@ -63,6 +63,8 @@ export type LayoutHint =
   | 'grid-2d'         // 2D grid (DP tables, matrices)
   | 'hashmap-buckets' // bucket rows (hashmaps)
   | 'radial'          // circular/radial (hash rings, force-directed)
+  | 'elk-layered'     // ELK layered — orthogonal routing (system diagrams, complex graphs)
+  | 'elk-radial'      // ELK radial layout
 
 /** Canvas-relative slot for info primitives (text-badge, counter). */
 export type SlotPosition =

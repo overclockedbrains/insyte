@@ -356,7 +356,7 @@ function isDirective(line: string): boolean {
 const VALID_TYPES = ['concept', 'dsa-trace', 'lld', 'hld'] as const
 const VALID_LAYOUTS = ['text-left-canvas-right', 'canvas-only', 'code-left-canvas-right'] as const
 const VALID_VISUAL_TYPES = ['array', 'hashmap', 'linked-list', 'tree', 'graph', 'stack', 'queue', 'dp-table', 'grid', 'recursion-tree', 'system-diagram', 'text-badge', 'counter'] as const
-const VALID_LAYOUT_HINTS = ['dagre-TB', 'dagre-LR', 'dagre-BT', 'tree-RT', 'linear-H', 'linear-V', 'grid-2d', 'hashmap-buckets', 'radial'] as const
+const VALID_LAYOUT_HINTS = ['dagre-TB', 'dagre-LR', 'dagre-BT', 'tree-RT', 'linear-H', 'linear-V', 'grid-2d', 'hashmap-buckets', 'radial', 'elk-layered', 'elk-radial'] as const
 const VALID_SLOTS = ['top-left', 'top-center', 'top-right', 'bottom-left', 'bottom-center', 'bottom-right', 'left-center', 'right-center', 'overlay-top', 'overlay-bottom', 'center'] as const
 const VALID_CHALLENGE_TYPES = ['predict', 'break-it', 'optimize', 'scenario'] as const
 

@@ -1,5 +1,5 @@
-import { useMemo, useEffect } from 'react'
-import { computeSceneGraphAtStep, LRUCache } from '@insyte/scene-engine'
+import { useMemo, useEffect, useState } from 'react'
+import { computeSceneGraphAtStep, LRUCache, subscribeELKReady } from '@insyte/scene-engine'
 import type { Scene, SceneGraph } from '@insyte/scene-engine'
 
 const CACHE_CAPACITY = 50   // 50 steps ~ typical visualization length
@@ -10,19 +10,40 @@ const CACHE_CAPACITY = 50   // 50 steps ~ typical visualization length
  * - LRU cache (50 entries): avoids recomputing steps already visited.
  * - requestIdleCallback prefetch: pre-computes steps N+1 and N-1 during idle time.
  * - Cache is cleared when the scene identity changes (new generation).
- *
- * Phase 28 (ELK) adds ELK-ready subscription: when the ELK worker finishes
- * upgrading a layout, this hook clears the cache and bumps elkVersion state
- * to trigger a re-render with the higher-quality layout.
+ * - elkVersion (Phase 28): when the ELK worker finishes upgrading a layout,
+ *   this bumps elkVersion which forces a new LRU cache instance, invalidating
+ *   all cached scene graphs so they are recomputed with the ELK layout.
  */
 export function useSceneRuntime(
   scene: Scene | null,
   stepIndex: number
 ): { sceneGraph: SceneGraph | null } {
+  // Phase 28: ELK layout upgrade signal.
+  // Bumped by subscribeELKReady; causes the cache and sceneGraph to recompute.
+  const [elkVersion, setElkVersion] = useState(0)
+
   // LRU cache: stepIndex → SceneGraph
-  // Cache is recreated (cleared) automatically when scene identity changes
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const cache = useMemo(() => new LRUCache<number, SceneGraph>(CACHE_CAPACITY), [scene])
+  // Recreated when scene identity OR ELK version changes.
+  // Keying on elkVersion means the cache is silently discarded (and all steps
+  // recomputed) whenever the ELK worker delivers a higher-quality layout.
+  const cache = useMemo(
+    () => new LRUCache<number, SceneGraph>(CACHE_CAPACITY),
+    // elkVersion is intentionally in the dep array to invalidate on ELK upgrade
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [scene, elkVersion],
+  )
+
+  // Subscribe to ELK layout upgrades for scenes that contain system-diagram
+  // or elk-layered graph visuals.  When ELK resolves, clear step cache and
+  // re-render with orthogonal-routed layout.
+  useEffect(() => {
+    const hasELKVisual = scene?.visuals.some(
+      v => v.type === 'system-diagram' || v.layoutHint === 'elk-layered' || v.layoutHint === 'elk-radial'
+    )
+    if (!hasELKVisual) return
+
+    return subscribeELKReady(() => setElkVersion(v => v + 1))
+  }, [scene])
 
   // Compute scene graph for the current step (cache-first)
   const sceneGraph = useMemo(() => {

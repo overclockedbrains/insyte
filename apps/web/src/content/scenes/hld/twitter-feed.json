@@ -119,7 +119,7 @@
           }
         ]
       },
-      "layoutHint": "dagre-LR"
+      "layoutHint": "elk-layered"
     },
     {
       "id": "stats-followers",

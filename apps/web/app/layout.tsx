@@ -9,6 +9,7 @@ import { GlowEffect } from '@/components/layout/GlowEffect'
 import { DotGridBackground } from '@/components/layout/DotGridBackground'
 import { AuthProvider } from '@/components/auth/AuthProvider'
 import { AuthModal } from '@/components/auth/AuthModal'
+import { ELKInitializer } from '@/src/engine/ELKInitializer'
 import './globals.css'
 
 const manrope = Manrope({
@@ -74,6 +75,9 @@ export default function RootLayout({
         {/* Background layers */}
         <GlowEffect />
         <DotGridBackground opacity={0.4} />
+
+        {/* Wire ELK worker runner for system-diagram layouts */}
+        <ELKInitializer />
 
         {/* Auth provider — initialises session on mount */}
         <AuthProvider>

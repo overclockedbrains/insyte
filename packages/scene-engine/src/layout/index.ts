@@ -4,12 +4,46 @@ import {
   applyLinearLayout, applyStackLayout, applyGridLayout,
   applyHashmapLayout, applySlotLayout, applyRadialLayout,
 } from './algorithms/arithmetic'
+import { applyELKLayout } from './algorithms/elk'
 import { emptyLayoutResult, computeViewBox } from './utils'
 import type { LayoutResult, LayoutInput } from './types'
 import type { Visual } from '../types'   // direct internal import — NOT '@insyte/scene-engine' (self-reference)
 
-// Layout cache: topology hash → LayoutResult
+// ─── Synchronous layout cache (dagre / arithmetic / d3-hierarchy) ─────────────
 const layoutCache = new Map<string, LayoutResult>()
+
+// ─── ELK layout cache ────────────���──────────────────────��─────────────────────
+// Separate from layoutCache — ELK results are expensive to compute and are
+// never evicted on topology changes.  Once computed, the ELK result wins over
+// the dagre placeholder that was returned on the first synchronous call.
+const elkLayoutCache = new Map<string, LayoutResult>()
+
+// ─── ELK runner injection ─────────────────────────────────────────────────────
+// The runner is injected by apps/web at startup (setELKRunner) so this
+// package stays free of browser APIs (Worker, import.meta.url, etc.).
+let elkRunner: ((graph: object) => Promise<object>) | null = null
+
+export function setELKRunner(runner: (graph: object) => Promise<object>): void {
+  elkRunner = runner
+}
+
+// ─── ELK ready pub/sub ───────────────────────────────���────────────────────────
+// Subscribers are notified when an ELK layout finishes, so React can
+// clear its step-graph cache and re-render with the upgraded layout.
+
+type ELKReadyCallback = () => void
+const elkReadyListeners = new Set<ELKReadyCallback>()
+
+export function subscribeELKReady(cb: ELKReadyCallback): () => void {
+  elkReadyListeners.add(cb)
+  return () => { elkReadyListeners.delete(cb) }
+}
+
+function notifyELKReady(): void {
+  for (const cb of elkReadyListeners) cb()
+}
+
+// ─── Topology hashing ──────────────────���──────────────────────���───────────────
 
 /**
  * Hash only topology (node IDs + edges), not visual state (colors, highlights).
@@ -19,13 +53,11 @@ function hashTopology(visual: Visual, state: Record<string, unknown>): string {
   const type = visual.type
 
   if (type === 'tree' || type === 'recursion-tree') {
-    // Trees store structure in a `root` object, not a flat `nodes` array
     const s = state as any
     if (s.root) {
       const rootHash = hashTreeNode(s.root)
       return `${visual.id}|${type}|${rootHash}`
     }
-    // Legacy flat-array shape: hash by IDs
     const nodes: any[] = s.nodes ?? []
     return `${visual.id}|${type}|${nodes.map((n: any) => n.id).join(',')}`
   }
@@ -59,12 +91,28 @@ function hashTopology(visual: Visual, state: Record<string, unknown>): string {
 function hashTreeNode(node: any): string {
   if (!node) return 'null'
   const id = String(node.id ?? node.value ?? '?')
-  // Support both binary trees (left/right) and n-ary trees (children)
   const children = node.children
     ? node.children.map(hashTreeNode).join(',')
     : `${hashTreeNode(node.left ?? null)},${hashTreeNode(node.right ?? null)}`
   return `${id}(${children})`
 }
+
+// ─── ELK background upgrade ───────────────────────────────────────────────────
+
+function scheduleELKUpgrade(input: LayoutInput, topoHash: string): void {
+  if (!elkRunner) return
+
+  applyELKLayout(input, elkRunner).then(elkResult => {
+    elkLayoutCache.set(topoHash, elkResult)
+    // Promote to main cache so the next call (without ELK-specific check) also wins
+    layoutCache.set(topoHash, elkResult)
+    notifyELKReady()
+  }).catch(() => {
+    // ELK failed — dagre placeholder stays in cache; no user-visible error
+  })
+}
+
+// ─── Main entry point ───────────────────────────────────────────────���─────────
 
 export function computeLayout(
   visual: Visual,
@@ -73,14 +121,25 @@ export function computeLayout(
   containerHeight = 600
 ): LayoutResult {
   const topoHash = hashTopology(visual, state)
+  const hint = visual.layoutHint
 
-  // Cache hit — topology unchanged, reuse layout
+  // ── ELK fast-path ────────────────────────────────────────────���─────────────
+  // For ELK-eligible types, check the ELK cache BEFORE the general layout
+  // cache.  Once ELK has resolved, both caches are updated, so this check
+  // will only fire on the very first re-render after the async upgrade.
+  const isELKCandidate =
+    visual.type === 'system-diagram' ||
+    (visual.type === 'graph' && (hint === 'elk-layered' || hint === 'elk-radial'))
+
+  if (isELKCandidate && elkLayoutCache.has(topoHash)) {
+    return elkLayoutCache.get(topoHash)!
+  }
+
+  // ── General synchronous cache ─────────────────────���────────────────────────
   if (layoutCache.has(topoHash)) return layoutCache.get(topoHash)!
 
   const input: LayoutInput = { visual, state }
   let result: LayoutResult
-
-  const hint = visual.layoutHint
 
   switch (visual.type) {
     case 'tree':
@@ -89,7 +148,11 @@ export function computeLayout(
       break
 
     case 'graph':
-      if (hint === 'radial') {
+      if (hint === 'elk-layered' || hint === 'elk-radial') {
+        // ELK requested — return dagre sync, upgrade async
+        result = applyDagreLayout(input, hint === 'elk-layered' ? 'LR' : 'TB')
+        scheduleELKUpgrade(input, topoHash)
+      } else if (hint === 'radial') {
         result = applyRadialLayout(input)
       } else {
         result = applyDagreLayout(input,
@@ -100,7 +163,9 @@ export function computeLayout(
       break
 
     case 'system-diagram':
-      result = applyDagreLayout(input, 'LR')  // Phase 28 upgrades this to ELK; dagre used here
+      // Always use ELK for system-diagram: return dagre sync, upgrade async
+      result = applyDagreLayout(input, 'LR')
+      scheduleELKUpgrade(input, topoHash)
       break
 
     case 'array':
