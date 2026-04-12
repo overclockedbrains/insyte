@@ -90,3 +90,6 @@ export type {
   SceneGraph,
   SceneGraphDiff,
 } from './scene-graph'
+
+// ─── Runtime ──────────────────────────────────────────────────────────────────
+export { LRUCache } from './runtime'
