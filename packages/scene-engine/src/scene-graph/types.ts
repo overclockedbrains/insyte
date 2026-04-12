@@ -1,4 +1,4 @@
-import type { VisualType } from '../types'
+import type { VisualType, Condition } from '../types'
 
 export interface SceneNode {
   id: string
@@ -24,6 +24,12 @@ export interface SceneGroup {
   id: string                   // = visual ID
   nodeIds: string[]
   bbox: { x: number; y: number; width: number; height: number }
+  // Display metadata — lifted from scene.visuals so renderers need no raw Scene access
+  label?: string               // visual.label
+  isHud: boolean               // true for text-badge / counter (renders in HUD zone)
+  visualType: VisualType       // primitive type — for PrimitiveRegistry lookup
+  // Visibility — control-toggle is true in step engine; renderer layer filters on this
+  showWhen?: Condition
 }
 
 export interface SceneGraph {

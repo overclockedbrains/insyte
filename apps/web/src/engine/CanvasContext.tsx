@@ -10,7 +10,8 @@
  *   const { width, height, toPx } = useCanvas()
  */
 
-import React from 'react'
+import React, { JSX, useCallback } from 'react'
+import { useCanvasDimensions } from '../hooks/useCanvasDimensions';
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -51,6 +52,32 @@ export const CanvasContext = React.createContext<CanvasContextValue>({
 // ─── Hook ──────────────────────────────────────────────────────────────────────
 
 export const useCanvas = () => React.useContext(CanvasContext)
+
+// ─── Provider ────────────────────────────────────────────────────────────────
+
+export const CanvasContextProvider = ({
+  children, className, as: Component = 'div'
+}: {
+  children: React.ReactNode, className?: string, as?: React.ElementType
+}): JSX.Element => {
+  const { ref, width, height } = useCanvasDimensions();
+
+  const toPx = useCallback(
+    (pos: { x: number; y: number }) => ({
+      x: (pos.x / 100) * (width || 800),
+      y: (pos.y / 100) * (height || 600),
+    }),
+    [width, height],
+  )
+
+  return (
+    <CanvasContext.Provider value={{ width, height, toPx }}>
+      <Component className={className} ref={ref}>
+        {children}
+      </Component>
+    </CanvasContext.Provider>
+  )
+}
 
 // ─── viewBox helper ───────────────────────────────────────────────────────────
 

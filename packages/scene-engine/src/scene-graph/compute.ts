@@ -69,6 +69,10 @@ export function computeSceneGraphAtStep(
         width: bb.maxX - bb.minX,
         height: bb.maxY - bb.minY,
       },
+      label: visual.label,
+      isHud: visual.type === 'text-badge' || visual.type === 'counter',
+      visualType: visual.type,
+      showWhen: visual.showWhen,
     })
   }
 
