@@ -66,3 +66,14 @@ export {
 // ─── Layout Engine ────────────────────────────────────────────────────────────
 export { computeLayout, computeViewBox } from './layout/index'
 export type { LayoutResult, PositionedNode, PositionedEdge } from './layout/types'
+
+// ─── Step Engine ──────────────────────────────────────────────────────────────
+export {
+  applyStepActionsUpTo,
+  getVisualStateAtStep,
+  computeTopologyAtStep,
+  hashTopologyAtStep,
+  evaluateCondition,
+  validateStepSequence,
+} from './step-engine'
+export type { StepValidationResult } from './step-engine'

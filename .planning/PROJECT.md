@@ -55,7 +55,7 @@ R1 released on 8 April 2026 and R2 is in progress
 | **Phase 18** | ✅ | Coordinate System Unification (fix dual-coordinate edge/node misalignment) |
 | **Phase 19** | ✅ | Scene JSON Schema Redesign (LayoutHint, SlotPosition, simplified Action) |
 | **Phase 20** | ✅ | Layout Engine (SPACING constants, per-primitive sizing, dagre/d3-hierarchy/arithmetic algorithms) |
-| **Phase 21** | 🔲 | Step Engine (applyStepActionsUpTo, computeTopologyAtStep, evaluateCondition, step validation) |
+| **Phase 21** | ✅ | Step Engine (applyStepActionsUpTo, computeTopologyAtStep, evaluateCondition, step validation) |
 | **Phase 22** | 🔲 | Scene Graph Architecture (SceneGraph types, SceneGraphDiff, DOMRenderer extracted) |
 | **Phase 23** | 🔲 | Scene Runtime & Caching (unified cache layer: layout + scene graph + ELK; useSceneRuntime hook; playback bridge) |
 | **Phase 24** | 🔲 | ISCL Grammar & Parser (purpose-built DSL, deterministic parser, cross-ref validation) |

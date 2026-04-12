@@ -3,7 +3,7 @@
 import { useEffect, useCallback, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import type { Scene } from '@insyte/scene-engine'
+import type { Scene, Condition } from '@insyte/scene-engine'
 import { useBoundStore } from '@/src/stores/store'
 import { DotGridBackground } from '@/components/layout/DotGridBackground'
 import { PlaybackControls } from '../controls/PlaybackControls'
@@ -73,11 +73,18 @@ function CanvasVisualization({ scene, controlValues }: { scene: Scene; controlVa
   const canvasContextValue = { width: dims.w || 800, height: dims.h || 600, toPx }
   // ────────────────────────────────────────────────────────────────────────────
 
-  // Evaluate a visual's showWhen condition against current control values
-  const isVisible = (visual: { showWhen?: { control: string; equals: unknown } }) => {
+  // Evaluate a visual's showWhen condition against current control values.
+  // Step-based conditions (step-range, after-step, before-step, always) are
+  // handled by the step engine; the renderer only needs to resolve control-toggle.
+  const isVisible = (visual: { showWhen?: Condition }) => {
     if (!visual.showWhen) return true
-    const val = controlValues[visual.showWhen.control]
-    return val === visual.showWhen.equals
+    const cond = visual.showWhen
+    if (cond.type === 'control-toggle') {
+      const val = controlValues[cond.controlId]
+      return cond.value !== undefined ? val === cond.value : Boolean(val)
+    }
+    // All step-based condition types default to visible here (step engine is authoritative)
+    return true
   }
 
   const visiblePopups = scene.popups.filter(

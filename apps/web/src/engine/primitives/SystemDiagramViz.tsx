@@ -118,8 +118,7 @@ export function SystemDiagramViz({ id, state, visual }: PrimitiveProps) {
       <svg
         viewBox={layout.viewBox}
         width="100%"
-        height="auto"
-        style={{ overflow: 'visible', display: 'block', maxWidth: vw }}
+        style={{ overflow: 'visible', display: 'block', maxWidth: vw, height: 'auto' }}
         preserveAspectRatio="xMidYMid meet"
         aria-label="System diagram visualization"
       >

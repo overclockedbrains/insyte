@@ -5,24 +5,56 @@ import { ZodError } from 'zod'
 // ─── Migration helpers ────────────────────────────────────────────────────────
 
 /**
+ * Convert legacy Condition format { control, equals } → { type: 'control-toggle', controlId, value }.
+ * Runs as part of visual migration before schema validation.
+ */
+function migrateCondition(cond: unknown): unknown {
+  if (!cond || typeof cond !== 'object' || Array.isArray(cond)) return cond
+  const c = cond as Record<string, unknown>
+  if ('control' in c && !('type' in c)) {
+    return { type: 'control-toggle', controlId: c['control'], value: c['equals'] }
+  }
+  return cond
+}
+
+/**
  * Silently drops the legacy `position` field from a visual if present.
  * Also drops `x`/`y` from node arrays inside initialState (graph, tree,
  * recursion-tree, system-diagram use "nodes" or "components").
+ * Migrates legacy Condition format { control, equals } to the new discriminated union.
  * Runs before schema validation so old JSONs parse cleanly during the transition.
  */
 function stripLegacyPositions(raw: Record<string, unknown>): Record<string, unknown> {
+  // Migrate legacy showWhen on popups
+  const popups = raw['popups']
+  const migratedPopups = Array.isArray(popups)
+    ? popups.map((p: unknown) => {
+        if (!p || typeof p !== 'object') return p
+        const popup = p as Record<string, unknown>
+        return popup['showWhen']
+          ? { ...popup, showWhen: migrateCondition(popup['showWhen']) }
+          : popup
+      })
+    : popups
+
   const visuals = raw['visuals']
-  if (!Array.isArray(visuals)) return raw
+  if (!Array.isArray(visuals)) return { ...raw, popups: migratedPopups }
   return {
     ...raw,
+    popups: migratedPopups,
     visuals: visuals.map((v: unknown) => {
       if (!v || typeof v !== 'object') return v
       const visual = v as Record<string, unknown>
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { position, ...rest } = visual
 
+      // Migrate legacy showWhen condition format
+      const migratedRest: typeof rest = rest['showWhen']
+        ? { ...rest, showWhen: migrateCondition(rest['showWhen']) }
+        : rest
+
       // Strip x/y from node/component arrays inside initialState
-      const initialState = rest['initialState']
+      const initialState = migratedRest['initialState']
       if (initialState && typeof initialState === 'object') {
         const state = initialState as Record<string, unknown>
         const stripped: Record<string, unknown> = { ...state }
@@ -33,9 +65,9 @@ function stripLegacyPositions(raw: Record<string, unknown>): Record<string, unkn
             )
           }
         }
-        return { ...rest, initialState: stripped }
+        return { ...migratedRest, initialState: stripped }
       }
-      return rest
+      return migratedRest
     }),
   }
 }

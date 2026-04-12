@@ -32,13 +32,23 @@ export type CodeLanguage = 'python' | 'javascript'
 
 // ─── Condition ────────────────────────────────────────────────────────────────
 
-/** Evaluates whether a control matches a specific value — used for showWhen. */
-export interface Condition {
-  /** The id of the Control to evaluate */
-  control: string
-  /** The value the control must equal for the condition to be true */
-  equals: unknown
-}
+/**
+ * Discriminated union for showWhen visibility conditions.
+ *
+ * Step-based variants (step-range, after-step, before-step, always) are
+ * evaluated purely by the step engine.
+ *
+ * control-toggle: evaluated by the renderer using PlaybackStore control values.
+ * The step engine returns `true` for this type (structural default); the renderer
+ * applies the actual toggle value as a final visibility filter.
+ */
+export type Condition =
+  | { type: 'step-range';     from: number;   to: number }
+  | { type: 'after-step';     after: number }
+  | { type: 'before-step';    before: number }
+  /** value: optional match target — if omitted, any truthy control value shows the visual */
+  | { type: 'control-toggle'; controlId: string; value?: unknown }
+  | { type: 'always' }
 
 // ─── Layout ───────────────────────────────────────────────────────────────────
 

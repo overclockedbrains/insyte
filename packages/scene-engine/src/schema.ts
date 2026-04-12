@@ -40,10 +40,13 @@ export const ControlTypeSchema = z.enum([
 
 // ─── Condition ────────────────────────────────────────────────────────────────
 
-export const ConditionSchema = z.object({
-  control: z.string(),
-  equals: z.unknown(),
-})
+export const ConditionSchema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('step-range'),     from: z.number(), to: z.number() }),
+  z.object({ type: z.literal('after-step'),     after: z.number() }),
+  z.object({ type: z.literal('before-step'),    before: z.number() }),
+  z.object({ type: z.literal('control-toggle'), controlId: z.string(), value: z.unknown().optional() }),
+  z.object({ type: z.literal('always') }),
+])
 
 // ─── Layout ───────────────────────────────────────────────────────────────────
 

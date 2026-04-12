@@ -84,8 +84,9 @@
       "type": "system-diagram",
       "label": "URL Shortener (Cache Off)",
       "showWhen": {
-        "control": "cache-toggle",
-        "equals": false
+        "type": "control-toggle",
+        "controlId": "cache-toggle",
+        "value": false
       },
       "initialState": {
         "components": [
