@@ -110,14 +110,6 @@ function CanvasVisualization({ scene, controlValues }: { scene: Scene; controlVa
     return toPx({ x: 50, y: 75 })
   }
 
-  function getMaxWidth(type: string): string {
-    if (type === 'system-diagram') return '100%'
-    if (type === 'queue') return '320px'
-    if (type === 'graph') return '100%'
-    if (type === 'tree' || type === 'recursion-tree') return '100%'
-    return '100%'
-  }
-
   return (
     // Phase 18: wrap the whole visualization in CanvasContext so every child
     // primitive can read the measured pixel dimensions without prop-drilling.
@@ -143,6 +135,7 @@ function CanvasVisualization({ scene, controlValues }: { scene: Scene; controlVa
                     state={state}
                     step={currentStep}
                     label={visual.label}
+                    visual={visual}
                   />
                 )
               })}
@@ -159,6 +152,7 @@ function CanvasVisualization({ scene, controlValues }: { scene: Scene; controlVa
                         state={state}
                         step={currentStep}
                         label={visual.label}
+                        visual={visual}
                       />
                     )
                   })}
@@ -202,6 +196,7 @@ function CanvasVisualization({ scene, controlValues }: { scene: Scene; controlVa
                     state={state}
                     step={currentStep}
                     label={visual.label}
+                    visual={visual}
                   />
                 </div>
               )

@@ -1,24 +1,18 @@
 /**
- * RecursionTreeViz — Phase 19 bridge: auto-layout
+ * RecursionTreeViz — Phase 20: computeLayout() from @insyte/scene-engine
  *
- * x/y removed from scene JSON in Phase 19. This component now computes node
- * positions using the same subtree-width centering algorithm as TreeViz.
- * Phase 20 will replace this with computeLayout() from @insyte/scene-engine.
+ * Positions are computed by the deterministic Reingold-Tilford algorithm
+ * (d3-hierarchy) inside the layout engine. This replaces the custom
+ * subtree-width centering algorithm that was the Phase 19 bridge.
  */
 
 'use client'
 
+import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import type { PrimitiveProps } from '.'
-import { computeViewBox } from '../CanvasContext'
-
-// ─── Constants ─────────────────────────────────────────────────────────────────
-const NODE_UNIT_X = 96   // horizontal spread — wider than TreeViz to fit labels
-const NODE_UNIT_Y = 90   // vertical spacing
-const NODE_W      = 80
-const NODE_H      = 48
-const HALF_W      = NODE_W / 2
-const HALF_H      = NODE_H / 2
+import { computeLayout } from '@insyte/scene-engine'
+import { useCanvas } from '../CanvasContext'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface RecursionNode {
@@ -34,57 +28,9 @@ interface RecursionTreeState {
   rootId: string
 }
 
-// ─── Auto layout (subtree-width centering) ─────────────────────────────────────
-// TODO(Phase 20): replace with computeLayout() from @insyte/scene-engine
-
-function subtreeWidth(id: string, nodeMap: Map<string, RecursionNode>): number {
-  const node = nodeMap.get(id)
-  if (!node) return 1
-  const children = node.children ?? []
-  if (children.length === 0) return 1
-  return children.reduce((sum, cId) => sum + subtreeWidth(cId, nodeMap), 0)
-}
-
-function assignPositions(
-  id: string,
-  depth: number,
-  xStart: number,
-  nodeMap: Map<string, RecursionNode>,
-  out: Map<string, { x: number; y: number }>,
-): void {
-  const node = nodeMap.get(id)
-  if (!node) return
-  const children = node.children ?? []
-  if (children.length === 0) {
-    out.set(id, { x: xStart, y: depth })
-    return
-  }
-  let cursor = xStart
-  for (const cId of children) {
-    assignPositions(cId, depth + 1, cursor, nodeMap, out)
-    cursor += subtreeWidth(cId, nodeMap)
-  }
-  const first = out.get(children[0] ?? '')
-  const last  = out.get(children[children.length - 1] ?? '')
-  if (!first || !last) return
-  out.set(id, { x: (first.x + last.x) / 2, y: depth })
-}
-
-// ─── Edge path ─────────────────────────────────────────────────────────────────
-function edgeBezier(
-  from: { x: number; y: number },
-  to: { x: number; y: number },
-): string {
-  const sx = from.x
-  const sy = from.y + HALF_H
-  const ex = to.x
-  const ey = to.y - HALF_H
-  const midY = (sy + ey) / 2
-  return `M ${sx} ${sy} C ${sx} ${midY} ${ex} ${midY} ${ex} ${ey}`
-}
-
 // ─── Component ─────────────────────────────────────────────────────────────────
-export function RecursionTreeViz({ state }: PrimitiveProps) {
+export function RecursionTreeViz({ id, state, visual }: PrimitiveProps) {
+  const { width: canvasW, height: canvasH } = useCanvas()
   const { nodes = [], rootId } = state as RecursionTreeState
 
   if (nodes.length === 0) {
@@ -95,51 +41,25 @@ export function RecursionTreeViz({ state }: PrimitiveProps) {
     )
   }
 
-  const nodeMap = new Map(nodes.map((n) => [n.id, n]))
+  const resolvedVisual = visual ?? { id, type: 'recursion-tree' as const, initialState: {} }
+
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const layout = useMemo(
+    () => computeLayout(resolvedVisual, state as Record<string, unknown>, canvasW, canvasH),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [resolvedVisual.id, state, canvasW, canvasH],
+  )
+
+  const rawById = new Map(nodes.map(n => [n.id, n]))
+  const [nodeW, nodeH] = [layout.nodes[0]?.width ?? 80, layout.nodes[0]?.height ?? 48]
   const effectiveRootId = rootId ?? nodes[0]?.id
 
-  const posMap = new Map<string, { x: number; y: number }>()
-  if (effectiveRootId) {
-    assignPositions(effectiveRootId, 0, 0, nodeMap, posMap)
-  }
-
-  const scaledNodes = nodes.map((n) => {
-    const pos = posMap.get(n.id) ?? { x: 0, y: 0 }
-    return { ...n, svgX: pos.x * NODE_UNIT_X, svgY: pos.y * NODE_UNIT_Y }
-  })
-
-  const scaledMap = new Map(scaledNodes.map((n) => [n.id, n]))
-
-  const connections: {
-    from: { x: number; y: number }
-    to: { x: number; y: number }
-    id: string
-    pruned: boolean
-  }[] = []
-
-  scaledNodes.forEach((node) => {
-    const children = node.children ?? []
-    children.forEach((childId) => {
-      const child = scaledMap.get(childId)
-      if (child) {
-        connections.push({
-          from: { x: node.svgX, y: node.svgY },
-          to:   { x: child.svgX, y: child.svgY },
-          id:   `${node.id}-${childId}`,
-          pruned: child.status === 'memoized',
-        })
-      }
-    })
-  })
-
-  const vbNodes = scaledNodes.map((n) => ({ x: n.svgX, y: n.svgY }))
-  const viewBox = computeViewBox(vbNodes, NODE_W, NODE_H, 32)
-  const [, , vw] = viewBox.split(' ').map(Number)
+  const [,, vw] = layout.viewBox.split(' ').map(Number)
 
   return (
     <div className="flex items-center justify-center w-full min-h-[300px] overflow-visible">
       <svg
-        viewBox={viewBox}
+        viewBox={layout.viewBox}
         width="100%"
         height="auto"
         style={{ overflow: 'visible', display: 'block', maxWidth: vw }}
@@ -147,27 +67,35 @@ export function RecursionTreeViz({ state }: PrimitiveProps) {
         aria-label="Recursion tree visualization"
       >
         {/* ── Edges ── */}
-        {connections.map((conn) => (
-          <motion.path
-            key={conn.id}
-            d={edgeBezier(conn.from, conn.to)}
-            stroke={conn.pruned ? 'var(--color-outline-variant)' : 'var(--color-on-surface-variant)'}
-            strokeWidth={2}
-            strokeDasharray={conn.pruned ? '4 4' : undefined}
-            fill="none"
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: 1 }}
-            transition={{ duration: 0.35, ease: 'easeOut' }}
-          />
-        ))}
+        {layout.edges.map((edge) => {
+          const [wp0, wp1] = edge.waypoints
+          if (!wp0 || !wp1) return null
+          const sx = wp0.x, sy = wp0.y
+          const ex = wp1.x, ey = wp1.y
+          const midY = (sy + ey) / 2
+          const isMemoized = rawById.get(edge.to)?.status === 'memoized'
+          return (
+            <motion.path
+              key={edge.id}
+              d={`M ${sx} ${sy} C ${sx} ${midY} ${ex} ${midY} ${ex} ${ey}`}
+              stroke={isMemoized ? 'var(--color-outline-variant)' : 'var(--color-on-surface-variant)'}
+              strokeWidth={2}
+              strokeDasharray={isMemoized ? '4 4' : undefined}
+              fill="none"
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{ pathLength: 1, opacity: 1 }}
+              transition={{ duration: 0.35, ease: 'easeOut' }}
+            />
+          )
+        })}
 
-        {/* ── Nodes via foreignObject ── */}
-        {scaledNodes.map((node) => {
-          const raw = nodeMap.get(node.id)!
-          const isComputing = raw.status === 'computing'
-          const isMemoized  = raw.status === 'memoized'
-          const isComplete  = raw.status === 'complete'
-          const isRoot      = node.id === effectiveRootId
+        {/* ── Nodes ── */}
+        {layout.nodes.map((posNode) => {
+          const raw = rawById.get(posNode.id)
+          const isComputing = raw?.status === 'computing'
+          const isMemoized  = raw?.status === 'memoized'
+          const isComplete  = raw?.status === 'complete'
+          const isRoot      = posNode.id === effectiveRootId
 
           let bgColor     = 'var(--color-surface-container)'
           let borderColor = 'var(--color-outline-variant)'
@@ -188,14 +116,14 @@ export function RecursionTreeViz({ state }: PrimitiveProps) {
 
           return (
             <foreignObject
-              key={node.id}
-              x={node.svgX - HALF_W}
-              y={node.svgY - HALF_H}
-              width={NODE_W}
-              height={NODE_H + 16}
+              key={posNode.id}
+              x={posNode.x - nodeW / 2}
+              y={posNode.y - nodeH / 2}
+              width={nodeW}
+              height={nodeH + 16}
               style={{ overflow: 'visible' }}
             >
-              <div style={{ width: NODE_W, position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <div style={{ width: nodeW, position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 {isRoot && (
                   <span style={{ position: 'absolute', top: -20, fontSize: 9, fontFamily: 'monospace', fontWeight: 700, textTransform: 'uppercase', color: 'var(--color-primary)', background: 'var(--color-surface-container)', borderRadius: 4, padding: '0 3px' }}>
                     root
@@ -212,9 +140,9 @@ export function RecursionTreeViz({ state }: PrimitiveProps) {
                   transition={{ duration: 0.2 }}
                 >
                   <div style={{ fontSize: 12, fontFamily: 'monospace', fontWeight: 700, lineHeight: 1.2 }}>
-                    {raw.label}
+                    {raw?.label ?? posNode.id}
                   </div>
-                  {raw.result && (
+                  {raw?.result && (
                     <div style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--color-secondary)', marginTop: 2 }}>
                       ={raw.result}
                     </div>

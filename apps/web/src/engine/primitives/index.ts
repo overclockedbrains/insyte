@@ -1,4 +1,5 @@
 import React from 'react'
+import type { Visual } from '@insyte/scene-engine'
 
 import { ArrayViz } from './ArrayViz'
 import { HashMapViz } from './HashMapViz'
@@ -22,6 +23,8 @@ export interface PrimitiveProps {
   state: unknown
   step: number
   label?: string
+  /** Phase 20: full Visual object so primitives can call computeLayout(visual, state) */
+  visual?: Visual
   onHover?: (id: string) => void
 }
 

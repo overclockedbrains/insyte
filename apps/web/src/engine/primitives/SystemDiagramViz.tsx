@@ -1,13 +1,14 @@
 /**
- * SystemDiagramViz — Phase 19 bridge: grid auto-layout
+ * SystemDiagramViz — Phase 20: computeLayout() / dagre LR from @insyte/scene-engine
  *
- * x/y removed from scene JSON in Phase 19. Positions are now computed here
- * using a left-to-right grid arrangement.
- * Phase 20 will replace this with computeLayout() / dagre from @insyte/scene-engine.
+ * Positions are computed by the dagre left-to-right layout engine. The SVG
+ * viewBox is set from the bounding box so content is never clipped. Phase 28
+ * will upgrade this to ELK for orthogonal routing.
  */
 
 'use client'
 
+import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import {
   Server,
@@ -23,29 +24,21 @@ import {
   Zap,
 } from 'lucide-react'
 import type { PrimitiveProps } from '.'
-import { computeViewBox } from '../CanvasContext'
+import { computeLayout } from '@insyte/scene-engine'
+import { useCanvas } from '../CanvasContext'
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
-const NODE_W    = 120  // component box width
-const NODE_H    = 72   // component box height
-const COL_GAP   = 80   // horizontal gap between component centres
-const ROW_GAP   = 100  // vertical gap between component centres
+// NODE_W / NODE_H must match PRIMITIVE_SIZING.systemDiagram in the layout engine
+const NODE_W = 120
+const NODE_H = 48
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface SystemComponent {
   id: string
   label: string
   icon?: string
-  // x/y no longer in scene JSON — positions computed by bridge layout below
-  x?: number
-  y?: number
   status?: 'normal' | 'active' | 'overloaded' | 'dead'
   sublabel?: string
-}
-
-interface PositionedComponent extends SystemComponent {
-  cx: number  // computed center x
-  cy: number  // computed center y
 }
 
 interface SystemConnection {
@@ -54,7 +47,6 @@ interface SystemConnection {
   label?: string
   style?: 'solid' | 'dashed'
   active?: boolean
-  showWhen?: { control: string; equals: unknown }
 }
 
 interface SystemDiagramState {
@@ -75,17 +67,24 @@ const IconMap: Record<string, React.ElementType> = {
   zap:      Zap,
 }
 
-// ─── Edge path ─────────────────────────────────────────────────────────────────
+// ─── Edge path from dagre waypoints ────────────────────────────────────────────
+function waypointsToPath(waypoints: { x: number; y: number }[]): string {
+  if (waypoints.length < 2) return ''
+  const [first, ...rest] = waypoints
+  const d = [`M ${first!.x} ${first!.y}`]
+  for (const p of rest) {
+    d.push(`L ${p.x} ${p.y}`)
+  }
+  return d.join(' ')
+}
+
 /**
- * S-curve cubic bezier between two component centers.
- * Connects right-edge of `from` to left-edge of `to` when laid out horizontally,
- * or adapts to arbitrary positions using a midpoint-based control-point strategy.
+ * S-curve bezier fallback when dagre provides no waypoints.
  */
-function systemEdgePath(
+function sCurvePath(
   from: { x: number; y: number },
   to: { x: number; y: number },
 ): string {
-  // Use component centers — arrowhead already has refX so it sits on the edge
   const sx = from.x + NODE_W / 2
   const sy = from.y
   const ex = to.x - NODE_W / 2
@@ -95,31 +94,29 @@ function systemEdgePath(
 }
 
 // ─── Component ─────────────────────────────────────────────────────────────────
-export function SystemDiagramViz({ state }: PrimitiveProps) {
+export function SystemDiagramViz({ id, state, visual }: PrimitiveProps) {
+  const { width: canvasW, height: canvasH } = useCanvas()
   const { components = [], connections = [] } = state as SystemDiagramState
 
-  // TODO(Phase 20): replace with computeLayout() / dagre from @insyte/scene-engine
-  // Bridge: left-to-right grid, ceil(sqrt(n)) columns
-  const cols = Math.max(1, Math.ceil(Math.sqrt(components.length)))
-  const positioned: PositionedComponent[] = components.map((c, i) => ({
-    ...c,
-    cx: (i % cols) * (NODE_W + COL_GAP) + NODE_W / 2 + COL_GAP / 2,
-    cy: Math.floor(i / cols) * (NODE_H + ROW_GAP) + NODE_H / 2 + ROW_GAP / 2,
-  }))
+  const resolvedVisual = visual ?? { id, type: 'system-diagram' as const, initialState: {} }
 
-  const getComp = (id: string) => positioned.find((c) => c.id === id)
+  const layout = useMemo(
+    () => computeLayout(resolvedVisual, state as Record<string, unknown>, canvasW, canvasH),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [resolvedVisual.id, state, canvasW, canvasH],
+  )
 
-  const centerPoints = positioned.map((c) => ({ x: c.cx, y: c.cy }))
-  const viewBox = computeViewBox(centerPoints, NODE_W, NODE_H, 36)
-  const [, , vw] = viewBox.split(' ').map(Number)
+  const posById  = new Map(layout.nodes.map(n => [n.id, n]))
+  const rawById  = new Map(components.map(c => [c.id, c]))
 
-  // Unique IDs for SVG markers
-  const idBase = `sys-${components.map((c) => c.id).join('').slice(0, 8)}`
+  const idBase = `sys-${components.map(c => c.id).join('').slice(0, 8)}`
+
+  const [,, vw] = layout.viewBox.split(' ').map(Number)
 
   return (
     <div className="flex items-center justify-center w-full min-h-[220px] overflow-visible">
       <svg
-        viewBox={viewBox}
+        viewBox={layout.viewBox}
         width="100%"
         height="auto"
         style={{ overflow: 'visible', display: 'block', maxWidth: vw }}
@@ -137,31 +134,32 @@ export function SystemDiagramViz({ state }: PrimitiveProps) {
 
         {/* ── Connections ── */}
         {connections.map((conn, idx) => {
-          const from = getComp(conn.from)
-          const to   = getComp(conn.to)
-          if (!from || !to) return null
+          const fromNode = posById.get(conn.from)
+          const toNode   = posById.get(conn.to)
+          if (!fromNode || !toNode) return null
+
+          const layoutEdge = layout.edges.find(e => e.from === conn.from && e.to === conn.to)
+          const pathD = layoutEdge?.waypoints.length
+            ? waypointsToPath(layoutEdge.waypoints)
+            : sCurvePath(fromNode, toNode)
+
+          if (!pathD) return null
 
           const isDashed  = conn.style === 'dashed'
           const isActive  = !!conn.active
-          const strokeColor = isActive
-            ? 'var(--color-secondary)'
-            : 'var(--color-outline-variant)'
-          const midX = (from.cx + to.cx) / 2
-          const midY = (from.cy + to.cy) / 2
+          const strokeColor = isActive ? 'var(--color-secondary)' : 'var(--color-outline-variant)'
+          const midX = (fromNode.x + toNode.x) / 2
+          const midY = (fromNode.y + toNode.y) / 2
 
           return (
             <g key={`conn-${idx}`}>
               <motion.path
-                d={systemEdgePath({ x: from.cx, y: from.cy }, { x: to.cx, y: to.cy })}
+                d={pathD}
                 fill="none"
                 stroke={strokeColor}
                 strokeWidth={isActive ? 2.5 : 1.8}
                 strokeDasharray={isActive ? '8 5' : isDashed ? '6 4' : undefined}
-                markerEnd={
-                  isActive
-                    ? `url(#${idBase}-arrow-active)`
-                    : `url(#${idBase}-arrow)`
-                }
+                markerEnd={isActive ? `url(#${idBase}-arrow-active)` : `url(#${idBase}-arrow)`}
                 style={{
                   filter: isActive ? 'drop-shadow(0 0 5px var(--color-secondary))' : 'none',
                 }}
@@ -189,8 +187,11 @@ export function SystemDiagramViz({ state }: PrimitiveProps) {
           )
         })}
 
-        {/* ── Components via foreignObject ── */}
-        {positioned.map((comp) => {
+        {/* ── Components ── */}
+        {layout.nodes.map((posNode) => {
+          const comp = rawById.get(posNode.id)
+          if (!comp) return null
+
           const isOverloaded = comp.status === 'overloaded'
           const isDead       = comp.status === 'dead'
           const isActive     = comp.status === 'active'
@@ -205,14 +206,14 @@ export function SystemDiagramViz({ state }: PrimitiveProps) {
             shadow      = '0 0 12px rgba(255, 110, 132, 0.25)'
           }
 
-          const IconToUse = comp.icon && IconMap[comp.icon] ? IconMap[comp.icon] : Server
+          const IconToUse = comp.icon && IconMap[comp.icon] ? IconMap[comp.icon]! : Server
           const Icon = IconToUse as React.ElementType
 
           return (
             <foreignObject
-              key={comp.id}
-              x={comp.cx - NODE_W / 2}
-              y={comp.cy - NODE_H / 2}
+              key={posNode.id}
+              x={posNode.x - NODE_W / 2}
+              y={posNode.y - NODE_H / 2}
               width={NODE_W}
               height={NODE_H}
               style={{ overflow: 'visible' }}
@@ -220,14 +221,10 @@ export function SystemDiagramViz({ state }: PrimitiveProps) {
               <div style={{ width: NODE_W, height: NODE_H }}>
                 <motion.div
                   className={`w-full h-full flex flex-col items-center justify-center rounded-2xl border px-3 py-2.5 ${isDead ? 'grayscale opacity-40' : ''}`}
-                  style={{
-                    backgroundColor: 'var(--color-surface-container)',
-                    position: 'relative',
-                  }}
+                  style={{ backgroundColor: 'var(--color-surface-container)', position: 'relative' }}
                   animate={{
                     borderColor,
                     boxShadow: shadow,
-                    // Shake for overloaded state — expressed as translateX px values
                     x: isOverloaded ? [0, -3, 3, -3, 0] : 0,
                   }}
                   transition={
@@ -244,24 +241,20 @@ export function SystemDiagramViz({ state }: PrimitiveProps) {
                     </div>
                   )}
 
-                  {/* Icon */}
                   <div className={`mb-1.5 ${isActive ? 'text-primary' : isOverloaded ? 'text-error' : 'text-on-surface-variant'}`}>
                     <Icon size={22} />
                   </div>
 
-                  {/* Label */}
                   <span className={`text-[12px] font-bold tracking-wide text-center leading-tight ${isDead ? 'line-through text-on-surface-variant' : 'text-on-surface'}`}>
                     {comp.label}
                   </span>
 
-                  {/* Sublabel */}
                   {comp.sublabel && (
                     <span className="text-[10px] text-on-surface-variant mt-0.5">
                       {comp.sublabel}
                     </span>
                   )}
 
-                  {/* Status badges — positioned relative to the foreignObject box */}
                   {isOverloaded && (
                     <div className="absolute -top-2.5 -right-2.5 bg-error text-on-error rounded-full p-0.5 animate-pulse shadow-lg">
                       <AlertTriangle size={12} />

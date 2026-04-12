@@ -62,3 +62,7 @@ export {
   // Legacy (deprecated)
   tryParseScene,
 } from './parser'
+
+// ─── Layout Engine ────────────────────────────────────────────────────────────
+export { computeLayout, computeViewBox } from './layout/index'
+export type { LayoutResult, PositionedNode, PositionedEdge } from './layout/types'
