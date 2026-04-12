@@ -74,7 +74,7 @@
                 "children": [
                   "p1"
                 ],
-                "highlight": "var(--color-primary)"
+                "highlight": "active"
               },
               {
                 "id": "p1",
@@ -82,13 +82,13 @@
                 "children": [
                   "p2"
                 ],
-                "highlight": "var(--color-primary)"
+                "highlight": "active"
               },
               {
                 "id": "p2",
                 "value": "p*",
                 "children": [],
-                "highlight": "var(--color-secondary)"
+                "highlight": "found"
               }
             ],
             "rootId": "root"
@@ -145,13 +145,13 @@
                 "children": [
                   "e1"
                 ],
-                "highlight": "var(--color-primary)"
+                "highlight": "active"
               },
               {
                 "id": "e1",
                 "value": "e*",
                 "children": [],
-                "highlight": "var(--color-secondary)"
+                "highlight": "found"
               }
             ],
             "rootId": "root"
@@ -221,7 +221,7 @@
                 "children": [
                   "an1"
                 ],
-                "highlight": "var(--color-primary)"
+                "highlight": "active"
               },
               {
                 "id": "an1",
@@ -229,13 +229,13 @@
                 "children": [
                   "n1"
                 ],
-                "highlight": "var(--color-primary)"
+                "highlight": "active"
               },
               {
                 "id": "n1",
                 "value": "n*",
                 "children": [],
-                "highlight": "var(--color-secondary)"
+                "highlight": "found"
               }
             ],
             "rootId": "root"
@@ -265,7 +265,7 @@
                   "a1",
                   "b1"
                 ],
-                "highlight": "var(--color-secondary)"
+                "highlight": "found"
               },
               {
                 "id": "a1",
@@ -273,7 +273,7 @@
                 "children": [
                   "p1"
                 ],
-                "highlight": "var(--color-secondary)"
+                "highlight": "found"
               },
               {
                 "id": "p1",
@@ -281,7 +281,7 @@
                 "children": [
                   "p2"
                 ],
-                "highlight": "var(--color-secondary)"
+                "highlight": "found"
               },
               {
                 "id": "p2",
@@ -289,7 +289,7 @@
                 "children": [
                   "l1"
                 ],
-                "highlight": "var(--color-secondary)"
+                "highlight": "found"
               },
               {
                 "id": "l1",
@@ -350,7 +350,7 @@
                   "a1",
                   "b1"
                 ],
-                "highlight": "var(--color-secondary)"
+                "highlight": "found"
               },
               {
                 "id": "a1",
@@ -358,7 +358,7 @@
                 "children": [
                   "p1"
                 ],
-                "highlight": "var(--color-secondary)"
+                "highlight": "found"
               },
               {
                 "id": "p1",
@@ -366,7 +366,7 @@
                 "children": [
                   "p2"
                 ],
-                "highlight": "var(--color-secondary)"
+                "highlight": "found"
               },
               {
                 "id": "p2",
@@ -434,7 +434,7 @@
                   "a1",
                   "b1"
                 ],
-                "highlight": "var(--color-primary)"
+                "highlight": "active"
               },
               {
                 "id": "a1",
@@ -442,7 +442,7 @@
                 "children": [
                   "p1"
                 ],
-                "highlight": "var(--color-primary)"
+                "highlight": "active"
               },
               {
                 "id": "p1",
@@ -450,7 +450,7 @@
                 "children": [
                   "p2"
                 ],
-                "highlight": "var(--color-error)"
+                "highlight": "miss"
               },
               {
                 "id": "p2",
@@ -579,7 +579,7 @@
                 "children": [
                   "nan1"
                 ],
-                "highlight": "var(--color-primary)"
+                "highlight": "active"
               },
               {
                 "id": "nan1",
@@ -587,13 +587,13 @@
                 "children": [
                   "nana1"
                 ],
-                "highlight": "var(--color-primary)"
+                "highlight": "active"
               },
               {
                 "id": "nana1",
                 "value": "a*",
                 "children": [],
-                "highlight": "var(--color-secondary)"
+                "highlight": "found"
               }
             ],
             "rootId": "root"
@@ -623,7 +623,7 @@
                   "a1",
                   "b1"
                 ],
-                "highlight": "var(--color-error)"
+                "highlight": "miss"
               },
               {
                 "id": "a1",
