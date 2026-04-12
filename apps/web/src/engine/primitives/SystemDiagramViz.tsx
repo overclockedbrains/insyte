@@ -227,16 +227,22 @@ export function SystemDiagramViz({ id, state, visual }: PrimitiveProps) {
               <div style={{ width: NODE_W, height: NODE_H }}>
                 <motion.div
                   className={`w-full h-full flex flex-col items-center justify-center rounded-2xl border px-3 py-2.5 ${isDead ? 'grayscale opacity-40' : ''}`}
-                  style={{ backgroundColor: 'var(--color-surface-container)', position: 'relative' }}
-                  animate={{
+                  style={{
+                    backgroundColor: 'var(--color-surface-container)',
+                    position: 'relative',
+                    // borderColor and boxShadow in style (not animate) so they
+                    // switch instantly — no RGB interpolation flash when going
+                    // from cyan (active) → red (overloaded) through blue/purple
                     borderColor,
                     boxShadow: shadow,
+                  }}
+                  animate={{
                     x: isOverloaded ? [0, -3, 3, -3, 0] : 0,
                   }}
                   transition={
                     isOverloaded
                       ? { repeat: Infinity, duration: 0.35, ease: 'easeInOut' }
-                      : { duration: 0.2 }
+                      : { duration: 0 }
                   }
                 >
                   {/* Dead overlay */}
