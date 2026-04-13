@@ -1,34 +1,28 @@
 # Documentation
 
-Central docs hub for `insyte`.
+Docs for `insyte` — last updated April 2026.
 
-## Start Here
+---
 
-- [Codebase Map](codebase-map.md)
-- [Architecture Diagrams](architecture/tech-architecture.md)
-- [Prompt to Visualization Flow](architecture/prompt-to-visualization.md)
+## Architecture
 
-## Frontend
-
-- [Component Map](components/component-map.md)
-
-## Backend
-
-- [API Reference](backend/api-reference.md)
-- [Supabase Data Model](backend/data-model.md)
+- [Platform Architecture](architecture/tech-architecture.md) — full system Mermaid diagram
+- [AI Pipeline](architecture/ai-pipeline.md) — event protocol, stage map, pre-processors, live chat
 
 ## Scene Engine
 
-- [Scene JSON and Rendering Contract](scene-engine/scene-json-and-rendering.md)
+- [Scene Engine Reference](scene-engine/scene-engine.md) — scene JSON contract, enums, step actions, layout hints, scene graph diff
+
+## Backend
+
+- [API Reference](backend/api-reference.md) — all endpoints, request/response shapes
+- [Supabase Data Model](backend/data-model.md) — tables, privacy rules, query patterns
+
+## Explained (Simple Overviews)
+
+- [How the AI Module Works](explained/ai-module.md) — the 5-stage pipeline in plain English
 
 ## Guides
 
-- [Adding Scenes and Primitives](guides/adding-scenes-and-primitives.md)
-
-## Scope
-
-These docs are focused on the current monorepo implementation in:
-
-- `apps/web`
-- `packages/scene-engine`
-
+- [Adding Scenes & Primitives](guides/adding-scenes-and-primitives.md) — step-by-step checklists
+- [ISCL Quick Reference](guides/iscl-quick-reference.md) — grammar cheat-sheet, valid values, known AI quirks

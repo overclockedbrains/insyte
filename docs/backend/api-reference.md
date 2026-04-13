@@ -1,96 +1,128 @@
 # API Reference
 
-Reference for `apps/web/app/api/*` and auth callback routes.
+Reference for all server routes in `apps/web/app/api/`.
+Updated April 2026 (R2 / Phase 27).
+
+---
 
 ## Common Request Headers
 
 | Header | Optional | Meaning |
 | --- | --- | --- |
-| `x-api-key` | Yes | BYOK API key passed from client settings |
-| `x-provider` | Yes | `gemini`, `openai`, `anthropic`, or `groq` |
-| `x-model` | Yes | Provider model id |
-| `x-user-id` | Yes (`/api/generate`) | Signed-in user id for generation history |
+| `x-provider` | Yes | Provider ID: `gemini`, `openai`, `anthropic`, `groq`, `ollama`, `custom` |
+| `x-model` | Yes | Provider model ID (e.g. `gemini-2.5-flash`, `gpt-4o`) |
+| `x-api-key` | Yes | BYOK API key (never logged server-side) |
+| `x-base-url` | Yes | Required for `ollama` and `custom` providers |
+| `x-user-id` | Yes | Signed-in user ID, passed to `/api/generate` for history tracking |
 
-If no BYOK key is provided, server default generation path uses Gemini.
+If no BYOK key is provided, the server-side default path uses Gemini Flash (free tier).
+
+---
 
 ## `POST /api/generate`
 
-Generate a full scene from prompt text (streaming).
+Runs the 5-stage AI pipeline for concept / LLD / HLD scene generation. Response is an **SSE stream of `GenerationEvent` objects**.
 
-Request body:
+### Request body
 
 ```json
 {
   "topic": "How does a hash table work?",
+  "mode": "concept",
   "slug": "optional-custom-slug"
 }
 ```
 
-Behavior:
+- `mode` — optional `SceneType` hint. If omitted the AI picks the type in Stage 1.
+- `slug` — optional. If omitted, a slug is derived from the topic.
 
-- Free-tier path:
-  - checks query dedupe via `query_hashes`
-  - enforces per-IP rate limit
-- BYOK path:
-  - skips free-tier dedupe/rate-limit checks
-- streams scene object text response (`toTextStreamResponse`)
-- on completion, validates output and persists scene/query mapping asynchronously
+### Response stream
 
-Common status codes:
+Each event is a JSON line prefixed `data: ` (SSE format):
 
-- `200` stream response or `{ "cached": true, "slug": "..." }`
-- `400` invalid JSON / missing topic / topic too long
-- `429` free-tier limit exceeded
-- `500` generation failure
+```
+data: {"type":"plan","title":"How Hash Tables Work","visualCount":2,"stepCount":8,"layout":"text-left-canvas-right"}
+data: {"type":"content","states":{...},"steps":[...]}
+data: {"type":"annotations","explanation":[...],"popups":[...]}
+data: {"type":"misc","challenges":[...],"controls":[...]}
+data: {"type":"complete","scene":{...}}
+```
+
+Or on failure:
+
+```
+data: {"type":"error","stage":1,"message":"...","retryable":true}
+```
+
+### Behavior
+
+- **Free-tier path:** checks query dedupe via `query_hashes` + per-IP rate limit via `rate_limits`.
+- **BYOK path:** skips dedupe/rate-limit. Uses user's key + selected provider.
+- On `complete` event, scene and query hash are asynchronously persisted to Supabase.
+
+### Status codes
+
+| Code | Meaning |
+| --- | --- |
+| `200` | SSE stream started |
+| `400` | Missing topic / topic too long / invalid JSON |
+| `429` | Free-tier limit exceeded |
+| `500` | Pipeline failed on all retries |
+
+---
 
 ## `POST /api/instrument`
 
-Generate instrumented code for DSA tracing.
+AI-assisted code instrumentation for DSA trace mode.
 
-Request body:
+### Request body
 
 ```json
 {
-  "code": "function twoSum(...) { ... }",
-  "language": "javascript",
+  "code": "def two_sum(nums, target): ...",
+  "language": "python",
   "problemStatement": "Two Sum"
 }
 ```
 
-Response:
+### Response
 
 ```json
 {
-  "instrumentedCode": "..."
+  "instrumentedCode": "def two_sum(nums, target):\n  __trace__ = []\n  ..."
 }
 ```
 
 Status codes: `200`, `400`, `500`.
 
+---
+
 ## `POST /api/visualize-trace`
 
-Generate scene JSON from execution trace (streaming).
+Converts a sandbox execution trace into a streaming `Scene` JSON.
 
-Request body:
+### Request body
 
 ```json
 {
-  "trace": { "steps": [] },
+  "trace": { "steps": [...] },
   "originalCode": "...",
   "language": "python",
   "problemStatement": "Two Sum"
 }
 ```
 
-Response: streamed text scene payload (`toTextStreamResponse`).
+Response: streamed text scene payload (same SSE format as `/api/generate`).
 
 Status codes: `200`, `400`, `500`.
 
+---
+
 ## `POST /api/chat`
 
-Scene-context tutor chat stream with optional patch block.
+Scene-context tutor chat stream. Uses `streamText` with a 1 024-token output budget.
 
-Request body:
+### Request body
 
 ```json
 {
@@ -99,34 +131,63 @@ Request body:
     "title": "How Hash Tables Work",
     "type": "concept",
     "currentStep": 3,
-    "visualSummary": []
+    "currentExplanation": "Collision resolved by chaining...",
+    "visualSummary": [{ "id": "table", "type": "hashmap", "label": "Hash Table" }]
   },
-  "history": []
+  "history": [
+    { "role": "user", "content": "..." },
+    { "role": "assistant", "content": "..." }
+  ]
 }
 ```
 
-Response: streamed assistant text (`toTextStreamResponse`).
+Response: streamed assistant text.
 
 Status codes: `200`, `400`, `500`.
 
+---
+
 ## `GET /api/rate-limit-status`
 
-Read-only free-tier quota check for current requester IP.
+Read-only free-tier quota check for the requester's hashed IP.
 
-Response:
+### Response
 
 ```json
 {
-  "remaining": 12,
-  "resetAt": "2026-04-08T10:00:00.000Z"
+  "remaining": 7,
+  "resetAt": "2026-04-13T11:00:00.000Z"
 }
 ```
 
+---
+
+## `GET /api/providers/ollama-models`
+
+Server-side proxy for `GET {ollamaBaseURL}/api/tags`. Avoids CORS when the UI fetches local Ollama model names.
+
+### Query params
+
+| Param | Required | Description |
+| --- | --- | --- |
+| `baseUrl` | Yes | Ollama server base URL (default `http://localhost:11434`) |
+
+### Response
+
+```json
+{
+  "models": [
+    { "id": "llama3.2:latest", "label": "llama3.2:latest" }
+  ]
+}
+```
+
+---
+
 ## `GET /auth/callback`
 
-Supabase OAuth code exchange endpoint.
+Supabase OAuth code exchange.
 
-- accepts `?code=...&next=/target`
-- exchanges code with Supabase anon client
-- redirects to `next` on success, or `/?auth_error=1` on failure
-
+- Accepts `?code=...&next=/target`
+- Exchanges code with Supabase anon client
+- Redirects to `next` on success, or `/?auth_error=1` on failure

@@ -1,4 +1,4 @@
-﻿<p align="center">
+<p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/assets/insyte-wordmark-dark.svg">
     <img src="docs/assets/insyte-wordmark-light.svg" alt="insyte" width="300">
@@ -26,11 +26,12 @@
 
 ## Why insyte
 
-- Prompt-first workflow for concept explanations, DSA traces, and design walkthroughs.
-- Scene-based runtime: visuals, controls, steps, popups, and narrative evolve together.
-- Streaming generation with partial scene promotion, so users see progress immediately.
-- BYOK support for OpenAI, Anthropic, Gemini, and Groq.
-- Static + cached + generated scene paths in one player experience.
+- **Prompt-first workflow** for concept explanations, DSA algorithm traces, and system design walkthroughs.
+- **5-stage AI pipeline** — ISCL grammar → parallel state/step generation → annotations → deterministic assembly. Per-stage retry, partial-success recovery, no monolithic JSON hallucination.
+- **ISCL (Insyte Scene Language)** — a purpose-built DSL the AI generates. No XY coordinates; the layout engine positions everything deterministically.
+- **Scene-based runtime**: step engine, layout engine (dagre / d3-hierarchy / arithmetic / radial), scene-graph diff, LRU cache, and targeted Framer Motion animations — all in `packages/scene-engine`.
+- **BYOK** for Gemini, OpenAI, Anthropic, Groq, Ollama (local), and any OpenAI-compatible endpoint.
+- **Static + Supabase-cached + AI-streamed** scene paths through one unified player.
 
 ## Quick Navigation
 
@@ -41,7 +42,7 @@
 | Environment variables | [Environment Setup](#environment-setup) |
 | Scripts | [Commands](#commands) |
 | Docs hub | [Documentation](#documentation) |
-| Architecture diagrams | [Architecture](#architecture) |
+| Monorepo layout | [Architecture](#architecture) |
 | Deployment | [Deployment Notes](#deployment-notes) |
 | Contribution flow | [Contributing](#contributing) |
 
@@ -86,11 +87,12 @@ Copy-Item apps/web/.env.example apps/web/.env.local
 
 | Command | Description |
 | --- | --- |
-| `pnpm dev` | Start full Turborepo dev pipeline |
-| `pnpm build` | Build all packages/apps |
-| `pnpm type-check` | Run TypeScript checks across workspace |
-| `pnpm validate-scenes` | Validate production scene JSON against schema |
-| `pnpm --filter web seed` | Seed topic index data to Supabase |
+| `pnpm dev` | Start full Turborepo dev pipeline (packages watch + web dev server) |
+| `pnpm build` | Build all packages then the app |
+| `pnpm type-check` | TypeScript check across the entire workspace |
+| `pnpm test` | Run Vitest unit tests (ISCL parser, step engine, validators, assembly) |
+| `pnpm validate-scenes` | Validate all 24 production scene JSON files against `SceneSchema` |
+| `pnpm --filter web seed` | Seed topic index metadata to Supabase |
 | `pnpm --filter web seed-scenes` | Seed scene records to Supabase |
 
 ## Product Preview
@@ -136,33 +138,31 @@ Copy-Item apps/web/.env.example apps/web/.env.local
 
 ### Monorepo
 
-- `apps/web`: Next.js app, routes, APIs, simulation UI/runtime, Supabase integration.
-- `packages/scene-engine`: scene types, Zod schemas, parser, normalization, state compute.
-- `.planning`: product and design planning artifacts.
-
-### Diagram references
-
-- [Prompt to visualization core flow](docs/architecture/prompt-to-visualization.md)
-- [Technical architecture overview](docs/architecture/tech-architecture.md)
+- `apps/web` — Next.js 16 app: App Router pages, API routes, AI module, simulation engine, Supabase integration.
+- `packages/scene-engine` — shared lib: types, Zod schema, ISCL parser, step engine, layout engine, scene graph, LRU cache.
+- `packages/tsconfig` — shared TypeScript base configs.
+- `.planning/` — product roadmap (`PROJECT.md`), design system (`DESIGN.md`), per-phase PLANs.
 
 ## Documentation
 
-- [Docs index](docs/README.md)
-- [Codebase map](docs/codebase-map.md)
-- [Component map](docs/components/component-map.md)
-- [API reference](docs/backend/api-reference.md)
-- [Supabase data model](docs/backend/data-model.md)
-- [Scene JSON and rendering contract](docs/scene-engine/scene-json-and-rendering.md)
-- [Adding scenes and primitives](docs/guides/adding-scenes-and-primitives.md)
+Full docs index: **[docs/README.md](docs/README.md)**
 
 ## BYOK
 
-insyte supports Bring Your Own Key from Settings for OpenAI, Anthropic, Gemini, and Groq.
+insyte supports Bring Your Own Key for all providers from the Settings page:
 
-- Keys are stored in browser `localStorage`.
-- Keys are forwarded per request only; they are not persisted by this repo.
-- If no BYOK key is present, generation falls back to server-side Gemini.
-- Production still requires `GEMINI_API_KEY` for fallback path.
+| Provider | Type | Notes |
+| --- | --- | --- |
+| Gemini | Cloud | Server default (free tier). Requires `GEMINI_API_KEY` env var for fallback. |
+| OpenAI | Cloud | BYOK only. Key stored client-side. |
+| Anthropic | Cloud | BYOK only. Key stored client-side. |
+| Groq | Cloud | BYOK only. Key stored client-side. |
+| Ollama | Local | No key required. Set base URL to your Ollama instance. Requires `OLLAMA_ORIGINS=https://insyte.amanarya.com` when starting Ollama. |
+| Custom | Any OpenAI-compatible | Provide base URL + optional key. Covers LM Studio, vLLM, Together.ai, etc. |
+
+- Keys are stored in browser `localStorage` only — never sent to or logged by the insyte server.
+- Keys are forwarded per request in request headers (`x-api-key`, `x-provider`, `x-model`, `x-base-url`).
+- Cloud provider calls always run server-side for key protection. Ollama runs browser-direct (Vercel bypassed).
 
 ## Deployment Notes
 
