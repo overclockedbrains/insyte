@@ -65,6 +65,13 @@ R1 released on 8 April 2026 and R2 is in progress
 | **Phase 28** | 🌿 | ELK Integration & System Diagram Quality — **implemented on `feature/phase-28-elk`, not merged to main.** Dagre S-curves look more polished in insyte's dark glassmorphism aesthetic than ELK's orthogonal connectors. Branch preserved for future use (e.g. optional toggle or different scene type). |
 | **Phase 29** | 🔲 | Zoom/Pan Viewport & Interactive Canvas (CSS transform, pinch-to-zoom, zoom-to-fit) |
 
+### Release 3 (R3) - AI Quality
+
+| Phase | Status | Description |
+|-------|--------|-------------|
+| **Phase 30** | 🔲 | AI Pipeline Redesign — Kill ISCL, add Stage 0 free reasoning, co-generate steps + explanations, error-guided retry, per-stage model defaults (static routing) |
+| **Phase 31** | 🔲 | BYOK Model Routing — provider-aware tier routing so BYOK users get full routing benefits |
+
 ---
 
 ## Phases
@@ -605,6 +612,44 @@ _OG Images_
 - Keyboard controls: `+/=` zoom in, `-` zoom out, `0` zoom-to-fit
 
 **Plan:** [→ phases/phase-29/PLAN.md](phases/phase-29/PLAN.md)
+
+---
+
+### Phase 30 — AI Pipeline Redesign: Kill ISCL, Stage 0 Reasoning, Co-generated Steps + Explanations
+**Goal:** Fix the root causes of generation quality problems — ISCL hallucinations, visual-logic drift (steps and explanations out of sync), blind retries — by replacing ISCL with native constrained decoding via `generateObject`, introducing a free-text Stage 0 reasoning pass that flows as shared context into all downstream stages, and co-generating explanation + actions per step so drift is structurally impossible.
+
+**Estimated effort:** 6–8 days
+
+**Prerequisite:** Phase 25 (5-stage pipeline and SSE infrastructure in place)
+
+**Trigger:** Research finalized April 14, 2026 — `.planning/research/ai-pipeline-redesign/README.md`
+
+**Deliverables:**
+- `apps/web/src/ai/schemas.ts` — Zod schemas + **dynamic schema factories**: `SceneSkeletonSchema`, `buildStepsSchema(visualIds)`, `buildPopupsSchema(visualIds)`, `MiscSchema`. Dynamic factories make invalid cross-references physically impossible via constrained decoding.
+- `apps/web/src/ai/model-routing.ts` — `STAGE_MODELS` (per-stage Gemini defaults) + `resolveStageModel(stage, byokModel)`. BYOK: user's selected model used for all stages (static). Provider-aware BYOK routing deferred to Phase 31.
+- `client.ts` extended with `generateObject<T>(prompt, schema, config)` wrapper
+- `pipeline.ts` rewritten: Stage 0 → `reasoning` event → Stage 1 → `plan` → Stage 2 → `content` → [Stage 3 ∥ Stage 4] → Stage 5. Stage 2 runs before Stage 3 (event ordering). Per-stage timeouts.
+- `prompts/builders.ts` rewritten: 5 builders with `lastError?` for error-guided retry
+- Prompt files: `stage0-reasoning.md` (no system prompt, no few-shot, PTCF, numbered questions), `stage1-skeleton.md` (brief system prompt, Binary Search example, ID naming rules), `stage2-steps.md` (pedagogical system prompt, visual IDs at TOP, XML delimiters, explicit CoT + schema ordering, ≤3000 tokens total), `stage3-popups.md`, `stage4-misc.md`
+- Error-guided `retryStage` with per-attempt timeout: injects exact validator error (cuts retries ~50%)
+- Validators updated: `states.ts` merged into `steps.ts`; `annotations.ts` renamed `popups.ts`; semantic checks preserved
+- `assembly.ts` input types updated from ISCL-derived to new schema types (logic unchanged)
+- AI module hygiene: fix `@/` alias imports in `liveChat.ts` + `traceToScene.ts`; add `index.ts` public barrel
+- **New `GenerationEvent` variant:** `{ type: 'reasoning', text }` — frontend shows "Thinking..." during Stage 0
+- **Deleted:** `iscl-preprocess.ts`, `iscl-preprocess.test.ts`, `stage1-iscl.md`, `stage2a-states.md`, `stage2b-steps.md`, `stage3-annotations.md`, ISCL parser
+
+**Plan:** [→ phases/phase-30/PLAN.md](phases/phase-30/PLAN.md)
+
+---
+
+### Phase 31 — BYOK Model Routing
+**Goal:** Replace Phase 30's static BYOK behavior (single model for all stages) with provider-aware tier routing — when a user brings their own API key, insyte routes each stage to the appropriate model tier within their chosen provider's family (e.g., Anthropic BYOK → Opus for Stage 0, Sonnet for Stage 2, Haiku for Stages 1/3/4).
+
+**Prerequisite:** Phase 30 (pipeline must be stable before adding routing complexity)
+
+**Research:** `.planning/research/ai-pipeline-redesign/byok-model-routing.md` — full industry analysis (Aider, OpenRouter, Continue.dev, DeepSource), `PROVIDER_TIER_MODELS` table, `resolveStageModel` implementation ready to drop in.
+
+**Plan:** To be written — research is complete, planning deferred until Phase 30 ships.
 
 ---
 
