@@ -23,7 +23,7 @@
 
 ## Progress Tracker
 
-R1 released on 8 April 2026 and R2 is in progress
+R1 released on 8 April 2026. R2 released on 14 April 2026. R3 in progress.
 
 ### Release 1 (R1) - Core Platform
 
@@ -63,12 +63,12 @@ R1 released on 8 April 2026 and R2 is in progress
 | **Phase 26** | ⏸️ | Progressive Streaming Generation UX — **Skipped until Phase 25 generation quality is stable.** |
 | **Phase 27** | ✅ | Visual Quality & Animation System (HIGHLIGHT_COLORS semantic color system, resolveHighlight across all 12 primitives, stable slot-based keys in ArrayViz/StackViz/QueueViz, DPTableViz cell-remounting fix via useAnimate+data-cell, typography.css hierarchy, useAnimateStep choreography hook, keyboard playback controls) |
 | **Phase 28** | 🌿 | ELK Integration & System Diagram Quality — **implemented on `feature/phase-28-elk`, not merged to main.** Dagre S-curves look more polished in insyte's dark glassmorphism aesthetic than ELK's orthogonal connectors. Branch preserved for future use (e.g. optional toggle or different scene type). |
-| **Phase 29** | 🔲 | Zoom/Pan Viewport & Interactive Canvas (CSS transform, pinch-to-zoom, zoom-to-fit) |
 
 ### Release 3 (R3) - AI Quality
 
 | Phase | Status | Description |
 |-------|--------|-------------|
+| **Phase 29** | ⏸️ | Zoom/Pan Viewport & Interactive Canvas — **Skipped indefinitely.** Not a priority; canvas interaction model may change with AI quality improvements. Branch not started. |
 | **Phase 30** | 🔲 | AI Pipeline Redesign — Kill ISCL, add Stage 0 free reasoning, co-generate steps + explanations, error-guided retry, per-stage model defaults (static routing) |
 | **Phase 31** | 🔲 | BYOK Model Routing — provider-aware tier routing so BYOK users get full routing benefits |
 
@@ -597,21 +597,19 @@ _OG Images_
 ---
 
 ### Phase 29 — Zoom/Pan Viewport & Interactive Canvas
-**Goal:** Add zoom and pan to the canvas zone, enabling navigation of large graphs, system diagrams, and recursion trees that exceed the visible area. CSS transform viewport approach — zero React re-renders during pan/zoom. Includes zoom-to-fit on scene load and mobile pinch-to-zoom.
+> ⏸️ **Skipped indefinitely.** Moved to R3 scope but deprioritized — not planned for implementation in the near term. The canvas interaction model may be revisited after AI quality (Phase 30) stabilizes. Original deliverables preserved below for reference.
 
-**Estimated effort:** 4–5 days
+**Original Goal:** Add zoom and pan to the canvas zone, enabling navigation of large graphs, system diagrams, and recursion trees that exceed the visible area. CSS transform viewport approach — zero React re-renders during pan/zoom. Includes zoom-to-fit on scene load and mobile pinch-to-zoom.
 
 **Prerequisite:** Phase 22 (scene graph provides bounding box for zoom-to-fit)
 
-**Deliverables:**
+**Deliverables (reference only):**
 - `viewport-store.ts`: `setTranslate()`, `setScale(newScale, originX, originY)` (zoom toward cursor), `zoomToFit(bbox, containerW, containerH)`, `reset()`
 - `ViewportContainer.tsx`: CSS transform applied imperatively via `innerRef.current.style.transform`; `willChange: 'transform'` for GPU compositing layer
 - Pointer events for drag pan; wheel event (`passive: false`) for zoom; touch events for pinch-to-zoom
 - `ViewportControls.tsx`: zoom-in/zoom-out/fit HUD buttons + scale percentage display
 - `useAutoFit()` hook: auto zoom-to-fit when content exceeds 90% of container dimensions
 - Keyboard controls: `+/=` zoom in, `-` zoom out, `0` zoom-to-fit
-
-**Plan:** [→ phases/phase-29/PLAN.md](phases/phase-29/PLAN.md)
 
 ---
 
