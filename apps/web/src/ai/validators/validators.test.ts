@@ -1,288 +1,190 @@
 import { describe, it, expect } from 'vitest'
-import { validateStates } from './states'
 import { validateSteps } from './steps'
-import { validateAnnotations } from './annotations'
-import { validateMisc } from './misc'
-import type { ISCLParsed } from '@insyte/scene-engine'
+import { validatePopups } from './popups'
+import { MiscSchema } from '../schemas'
+import type { SceneSkeletonParsed, StepsParsed, PopupsParsed } from '../schemas'
 
-// ─── Shared test fixture ──────────────────────────────────────────────────────
+// ─── Shared test fixtures ─────────────────────────────────────────────────────
 
-function makeParsed(overrides?: Partial<ISCLParsed>): ISCLParsed {
+function makeSkeleton(overrides?: Partial<SceneSkeletonParsed>): SceneSkeletonParsed {
   return {
     title: 'Binary Search',
-    type: 'dsa-trace',
-    layout: 'canvas-only',
-    visualIds: new Set(['arr', 'ptr']),
-    visualDecls: [
-      { id: 'arr', type: 'array', layoutHint: 'linear-H' },
-      { id: 'ptr', type: 'counter', slot: 'bottom-left' },
+    type: 'dsa',
+    layout: 'linear-H',
+    visuals: [
+      { id: 'arr', type: 'array' },
+      { id: 'ptr', type: 'counter' },
     ],
     stepCount: 4,
-    steps: [
-      { index: 0, isInit: true, sets: [] },
-      { index: 1, isInit: false, sets: [{ visualId: 'arr', field: 'cells', rawValue: '[{v:1}]' }] },
-      { index: 2, isInit: false, sets: [{ visualId: 'ptr', field: 'value', rawValue: '1' }] },
-      { index: 3, isInit: false, sets: [{ visualId: 'arr', field: 'cells', rawValue: '[{v:2}]' }] },
-    ],
-    explanation: [],
-    popups: [],
-    challenges: [],
-    controls: [],
     ...overrides,
   }
 }
 
-// ─── validateStates ───────────────────────────────────────────────────────────
-
-describe('validateStates', () => {
-  it('accepts valid initialStates covering all visual IDs', () => {
-    const raw = {
-      initialStates: {
-        arr: { cells: [{ value: 1 }] },
-        ptr: { value: 0, label: 'pointer' },
+function makeSteps(overrides?: Partial<StepsParsed>): StepsParsed {
+  return {
+    initialStates: {
+      arr: { items: [1, 3, 5] },
+      ptr: { value: 0 },
+    },
+    steps: [
+      {
+        index: 1,
+        explanation: { heading: 'Step 1', body: 'First step.' },
+        actions: [{ target: 'arr', params: { highlighted: [0] } }],
       },
-    }
-    const result = validateStates(raw, makeParsed())
-    expect(result.ok).toBe(true)
-    expect(result.states['arr']).toEqual({ cells: [{ value: 1 }] })
-    expect(result.states['ptr']).toEqual({ value: 0, label: 'pointer' })
-  })
-
-  it('rejects when a visual ID is missing from initialStates', () => {
-    const raw = {
-      initialStates: {
-        arr: { cells: [] },
-        // 'ptr' missing
+      {
+        index: 2,
+        explanation: { heading: 'Step 2', body: 'Second step.' },
+        actions: [{ target: 'ptr', params: { value: 1 } }],
       },
-    }
-    const result = validateStates(raw, makeParsed())
-    expect(result.ok).toBe(false)
-    expect(result.error).toContain('"ptr"')
-  })
-
-  it('rejects malformed top-level shape (no initialStates key)', () => {
-    const raw = { states: {} }
-    const result = validateStates(raw, makeParsed())
-    expect(result.ok).toBe(false)
-    expect(result.error).toContain('Stage 2a')
-  })
-
-  it('rejects non-object input', () => {
-    const result = validateStates('not an object', makeParsed())
-    expect(result.ok).toBe(false)
-  })
-
-  it('accepts extra keys in initialStates (AI may add more than declared)', () => {
-    const raw = {
-      initialStates: {
-        arr: { cells: [] },
-        ptr: { value: 0, label: 'ptr' },
-        undeclared: { cells: [] },   // extra key — should be ignored
+      {
+        index: 3,
+        explanation: { heading: 'Step 3', body: 'Third step.' },
+        actions: [],
       },
-    }
-    const result = validateStates(raw, makeParsed())
-    expect(result.ok).toBe(true)
-  })
-})
+      {
+        index: 4,
+        explanation: { heading: 'Step 4', body: 'Fourth step.' },
+        actions: [{ target: 'arr', params: { highlighted: [1] } }],
+      },
+    ],
+    ...overrides,
+  }
+}
 
 // ─── validateSteps ────────────────────────────────────────────────────────────
 
 describe('validateSteps', () => {
-  it('accepts valid steps with correct action targets', () => {
-    const raw = {
+  it('accepts valid steps covering all visual IDs', () => {
+    const result = validateSteps(makeSteps(), makeSkeleton())
+    expect(result.valid).toBe(true)
+    expect(result.errors).toHaveLength(0)
+  })
+
+  it('rejects when initialStates is missing an entry for a visual ID', () => {
+    const steps = makeSteps({
+      initialStates: { arr: { items: [] } },  // ptr missing
+    })
+    const result = validateSteps(steps, makeSkeleton())
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.includes('"ptr"'))).toBe(true)
+  })
+
+  it('rejects when initialStates has an unknown visual ID', () => {
+    const steps = makeSteps({
+      initialStates: {
+        arr: { items: [] },
+        ptr: { value: 0 },
+        unknown: { x: 1 },  // not in skeleton
+      },
+    })
+    const result = validateSteps(steps, makeSkeleton())
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.includes('"unknown"'))).toBe(true)
+  })
+
+  it('rejects non-monotonic step indices', () => {
+    const steps = makeSteps({
       steps: [
-        { index: 1, actions: [{ target: 'arr', params: { cells: [{ value: 1 }] } }] },
-        { index: 2, actions: [{ target: 'ptr', params: { value: 1 } }] },
-        { index: 3, actions: [{ target: 'arr', params: { cells: [{ value: 2 }] } }] },
+        { index: 1, explanation: { heading: 'A', body: 'B' }, actions: [] },
+        { index: 3, explanation: { heading: 'C', body: 'D' }, actions: [] },  // gap!
+        { index: 4, explanation: { heading: 'E', body: 'F' }, actions: [] },
       ],
-    }
-    const result = validateSteps(raw, makeParsed())
-    expect(result.ok).toBe(true)
-    expect(result.steps).toHaveLength(4)   // includes synthetic step 0
-    expect(result.steps[0]).toEqual({ index: 0, actions: [] })
+    })
+    const result = validateSteps(steps, makeSkeleton())
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.includes('1, 2, 3'))).toBe(true)
   })
 
   it('rejects an action targeting an unknown visual ID', () => {
-    const raw = {
+    const steps = makeSteps({
       steps: [
-        { index: 1, actions: [{ target: 'unknown-id', params: {} }] },
+        {
+          index: 1,
+          explanation: { heading: 'A', body: 'B' },
+          actions: [{ target: 'does-not-exist', params: {} }],
+        },
       ],
-    }
-    const result = validateSteps(raw, makeParsed())
-    expect(result.ok).toBe(false)
-    expect(result.error).toContain('"unknown-id"')
-  })
-
-  it('rejects a step index >= stepCount', () => {
-    const raw = {
-      steps: [
-        { index: 99, actions: [] },
-      ],
-    }
-    const result = validateSteps(raw, makeParsed())
-    expect(result.ok).toBe(false)
-    expect(result.error).toContain('out of range')
-  })
-
-  it('rejects malformed top-level shape', () => {
-    const result = validateSteps({ data: [] }, makeParsed())
-    expect(result.ok).toBe(false)
-  })
-
-  it('sorts steps by index', () => {
-    const raw = {
-      steps: [
-        { index: 3, actions: [] },
-        { index: 1, actions: [] },
-        { index: 2, actions: [] },
-      ],
-    }
-    const result = validateSteps(raw, makeParsed())
-    expect(result.ok).toBe(true)
-    const indices = result.steps.map(s => s.index)
-    expect(indices).toEqual([0, 1, 2, 3])
-  })
-
-  it('does NOT duplicate step 0 when AI includes it', () => {
-    const raw = {
-      steps: [
-        { index: 0, actions: [] },
-        { index: 1, actions: [{ target: 'arr', params: {} }] },
-      ],
-    }
-    const result = validateSteps(raw, makeParsed())
-    expect(result.ok).toBe(true)
-    expect(result.steps.filter(s => s.index === 0)).toHaveLength(1)
+    })
+    const result = validateSteps(steps, makeSkeleton())
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.includes('"does-not-exist"'))).toBe(true)
   })
 })
 
-// ─── validateAnnotations ──────────────────────────────────────────────────────
+// ─── validatePopups ───────────────────────────────────────────────────────────
 
-describe('validateAnnotations', () => {
-  it('accepts valid explanation and popups', () => {
-    const raw = {
-      explanation: [
-        { appearsAtStep: 0, heading: 'What is Binary Search?', body: 'It splits in half each time.' },
-        { appearsAtStep: 2, heading: 'Mid point', body: 'Check the middle element.' },
-      ],
+describe('validatePopups', () => {
+  function makePopups(overrides?: Partial<PopupsParsed>): PopupsParsed {
+    return {
       popups: [
-        { attachTo: 'arr', showAtStep: 1, hideAtStep: 3, text: 'Array is sorted', style: 'info' },
+        { attachTo: 'arr', showAtStep: 1, hideAtStep: 3, text: 'This is an array', style: 'info' },
       ],
+      ...overrides,
     }
-    const result = validateAnnotations(raw, makeParsed())
-    expect(result.ok).toBe(true)
-    expect(result.explanation).toHaveLength(2)
-    expect(result.popups).toHaveLength(1)
-    // Popup should get a generated id
-    expect(result.popups[0]!.id).toBeTruthy()
-    expect(result.popups[0]!.attachTo).toBe('arr')
+  }
+
+  it('accepts valid popups with correct step range', () => {
+    const result = validatePopups(makePopups(), makeSkeleton())
+    expect(result.valid).toBe(true)
   })
 
-  it('rejects explanation with appearsAtStep >= stepCount', () => {
-    const raw = {
-      explanation: [{ appearsAtStep: 99, heading: 'Bad', body: 'Out of range.' }],
-      popups: [],
-    }
-    const result = validateAnnotations(raw, makeParsed())
-    expect(result.ok).toBe(false)
-    expect(result.error).toContain('99')
+  it('rejects popup with unknown attachTo visual ID', () => {
+    const result = validatePopups(
+      makePopups({ popups: [{ attachTo: 'no-such-id', showAtStep: 1, hideAtStep: 2, text: 'Bad' }] }),
+      makeSkeleton(),
+    )
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.includes('"no-such-id"'))).toBe(true)
   })
 
-  it('rejects popup attachTo referencing unknown visual ID', () => {
-    const raw = {
-      explanation: [],
-      popups: [{ attachTo: 'no-such-visual', showAtStep: 0, text: 'Bad', style: 'info' }],
-    }
-    const result = validateAnnotations(raw, makeParsed())
-    expect(result.ok).toBe(false)
-    expect(result.error).toContain('"no-such-visual"')
+  it('rejects popup where showAtStep > hideAtStep', () => {
+    const result = validatePopups(
+      makePopups({ popups: [{ attachTo: 'arr', showAtStep: 5, hideAtStep: 2, text: 'Backwards' }] }),
+      makeSkeleton(),
+    )
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.includes('showAtStep'))).toBe(true)
   })
 
-  it('rejects popup showAtStep >= stepCount', () => {
-    const raw = {
-      explanation: [],
-      popups: [{ attachTo: 'arr', showAtStep: 10, text: 'Way too late', style: 'info' }],
-    }
-    const result = validateAnnotations(raw, makeParsed())
-    expect(result.ok).toBe(false)
-    expect(result.error).toContain('showAtStep 10')
+  it('rejects popup where hideAtStep exceeds stepCount', () => {
+    const result = validatePopups(
+      makePopups({ popups: [{ attachTo: 'arr', showAtStep: 1, hideAtStep: 99, text: 'Too late' }] }),
+      makeSkeleton(),
+    )
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.includes('hideAtStep'))).toBe(true)
   })
 
-  it('rejects popup hideAtStep > stepCount', () => {
-    const raw = {
-      explanation: [],
-      popups: [{ attachTo: 'arr', showAtStep: 1, hideAtStep: 999, text: 'Bad hide', style: 'info' }],
-    }
-    const result = validateAnnotations(raw, makeParsed())
-    expect(result.ok).toBe(false)
-    expect(result.error).toContain('hideAtStep 999')
-  })
-
-  it('rejects malformed top-level shape', () => {
-    const result = validateAnnotations({ annotations: [] }, makeParsed())
-    expect(result.ok).toBe(false)
+  it('accepts empty popups array', () => {
+    const result = validatePopups({ popups: [] }, makeSkeleton())
+    expect(result.valid).toBe(true)
   })
 })
 
-// ─── validateMisc ─────────────────────────────────────────────────────────────
+// ─── MiscSchema ───────────────────────────────────────────────────────────────
 
-describe('validateMisc', () => {
-  it('accepts valid challenges and controls', () => {
-    const raw = {
+describe('MiscSchema', () => {
+  it('accepts valid MCQ challenges', () => {
+    const result = MiscSchema.safeParse({
       challenges: [
-        { type: 'predict',  title: 'Predict',  description: 'What is mid at step 1?' },
-        { type: 'break-it', title: 'Break it', description: 'What input causes O(n)?' },
-        { type: 'optimize', title: 'Optimize', description: 'How to improve for sorted input?' },
+        { question: 'What happens when the target is not in the array?', options: ['A', 'B', 'C'], answer: 1, type: 'predict' },
+        { question: 'What input causes the worst case?', options: ['A', 'B'], answer: 0, type: 'break-it' },
       ],
-      controls: [
-        { type: 'slider', id: 'size', label: 'Array Size', config: { min: 4, max: 20, defaultValue: 8 } },
-      ],
-    }
-    const result = validateMisc(raw)
-    expect(result.ok).toBe(true)
-    expect(result.challenges).toHaveLength(3)
-    // Each challenge should get a generated id
-    expect(result.challenges[0]!.id).toBeTruthy()
-    expect(result.challenges[0]!.type).toBe('predict')
-    expect(result.controls).toHaveLength(1)
-    expect(result.controls[0]!.type).toBe('slider')
+    })
+    expect(result.success).toBe(true)
   })
 
-  it('accepts empty controls array', () => {
-    const raw = {
-      challenges: [
-        { type: 'predict',  title: 'Predict',  description: 'Q1' },
-        { type: 'break-it', title: 'Break it', description: 'Q2' },
-        { type: 'optimize', title: 'Optimize', description: 'Q3' },
-      ],
-      controls: [],
-    }
-    const result = validateMisc(raw)
-    expect(result.ok).toBe(true)
-    expect(result.controls).toHaveLength(0)
+  it('rejects challenges with fewer than 2 options', () => {
+    // options.min(2) rejects single-option challenges
+    const result = MiscSchema.safeParse({
+      challenges: [{ question: 'What happens when the array is empty?', options: ['A'], answer: 0, type: 'predict' }],
+    })
+    expect(result.success).toBe(false)
   })
 
-  it('rejects invalid challenge type', () => {
-    const raw = {
-      challenges: [
-        { type: 'invalid-type', title: 'Bad', description: 'Bad type' },
-      ],
-      controls: [],
-    }
-    const result = validateMisc(raw)
-    expect(result.ok).toBe(false)
-  })
-
-  it('uses empty defaults when challenges/controls are absent', () => {
-    const result = validateMisc({})
-    // z.default([]) makes this ok with empty arrays
-    expect(result.ok).toBe(true)
-    expect(result.challenges).toHaveLength(0)
-    expect(result.controls).toHaveLength(0)
-  })
-
-  it('rejects non-object input', () => {
-    const result = validateMisc('bad')
-    expect(result.ok).toBe(false)
+  it('accepts missing challenges (empty array)', () => {
+    const result = MiscSchema.safeParse({ challenges: [] })
+    expect(result.success).toBe(true)
   })
 })

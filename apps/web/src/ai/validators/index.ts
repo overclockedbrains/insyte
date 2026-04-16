@@ -1,9 +1,5 @@
-export { validateStates } from './states'
 export { validateSteps } from './steps'
-export { validateAnnotations } from './annotations'
-export { validateMisc } from './misc'
+export { validatePopups } from './popups'
 
-export type { ValidatedStates } from './states'
-export type { ValidatedSteps } from './steps'
-export type { ValidatedAnnotations } from './annotations'
-export type { ValidatedMisc } from './misc'
+export type { ValidationResult as StepsValidationResult } from './steps'
+export type { ValidationResult as PopupsValidationResult } from './popups'

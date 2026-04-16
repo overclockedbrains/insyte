@@ -5,7 +5,7 @@ import { resolveModel } from './providers'
 import { REGISTRY } from './registry'
 import type { Provider } from './registry'
 import { loadPromptMarkdown } from './prompts/loadPrompt'
-import type { TraceData } from '@/src/sandbox/types'
+import type { TraceData } from '../sandbox/types'
 
 const TRACE_TO_SCENE_SYSTEM_PROMPT = loadPromptMarkdown('trace-to-scene.md')
 

@@ -260,22 +260,14 @@ function NetworkScene({ compact }: { compact: boolean }) {
           strokeLinecap="round"
           strokeWidth="1"
         />
-        <motion.circle
-          cx="18"
-          cy="26"
-          r="0.9"
-          fill="rgba(88,196,217,0.9)"
-          animate={{ cx: [18, 47, 18], opacity: [0, 1, 0] }}
-          transition={{ duration: 1.7, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
-        />
-        <motion.circle
-          cx="53"
-          cy="26"
-          r="0.9"
-          fill="rgba(88,196,217,0.9)"
-          animate={{ cx: [53, 78, 53], opacity: [0, 1, 0] }}
-          transition={{ duration: 1.7, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut', delay: 0.25 }}
-        />
+        <circle cx="18" cy="26" r="0.9" fill="rgba(88,196,217,0.9)">
+          <animate attributeName="cx" values="18;47;18" dur="1.7s" repeatCount="indefinite" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" />
+          <animate attributeName="opacity" values="0;1;0" dur="1.7s" repeatCount="indefinite" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" />
+        </circle>
+        <circle cx="53" cy="26" r="0.9" fill="rgba(88,196,217,0.9)">
+          <animate attributeName="cx" values="53;78;53" dur="1.7s" begin="0.25s" repeatCount="indefinite" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" />
+          <animate attributeName="opacity" values="0;1;0" dur="1.7s" begin="0.25s" repeatCount="indefinite" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" />
+        </circle>
         <circle cx="18" cy="33" r="0.55" fill="rgba(150,163,182,0.55)" />
         <circle cx="50" cy="33" r="0.55" fill="rgba(150,163,182,0.55)" />
         <circle cx="78" cy="33" r="0.55" fill="rgba(150,163,182,0.55)" />

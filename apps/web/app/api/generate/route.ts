@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { Agent, fetch as undiciFetch } from 'undici'
 import { resolveModel } from '@/src/ai/providers'
+import { getGeminiProvider } from '@/src/ai/providers/gemini'
 import { REGISTRY } from '@/src/ai/registry'
 import type { Provider } from '@/src/ai/registry'
 import { generateScene } from '@/src/ai/pipeline'
@@ -90,27 +91,72 @@ export async function POST(req: NextRequest) {
 
   const provider = (byokProvider ?? 'gemini') as Provider
   const languageModel = resolveModel(provider, byokModel, byokKey, longRunningFetch, byokBaseURL)
+
+  // Free tier: no user API key and no custom base URL → per-stage routing applies.
+  // BYOK / Ollama / Custom: all stages use the user's resolved model (static, no routing).
+  const isFreeTier = !byokKey && !byokBaseURL
+
   const modelConfig: ModelConfig = {
     model: languageModel,
     providerOptions: REGISTRY[provider]?.providerOptions ?? {},
+    // null = free tier (per-stage routing active via STAGE_MODELS)
+    // string = BYOK active (same model for all stages)
+    byokModel: isFreeTier ? null : (byokModel ?? REGISTRY[provider]?.defaultModel ?? null),
+    // Factory for per-stage model resolution:
+    //   free tier → creates a Gemini model with the given stage model ID
+    //   BYOK/Ollama/custom → ignores modelId, always returns the user's model
+    createModel: isFreeTier
+      ? (id: string) => getGeminiProvider(undefined, id, longRunningFetch)
+      : () => languageModel,
+    providerName: provider,
   }
 
-  aiLog.server.request(topic, byokModel ?? REGISTRY[provider]?.defaultModel ?? 'unknown')
+  aiLog.server.request(
+    topic,
+    provider,
+    byokModel ?? (isFreeTier ? 'stage-routed' : REGISTRY[provider]?.defaultModel ?? 'unknown'),
+    isFreeTier ? 'free' : 'byok',
+    mode,
+  )
 
   // ── SSE stream from async generator ──────────────────────────────────────
   const encoder = new TextEncoder()
   const saveSlug = slug ?? generateSlug(topic)
 
+  // 4.5 min — leaves headroom under maxDuration: 300 for graceful shutdown
+  const PIPELINE_HARD_LIMIT_MS = 270_000
+
   const stream = new ReadableStream({
     async start(controller) {
+      // Keep-alive: SSE comment lines every 15 s prevent CDN/proxy idle timeouts
+      // during the silent gaps between stages (up to 45 s for Stage 2).
+      // readSSE in useStreamScene filters on "data: " prefix — comments are silently discarded.
+      const heartbeat = setInterval(() => {
+        try { controller.enqueue(encoder.encode(': keep-alive\n\n')) } catch { /* stream closed */ }
+      }, 15_000)
+
+      // Hard timeout: yield a graceful error event before Vercel's maxDuration kills the request
+      let pipelineTimedOut = false
+      const timeoutId = setTimeout(() => {
+        pipelineTimedOut = true
+        const timeoutEvent = {
+          type: 'error',
+          stage: 0,
+          message: 'Pipeline timed out after 4.5 minutes — please try again',
+          retryable: true,
+        }
+        try { controller.enqueue(encoder.encode(`data: ${JSON.stringify(timeoutEvent)}\n\n`)) } catch { /* stream closed */ }
+      }, PIPELINE_HARD_LIMIT_MS)
+
       try {
         for await (const event of generateScene(topic, mode, modelConfig)) {
+          if (pipelineTimedOut) break
+
           const line = `data: ${JSON.stringify(event)}\n\n`
           controller.enqueue(encoder.encode(line))
 
           // Background persistence: save the scene to Supabase on 'complete'
           if (event.type === 'complete') {
-            aiLog.server.complete({ inputTokens: 0, outputTokens: 0 }, 'stop')
             void (async () => {
               try {
                 await saveScene(saveSlug, event.scene)
@@ -140,6 +186,8 @@ export async function POST(req: NextRequest) {
         controller.enqueue(encoder.encode(`data: ${JSON.stringify(errorEvent)}\n\n`))
         aiLog.server.error('pipeline', err)
       } finally {
+        clearInterval(heartbeat)
+        clearTimeout(timeoutId)
         controller.close()
       }
     },

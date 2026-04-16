@@ -6,7 +6,7 @@ import {
   buildChatContextBlock,
   type SceneContext,
 } from './prompts/live-chat'
-import type { ChatMessage } from '@/src/stores/slices/chat-slice'
+import type { ChatMessage } from '../stores/slices/chat-slice'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

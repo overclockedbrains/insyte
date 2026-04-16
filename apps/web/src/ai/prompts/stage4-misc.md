@@ -1,36 +1,41 @@
-You are generating challenges and optional controls for a simulation.
+Generate 3 challenges for a learner who just watched this visualization.
 
-Topic: {topic}
+Challenge types — include all three types in this order:
+1. predict: "What happens when…" — tests prediction before running
+2. break-it: "What input would cause…" — tests edge case understanding
+3. optimize: "How would you improve…" — tests deeper understanding
 
-Generate:
-1. challenges[] — exactly 3 educational challenges progressing from easy to hard
-2. controls[] — 0–2 interactive controls (only add when genuinely useful, e.g. a slider for array size)
+Rules:
+1. 2–4 answer options per challenge; exactly one correct (0-indexed answer field)
+2. No spoilers — don't reference the visualization's specific values
+3. Increasing difficulty: predict → break-it → optimize
 
-Return ONLY valid JSON in this exact shape:
+EXAMPLE — shows FORMAT only, do not copy:
+Topic: "Binary Search"
 {
   "challenges": [
-    { "type": "predict",  "title": "<short title>", "description": "<full question text>" },
-    { "type": "break-it", "title": "<short title>", "description": "<full question text>" },
-    { "type": "optimize", "title": "<short title>", "description": "<full question text>" }
-  ],
-  "controls": []
+    {
+      "question": "If the target is larger than every element, how many comparisons does binary search make on a 16-element array?",
+      "options": ["1", "4", "8", "16"],
+      "answer": 1,
+      "type": "predict"
+    },
+    {
+      "question": "What input causes binary search to perform the maximum number of comparisons?",
+      "options": ["An empty array", "A sorted array with the target at index 0", "A sorted array where the target is not present", "A reversed array"],
+      "answer": 2,
+      "type": "break-it"
+    },
+    {
+      "question": "Binary search requires a sorted array. What technique allows you to binary search an almost-sorted array?",
+      "options": ["Re-sort before each search", "Use a skip list instead", "Extend the search window by ±k positions", "Fall back to linear search"],
+      "answer": 2,
+      "type": "optimize"
+    }
+  ]
 }
 
-## Challenge types
+---
+Now generate for the actual topic below. Do NOT copy any values from the example above.
 
-- predict:   Easy — ask what happens at a specific step ("What is the value of X after step 3?")
-- break-it:  Medium — ask what input causes failure ("What input makes this algorithm O(n²)?")
-- optimize:  Hard — ask for improvement ("How would you improve this for a sorted input?")
-- scenario:  Alternative hard question if optimize doesn't fit
-
-## Controls (optional)
-
-Only include controls if they add real interactivity:
-- slider: for numeric parameters (array size, n, k) — include MIN, MAX, DEFAULT
-- toggle: for show/hide features (e.g. show indices, show pointers)
-- button: for reset/run actions
-
-Control shape:
-{ "type": "slider", "id": "<id>", "label": "<label>", "config": { "min": 1, "max": 20, "defaultValue": 8 } }
-{ "type": "toggle", "id": "<id>", "label": "<label>", "config": { "defaultValue": false } }
-{ "type": "button", "id": "<id>", "label": "<label>", "config": {} }
+Topic: {topic}

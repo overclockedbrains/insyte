@@ -1,50 +1,62 @@
-import { parseISCL } from '@insyte/scene-engine'
-import type { Scene, SceneLayout, SceneType, Step, ExplanationSection, Popup, Challenge, Control } from '@insyte/scene-engine'
-import { callLLM } from './client'
+import type { Scene, SceneType } from '@insyte/scene-engine'
+import { streamText } from 'ai'
+import { generateObject } from './client'
 import type { ModelConfig } from './client'
+import { resolveStageModel } from './model-routing'
+import type { StageKey } from './model-routing'
 import {
+  SceneSkeletonSchema,
+  buildStepsSchema,
+  buildPopupsSchema,
+  MiscSchema,
+} from './schemas'
+import type { SceneSkeletonParsed, StepsParsed, PopupsParsed, MiscParsed } from './schemas'
+import {
+  buildStage0Prompt,
   buildStage1Prompt,
-  buildStage2aPrompt,
-  buildStage2bPrompt,
+  buildStage2Prompt,
   buildStage3Prompt,
   buildStage4Prompt,
+  STAGE1_SYSTEM,
+  STAGE2_SYSTEM,
+  STAGE3_SYSTEM,
 } from './prompts/builders'
-import { validateStates, validateSteps, validateAnnotations, validateMisc } from './validators'
+import { validateSteps, validatePopups } from './validators'
 import { assembleScene } from './assembly'
-import { stripCodeFences, joinStepContinuations } from './iscl-preprocess'
+import { aiLog } from '@/lib/ai-logger'
 
 // ─── GenerationEvent ──────────────────────────────────────────────────────────
 
 /**
- * Discriminated union of all events the pipeline can emit.
- * The client (useStreamScene) consumes these over SSE.
+ * Discriminated union of all events the pipeline emits over SSE.
  *
- * Ordering contract:
- *   plan → content → annotations → misc → complete
- *   (or: plan → error on fatal failure)
+ * Canonical ordering contract (Phase 30):
+ *   reasoning → plan → content → annotations → misc → complete
+ *   (or: any stage → error on fatal failure)
+ *
+ * Stage 2 is the only fatal stage. Stage 3 and 4 failures are non-fatal —
+ * the scene is still complete without popups or challenges.
  */
 export type GenerationEvent =
   | {
+      type: 'reasoning'
+      text: string
+    }
+  | {
       type: 'plan'
-      title: string
-      visualCount: number
-      stepCount: number
-      layout: SceneLayout
+      skeleton: SceneSkeletonParsed
     }
   | {
       type: 'content'
-      states: Record<string, unknown>
-      steps: Step[]
+      steps: StepsParsed
     }
   | {
       type: 'annotations'
-      explanation: ExplanationSection[]
-      popups: Popup[]
+      popups: PopupsParsed
     }
   | {
       type: 'misc'
-      challenges: Challenge[]
-      controls: Control[]
+      misc: MiscParsed
     }
   | {
       type: 'complete'
@@ -60,171 +72,228 @@ export type GenerationEvent =
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 /**
- * Per-stage retry budget.
- * Override with PIPELINE_MAX_RETRIES=0 to disable all server-side retries
- * (useful in development to fail fast rather than burning tokens on every typo).
+ * Per-stage retry budgets (excluding Stage 0).
+ * Override with PIPELINE_MAX_RETRIES=0 to disable retries in development.
  */
-const MAX_RETRIES = Math.max(
-  0,
-  parseInt(process.env.PIPELINE_MAX_RETRIES ?? '2', 10) || 2,
-)
+const _pipelineRetries = parseInt(process.env.PIPELINE_MAX_RETRIES ?? '', 10)
+const MAX_RETRIES = Math.max(0, isNaN(_pipelineRetries) ? 2 : _pipelineRetries)
 
 // ─── generateScene ────────────────────────────────────────────────────────────
 
 /**
- * Async generator orchestrating all 5 pipeline stages.
+ * Async generator orchestrating the 6-stage AI pipeline.
  *
  * Stage execution order:
- *   1  ISCL generation      — fatal on all retries failing
- *   2a Visual initial states — non-fatal (falls back to empty)    ┐ parallel
- *   2b Step params           — fatal if all retries fail          ┘
- *   3  Annotations           — non-fatal (falls back to empty arrays)
- *   4  Misc (challenges)     — non-fatal (falls back to empty arrays)
+ *   0  Free reasoning       — fatal abort on failure (no schema, no retry)
+ *   1  Scene skeleton        — fatal on all retries failing
+ *   2  Steps + explanations  — fatal on all retries failing
+ *   3  Popups               ┐ parallel after Stage 2; non-fatal
+ *   4  Misc (challenges)    ┘ parallel after Stage 2; non-fatal
  *   5  Deterministic assembly — fatal if safeParseScene fails
  *
- * @param topic   User-supplied topic string
- * @param mode    Optional SceneType hint — if omitted the AI picks the type
- * @param config  Model + providerOptions bundle built by the route handler
+ * Model routing:
+ *   BYOK (modelConfig.byokModel != null): every stage uses user's model (static).
+ *   Free tier (byokModel == null): per-stage models from STAGE_MODELS.
  */
 export async function* generateScene(
   topic: string,
   mode: SceneType | undefined,
-  config: ModelConfig,
+  modelConfig: ModelConfig,
 ): AsyncGenerator<GenerationEvent> {
 
-  // ─── Stage 1: ISCL Generation ──────────────────────────────────────────────
-  const stage1Prompt = buildStage1Prompt(topic, mode)
-  const isclResult = await retryStage(MAX_RETRIES, async () => {
-    const raw = await callLLM(stage1Prompt, config)
-    // Strip any markdown code fences the model may add despite instructions,
-    // then re-join SET lines that the model split across multiple lines.
-    const cleaned = joinStepContinuations(stripCodeFences(raw))
-    const parsed = parseISCL(cleaned)
-    return parsed.ok
-      ? { ok: true as const, value: parsed.parsed! }
-      : { ok: false as const, error: parsed.error!.message }
-  })
+  const byokModel = modelConfig.byokModel
+  const pipelineStart = Date.now()
 
-  if (!isclResult.ok) {
+  /**
+   * Build a per-stage ModelConfig:
+   * - Resolves the correct model for this stage (per-stage or BYOK passthrough)
+   * - Sets the stage-specific temperature
+   * - Adjusts providerOptions for Stage 0 (higher thinking budget)
+   */
+  const stageConfig = (stage: StageKey, temperature: number): ModelConfig => {
+    const modelId = resolveStageModel(stage, byokModel)
+    const stageProviderOptions = stage === 'stage0'
+      ? buildStage0ProviderOptions(modelConfig.providerOptions, modelConfig.providerName)
+      : modelConfig.providerOptions
+    return {
+      ...modelConfig,
+      model: modelConfig.createModel(modelId),
+      temperature,
+      providerOptions: stageProviderOptions,
+    }
+  }
+
+  // ── Stage 0: Free Reasoning ──────────────────────────────────────────────
+  // No system prompt, no few-shot, temperature 1.0, high thinkingBudget.
+  // Thinking models reason from first principles; examples push them into
+  // pattern-matching mode, short-circuiting the reasoning we're paying for.
+  const model0 = resolveStageModel('stage0', byokModel)
+  aiLog.server.stageStart(0, model0, 1.0)
+  const t0 = Date.now()
+  let reasoning = ''
+  try {
+    const stage0Cfg = stageConfig('stage0', 1.0)
+    const { textStream } = streamText({
+      model: stage0Cfg.model,
+      prompt: buildStage0Prompt(topic, mode),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      providerOptions: stage0Cfg.providerOptions as any,
+      temperature: 1.0,
+      maxOutputTokens: 8192,
+      maxRetries: 0,
+    })
+    for await (const chunk of textStream) {
+      reasoning += chunk
+      yield { type: 'reasoning', text: chunk }
+    }
+    aiLog.server.stageDone(0, Date.now() - t0)
+  } catch (err) {
+    aiLog.server.stageFail(0, err)
+    yield {
+      type: 'error',
+      stage: 0,
+      message: `Stage 0 (reasoning) failed: ${err instanceof Error ? err.message : String(err)}`,
+      retryable: true,
+    }
+    return
+  }
+
+  // ── Stage 1: Scene Skeleton ──────────────────────────────────────────────
+  const model1 = resolveStageModel('stage1', byokModel)
+  aiLog.server.stageStart(1, model1, 0.1)
+  const t1 = Date.now()
+  let skeleton: SceneSkeletonParsed
+  try {
+    skeleton = await retryStage(MAX_RETRIES, (lastError) =>
+      generateObject(
+        buildStage1Prompt(topic, reasoning, lastError),
+        SceneSkeletonSchema,
+        stageConfig('stage1', 0.1),
+        STAGE1_SYSTEM,
+      ),
+      15_000,
+      1,
+    )
+    aiLog.server.stageDone(1, Date.now() - t1)
+  } catch (err) {
+    aiLog.server.stageFail(1, err)
     yield {
       type: 'error',
       stage: 1,
-      message: `Stage 1 (ISCL) failed after ${MAX_RETRIES} attempts: ${isclResult.error}`,
+      message: `Stage 1 (skeleton) failed after ${MAX_RETRIES} retries: ${err instanceof Error ? err.message : String(err)}`,
       retryable: true,
     }
     return
   }
 
-  const iscl = isclResult.value
+  yield { type: 'plan', skeleton }
 
-  // Yield 'plan' immediately — client can show title + placeholder skeleton
-  yield {
-    type: 'plan',
-    title: iscl.title,
-    visualCount: iscl.visualDecls.length,
-    stepCount: iscl.stepCount,
-    layout: iscl.layout,
-  }
+  const visualIds = skeleton.visuals.map(v => v.id)
 
-  // ─── Stages 2a + 2b: Parallel ──────────────────────────────────────────────
-  const [statesResult, stepsResult] = await Promise.all([
-    retryStage(MAX_RETRIES, async () => {
-      const raw = await callLLM(buildStage2aPrompt(iscl, topic), config)
-      const parsed = parseJSON(raw)
-      if (!parsed.ok) return { ok: false as const, error: parsed.error }
-      const validated = validateStates(parsed.data, iscl)
-      return validated.ok
-        ? { ok: true as const, value: validated.states }
-        : { ok: false as const, error: validated.error! }
-    }),
-    retryStage(MAX_RETRIES, async () => {
-      const raw = await callLLM(buildStage2bPrompt(iscl), config)
-      const parsed = parseJSON(raw)
-      if (!parsed.ok) return { ok: false as const, error: parsed.error }
-      const validated = validateSteps(parsed.data, iscl)
-      return validated.ok
-        ? { ok: true as const, value: validated.steps }
-        : { ok: false as const, error: validated.error! }
-    }),
-  ])
+  // ── Stage 2: Steps + Explanations ───────────────────────────────────────
+  // Must complete before Stage 3 — Stage 3 references visual IDs that Stage 2
+  // confirms. Dynamic schema factory constrains target enum to actual visual IDs.
+  const model2 = resolveStageModel('stage2', byokModel)
+  aiLog.server.stageStart(2, model2, 0.2)
+  const t2 = Date.now()
+  let stepsParsed: StepsParsed
+  try {
+    const stepsRaw = await retryStage(MAX_RETRIES, async (lastError) => {
+      const raw = await generateObject(
+        buildStage2Prompt(topic, reasoning, skeleton, lastError),
+        buildStepsSchema(visualIds),
+        stageConfig('stage2', 0.2),
+        STAGE2_SYSTEM,
+      )
+      const validation = validateSteps(raw as StepsParsed, skeleton)
+      if (!validation.valid) {
+        throw new Error(`Semantic validation failed: ${validation.errors.join('; ')}`)
+      }
+      return raw
+    }, 45_000, 2)  // 45s — heaviest stage (co-generates both steps and explanations)
 
-  // Stage 2b failure is fatal — no step data means no visualization
-  if (!stepsResult.ok) {
+    stepsParsed = stepsRaw as StepsParsed
+    aiLog.server.stageDone(2, Date.now() - t2)
+  } catch (err) {
+    aiLog.server.stageFail(2, err)
     yield {
       type: 'error',
       stage: 2,
-      message: `Stage 2b (steps) failed after ${MAX_RETRIES} attempts: ${stepsResult.error}`,
+      message: `Stage 2 (steps) failed after ${MAX_RETRIES} retries: ${err instanceof Error ? err.message : String(err)}`,
       retryable: true,
     }
     return
   }
 
-  // Stage 2a failure is non-fatal — fall back to empty states (schema defaults)
-  const states = statesResult.ok ? statesResult.value : {}
-  if (!statesResult.ok) {
-    console.warn('[pipeline] Stage 2a (initial states) failed — using empty states:', statesResult.error)
+  yield { type: 'content', steps: stepsParsed }
+
+  // ── Stage 3 + Stage 4 in parallel ───────────────────────────────────────
+  // Both run AFTER Stage 2 (not simultaneously) to preserve event ordering.
+  // Stage 3 uses STAGE3_SYSTEM; Stage 4 has no system prompt.
+  const model3 = resolveStageModel('stage3', byokModel)
+  const model4 = resolveStageModel('stage4', byokModel)
+  aiLog.server.stageStart(3, model3, 0.4)
+  aiLog.server.stageStart(4, model4, 0.5)
+  const t34 = Date.now()
+
+  const [popupsResult, miscResult] = await Promise.allSettled([
+
+    retryStage(MAX_RETRIES, (lastError) =>
+      generateObject(
+        buildStage3Prompt(topic, skeleton, lastError),
+        buildPopupsSchema(visualIds),
+        stageConfig('stage3', 0.4),
+        STAGE3_SYSTEM,
+      ),
+      15_000,
+      3,
+    ).then(raw => {
+      aiLog.server.stageDone(3, Date.now() - t34)
+      // Semantic validation (non-fatal — invalid popups are simply dropped)
+      const validation = validatePopups(raw as PopupsParsed, skeleton)
+      if (!validation.valid) {
+        // Warn only — stage still succeeded, popups are returned as-is
+        aiLog.server.error('stage-3-validation', validation.errors.join('; '))
+      }
+      return raw as PopupsParsed
+    }),
+
+    retryStage(MAX_RETRIES, (lastError) =>
+      generateObject(
+        buildStage4Prompt(topic, lastError),
+        MiscSchema,
+        stageConfig('stage4', 0.5),
+        // No system prompt for Stage 4
+      ),
+      15_000,
+      4,
+    ).then(raw => {
+      aiLog.server.stageDone(4, Date.now() - t34)
+      return raw
+    }),
+
+  ])
+
+  const popups = popupsResult.status === 'fulfilled' ? popupsResult.value : null
+  const misc   = miscResult.status   === 'fulfilled' ? miscResult.value   : null
+
+  if (popupsResult.status === 'rejected') {
+    aiLog.server.stageFail(3, (popupsResult as PromiseRejectedResult).reason)
+  }
+  if (miscResult.status === 'rejected') {
+    aiLog.server.stageFail(4, (miscResult as PromiseRejectedResult).reason)
   }
 
-  yield {
-    type: 'content',
-    states,
-    steps: stepsResult.value,
-  }
+  if (popups) yield { type: 'annotations', popups }
+  if (misc)   yield { type: 'misc',        misc   }
 
-  // ─── Stage 3: Annotations ──────────────────────────────────────────────────
-  const annotationsResult = await retryStage(MAX_RETRIES, async () => {
-    const raw = await callLLM(buildStage3Prompt(iscl, topic), config)
-    const parsed = parseJSON(raw)
-    if (!parsed.ok) return { ok: false as const, error: parsed.error }
-    const validated = validateAnnotations(parsed.data, iscl)
-    return validated.ok
-      ? { ok: true as const, value: { explanation: validated.explanation, popups: validated.popups } }
-      : { ok: false as const, error: validated.error! }
-  })
-
-  const explanation: ExplanationSection[] = annotationsResult.ok ? annotationsResult.value.explanation : []
-  const popups: Popup[] = annotationsResult.ok ? annotationsResult.value.popups : []
-  if (!annotationsResult.ok) {
-    console.warn('[pipeline] Stage 3 (annotations) failed — proceeding without annotations:', annotationsResult.error)
-  }
-
-  yield {
-    type: 'annotations',
-    explanation,
-    popups,
-  }
-
-  // ─── Stage 4: Misc ─────────────────────────────────────────────────────────
-  const miscResult = await retryStage(1, async () => {
-    const raw = await callLLM(buildStage4Prompt(topic), config)
-    const parsed = parseJSON(raw)
-    if (!parsed.ok) return { ok: false as const, error: parsed.error }
-    const validated = validateMisc(parsed.data)
-    return validated.ok
-      ? { ok: true as const, value: { challenges: validated.challenges, controls: validated.controls } }
-      : { ok: false as const, error: validated.error! }
-  })
-
-  const challenges: Challenge[] = miscResult.ok ? miscResult.value.challenges : []
-  const controls: Control[] = miscResult.ok ? miscResult.value.controls : []
-  if (!miscResult.ok) {
-    console.warn('[pipeline] Stage 4 (misc) failed — proceeding without challenges/controls:', miscResult.error)
-  }
-
-  yield { type: 'misc', challenges, controls }
-
-  // ─── Stage 5: Deterministic Assembly ───────────────────────────────────────
-  const assembled = assembleScene(
-    iscl,
-    states,
-    stepsResult.value,
-    explanation,
-    popups,
-    challenges,
-    controls,
-  )
+  // ── Stage 5: Deterministic Assembly ─────────────────────────────────────
+  aiLog.server.stageStart(5, 'deterministic', 0)
+  const t5 = Date.now()
+  const assembled = assembleScene(skeleton, stepsParsed, popups, misc)
 
   if (!assembled.ok) {
+    aiLog.server.stageFail(5, assembled.errors!.join('; '))
     yield {
       type: 'error',
       stage: 5,
@@ -234,53 +303,72 @@ export async function* generateScene(
     return
   }
 
+  aiLog.server.stageDone(5, Date.now() - t5)
+  aiLog.server.pipelineDone(Date.now() - pipelineStart)
+
   yield { type: 'complete', scene: assembled.scene! }
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 /**
- * Retry wrapper for a single stage function.
- *
- * fn must return { ok: true; value: T } | { ok: false; error: string }.
- * If fn throws, the exception is caught and treated as a retryable failure.
- * Retries up to maxRetries times, returning the last result on all failures.
+ * Builds provider-specific thinking config for Stage 0.
+ * Each provider uses a different key/schema for extended thinking.
  */
-async function retryStage<T>(
-  maxRetries: number,
-  fn: () => Promise<{ ok: true; value: T } | { ok: false; error: string }>,
-): Promise<{ ok: true; value: T } | { ok: false; error: string }> {
-  let last: { ok: true; value: T } | { ok: false; error: string } = {
-    ok: false,
-    error: 'No attempts made',
+function buildStage0ProviderOptions(
+  baseOptions: Record<string, unknown>,
+  providerName: string,
+): Record<string, unknown> {
+  switch (providerName) {
+    case 'gemini':
+      return { ...baseOptions, google: { thinkingConfig: { thinkingBudget: 16384 } } }
+    case 'anthropic':
+      return { ...baseOptions, anthropic: { thinking: { type: 'enabled', budget_tokens: 16384 } } }
+    case 'openai':
+      // o-series models think automatically; reasoningEffort controls depth
+      return { ...baseOptions, openai: { reasoningEffort: 'high' } }
+    default:
+      // groq, ollama, custom: no standard thinking API — pass through unchanged
+      return baseOptions
   }
-
-  for (let i = 0; i < maxRetries; i++) {
-    try {
-      last = await fn()
-      if (last.ok) return last
-    } catch (err) {
-      last = {
-        ok: false,
-        error: err instanceof Error ? err.message : String(err),
-      }
-    }
-  }
-
-  return last
 }
 
 /**
- * Parse JSON from an LLM response, stripping markdown code fences if present.
- * Returns { ok: true, data } | { ok: false, error }.
+ * Retry wrapper with per-attempt timeout, retry logging, and error-guided prompts.
+ *
+ * The function fn receives lastError on retries so prompt builders can inject
+ * the exact validation failure — the model is told what to fix, not just
+ * asked to "try again".
+ *
+ * Uses exponential backoff: 500ms, 1000ms (then throws).
  */
-function parseJSON(raw: string): { ok: true; data: unknown } | { ok: false; error: string } {
-  const cleaned = stripCodeFences(raw)
-  try {
-    return { ok: true, data: JSON.parse(cleaned) }
-  } catch {
-    return { ok: false, error: `JSON.parse failed on: ${cleaned.slice(0, 120)}...` }
+async function retryStage<T>(
+  maxRetries: number,
+  fn: (lastError?: string) => Promise<T>,
+  timeoutPerAttemptMs: number,
+  stageNum: number,
+): Promise<T> {
+  let lastError: string | undefined = undefined
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await withTimeout(fn(lastError), timeoutPerAttemptMs)
+    } catch (err) {
+      lastError = err instanceof Error ? err.message : String(err)
+      if (attempt === maxRetries) throw err
+      aiLog.server.stageRetry(stageNum, attempt + 1, lastError)
+      await new Promise(r => setTimeout(r, 500 * (attempt + 1)))
+    }
   }
+  throw new Error('retryStage: unreachable')
 }
 
-// stripCodeFences and joinStepContinuations are imported from ./iscl-preprocess
+/**
+ * Wrap a promise with a timeout.
+ * Throws if the promise doesn't resolve within timeoutMs milliseconds.
+ */
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error(`Stage timed out after ${timeoutMs}ms`)), timeoutMs),
+  )
+  return Promise.race([promise, timeout])
+}

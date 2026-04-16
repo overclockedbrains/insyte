@@ -14,7 +14,7 @@
 | Stack | Next.js 16, TypeScript, Tailwind v4, Framer Motion, Zustand, Vercel AI SDK |
 | Monorepo | Turborepo + pnpm workspaces |
 | Database | Supabase |
-| AI Default | Gemini Flash (free tier) |
+| AI Default | Gemini 2.5 Pro (Stage 0) · 2.0 Flash (Stage 1) · 2.0 Pro (Stage 2) · 2.0 Flash (Stage 3) · 2.0 Flash Lite (Stage 4) |
 | BYOK | OpenAI · Anthropic · Gemini · Groq · Ollama (local) · Custom endpoint |
 | Theme | Dark-only, always |
 | Pre-built sims | 24 total (5 concept + 10 DSA + 5 LLD + 4 HLD) |
@@ -69,7 +69,7 @@ R1 released on 8 April 2026. R2 released on 14 April 2026. R3 in progress.
 | Phase | Status | Description |
 |-------|--------|-------------|
 | **Phase 29** | ⏸️ | Zoom/Pan Viewport & Interactive Canvas — **Skipped indefinitely.** Not a priority; canvas interaction model may change with AI quality improvements. Branch not started. |
-| **Phase 30** | 🔲 | AI Pipeline Redesign — Kill ISCL, add Stage 0 free reasoning, co-generate steps + explanations, error-guided retry, per-stage model defaults (static routing) |
+| **Phase 30** | ✅ | AI Pipeline Redesign — Kill ISCL, add Stage 0 free reasoning (streaming), co-generate steps + explanations, error-guided retry, per-stage model defaults (static routing). AUDIT complete: 15 findings resolved (5 critical bugs, 5 moderate, 5 gaps). |
 | **Phase 31** | 🔲 | BYOK Model Routing — provider-aware tier routing so BYOK users get full routing benefits |
 
 ---
@@ -616,6 +616,8 @@ _OG Images_
 ### Phase 30 — AI Pipeline Redesign: Kill ISCL, Stage 0 Reasoning, Co-generated Steps + Explanations
 **Goal:** Fix the root causes of generation quality problems — ISCL hallucinations, visual-logic drift (steps and explanations out of sync), blind retries — by replacing ISCL with native constrained decoding via `generateObject`, introducing a free-text Stage 0 reasoning pass that flows as shared context into all downstream stages, and co-generating explanation + actions per step so drift is structurally impossible.
 
+**Status:** Completed April 16, 2026. Implementation landed April 14–15; AUDIT reviewed April 15; all 15 findings fixed April 16.
+
 **Estimated effort:** 6–8 days
 
 **Prerequisite:** Phase 25 (5-stage pipeline and SSE infrastructure in place)
@@ -624,17 +626,39 @@ _OG Images_
 
 **Deliverables:**
 - `apps/web/src/ai/schemas.ts` — Zod schemas + **dynamic schema factories**: `SceneSkeletonSchema`, `buildStepsSchema(visualIds)`, `buildPopupsSchema(visualIds)`, `MiscSchema`. Dynamic factories make invalid cross-references physically impossible via constrained decoding.
-- `apps/web/src/ai/model-routing.ts` — `STAGE_MODELS` (per-stage Gemini defaults) + `resolveStageModel(stage, byokModel)`. BYOK: user's selected model used for all stages (static). Provider-aware BYOK routing deferred to Phase 31.
-- `client.ts` extended with `generateObject<T>(prompt, schema, config)` wrapper
-- `pipeline.ts` rewritten: Stage 0 → `reasoning` event → Stage 1 → `plan` → Stage 2 → `content` → [Stage 3 ∥ Stage 4] → Stage 5. Stage 2 runs before Stage 3 (event ordering). Per-stage timeouts.
+- `apps/web/src/ai/model-routing.ts` — `STAGE_MODELS` (per-stage Gemini defaults: 2.5 Pro / 2.0 Flash / 2.0 Pro / 2.0 Flash / 2.0 Flash Lite) + `resolveStageModel(stage, byokModel)`. BYOK: user's selected model used for all stages (static). Provider-aware BYOK routing deferred to Phase 31.
+- `client.ts` extended with `generateObject<T>(prompt, schema, config)` wrapper + `providerName` on `ModelConfig`
+- `pipeline.ts` rewritten: Stage 0 **streams** via `streamText` (reasoning chunks live) → Stage 1 → `plan` → Stage 2 → `content` → [Stage 3 ∥ Stage 4] → Stage 5. Stage 2 runs before Stage 3 (event ordering). Per-stage timeouts. Semantic validation inside `retryStage` so failures drive error-guided retry.
 - `prompts/builders.ts` rewritten: 5 builders with `lastError?` for error-guided retry
-- Prompt files: `stage0-reasoning.md` (no system prompt, no few-shot, PTCF, numbered questions), `stage1-skeleton.md` (brief system prompt, Binary Search example, ID naming rules), `stage2-steps.md` (pedagogical system prompt, visual IDs at TOP, XML delimiters, explicit CoT + schema ordering, ≤3000 tokens total), `stage3-popups.md`, `stage4-misc.md`
+- Prompt files: `stage0-reasoning.md` (≤400 word constraint), `stage1-skeleton.md`, `stage2-steps.md`, `stage3-popups.md`, `stage4-misc.md` — all examples aligned to Binary Search
 - Error-guided `retryStage` with per-attempt timeout: injects exact validator error (cuts retries ~50%)
-- Validators updated: `states.ts` merged into `steps.ts`; `annotations.ts` renamed `popups.ts`; semantic checks preserved
+- Validators: `validateSteps` includes step-count check; `validators/misc.ts` deleted (superseded by `MiscSchema`); `popups.ts` semantic checks preserved
 - `assembly.ts` input types updated from ISCL-derived to new schema types (logic unchanged)
-- AI module hygiene: fix `@/` alias imports in `liveChat.ts` + `traceToScene.ts`; add `index.ts` public barrel
-- **New `GenerationEvent` variant:** `{ type: 'reasoning', text }` — frontend shows "Thinking..." during Stage 0
-- **Deleted:** `iscl-preprocess.ts`, `iscl-preprocess.test.ts`, `stage1-iscl.md`, `stage2a-states.md`, `stage2b-steps.md`, `stage3-annotations.md`, ISCL parser
+- AI module hygiene: `index.ts` public barrel added
+- **New `GenerationEvent` variant:** `{ type: 'reasoning', text }` — frontend shows "Thinking..." as chunks arrive during Stage 0 streaming
+- **Deleted:** `iscl-preprocess.ts`, `iscl-preprocess.test.ts`, `stage1-iscl.md`, `stage2a-states.md`, `stage2b-steps.md`, `stage3-annotations.md`, `validators/misc.ts`, ISCL parser
+- **route.ts:** 15 s keep-alive SSE heartbeat (prevents CDN idle timeout during inter-stage gaps); 4.5-minute graceful pipeline timeout
+- **`buildStage0ProviderOptions`:** provider-aware thinking config (Gemini `thinkingConfig`, Anthropic `thinking`, OpenAI `reasoningEffort`, others pass-through)
+
+**AUDIT (April 15–16, 2026):** 15 findings — all resolved. See [AUDIT.md](phases/phase-30/AUDIT.md).
+
+| ID | Fix |
+|---|---|
+| BUG-01 | `validateSteps` moved inside `retryStage` — semantic failures now drive error-guided retry |
+| BUG-02 | Stage 0 streams via `streamText`; reasoning chunks emitted live (no 90 s dead silence) |
+| BUG-03 | `condenseReasoning` removed; Stage 0 prompt gets 400-word cap; Stage 2 receives full reasoning |
+| BUG-04 | `validators/misc.ts` deleted; test replaced with `MiscSchema` smoke test |
+| BUG-05 | `detectedMode` now included in `/api/generate` fetch body |
+| BUG-06 | `stage4` model → `gemini-2.0-flash-lite` |
+| BUG-07 | `stage2` model → `gemini-2.0-pro` |
+| BUG-08 | `validateSteps` Check 4: `steps.length === skeleton.stepCount` |
+| BUG-09 | 15 s keep-alive heartbeat covers all inter-stage SSE gaps |
+| BUG-10 | `providerName` on `ModelConfig`; `buildStage0ProviderOptions` applies correct thinking config per provider |
+| GAP-01 | All 4 stage prompt examples aligned to Binary Search |
+| GAP-02 | `annotations` and `misc` switch cases added in `useStreamScene` with `console.debug` observability |
+| GAP-03 | Resolved by BUG-04 |
+| GAP-04 | 4.5-minute hard pipeline timeout in `route.ts` — graceful error event before Vercel kills the request |
+| GAP-05 | Closed — double validation is acceptable as defence-in-depth |
 
 **Plan:** [→ phases/phase-30/PLAN.md](phases/phase-30/PLAN.md)
 
@@ -643,11 +667,11 @@ _OG Images_
 ### Phase 31 — BYOK Model Routing
 **Goal:** Replace Phase 30's static BYOK behavior (single model for all stages) with provider-aware tier routing — when a user brings their own API key, insyte routes each stage to the appropriate model tier within their chosen provider's family (e.g., Anthropic BYOK → Opus for Stage 0, Sonnet for Stage 2, Haiku for Stages 1/3/4).
 
-**Prerequisite:** Phase 30 (pipeline must be stable before adding routing complexity)
+**Prerequisite:** Phase 30 ✅ — pipeline is stable. `providerName` is already on `ModelConfig` (landed in Phase 30 AUDIT BUG-10), so `resolveStageModel` can branch on it with no interface changes.
 
 **Research:** `.planning/research/ai-pipeline-redesign/byok-model-routing.md` — full industry analysis (Aider, OpenRouter, Continue.dev, DeepSource), `PROVIDER_TIER_MODELS` table, `resolveStageModel` implementation ready to drop in.
 
-**Plan:** To be written — research is complete, planning deferred until Phase 30 ships.
+**Plan:** To be written.
 
 ---
 

@@ -66,7 +66,7 @@ export const REGISTRY: Record<Provider, ProviderConfig> = {
     models: [
       { id: 'gemini-2.5-flash', label: 'Flash 2.5', badge: 'fast' },
       { id: 'gemini-2.5-pro', label: 'Pro 2.5' },
-      { id: 'gemini-2.0-flash', label: 'Flash 2.0' },
+      { id: 'gemini-2.5-flash-lite', label: 'Flash 2.5 Lite', badge: 'cheapest' },
       { id: 'gemini-3-flash-preview', label: 'Flash 3.0', badge: 'new' },
       { id: 'gemini-3.1-pro-preview', label: 'Pro 3.1', badge: 'new' },
     ],

@@ -8,6 +8,9 @@ import { aiLog } from '@/lib/ai-logger'
 import { va } from '@/src/lib/analytics'
 import type { GenerationEvent } from '@/src/ai/pipeline'
 
+// Re-export so consumers don't need to import from the AI module directly
+export type { GenerationEvent }
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 /**
@@ -18,10 +21,8 @@ import type { GenerationEvent } from '@/src/ai/pipeline'
  * entirely (useful in development to avoid burning tokens on repeated attempts).
  * Defaults to 1 (one automatic retry).
  */
-const CLIENT_MAX_RETRIES = Math.max(
-  0,
-  parseInt(process.env.NEXT_PUBLIC_CLIENT_MAX_RETRIES ?? '1', 10) || 1,
-)
+const _clientRetries = parseInt(process.env.NEXT_PUBLIC_CLIENT_MAX_RETRIES ?? '', 10)
+const CLIENT_MAX_RETRIES = Math.max(0, isNaN(_clientRetries) ? 1 : _clientRetries)
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -29,6 +30,8 @@ export interface UseStreamSceneResult {
   isStreaming: boolean
   /** For Phase 26 progressive rendering — empty in Phase 25, filled on complete */
   streamedFields: Set<string>
+  /** Stage 0 free reasoning text — shown as "Thinking..." during generation */
+  reasoningText: string | null
   error: string | null
   startStreaming: (topic: string, slug?: string) => void
   retry: () => void
@@ -92,6 +95,7 @@ async function* readSSE(
  */
 export function useStreamScene(): UseStreamSceneResult {
   const [error, setError] = useState<string | null>(null)
+  const [reasoningText, setReasoningText] = useState<string | null>(null)
   const lastTopicRef = useRef<string>('')
   const lastSlugRef = useRef<string | undefined>(undefined)
   const retryCountRef = useRef(0)
@@ -157,6 +161,7 @@ export function useStreamScene(): UseStreamSceneResult {
     (topic: string, slug?: string) => {
       aiLog.stream.start(topic, slug)
       setError(null)
+      setReasoningText(null)
       setStreaming(true)
       aiLog.store.setStreaming(true)
 
@@ -174,6 +179,7 @@ export function useStreamScene(): UseStreamSceneResult {
         ollamaBaseURL,
         customBaseURL,
         customApiKey,
+        detectedMode,
       } = useBoundStore.getState()
       const key = apiKeys[provider]
       const headers: Record<string, string> = { 'Content-Type': 'application/json' }
@@ -201,7 +207,7 @@ export function useStreamScene(): UseStreamSceneResult {
           const response = await fetch('/api/generate', {
             method: 'POST',
             headers,
-            body: JSON.stringify({ topic, slug }),
+            body: JSON.stringify({ topic, slug, mode: detectedMode ?? undefined }),
             signal: controller.signal,
           })
 
@@ -220,12 +226,27 @@ export function useStreamScene(): UseStreamSceneResult {
             if (controller.signal.aborted) break
 
             switch (event.type) {
+              case 'reasoning':
+                // Stage 0 free reasoning complete — show "Thinking..." text
+                setReasoningText(event.text)
+                aiLog.stream.firstPartial()
+                break
+
               case 'plan':
-                aiLog.stream.sceneInit(event.title)
+                aiLog.stream.sceneInit(event.skeleton.title)
                 break
 
               case 'content':
-                aiLog.stream.firstPartial()
+                break
+
+              case 'annotations':
+                console.debug('[stream] annotations received:', event.popups.popups.length, 'popups')
+                // Phase 26: store popups progressively here
+                break
+
+              case 'misc':
+                console.debug('[stream] misc received:', event.misc.challenges.length, 'challenges')
+                // Phase 26: store challenges progressively here
                 break
 
               case 'complete':
@@ -314,5 +335,5 @@ export function useStreamScene(): UseStreamSceneResult {
     aiLog.store.setStreaming(false)
   }, [setStreaming])
 
-  return { isStreaming, streamedFields, error, startStreaming, retry, abort }
+  return { isStreaming, streamedFields, reasoningText, error, startStreaming, retry, abort }
 }

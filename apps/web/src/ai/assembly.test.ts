@@ -1,140 +1,159 @@
 import { describe, it, expect } from 'vitest'
 import { assembleScene } from './assembly'
-import type { ISCLParsed, Step } from '@insyte/scene-engine'
+import type { SceneSkeletonParsed, StepsParsed, PopupsParsed, MiscParsed } from './schemas'
 
 // ─── Fixture builders ─────────────────────────────────────────────────────────
 
-function makeParsed(overrides?: Partial<ISCLParsed>): ISCLParsed {
+function makeSkeleton(overrides?: Partial<SceneSkeletonParsed>): SceneSkeletonParsed {
   return {
     title: 'Binary Search',
-    type: 'dsa-trace',
-    layout: 'canvas-only',
-    visualIds: new Set(['arr', 'ptr']),
-    visualDecls: [
-      { id: 'arr', type: 'array', layoutHint: 'linear-H' },
-      { id: 'ptr', type: 'counter', slot: 'bottom-left' },
+    type: 'dsa',
+    layout: 'linear-H',
+    visuals: [
+      { id: 'arr', type: 'array', hint: 'sorted integer array' },
+      { id: 'ptr', type: 'counter' },
     ],
     stepCount: 3,
-    steps: [
-      { index: 0, isInit: true, sets: [] },
-      { index: 1, isInit: false, sets: [{ visualId: 'arr', field: 'cells', rawValue: '[{v:1}]' }] },
-      { index: 2, isInit: false, sets: [{ visualId: 'ptr', field: 'value', rawValue: '1' }] },
-    ],
-    explanation: [],
-    popups: [],
-    challenges: [],
-    controls: [],
     ...overrides,
   }
 }
 
-const VALID_STATES = {
-  arr: { cells: [{ value: 1, highlight: 'default' }, { value: 5, highlight: 'default' }] },
-  ptr: { value: 0, label: 'pointer' },
+function makeSteps(overrides?: Partial<StepsParsed>): StepsParsed {
+  return {
+    initialStates: {
+      arr: { items: [1, 3, 5, 7, 9] },
+      ptr: { value: 0 },
+    },
+    steps: [
+      {
+        index: 1,
+        explanation: { heading: 'Start at the middle', body: 'Binary search begins by checking the middle element.' },
+        actions: [{ target: 'arr', params: { highlighted: [2] } }],
+      },
+      {
+        index: 2,
+        explanation: { heading: 'Eliminate half', body: 'If the target is smaller, discard the right half.' },
+        actions: [{ target: 'ptr', params: { value: 2 } }],
+      },
+      {
+        index: 3,
+        explanation: { heading: 'Found!', body: 'The target element has been located.' },
+        actions: [{ target: 'arr', params: { highlighted: [1] } }],
+      },
+    ],
+    ...overrides,
+  }
 }
-
-const VALID_STEPS: Step[] = [
-  { index: 0, actions: [] },
-  { index: 1, actions: [{ target: 'arr', params: { cells: [{ value: 1, highlight: 'active' }, { value: 5, highlight: 'default' }] } }] },
-  { index: 2, actions: [{ target: 'ptr', params: { value: 1, label: 'pointer' } }] },
-]
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('assembleScene', () => {
-  it('assembles a valid minimal scene', () => {
-    const result = assembleScene(
-      makeParsed(),
-      VALID_STATES,
-      VALID_STEPS,
-      [],   // explanation
-      [],   // popups
-      [],   // challenges
-      [],   // controls
-    )
+  it('assembles a valid minimal scene from skeleton + steps', () => {
+    const result = assembleScene(makeSkeleton(), makeSteps(), null, null)
     expect(result.ok).toBe(true)
     expect(result.scene).toBeDefined()
     expect(result.scene!.title).toBe('Binary Search')
+  })
+
+  it('maps dsa type to dsa-trace in the scene', () => {
+    const result = assembleScene(makeSkeleton({ type: 'dsa' }), makeSteps(), null, null)
+    expect(result.ok).toBe(true)
     expect(result.scene!.type).toBe('dsa-trace')
+  })
+
+  it('maps concept type to text-left-canvas-right page layout', () => {
+    const skeleton = makeSkeleton({ type: 'concept' })
+    const result = assembleScene(skeleton, makeSteps(), null, null)
+    expect(result.ok).toBe(true)
+    expect(result.scene!.layout).toBe('text-left-canvas-right')
+  })
+
+  it('maps dsa type to canvas-only page layout', () => {
+    const result = assembleScene(makeSkeleton({ type: 'dsa' }), makeSteps(), null, null)
+    expect(result.ok).toBe(true)
     expect(result.scene!.layout).toBe('canvas-only')
   })
 
   it('generates a unique id for each assembled scene', () => {
-    const r1 = assembleScene(makeParsed(), VALID_STATES, VALID_STEPS, [], [], [], [])
-    const r2 = assembleScene(makeParsed(), VALID_STATES, VALID_STEPS, [], [], [], [])
+    const r1 = assembleScene(makeSkeleton(), makeSteps(), null, null)
+    const r2 = assembleScene(makeSkeleton(), makeSteps(), null, null)
     expect(r1.scene!.id).toBeTruthy()
     expect(r2.scene!.id).toBeTruthy()
     expect(r1.scene!.id).not.toBe(r2.scene!.id)
   })
 
-  it('maps visualDecls to scene visuals with correct types and layoutHints', () => {
-    const result = assembleScene(makeParsed(), VALID_STATES, VALID_STEPS, [], [], [], [])
-    const visuals = result.scene!.visuals
-    expect(visuals).toHaveLength(2)
-
-    const arr = visuals.find(v => v.id === 'arr')!
-    expect(arr.type).toBe('array')
-    expect(arr.layoutHint).toBe('linear-H')
-    expect(arr.initialState).toEqual(VALID_STATES.arr)
-
-    const ptr = visuals.find(v => v.id === 'ptr')!
-    expect(ptr.type).toBe('counter')
-    expect(ptr.slot).toBe('bottom-left')
-  })
-
-  it('falls back to null initialState when states map is empty (Stage 2a degraded)', () => {
-    // assembleScene should still run but safeParseScene may reject null initialState
-    // This test verifies the assembly doesn't throw — schema may or may not reject
-    const result = assembleScene(makeParsed(), {}, VALID_STEPS, [], [], [], [])
-    // Result depends on whether the schema allows null initialState
-    // Either way, we must not throw
-    expect(typeof result.ok).toBe('boolean')
-  })
-
-  it('includes steps in the assembled scene', () => {
-    const result = assembleScene(makeParsed(), VALID_STATES, VALID_STEPS, [], [], [], [])
+  it('includes a synthetic step 0 plus AI-generated steps', () => {
+    const result = assembleScene(makeSkeleton(), makeSteps(), null, null)
     expect(result.ok).toBe(true)
-    expect(result.scene!.steps).toHaveLength(3)
-    expect(result.scene!.steps[0]!.index).toBe(0)
-    expect(result.scene!.steps[0]!.actions).toHaveLength(0)
+    const steps = result.scene!.steps
+    expect(steps[0]).toEqual({ index: 0, actions: [] })
+    expect(steps).toHaveLength(4)  // step 0 + 3 AI steps
   })
 
-  it('includes explanation sections', () => {
-    const explanation = [
-      { appearsAtStep: 0, heading: 'What is Binary Search?', body: 'Efficient search on sorted arrays.' },
-    ]
-    const result = assembleScene(makeParsed(), VALID_STATES, VALID_STEPS, explanation, [], [], [])
+  it('extracts explanation from steps with correct appearsAtStep', () => {
+    const result = assembleScene(makeSkeleton(), makeSteps(), null, null)
     expect(result.ok).toBe(true)
-    expect(result.scene!.explanation).toHaveLength(1)
-    expect(result.scene!.explanation[0]!.heading).toBe('What is Binary Search?')
+    const exp = result.scene!.explanation
+    expect(exp).toHaveLength(3)
+    expect(exp[0]!.appearsAtStep).toBe(1)
+    expect(exp[0]!.heading).toBe('Start at the middle')
+    expect(exp[2]!.appearsAtStep).toBe(3)
   })
 
-  it('includes challenges when provided', () => {
-    const challenges = [
-      { id: 'c1', type: 'predict' as const, title: 'Predict', description: 'What is mid?' },
-    ]
-    const result = assembleScene(makeParsed(), VALID_STATES, VALID_STEPS, [], [], challenges, [])
+  it('merges initialStates into visuals', () => {
+    const result = assembleScene(makeSkeleton(), makeSteps(), null, null)
     expect(result.ok).toBe(true)
-    expect(result.scene!.challenges).toHaveLength(1)
+    const arrVisual = result.scene!.visuals.find(v => v.id === 'arr')!
+    expect(arrVisual.initialState).toEqual({ items: [1, 3, 5, 7, 9] })
   })
 
-  it('includes controls when provided', () => {
-    const controls = [
-      { id: 'size', type: 'slider' as const, label: 'Array Size', config: { min: 4, max: 20, defaultValue: 8 } },
-    ]
-    const result = assembleScene(makeParsed(), VALID_STATES, VALID_STEPS, [], [], [], controls)
+  it('includes popups when provided', () => {
+    const popups: PopupsParsed = {
+      popups: [
+        { attachTo: 'arr', showAtStep: 1, hideAtStep: 2, text: 'This is the array', style: 'info' },
+      ],
+    }
+    const result = assembleScene(makeSkeleton(), makeSteps(), popups, null)
     expect(result.ok).toBe(true)
-    expect(result.scene!.controls).toHaveLength(1)
+    expect(result.scene!.popups).toHaveLength(1)
+    expect(result.scene!.popups[0]!.attachTo).toBe('arr')
+    expect(result.scene!.popups[0]!.id).toBeTruthy()
+  })
+
+  it('produces empty popups when popups is null', () => {
+    const result = assembleScene(makeSkeleton(), makeSteps(), null, null)
+    expect(result.ok).toBe(true)
+    expect(result.scene!.popups).toHaveLength(0)
+  })
+
+  it('maps MCQ challenges to Scene Challenge shape', () => {
+    const misc: MiscParsed = {
+      challenges: [
+        {
+          question: 'What is the time complexity of binary search?',
+          options: ['O(1)', 'O(log n)', 'O(n)', 'O(n log n)'],
+          answer: 1,
+          type: 'predict',
+        },
+      ],
+    }
+    const result = assembleScene(makeSkeleton(), makeSteps(), null, misc)
+    expect(result.ok).toBe(true)
+    const challenges = result.scene!.challenges!
+    expect(challenges).toHaveLength(1)
+    expect(challenges[0]!.title).toBe('What is the time complexity of binary search?')
+    expect(challenges[0]!.id).toBeTruthy()
+    expect(challenges[0]!.type).toBe('predict')
   })
 
   it('returns errors array when safeParseScene fails', () => {
-    // Pass a step that references an unknown visual — safeParseScene should reject it
-    const badSteps: Step[] = [
-      { index: 0, actions: [] },
-      { index: 1, actions: [{ target: 'DOES_NOT_EXIST', params: {} }] },
-    ]
-    const result = assembleScene(makeParsed(), VALID_STATES, badSteps, [], [], [], [])
-    // May or may not fail depending on schema strictness — just verify no throw
+    // Deliberately corrupt steps to trigger schema failure
+    const badSteps: StepsParsed = {
+      initialStates: { arr: {}, ptr: {} },
+      steps: [], // empty steps array should fail schema (min: 1)
+    }
+    // The assembly itself should not throw
+    const result = assembleScene(makeSkeleton(), badSteps, null, null)
     expect(typeof result.ok).toBe('boolean')
     if (!result.ok) {
       expect(Array.isArray(result.errors)).toBe(true)

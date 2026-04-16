@@ -1,19 +1,16 @@
 /**
  * AI debug logger — server + client, zero dependencies.
  *
- * Enable in .env.local:
- *   NEXT_PUBLIC_DEBUG_AI=true
- *
- * That single flag works everywhere: Next.js exposes NEXT_PUBLIC_* vars to
- * both the server runtime and the browser bundle.
+ * Server logs (aiLog.server.*) are always-on — no flag needed.
+ * Client logs (aiLog.stream.*, aiLog.store.*) require NEXT_PUBLIC_DEBUG_AI=true.
  *
  * Namespaces
- *   aiLog.server.*  — /api/generate route (request, tokens, cache)
+ *   aiLog.server.*  — /api/generate route + pipeline stages
  *   aiLog.stream.*  — useStreamScene streaming lifecycle
  *   aiLog.store.*   — store mutations (setScene, clearScene, setStreaming)
  */
 
-const enabled = process.env.NEXT_PUBLIC_DEBUG_AI === 'true'
+const debugClient = process.env.NEXT_PUBLIC_DEBUG_AI === 'true'
 const isClient = typeof window !== 'undefined'
 
 // ─── Colour palette (browser only) ───────────────────────────────────────────
@@ -52,7 +49,9 @@ function emit(
   event: string,
   data?: Record<string, unknown>,
 ): void {
-  if (!enabled) return
+  // Server logs are always-on.
+  // Client logs are gated by NEXT_PUBLIC_DEBUG_AI=true.
+  if (isClient && !debugClient) return
 
   const prefix = `[AI:${ns}]`
   const time = elapsedStr()
@@ -74,16 +73,15 @@ function emit(
     )
   } else {
     // Server: flat structured line — easy to grep in terminal / Vercel logs
-    const parts: string[] = [prefix, event]
+    const parts: string[] = [prefix, event.padEnd(22)]
     if (data && Object.keys(data).length) {
       parts.push(
         Object.entries(data)
           .map(([k, v]) => `${k}=${typeof v === 'string' ? v : JSON.stringify(v)}`)
-          .join(' '),
+          .join('  '),
       )
     }
-    if (time) parts.push(time)
-    console.debug(parts.join('  '))
+    console.log(parts.join('  '))
   }
 }
 
@@ -91,41 +89,56 @@ function emit(
 
 export const aiLog = {
 
-  // ── Server route (/api/generate) ──────────────────────────────────────────
+  // ── Server route (/api/generate) + pipeline ───────────────────────────────
 
   server: {
-    /** Incoming POST request */
-    request: (topic: string, model: string) =>
-      emit('server', 'request', { topic: topic.slice(0, 80), model }),
+    /** Incoming POST — topic, provider, model, tier (free|byok), optional mode */
+    request: (
+      topic: string,
+      provider: string,
+      model: string,
+      tier: 'free' | 'byok',
+      mode?: string,
+    ) =>
+      emit('server', 'request', {
+        topic: topic.slice(0, 80),
+        provider,
+        model,
+        tier,
+        ...(mode ? { mode } : {}),
+      }),
 
     /** Rate limit check result */
     rateLimit: (ip: string, allowed: boolean) =>
       emit('server', 'rate-limit', { ip: ip.slice(0, 30), allowed }),
 
-    /** Stream finished — log token counts + finish reason */
-    complete: (
-      usage: {
-        inputTokens?: number
-        outputTokens?: number
-        reasoningTokens?: number
-        textTokens?: number
-      },
-      finishReason?: string,
-    ) =>
-      emit('server', 'complete', {
-        finishReason: finishReason ?? '?',
-        in: usage.inputTokens,
-        out: usage.outputTokens,
-        ...(usage.reasoningTokens !== undefined && { reasoning: usage.reasoningTokens }),
-        ...(usage.textTokens !== undefined && { text: usage.textTokens }),
-        ...(finishReason === 'length' && { WARN: 'hit maxOutputTokens — JSON likely truncated' }),
+    /** Pipeline stage started — model + temperature used for this stage */
+    stageStart: (stage: number, model: string, temp: number) =>
+      emit('server', `stage-${stage}:start`, { model, temp }),
+
+    /** Pipeline stage completed successfully */
+    stageDone: (stage: number, ms: number) =>
+      emit('server', `stage-${stage}:done`, { ms }),
+
+    /** retryStage fired a retry for this stage */
+    stageRetry: (stage: number, attempt: number, reason: string) =>
+      emit('server', `stage-${stage}:retry`, { attempt, reason: reason.slice(0, 140) }),
+
+    /** Stage failed (non-fatal: stages 3/4; or fatal: caught before error event) */
+    stageFail: (stage: number, reason: unknown) =>
+      emit('server', `stage-${stage}:fail`, {
+        reason: (reason instanceof Error ? reason.message : String(reason)).slice(0, 140),
       }),
+
+    /** Whole pipeline finished — total wall-clock time */
+    pipelineDone: (ms: number) =>
+      emit('server', 'pipeline-done', { ms }),
 
     /** Scene cache write result */
     cache: (status: 'saved' | 'skipped' | 'failed', detail?: unknown) =>
       emit('server', `cache:${status}`, detail !== undefined ? { detail: String(detail) } : undefined),
 
-    /** Any error in the route */
+    /** Any unexpected error in the route */
     error: (label: string, err: unknown) =>
       emit('server', `error:${label}`, { msg: err instanceof Error ? err.message : String(err) }),
   },
