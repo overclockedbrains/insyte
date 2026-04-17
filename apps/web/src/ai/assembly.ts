@@ -75,7 +75,7 @@ export function assembleScene(
     type: decl.type,
     layoutHint: skeleton.layout as LayoutHint,
     ...(decl.slot && { slot: decl.slot }),
-    initialState: (stepsParsed.initialStates[decl.id] as Record<string, unknown>) ?? null,
+    initialState: (stepsParsed.initialStates[decl.id] as Record<string, unknown>) ?? undefined,
   }))
 
   // ── Steps: synthetic step 0 (init) + AI-generated steps ──────────────────

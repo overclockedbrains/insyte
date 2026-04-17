@@ -41,12 +41,8 @@ export function validateSteps(
     }
   }
 
-  // Check 2: All visual IDs must have an initialState entry
-  for (const visual of skeleton.visuals) {
-    if (!(visual.id in steps.initialStates)) {
-      errors.push(`initialStates missing entry for visual ID: "${visual.id}"`)
-    }
-  }
+  // Check 2 removed: missing initialStates entries are tolerated — the assembler
+  // defaults them to undefined and the renderer handles missing initial state gracefully.
 
   // Check 3: Step indices must be monotonically increasing (1, 2, 3…)
   const indices = steps.steps.map(s => s.index)

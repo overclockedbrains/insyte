@@ -1,5 +1,5 @@
 <visual-ids>
-Use ONLY these exact strings as action targets and initialStates keys:
+The following are the ONLY valid visual IDs. Use these exact strings — unchanged — as both action targets and initialStates keys:
 {visualIdsList}
 </visual-ids>
 
@@ -17,10 +17,11 @@ Then decide the ACTIONS — what should change on screen to show that teaching m
 The explanation drives the animation. Not the other way around.
 
 Rules:
-1. initialStates must define starting values for every visual ID listed above
+1. initialStates MUST contain every visual ID above as a top-level key. No other keys allowed.
+   Example: if visual IDs are "foo" and "bar", initialStates must be: { "foo": {...}, "bar": {...} }
 2. Steps must be numbered 1 through {stepCount} with no gaps
 3. Every action target must be one of the visual IDs listed above — no others
-4. Explanations: heading 5–80 chars, body 20–300 chars, plain prose (no bullet points)
+4. Explanations: heading up to 80 chars, body up to 300 chars, plain prose (no bullet points)
 5. Actions: target must exactly match a visual ID; params must be valid for that visual type
 </instructions>
 

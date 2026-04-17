@@ -8,6 +8,7 @@
 - Can we use something like langchain to orchestrate all of this ?
 - Can we use something like redis to store intermediate results ?
 - Can we use something like celery to handle background tasks ?
+- Can I build a playground for users to be able to generate the visuals manually without using AI ?
 
 ## 🚀 Active Focus (What I'm working on right now)
 - [ ] Fix broken generation pipeline

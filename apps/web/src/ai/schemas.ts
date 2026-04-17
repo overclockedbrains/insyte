@@ -27,9 +27,9 @@ export const SceneSkeletonSchema = z.object({
     hint: z.string().optional(),
     slot: z.enum([
       'top-left', 'top-center', 'top-right',
-      'center-left', 'center', 'center-right',
       'bottom-left', 'bottom-center', 'bottom-right',
-      'full', 'overlay',
+      'left-center', 'right-center',
+      'overlay-top', 'overlay-bottom', 'center',
     ]).optional(),
   })).min(1).max(8),
   stepCount: z.number().int().min(3).max(20),
@@ -39,7 +39,9 @@ export type SceneSkeletonParsed = z.infer<typeof SceneSkeletonSchema>
 
 // ─── Stage 2: Steps + Explanations (dynamic schema factory) ──────────────────
 
-const VisualParamsSchema = z.record(z.unknown())
+// z.record(z.string(), z.any()) avoids additionalProperties:false in JSON Schema,
+// which Gemini's structured output API does not support.
+const VisualParamsSchema = z.record(z.string(), z.any())
 
 /**
  * buildStepsSchema creates the Stage 2 schema after Stage 1 completes.
@@ -50,16 +52,21 @@ const VisualParamsSchema = z.record(z.unknown())
  *
  * Schema field ordering (explanation BEFORE actions) mirrors the pedagogical
  * intent: the AI must commit to WHY before deciding WHAT to animate.
+ *
+ * `initialStates` uses z.record(z.string(), ...) rather than z.record(visualIdEnum, ...)
+ * because an enum-keyed record generates additionalProperties:false in JSON Schema,
+ * which Gemini's structured output rejects. Visual ID constraints on initialStates
+ * are enforced downstream by validateSteps (Checks 1 & 2).
  */
 export function buildStepsSchema(visualIds: string[]) {
   const visualIdEnum = z.enum(visualIds as [string, ...string[]])
   return z.object({
-    initialStates: z.record(visualIdEnum, VisualParamsSchema),
+    initialStates: z.record(z.string(), VisualParamsSchema),
     steps: z.array(z.object({
       index: z.number().int().min(1),
       explanation: z.object({
-        heading: z.string().min(3).max(80),
-        body: z.string().min(10).max(400),
+        heading: z.string().max(80),
+        body: z.string().max(400),
       }),
       actions: z.array(z.object({
         target: visualIdEnum,

@@ -7,6 +7,7 @@ Based on your planning above, produce the scene skeleton JSON. Follow these rule
 1. Visual IDs must be lowercase with hyphens only (arr, left-ptr, call-stack). No camelCase, no underscores, no numbers as first character.
 2. Choose layout that best fits the visual structure (dagre-TB for graphs/trees, linear-H for arrays/stacks, tree-RT for binary trees, grid-2d for DP tables).
 3. stepCount must match the number of teaching moments in your planning (typically 6–12).
+4. slot is optional and only needed for overlay/badge primitives (text-badge, counter). Valid values: top-left, top-center, top-right, bottom-left, bottom-center, bottom-right, left-center, right-center, overlay-top, overlay-bottom, center. Do NOT use "full" or "overlay" — they are invalid.
 
 EXAMPLE — shows FORMAT only, do not copy:
 Topic: "Binary Search"
