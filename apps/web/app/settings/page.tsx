@@ -2,8 +2,9 @@
 
 import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Trash2, AlertTriangle, ExternalLink, Gauge } from 'lucide-react'
+import { Trash2, AlertTriangle, ExternalLink, Gauge, Zap } from 'lucide-react'
 import type { Provider } from '@/src/ai/registry'
+import { REGISTRY } from '@/src/ai/registry'
 import { useSettings } from '@/src/stores/hooks'
 import { ProviderSelector } from '@/components/settings/ProviderSelector'
 import { ModelSelector } from '@/components/settings/ModelSelector'
@@ -32,6 +33,22 @@ function SectionCard({
         )}
       </div>
       {children}
+    </div>
+  )
+}
+
+// ─── Routing info row — shown instead of ModelSelector for routed providers ───
+
+function RoutingInfoRow() {
+  return (
+    <div className="flex items-center gap-3 rounded-xl border border-secondary/20 bg-secondary/5 px-4 py-3">
+      <Zap className="h-4 w-4 text-secondary shrink-0" />
+      <div>
+        <p className="text-sm font-medium text-on-surface">Auto-routing active</p>
+        <p className="text-xs text-on-surface-variant mt-0.5">
+          Frontier model for reasoning · Mid-tier for steps · Fast model for everything else
+        </p>
+      </div>
     </div>
   )
 }
@@ -133,8 +150,10 @@ function ClearAllDialog({
 // ─── Settings page ────────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
-  const { apiKeys, clearAllKeys } = useSettings()
+  const { provider, apiKeys, clearAllKeys } = useSettings()
   const [showClearDialog, setShowClearDialog] = useState(false)
+
+  const isRouted = REGISTRY[provider as Provider]?.supportsRouting ?? false
 
   const hasAnyKey = Object.values(apiKeys).some(Boolean)
 
@@ -172,12 +191,16 @@ export default function SettingsPage() {
           description="Choose which AI powers your simulations."
         >
           <ProviderSelector />
-          <div className="space-y-2 pt-1">
-            <p className="text-xs font-medium text-on-surface-variant uppercase tracking-wider">
-              Model
-            </p>
-            <ModelSelector />
-          </div>
+          {isRouted ? (
+            <RoutingInfoRow />
+          ) : (
+            <div className="space-y-2 pt-1">
+              <p className="text-xs font-medium text-on-surface-variant uppercase tracking-wider">
+                Model
+              </p>
+              <ModelSelector />
+            </div>
+          )}
         </SectionCard>
 
         {/* ── 2. API Keys ── */}
@@ -258,7 +281,7 @@ export default function SettingsPage() {
               </div>
             </div>
             <span className="text-xs text-on-surface-variant px-2 py-1 rounded-full bg-surface-container-highest">
-              v2
+              v3
             </span>
           </div>
         </SectionCard>

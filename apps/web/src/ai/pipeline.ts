@@ -111,7 +111,7 @@ export async function* generateScene(
    * - Adjusts providerOptions for Stage 0 (higher thinking budget)
    */
   const stageConfig = (stage: StageKey, temperature: number): ModelConfig => {
-    const modelId = resolveStageModel(stage, byokModel)
+    const modelId = resolveStageModel(stage, modelConfig.providerName, byokModel)
     const stageProviderOptions = stage === 'stage0'
       ? buildStage0ProviderOptions(modelConfig.providerOptions, modelConfig.providerName)
       : modelConfig.providerOptions
@@ -127,7 +127,7 @@ export async function* generateScene(
   // No system prompt, no few-shot, temperature 1.0, high thinkingBudget.
   // Thinking models reason from first principles; examples push them into
   // pattern-matching mode, short-circuiting the reasoning we're paying for.
-  const model0 = resolveStageModel('stage0', byokModel)
+  const model0 = resolveStageModel('stage0', modelConfig.providerName, byokModel)
   aiLog.server.stageStart(0, model0, 1.0)
   const t0 = Date.now()
   let reasoning = ''
@@ -159,7 +159,7 @@ export async function* generateScene(
   }
 
   // ── Stage 1: Scene Skeleton ──────────────────────────────────────────────
-  const model1 = resolveStageModel('stage1', byokModel)
+  const model1 = resolveStageModel('stage1', modelConfig.providerName, byokModel)
   aiLog.server.stageStart(1, model1, 0.1)
   const t1 = Date.now()
   let skeleton: SceneSkeletonParsed
@@ -193,7 +193,7 @@ export async function* generateScene(
   // ── Stage 2: Steps + Explanations ───────────────────────────────────────
   // Must complete before Stage 3 — Stage 3 references visual IDs that Stage 2
   // confirms. Dynamic schema factory constrains target enum to actual visual IDs.
-  const model2 = resolveStageModel('stage2', byokModel)
+  const model2 = resolveStageModel('stage2', modelConfig.providerName, byokModel)
   aiLog.server.stageStart(2, model2, 0.2)
   const t2 = Date.now()
   let stepsParsed: StepsParsed
@@ -230,8 +230,8 @@ export async function* generateScene(
   // ── Stage 3 + Stage 4 in parallel ───────────────────────────────────────
   // Both run AFTER Stage 2 (not simultaneously) to preserve event ordering.
   // Stage 3 uses STAGE3_SYSTEM; Stage 4 has no system prompt.
-  const model3 = resolveStageModel('stage3', byokModel)
-  const model4 = resolveStageModel('stage4', byokModel)
+  const model3 = resolveStageModel('stage3', modelConfig.providerName, byokModel)
+  const model4 = resolveStageModel('stage4', modelConfig.providerName, byokModel)
   aiLog.server.stageStart(3, model3, 0.4)
   aiLog.server.stageStart(4, model4, 0.5)
   const t34 = Date.now()

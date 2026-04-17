@@ -70,7 +70,7 @@ R1 released on 8 April 2026. R2 released on 14 April 2026. R3 in progress.
 |-------|--------|-------------|
 | **Phase 29** | ⏸️ | Zoom/Pan Viewport & Interactive Canvas — **Skipped indefinitely.** Not a priority; canvas interaction model may change with AI quality improvements. Branch not started. |
 | **Phase 30** | ✅ | AI Pipeline Redesign — Kill ISCL, add Stage 0 free reasoning (streaming), co-generate steps + explanations, error-guided retry, per-stage model defaults (static routing). AUDIT complete: 15 findings resolved (5 critical bugs, 5 moderate, 5 gaps). |
-| **Phase 31** | 🔲 | BYOK Model Routing — provider-aware tier routing so BYOK users get full routing benefits |
+| **Phase 31** | ✅ | BYOK Model Routing — provider-aware tier routing so BYOK users get full routing benefits |
 
 ---
 
@@ -671,7 +671,7 @@ _OG Images_
 
 **Research:** `.planning/research/ai-pipeline-redesign/byok-model-routing.md` — full industry analysis (Aider, OpenRouter, Continue.dev, DeepSource), `PROVIDER_TIER_MODELS` table, `resolveStageModel` implementation ready to drop in.
 
-**Plan:** To be written.
+**Plan:** [→ phases/phase-31/PLAN.md](phases/phase-31/PLAN.md)
 
 ---
 

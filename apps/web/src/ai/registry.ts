@@ -48,6 +48,13 @@ export interface ProviderConfig {
    * Keyed by the provider name as the AI SDK expects it.
    */
   providerOptions: Record<string, unknown>
+  /**
+   * When true, insyte applies provider-aware tier routing when the user's
+   * BYOK key is active for this provider. The model selector is hidden in
+   * Settings — routing picks the right model per stage automatically.
+   * When false (Ollama, Custom), the user's configured model is used for all stages.
+   */
+  supportsRouting: boolean
 }
 
 // ─── Registry ─────────────────────────────────────────────────────────────────
@@ -63,6 +70,7 @@ export const REGISTRY: Record<Provider, ProviderConfig> = {
     badge: 'Default · Free',
     serverDefault: true,
     defaultModel: 'gemini-2.5-flash',
+    supportsRouting: true,
     models: [
       { id: 'gemini-2.5-flash', label: 'Flash 2.5', badge: 'fast' },
       { id: 'gemini-2.5-pro', label: 'Pro 2.5' },
@@ -86,6 +94,7 @@ export const REGISTRY: Record<Provider, ProviderConfig> = {
     keyPlaceholder: 'sk-...',
     serverDefault: false,
     defaultModel: 'gpt-4o',
+    supportsRouting: true,
     models: [
       { id: 'gpt-4o-mini', label: 'GPT-4o mini', badge: 'fast' },
       { id: 'gpt-5.4', label: 'GPT-5.4', badge: 'new' },
@@ -106,6 +115,7 @@ export const REGISTRY: Record<Provider, ProviderConfig> = {
     keyPlaceholder: 'sk-ant-...',
     serverDefault: false,
     defaultModel: 'claude-sonnet-4-6',
+    supportsRouting: true,
     models: [
       { id: 'claude-opus-4-6', label: 'Opus 4.6', badge: 'new' },
       { id: 'claude-sonnet-4-6', label: 'Sonnet 4.6' },
@@ -123,6 +133,7 @@ export const REGISTRY: Record<Provider, ProviderConfig> = {
     keyPlaceholder: 'gsk_...',
     serverDefault: false,
     defaultModel: 'llama-3.3-70b-versatile',
+    supportsRouting: true,
     models: [
       { id: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B' },
       { id: 'llama-3.1-8b-instant', label: 'Llama 8B', badge: 'fast' },
@@ -141,6 +152,7 @@ export const REGISTRY: Record<Provider, ProviderConfig> = {
     badge: 'Local',
     serverDefault: false,
     defaultModel: '',
+    supportsRouting: false,
     defaultBaseURL: 'http://localhost:11434/v1',
     dynamicModels: true,
     models: [],
@@ -157,6 +169,7 @@ export const REGISTRY: Record<Provider, ProviderConfig> = {
     badge: 'Custom',
     serverDefault: false,
     defaultModel: '',
+    supportsRouting: false,
     dynamicModels: false,
     models: [],
     providerOptions: {},

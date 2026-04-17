@@ -92,22 +92,27 @@ export async function POST(req: NextRequest) {
   const provider = (byokProvider ?? 'gemini') as Provider
   const languageModel = resolveModel(provider, byokModel, byokKey, longRunningFetch, byokBaseURL)
 
-  // Free tier: no user API key and no custom base URL → per-stage routing applies.
-  // BYOK / Ollama / Custom: all stages use the user's resolved model (static, no routing).
+  // Free tier: no user API key and no custom base URL → per-stage Gemini routing applies.
+  // Routed BYOK (Gemini/OpenAI/Anthropic/Groq): provider-aware tier routing per stage.
+  // Unrouted BYOK (Ollama/Custom): user's configured model for all stages (no routing).
   const isFreeTier = !byokKey && !byokBaseURL
+  const isRoutedBYOK = Boolean(byokKey) && !['ollama', 'custom'].includes(provider)
 
   const modelConfig: ModelConfig = {
     model: languageModel,
     providerOptions: REGISTRY[provider]?.providerOptions ?? {},
     // null = free tier (per-stage routing active via STAGE_MODELS)
-    // string = BYOK active (same model for all stages)
+    // string = BYOK active (non-null signals BYOK; value used only for unrouted providers)
     byokModel: isFreeTier ? null : (byokModel ?? REGISTRY[provider]?.defaultModel ?? null),
     // Factory for per-stage model resolution:
-    //   free tier → creates a Gemini model with the given stage model ID
-    //   BYOK/Ollama/custom → ignores modelId, always returns the user's model
+    //   free tier       → Gemini model with the stage model ID from STAGE_MODELS
+    //   routed BYOK     → provider-specific model with the tier model ID for this stage
+    //   unrouted BYOK   → ignores model ID, always returns the user's configured model
     createModel: isFreeTier
       ? (id: string) => getGeminiProvider(undefined, id, longRunningFetch)
-      : () => languageModel,
+      : isRoutedBYOK
+        ? (id: string) => resolveModel(provider, id, byokKey, longRunningFetch)
+        : () => languageModel,
     providerName: provider,
   }
 

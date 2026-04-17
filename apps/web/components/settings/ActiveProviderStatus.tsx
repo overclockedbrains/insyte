@@ -17,6 +17,7 @@ export function ActiveProviderStatus() {
   const activeKey = apiKeys[provider]
   const hasByok = Boolean(activeKey)
   const providerName = REGISTRY[provider as Provider].shortName
+  const supportsRouting = REGISTRY[provider as Provider]?.supportsRouting ?? false
 
   // null  = not yet fetched  |  RateLimitStatus = fetched
   const [rateLimitStatus, setRateLimitStatus] = useState<RateLimitStatus | null>(null)
@@ -65,9 +66,13 @@ export function ActiveProviderStatus() {
               {providerName}
             </span>{' '}
             key ·{' '}
-            <span className="text-on-surface-variant text-xs font-mono truncate">
-              {model}
-            </span>{' '}
+            {supportsRouting ? (
+              <span className="text-secondary text-xs">Smart routing</span>
+            ) : (
+              <span className="text-on-surface-variant text-xs font-mono truncate">
+                {model}
+              </span>
+            )}{' '}
             · <span className="text-secondary">Unlimited requests</span>
           </p>
         ) : (
