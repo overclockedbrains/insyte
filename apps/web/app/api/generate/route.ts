@@ -22,10 +22,6 @@ import { jsonError } from '@/lib/responses'
 // Allow streaming for up to 5 minutes
 export const maxDuration = 300
 
-if (!process.env.GEMINI_API_KEY) {
-  throw new Error('GEMINI_API_KEY is not set — free-tier generation will fail at request time')
-}
-
 // Custom HTTP agent with extended timeouts for long-running AI generation.
 const longRunningAgent = new Agent({
   headersTimeout: 10 * 60 * 1000,
