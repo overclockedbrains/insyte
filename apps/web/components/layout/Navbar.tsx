@@ -206,10 +206,7 @@ export function Navbar() {
   const isDevPage = (pathname?.startsWith('/dev') ?? false) && Boolean(process.env.NEXT_PUBLIC_DEV_TOOLS)
 
   return (
-    <header
-      className="sticky top-0 z-50 w-full backdrop-blur-md bg-background/80"
-      style={{ boxShadow: '0 10px 30px -15px rgba(183,159,255,0.3)' }}
-    >
+    <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-background/80 border-b border-white/[0.06]">
       <nav className="mx-auto flex h-14 max-w-screen-2xl items-center justify-between px-4 sm:px-6 gap-3">
 
         {/* Logo */}
