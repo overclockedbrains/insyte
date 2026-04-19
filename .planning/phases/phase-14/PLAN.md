@@ -107,7 +107,7 @@ Create root `README.md`:
 ### 14.6 — Analytics
 - [x] Enable Vercel Analytics in Vercel dashboard
 - [x] Add `<Analytics />` from `@vercel/analytics/next` to root layout
-- [x] Basic event tracking with `va.track()`:
+- [x] Basic event tracking with `analytics.track()`:
   - `scene_generated` — when AI generation completes
   - `chat_sent` — when chat message sent
   - `byok_activated` — when user saves first API key

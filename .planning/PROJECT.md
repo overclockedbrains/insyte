@@ -71,7 +71,8 @@ R1 released on 8 April 2026. R2 released on 14 April 2026. R3 in progress.
 | **Phase 29** | ⏸️ | Zoom/Pan Viewport & Interactive Canvas — **Skipped indefinitely.** Not a priority; canvas interaction model may change with AI quality improvements. Branch not started. |
 | **Phase 30** | ✅ | AI Pipeline Redesign — Kill ISCL, add Stage 0 free reasoning (streaming), co-generate steps + explanations, error-guided retry, per-stage model defaults (static routing). AUDIT complete: 15 findings resolved (5 critical bugs, 5 moderate, 5 gaps). |
 | **Phase 31** | ✅ | BYOK Model Routing — provider-aware tier routing so BYOK users get full routing benefits |
-| **Phase 32** | 🔄 | Dev Pipeline Playground — per-stage runner, JSON editor, scene studio (`/dev/pipeline` + `/dev/scene`). Zero prod code changes. |
+| **Phase 32** | ✅ | Dev Pipeline Playground — per-stage runner, JSON editor, scene studio (`/dev/pipeline` + `/dev/scene`). Zero prod code changes. Completed April 19, 2026. |
+| **Phase 33** | 🚧 | Community Gallery — `/community/gallery` showing all AI-generated scenes via `user_generated_scenes` join (pre-builts naturally excluded, no user data). Sort by recency/popularity, load-more, Navbar link. `/community` base kept for future sub-routes. |
 
 ---
 
@@ -679,9 +680,45 @@ _OG Images_
 ### Phase 32 — Dev Pipeline Playground
 **Goal:** A dev-only tool that lets you run, inspect, edit, and replay individual AI pipeline stages without going through the full pipeline from scratch every time. Two routes: `/dev/pipeline` (per-stage runner with lock/edit/replay) and `/dev/scene` (scene JSON studio with live renderer). Zero production code changes — all new files under `app/dev/` and `api/dev/`.
 
+**Status:** Implementation started April 18, 2026.
+
 **Prerequisite:** Phase 30 ✅ (pipeline stages defined) + Phase 31 ✅ (model routing stable)
 
+**Design:** Matches insyte's dark glassmorphic aesthetic — glass-panel cards, `glow-border`, primary (lavender) / secondary (cyan) / error (red) status colors. DEV sub-header uses the same surface tokens as the rest of the app (no amber banner).
+
+**Deliverables:**
+
+| Work Item | File | Status |
+|-----------|------|--------|
+| DEV-01 | `app/api/dev/pipeline-stage/route.ts` | ✅ |
+| DEV-06 | `app/dev/layout.tsx` | ✅ |
+| DEV-02 | `app/dev/pipeline/usePlayground.ts` | ✅ |
+| DEV-03 | `app/dev/pipeline/StageCard.tsx` | ✅ |
+| DEV-04 | `app/dev/pipeline/page.tsx` | ✅ |
+| DEV-05 | `app/dev/scene/SceneStudio.tsx` | ✅ |
+| DEV-05 | `app/dev/scene/page.tsx` | ✅ |
+
 **Plan:** [→ phases/phase-32/PLAN.md](phases/phase-32/PLAN.md)
+
+---
+
+### Phase 33 — Community Gallery
+**Goal:** A public `/community` page showing every AI-generated scene created by the community. No user data exposed — the `scenes` table has no `user_id` column, so privacy is structural, not policy. Browsable grid sorted by recency or popularity, with "Load more" pagination and a Navbar link.
+
+**Status:** Planned April 19, 2026.
+
+**Prerequisite:** Phase 32 ✅ (stable pipeline) · Phase 11 ✅ (Supabase `scenes` table with public read RLS)
+
+**Deliverables:**
+- `GET /api/community/gallery?sort=recent|popular&page=N` — joins `user_generated_scenes` → `scenes`, service role bypasses RLS, returns `{ scenes, hasMore }` with no user fields
+- `app/community/layout.tsx` — shared shell for all `/community/*` sub-routes
+- `app/community/page.tsx` — redirects to `/community/gallery`
+- `/community/gallery` page with `GalleryPageClient.tsx` — sort toggle, `grid-cols-2 md:grid-cols-3 lg:grid-cols-4` grid, load-more
+- `CommunityCard.tsx` — title, query prompt subtitle, type badge, relative time, hit count, links to `/s/[slug]`
+- Skeleton grid (12 shimmer cards) + empty state
+- "Community" link added to Navbar
+
+**Plan:** [→ phases/phase-33/PLAN.md](phases/phase-33/PLAN.md)
 
 ---
 
