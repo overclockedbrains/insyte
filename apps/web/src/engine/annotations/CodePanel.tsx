@@ -5,13 +5,15 @@ import type { SceneCode } from '@insyte/scene-engine'
 import { createHighlighter } from 'shiki/bundle/web'
 import { Copy, Check } from 'lucide-react'
 
+type WebHighlighter = Awaited<ReturnType<typeof createHighlighter>>
+
 interface CodePanelProps {
   code: SceneCode
   currentStep: number
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let highlighterInstance: any = null
+let highlighterInstance: WebHighlighter | null = null
+let initializingPromise: Promise<WebHighlighter> | null = null
 
 export function CodePanel({ code, currentStep }: CodePanelProps) {
   const [html, setHtml] = useState<string>('')
@@ -23,10 +25,13 @@ export function CodePanel({ code, currentStep }: CodePanelProps) {
   useEffect(() => {
     async function initAndHighlight() {
       if (!highlighterInstance) {
-        highlighterInstance = await createHighlighter({
-          themes: ['vitesse-dark'],
-          langs: ['javascript', 'python', 'typescript'],
-        })
+        if (!initializingPromise) {
+          initializingPromise = createHighlighter({
+            themes: ['vitesse-dark'],
+            langs: ['javascript', 'python', 'typescript'],
+          })
+        }
+        highlighterInstance = await initializingPromise
       }
       const rawHtml = highlighterInstance.codeToHtml(code.source, {
         lang: code.language,

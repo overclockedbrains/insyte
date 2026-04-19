@@ -18,7 +18,20 @@ export function ExplanationPanel({ sections, currentStep }: ExplanationPanelProp
     }
   }, [currentStep, visibleSections.length])
 
-  if (visibleSections.length === 0) return null
+  if (sections.length === 0) return null
+
+  if (visibleSections.length === 0) {
+    return (
+      <div className="flex flex-col px-4 pb-6 gap-4">
+        <span className="text-[11px] font-mono uppercase tracking-widest text-on-surface-variant font-semibold pt-1">
+          Explanation
+        </span>
+        <p className="text-[12px] text-on-surface-variant/40 italic pl-3 border-l-2 border-outline-variant/15">
+          Step through to reveal explanations.
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col px-4 pb-6 gap-4">

@@ -45,13 +45,29 @@ export function DOMRenderer({
   useEffect(() => {
     const prev = prevGraphRef.current
     prevGraphRef.current = sceneGraph
-    if (!prev) return
+
+    if (!prev) {
+      // First render: imperatively animate all groups in.
+      // Framer Motion's declarative initial/animate is unreliable when the
+      // component mounts inside an already-animating parent (e.g. StreamingView
+      // fade-in), leaving groups stuck at opacity: 0.
+      for (const gid of sceneGraph.groups.keys()) {
+        if (!document.querySelector(`#sg-group-${gid}`)) continue
+        animate(
+          `#sg-group-${gid}`,
+          { scale: [0.88, 1.03, 1], opacity: [0, 1] },
+          { duration: 0.28 / speed },
+        )
+      }
+      return
+    }
 
     const diff = diffSceneGraphs(prev, sceneGraph)
 
     // Groups entering (new visual becoming active at this step)
     const addedGroupIds = new Set(diff.added.map(n => n.groupId))
     addedGroupIds.forEach(gid => {
+      if (!document.querySelector(`#sg-group-${gid}`)) return
       animate(
         `#sg-group-${gid}`,
         { scale: [0.88, 1.03, 1], opacity: [0, 1] },
@@ -61,6 +77,7 @@ export function DOMRenderer({
 
     // New edges draw-on (SVG edges with id sg-edge-{id} inside primitives)
     diff.addedEdges.forEach(edge => {
+      if (!document.querySelector(`#sg-edge-${edge.id}`)) return
       animate(`#sg-edge-${edge.id}`, { pathLength: [0, 1] }, { duration: 0.3 / speed })
     })
   }, [sceneGraph, speed])

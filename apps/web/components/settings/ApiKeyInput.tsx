@@ -6,7 +6,7 @@ import { Eye, EyeOff, Check, X } from 'lucide-react'
 import { useSettings } from '@/src/stores/hooks'
 import { REGISTRY } from '@/src/ai/registry'
 import type { Provider } from '@/src/ai/registry'
-import { va } from '@/src/lib/analytics'
+import { analytics } from '@/src/lib/analytics'
 
 const MIN_KEY_LENGTH = 20
 
@@ -44,7 +44,7 @@ export function ApiKeyInput({ provider }: ApiKeyInputProps) {
     setTimeout(() => setJustSaved(false), 2000)
 
     if (isFirstSavedKey) {
-      va.track('byok_activated', { provider })
+      analytics.track('byok_activated', { provider })
     }
   }, [apiKeys, inputValue, provider, setApiKey])
 

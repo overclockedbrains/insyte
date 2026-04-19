@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
-import { MenuIcon, SettingsIcon, StarIcon, Share2, Check, Maximize2, Minimize2, LogOut, User } from 'lucide-react'
+import { MenuIcon, SettingsIcon, StarIcon, Share2, Check, Maximize2, Minimize2, LogOut, User, Terminal } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Sheet,
@@ -203,6 +203,7 @@ export function Navbar() {
   }, [])
 
   const isScenePage = activeScene != null
+  const isDevPage = (pathname?.startsWith('/dev') ?? false) && Boolean(process.env.NEXT_PUBLIC_DEV_TOOLS)
 
   return (
     <header
@@ -219,7 +220,54 @@ export function Navbar() {
           <span className="gradient-text">i</span>nsyte
         </Link>
 
-        {isScenePage ? (
+        {isDevPage ? (
+          <>
+            {/* DEV badge */}
+            <div className="flex items-center gap-1.5">
+              <Terminal className="h-3.5 w-3.5 text-primary" />
+              <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-primary">
+                Dev
+              </span>
+            </div>
+
+            <div className="h-4 w-px bg-outline-variant/30" />
+
+            {/* Dev nav links */}
+            <div className="flex items-center gap-0.5">
+              <Link
+                href="/dev/pipeline"
+                className={[
+                  'px-3 py-1.5 text-sm font-medium rounded-md transition-colors',
+                  pathname === '/dev/pipeline'
+                    ? 'text-on-surface bg-surface-container-high'
+                    : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high',
+                ].join(' ')}
+              >
+                Pipeline
+              </Link>
+              <Link
+                href="/dev/scene"
+                className={[
+                  'px-3 py-1.5 text-sm font-medium rounded-md transition-colors',
+                  pathname === '/dev/scene'
+                    ? 'text-on-surface bg-surface-container-high'
+                    : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high',
+                ].join(' ')}
+              >
+                Scene Studio
+              </Link>
+            </div>
+
+            <div className="ml-auto flex items-center gap-3">
+              <span className="hidden md:block font-mono text-[10px] uppercase tracking-widest text-on-surface-variant/30 select-none">
+                Dev Only
+              </span>
+              <div className="hidden md:block h-4 w-px bg-outline-variant/20" />
+              <SettingsLink className="flex items-center p-1.5 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-150" />
+              <UserMenu />
+            </div>
+          </>
+        ) : isScenePage ? (
           <>
             <Link
               href="/explore"

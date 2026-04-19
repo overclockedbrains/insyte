@@ -12,7 +12,7 @@ function sanitizePayload(payload?: AnalyticsPayload) {
   return entries.length > 0 ? Object.fromEntries(entries) : undefined
 }
 
-export const va = {
+export const analytics = {
   track(eventName: string, payload?: AnalyticsPayload) {
     try {
       track(eventName, sanitizePayload(payload))
