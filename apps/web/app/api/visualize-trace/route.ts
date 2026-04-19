@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { resolveModel } from '@/src/ai/providers'
-import type { Provider } from '@/src/ai/registry'
+import { extractByokHeaders } from '@/lib/headers'
+import { jsonError } from '@/lib/responses'
 import { streamTraceToScene } from '@/src/ai/traceToScene'
 import { isValidLanguage, type TraceData } from '@/src/sandbox/types'
 
@@ -15,9 +16,7 @@ function isTraceData(value: unknown): value is TraceData {
 }
 
 export async function POST(req: NextRequest) {
-  const byokKey = req.headers.get('x-api-key')
-  const byokProvider = req.headers.get('x-provider') as Provider | null
-  const byokModel = req.headers.get('x-model')
+  const { byokKey, byokProvider, byokModel } = extractByokHeaders(req)
 
   let trace: TraceData
   let originalCode: string
@@ -58,9 +57,6 @@ export async function POST(req: NextRequest) {
     return result.toTextStreamResponse()
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Trace visualization failed.'
-    return new Response(
-      JSON.stringify({ error: message }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } },
-    )
+    return jsonError(message, 500)
   }
 }

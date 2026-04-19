@@ -1,7 +1,8 @@
 import type { NextRequest } from 'next/server'
 import { instrumentCode } from '@/src/ai/instrumentCode'
 import { resolveModel } from '@/src/ai/providers'
-import type { Provider } from '@/src/ai/registry'
+import { extractByokHeaders } from '@/lib/headers'
+import { jsonError } from '@/lib/responses'
 import { isValidLanguage } from '@/src/sandbox/types'
 
 function detectLanguage(code: string): 'python' | 'javascript' {
@@ -12,9 +13,7 @@ function detectLanguage(code: string): 'python' | 'javascript' {
 }
 
 export async function POST(req: NextRequest) {
-  const byokKey = req.headers.get('x-api-key')
-  const byokProvider = req.headers.get('x-provider') as Provider | null
-  const byokModel = req.headers.get('x-model')
+  const { byokKey, byokProvider, byokModel } = extractByokHeaders(req)
 
   let code: string
   let language: 'python' | 'javascript'
@@ -44,9 +43,6 @@ export async function POST(req: NextRequest) {
     return Response.json({ instrumentedCode })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Instrumentation failed.'
-    return new Response(
-      JSON.stringify({ error: message }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } },
-    )
+    return jsonError(message, 500)
   }
 }

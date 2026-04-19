@@ -16,9 +16,15 @@ import {
 } from '@/lib/supabase'
 import { generateSlug } from '@/src/lib/slug'
 import { aiLog } from '@/lib/ai-logger'
+import { extractByokHeaders } from '@/lib/headers'
+import { jsonError } from '@/lib/responses'
 
 // Allow streaming for up to 5 minutes
 export const maxDuration = 300
+
+if (!process.env.GEMINI_API_KEY) {
+  throw new Error('GEMINI_API_KEY is not set — free-tier generation will fail at request time')
+}
 
 // Custom HTTP agent with extended timeouts for long-running AI generation.
 const longRunningAgent = new Agent({
@@ -33,14 +39,7 @@ const longRunningFetch = (url: any, options?: any) =>
 // ─── POST /api/generate ───────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
-  // BYOK headers — present when the user has configured their own API key.
-  const byokKey = req.headers.get('x-api-key')
-  const byokProvider = req.headers.get('x-provider') as Provider | null
-  const byokModel = req.headers.get('x-model')
-  // Custom base URL — present for Ollama and Custom Endpoint providers.
-  const byokBaseURL = req.headers.get('x-base-url')
-  // Auth header — present when user is signed in (userId for history tracking)
-  const userId = req.headers.get('x-user-id')
+  const { byokKey, byokProvider, byokModel, byokBaseURL, userId } = extractByokHeaders(req)
 
   // Parse body
   let topic: string
@@ -82,10 +81,7 @@ export async function POST(req: NextRequest) {
     const allowed = await checkAndIncrementRateLimit(ip)
     aiLog.server.rateLimit(ip, allowed)
     if (!allowed) {
-      return new Response(
-        JSON.stringify({ error: 'Rate limit exceeded. Try again later.' }),
-        { status: 429, headers: { 'Content-Type': 'application/json' } },
-      )
+      return jsonError('Rate limit exceeded. Try again later.', 429)
     }
   }
 

@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { resolveModel } from '@/src/ai/providers'
-import type { Provider } from '@/src/ai/registry'
+import { extractByokHeaders } from '@/lib/headers'
+import { jsonError } from '@/lib/responses'
 import { streamChatResponse } from '@/src/ai/liveChat'
 import type { SceneContext } from '@/src/ai/prompts/live-chat'
 import type { ChatMessage } from '@/src/stores/slices/chat-slice'
@@ -11,11 +12,7 @@ export const maxDuration = 60
 // ─── POST /api/chat ───────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
-  // BYOK headers — present when the user has configured their own API key.
-  // Keys are never logged and never stored server-side.
-  const byokKey = req.headers.get('x-api-key')
-  const byokProvider = req.headers.get('x-provider') as Provider | null
-  const byokModel = req.headers.get('x-model')
+  const { byokKey, byokProvider, byokModel } = extractByokHeaders(req)
 
   // Parse body
   let message: string
@@ -50,9 +47,6 @@ export async function POST(req: NextRequest) {
     return result.toTextStreamResponse()
   } catch (err) {
     console.error('[/api/chat] error:', err)
-    return new Response(
-      JSON.stringify({ error: 'Chat failed. Please try again.' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } },
-    )
+    return jsonError('Chat failed. Please try again.', 500)
   }
 }
