@@ -55,8 +55,14 @@ export function DOMRenderer({
 
     const diff = diffSceneGraphs(prev, sceneGraph)
 
-    // Groups entering (new visual becoming active at this step)
-    const addedGroupIds = new Set(diff.added.map(n => n.groupId))
+    // Groups entering (new visual becoming active at this step).
+    // Guard: only animate groups that didn't exist in prev — if a group
+    // already rendered but received new nodes (common during streaming
+    // updates), re-running opacity:[0,1] would flash it invisible and
+    // leave it stuck at 0 when the Framer Motion motion value reasserts.
+    const addedGroupIds = new Set(
+      diff.added.map(n => n.groupId).filter(gid => !prev.groups.has(gid))
+    )
     addedGroupIds.forEach(gid => {
       if (!document.querySelector(`#sg-group-${gid}`)) return
       animate(
