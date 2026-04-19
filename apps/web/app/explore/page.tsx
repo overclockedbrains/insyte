@@ -46,17 +46,25 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
     <div className="relative min-h-screen">
       <GlowEffect intensity="subtle" className="fixed" />
 
-      <div className="relative z-10 mx-auto max-w-screen-xl px-4 sm:px-6 py-10 flex flex-col gap-12">
-        <div className="flex flex-col gap-4">
-          <h1 className="font-headline font-extrabold text-4xl sm:text-5xl text-on-surface">
-            Explore Simulations
+      <div className="relative z-10 mx-auto max-w-screen-xl px-4 sm:px-6 py-12 flex flex-col gap-10">
+
+        {/* Hero header */}
+        <div className="flex flex-col gap-3 max-w-2xl">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-primary/70 border border-primary/20 bg-primary/5 px-3 py-1 rounded-full">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary/60" />
+              24 hand-crafted simulations
+            </span>
+          </div>
+          <h1 className="font-headline font-extrabold text-4xl sm:text-5xl text-on-surface leading-tight">
+            Explore{' '}
+            <span className="gradient-text">Simulations</span>
           </h1>
-          <p className="text-base text-on-surface-variant max-w-lg">
-            24 hand-crafted interactive simulations. Play with the code, watch the
-            algorithm, master the concept.
+          <p className="text-base text-on-surface-variant max-w-lg leading-relaxed">
+            Play with the code, watch the algorithm, master the concept.
           </p>
 
-          <div className="mt-2">
+          <div className="mt-1">
             <SearchBar />
           </div>
 
@@ -69,6 +77,9 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
             </p>
           )}
         </div>
+
+        {/* Divider */}
+        <div className="h-px bg-gradient-to-r from-outline-variant/30 via-primary/20 to-transparent" />
 
         {rowsToRender.map((row) => (
           <TopicRow

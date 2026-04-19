@@ -137,14 +137,20 @@ export function TopicRow({
 
   return (
     <section className="group/row relative">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-bold font-headline text-on-surface">{title}</h2>
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <div className="h-4 w-0.5 rounded-full bg-primary/50" />
+          <h2 className="text-lg font-bold font-headline text-on-surface">{title}</h2>
+        </div>
         {seeAllHref && (
           <Link
             href={seeAllHref}
-            className="text-sm text-on-surface-variant hover:text-primary transition-colors duration-150"
+            className="flex items-center gap-1 text-sm text-on-surface-variant hover:text-primary transition-colors duration-150 group/link"
           >
             {seeAllLabel}
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="opacity-0 group-hover/link:opacity-100 -translate-x-1 group-hover/link:translate-x-0 transition-all duration-150">
+              <path d="M3 7h8M7.5 4l3 3-3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </Link>
         )}
       </div>
