@@ -73,7 +73,7 @@ export function FeatureCards() {
   return (
     <section className="w-full">
       <SectionHeader
-        title="Why Insyte"
+        title="Why insyte"
         description="Built for learning speed, visual clarity, and easy sharing."
         className="mb-6 sm:mb-8"
       />
@@ -82,20 +82,23 @@ export function FeatureCards() {
         {FEATURES.map((feat) => (
           <motion.div
             key={feat.title}
-            className="group rounded-2xl border border-outline-variant/20 bg-surface-container-low p-5 transition-[border-color,box-shadow,transform] duration-200 hover:border-primary/30"
-            whileHover={{ scale: 1.01, boxShadow: '0 0 12px rgba(183,159,255,0.09)' }}
+            className="group relative overflow-hidden rounded-2xl border border-outline-variant/20 bg-surface-container-low p-5 transition-[border-color,box-shadow] duration-200 hover:border-primary/30"
+            whileHover={{ scale: 1.01, boxShadow: '0 0 18px rgba(183,159,255,0.12)' }}
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
           >
+            {/* Gradient tint on hover */}
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/[0.04] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
+
             {/* Icon */}
-            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl border border-outline-variant/20 bg-surface-container-high text-primary transition-colors duration-200 group-hover:border-primary/30 group-hover:bg-primary/5">
+            <div className="relative mb-4 flex h-11 w-11 items-center justify-center rounded-xl border border-outline-variant/20 bg-surface-container-high text-primary transition-colors duration-200 group-hover:border-primary/30 group-hover:bg-primary/5">
               {feat.icon}
             </div>
 
             {/* Content */}
-            <h3 className="mb-2 text-base font-bold font-headline text-on-surface">
+            <h3 className="relative mb-2 text-base font-bold font-headline text-on-surface">
               {feat.title}
             </h3>
-            <p className="text-sm leading-relaxed text-on-surface-variant">
+            <p className="relative text-sm leading-relaxed text-on-surface-variant">
               {feat.description}
             </p>
           </motion.div>

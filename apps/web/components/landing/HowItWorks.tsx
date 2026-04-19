@@ -160,7 +160,7 @@ function StepCard({ step, mobile }: { step: typeof STEPS[number]; mobile?: boole
       mobile ? 'flex-row items-start' : 'min-h-[182px] flex-col items-center text-center',
     ].join(' ')}>
       <div className={[
-        'flex items-center justify-center rounded-xl shrink-0 border border-outline-variant/20 bg-surface-container-high',
+        'flex items-center justify-center rounded-xl shrink-0 border border-primary/20 bg-primary/[0.05]',
         mobile ? 'h-11 w-11' : 'h-12 w-12 mb-1',
       ].join(' ')}>
         <span className="text-primary">{step.icon}</span>
