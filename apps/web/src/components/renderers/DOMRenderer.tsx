@@ -47,9 +47,18 @@ export function DOMRenderer({
     prevGraphRef.current = sceneGraph
 
     if (!prev) {
-      // AnimatePresence initial={false} makes first-render groups start at their
-      // animate values (opacity 1) immediately, bypassing the broken declarative
-      // initial→animate path inside an already-animating parent.
+      // First render: imperatively animate all groups in.
+      // Framer Motion's declarative initial/animate is unreliable when the
+      // component mounts inside an already-animating parent (e.g. StreamingView
+      // fade-in), leaving groups stuck at opacity: 0.
+      for (const gid of sceneGraph.groups.keys()) {
+        if (!document.querySelector(`#sg-group-${gid}`)) continue
+        animate(
+          `#sg-group-${gid}`,
+          { scale: [0.88, 1.03, 1], opacity: [0, 1] },
+          { duration: 0.28 / speed },
+        )
+      }
       return
     }
 
@@ -95,7 +104,7 @@ export function DOMRenderer({
           </p>
         )}
 
-        <AnimatePresence initial={false}>
+        <AnimatePresence>
           {canvasGroups.map(group => {
             const PrimitiveComponent = PrimitiveRegistry[group.visualType]
             if (!PrimitiveComponent) return null
