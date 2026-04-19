@@ -299,6 +299,21 @@ textarea.landing-no-focus-ring:focus-visible {
   -webkit-text-fill-color: transparent;
 }
 
+/* Hero headline — slow-cycling animated gradient on "playing" */
+@keyframes gradient-flow {
+  0%, 100% { background-position: 0% center; }
+  50% { background-position: 100% center; }
+}
+
+.hero-gradient-text {
+  background: linear-gradient(135deg, #b79fff 0%, #c4aaff 15%, #3adffa 50%, #b79fff 85%, #c4aaff 100%);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-flow 8s ease-in-out infinite;
+}
+
 .neon-gradient {
   background: linear-gradient(135deg, #b79fff 0%, #ab8ffe 100%);
 }
