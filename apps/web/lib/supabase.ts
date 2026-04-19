@@ -294,7 +294,6 @@ export async function saveScene(slug: string, scene: Scene): Promise<void> {
       title: scene.title,
       type: scene.type,
       scene_json: scene as unknown as Json,
-      hit_count: 0,
       created_at: new Date().toISOString(),
     })
   } catch (err) {
@@ -310,7 +309,18 @@ export function incrementHitCount(slug: string): void {
   const supabase = getServerSupabase()
   if (!supabase) return
 
-  void supabase.rpc('increment_hit_count', { slug_arg: slug })
+  void (async () => {
+    const { data } = await supabase
+      .from('scenes')
+      .select('hit_count')
+      .eq('slug', slug)
+      .single()
+    if (data == null) return
+    await supabase
+      .from('scenes')
+      .update({ hit_count: (data.hit_count ?? 0) + 1 })
+      .eq('slug', slug)
+  })()
 }
 
 // ─── User history ─────────────────────────────────────────────────────────────

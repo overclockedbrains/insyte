@@ -351,15 +351,23 @@ export function Navbar() {
         ) : (
           <>
             <div className="hidden md:flex items-center gap-1">
-              {NAV_LINKS.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  className="px-3 py-1.5 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors rounded-md hover:bg-surface-container-high"
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {NAV_LINKS.map((link) => {
+                const isActive = pathname?.startsWith(link.href.split('/').slice(0, 2).join('/')) ?? false
+                return (
+                  <Link
+                    key={link.label}
+                    href={link.href}
+                    className={[
+                      'px-3 py-1.5 text-sm font-medium rounded-md transition-colors',
+                      isActive
+                        ? 'text-on-surface bg-surface-container-high'
+                        : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high',
+                    ].join(' ')}
+                  >
+                    {link.label}
+                  </Link>
+                )
+              })}
               <a
                 href={GITHUB_URL}
                 target="_blank"
@@ -393,16 +401,24 @@ export function Navbar() {
                   className="w-64 bg-surface-container-low border-outline-variant/20 pt-12"
                 >
                   <nav className="flex flex-col gap-1 p-4">
-                    {NAV_LINKS.map((link) => (
-                      <Link
-                        key={link.label}
-                        href={link.href}
-                        onClick={() => setMobileOpen(false)}
-                        className="flex items-center px-3 py-2.5 text-sm font-medium text-on-surface-variant hover:text-on-surface rounded-md hover:bg-surface-container-high transition-colors"
-                      >
-                        {link.label}
-                      </Link>
-                    ))}
+                    {NAV_LINKS.map((link) => {
+                      const isActive = pathname?.startsWith(link.href.split('/').slice(0, 2).join('/')) ?? false
+                      return (
+                        <Link
+                          key={link.label}
+                          href={link.href}
+                          onClick={() => setMobileOpen(false)}
+                          className={[
+                            'flex items-center px-3 py-2.5 text-sm font-medium rounded-md transition-colors',
+                            isActive
+                              ? 'text-on-surface bg-surface-container-high'
+                              : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high',
+                          ].join(' ')}
+                        >
+                          {link.label}
+                        </Link>
+                      )
+                    })}
                     <a
                       href={GITHUB_URL}
                       target="_blank"

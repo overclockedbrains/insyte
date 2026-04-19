@@ -72,7 +72,7 @@ R1 released on 8 April 2026. R2 released on 14 April 2026. R3 in progress.
 | **Phase 30** | ✅ | AI Pipeline Redesign — Kill ISCL, add Stage 0 free reasoning (streaming), co-generate steps + explanations, error-guided retry, per-stage model defaults (static routing). AUDIT complete: 15 findings resolved (5 critical bugs, 5 moderate, 5 gaps). |
 | **Phase 31** | ✅ | BYOK Model Routing — provider-aware tier routing so BYOK users get full routing benefits |
 | **Phase 32** | ✅ | Dev Pipeline Playground — per-stage runner, JSON editor, scene studio (`/dev/pipeline` + `/dev/scene`). Zero prod code changes. Completed April 19, 2026. |
-| **Phase 33** | 🚧 | Community Gallery — `/community/gallery` showing all AI-generated scenes via `user_generated_scenes` join (pre-builts naturally excluded, no user data). Sort by recency/popularity, load-more, Navbar link. `/community` base kept for future sub-routes. |
+| **Phase 33** | ✅ | Community Gallery — `/community/gallery` showing all AI-generated scenes via `user_generated_scenes` join (pre-builts naturally excluded, no user data). Sort by recency/popularity, load-more, Navbar link. `/community` base kept for future sub-routes. Completed April 19, 2026. |
 
 ---
 

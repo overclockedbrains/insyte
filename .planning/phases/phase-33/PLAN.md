@@ -2,7 +2,7 @@
 
 **Goal:** A public `/community/gallery` page showing all AI-generated scenes created by any user. Browsable grid sorted by recency or popularity. No user data exposed — not even indirectly.
 
-**Status:** Planned April 19, 2026.
+**Status:** Completed April 19, 2026.
 
 **Prerequisite:** Phase 32 ✅ (stable pipeline) · Phase 11 ✅ (`user_generated_scenes` table exists)
 
