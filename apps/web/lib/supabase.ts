@@ -323,7 +323,9 @@ export function recordUserGeneration(userId: string, query: string, slug: string
   const supabase = getServerSupabase()
   if (!supabase) return
 
-  void supabase.from('user_generated_scenes').insert({ user_id: userId, scene_slug: slug, query })
+  void supabase.from('user_generated_scenes')
+    .insert({ user_id: userId, scene_slug: slug, query })
+    .then(({ error }) => { if (error) console.error('[supabase] recordUserGeneration failed:', error) })
 }
 
 // ─── Saved scenes (bookmarks) ─────────────────────────────────────────────────
