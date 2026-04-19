@@ -5,6 +5,7 @@ import { experimental_useObject as useObject } from '@ai-sdk/react'
 import { SceneSchema } from '@insyte/scene-engine'
 import type { Scene } from '@insyte/scene-engine'
 import { useBoundStore } from '@/src/stores/store'
+import { buildAIHeaders } from '@/lib/headers'
 import { sandboxManager } from '@/src/sandbox/SandboxManager'
 import type { TraceData } from '@/src/sandbox/types'
 
@@ -22,14 +23,8 @@ interface VisualizeAwaiter {
 }
 
 function buildClientHeaders(): Record<string, string> {
-  const { provider, model, apiKeys } = useBoundStore.getState()
-  const key = apiKeys[provider]
-  if (!key) return {}
-  return {
-    'x-api-key': key,
-    'x-provider': provider,
-    'x-model': model,
-  }
+  const { provider, model, apiKeys, ollamaBaseURL, customBaseURL, customApiKey } = useBoundStore.getState()
+  return buildAIHeaders({ provider, model, apiKeys, ollamaBaseURL, customBaseURL, customApiKey })
 }
 
 function customInputSuffix(language: 'python' | 'javascript', customInput?: string): string {
@@ -167,10 +162,7 @@ export function useDSAPipeline() {
 
         const instrumentResponse = await fetch('/api/instrument', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...buildClientHeaders(),
-          },
+          headers: { 'Content-Type': 'application/json', ...buildClientHeaders() },
           body: JSON.stringify({
             code,
             language,

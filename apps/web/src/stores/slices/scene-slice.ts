@@ -1,6 +1,6 @@
 import type { StateCreator } from 'zustand'
 import type { Scene } from '@insyte/scene-engine'
-import type { BoundStore } from '../store'
+import type { BoundStore } from '../types'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -74,8 +74,7 @@ export const createSceneSlice: StateCreator<
     set((state) => {
       if (!state.draftScene || state.draftScene[field] === undefined) return
       if (state.activeScene) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ;(state.activeScene as any)[field] = state.draftScene[field]
+        Object.assign(state.activeScene, { [field]: state.draftScene[field] })
       }
       state.streamedFields.add(field as string)
     }),

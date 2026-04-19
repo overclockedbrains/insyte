@@ -1,6 +1,6 @@
 import type { StateCreator } from 'zustand'
 import type { User, Session } from '@supabase/supabase-js'
-import type { BoundStore } from '../store'
+import type { BoundStore } from '../types'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

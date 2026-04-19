@@ -1,12 +1,13 @@
 'use client'
 
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Scene } from '@insyte/scene-engine'
 import { safeParseScene } from '@insyte/scene-engine'
 import { useBoundStore } from '@/src/stores/store'
 import { aiLog } from '@/lib/ai-logger'
-import { va } from '@/src/lib/analytics'
+import { analytics } from '@/src/lib/analytics'
 import type { GenerationEvent } from '@/src/ai/pipeline'
+import { buildAIHeaders } from '@/lib/headers'
 
 // Re-export so consumers don't need to import from the AI module directly
 export type { GenerationEvent }
@@ -32,6 +33,8 @@ export interface UseStreamSceneResult {
   streamedFields: Set<string>
   /** Stage 0 free reasoning text — shown as "Thinking..." during generation */
   reasoningText: string | null
+  /** True after 30s of active streaming with no completion — show a patience message */
+  isSlowGeneration: boolean
   error: string | null
   startStreaming: (topic: string, slug?: string) => void
   retry: () => void
@@ -96,6 +99,8 @@ async function* readSSE(
 export function useStreamScene(): UseStreamSceneResult {
   const [error, setError] = useState<string | null>(null)
   const [reasoningText, setReasoningText] = useState<string | null>(null)
+  const [isSlowGeneration, setIsSlowGeneration] = useState(false)
+  const slowTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastTopicRef = useRef<string>('')
   const lastSlugRef = useRef<string | undefined>(undefined)
   const retryCountRef = useRef(0)
@@ -106,6 +111,14 @@ export function useStreamScene(): UseStreamSceneResult {
   const setStreaming = useBoundStore((s) => s.setStreaming)
   const isStreaming = useBoundStore((s) => s.isStreaming)
   const streamedFields = useBoundStore((s) => s.streamedFields)
+
+  // Clear slow-gen warning automatically when streaming stops
+  useEffect(() => {
+    if (!isStreaming) {
+      if (slowTimerRef.current) clearTimeout(slowTimerRef.current)
+      setIsSlowGeneration(false)
+    }
+  }, [isStreaming])
 
   // Stable ref so retry callbacks always call the latest runStream
   const runStreamRef = useRef<(topic: string, slug?: string) => void>(() => { })
@@ -118,7 +131,7 @@ export function useStreamScene(): UseStreamSceneResult {
       if (result.success) {
         const { provider, model, apiKeys } = useBoundStore.getState()
         aiLog.stream.validated(true)
-        va.track('scene_generated', {
+        analytics.track('scene_generated', {
           provider,
           model,
           byok: Boolean(apiKeys[provider]),
@@ -162,6 +175,9 @@ export function useStreamScene(): UseStreamSceneResult {
       aiLog.stream.start(topic, slug)
       setError(null)
       setReasoningText(null)
+      setIsSlowGeneration(false)
+      if (slowTimerRef.current) clearTimeout(slowTimerRef.current)
+      slowTimerRef.current = setTimeout(() => setIsSlowGeneration(true), 30_000)
       setStreaming(true)
       aiLog.store.setStreaming(true)
 
@@ -170,7 +186,6 @@ export function useStreamScene(): UseStreamSceneResult {
       const controller = new AbortController()
       abortControllerRef.current = controller
 
-      // Build BYOK headers from store (same logic as before)
       const {
         provider,
         model,
@@ -181,25 +196,10 @@ export function useStreamScene(): UseStreamSceneResult {
         customApiKey,
         detectedMode,
       } = useBoundStore.getState()
-      const key = apiKeys[provider]
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-
-      if (provider === 'ollama') {
-        headers['x-provider'] = 'ollama'
-        if (model) headers['x-model'] = model
-        headers['x-base-url'] = ollamaBaseURL || 'http://localhost:11434/v1'
-      } else if (provider === 'custom') {
-        headers['x-provider'] = 'custom'
-        if (model) headers['x-model'] = model
-        if (customBaseURL) headers['x-base-url'] = customBaseURL
-        if (customApiKey) headers['x-api-key'] = customApiKey
-      } else if (key) {
-        headers['x-api-key'] = key
-        headers['x-provider'] = provider
-        headers['x-model'] = model
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        ...buildAIHeaders({ provider, model, apiKeys, ollamaBaseURL, customBaseURL, customApiKey, userId: user?.id }),
       }
-
-      if (user?.id) headers['x-user-id'] = user.id
 
       // Fire the fetch and consume the SSE stream
       void (async () => {
@@ -335,5 +335,5 @@ export function useStreamScene(): UseStreamSceneResult {
     aiLog.store.setStreaming(false)
   }, [setStreaming])
 
-  return { isStreaming, streamedFields, reasoningText, error, startStreaming, retry, abort }
+  return { isStreaming, streamedFields, reasoningText, isSlowGeneration, error, startStreaming, retry, abort }
 }

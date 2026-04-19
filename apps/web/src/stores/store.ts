@@ -5,21 +5,15 @@ import { enableMapSet } from 'immer'
 
 enableMapSet()
 
-import { createSceneSlice, type SceneSlice } from './slices/scene-slice'
-import { createPlaybackSlice, type PlaybackSlice } from './slices/playback-slice'
-import { createSettingsSlice, type SettingsSlice } from './slices/settings-slice'
-import { createChatSlice, type ChatSlice } from './slices/chat-slice'
-import { createDetectionSlice, type DetectionSlice } from './slices/detection-slice'
-import { createAuthSlice, type AuthSlice } from './slices/auth-slice'
+import { createSceneSlice } from './slices/scene-slice'
+import { createPlaybackSlice } from './slices/playback-slice'
+import { createSettingsSlice } from './slices/settings-slice'
+import { createChatSlice } from './slices/chat-slice'
+import { createDetectionSlice } from './slices/detection-slice'
+import { createAuthSlice } from './slices/auth-slice'
+import { type BoundStore } from './types'
 
-// ─── Combined store type ──────────────────────────────────────────────────────
-
-export type BoundStore = SceneSlice &
-  PlaybackSlice &
-  SettingsSlice &
-  ChatSlice &
-  DetectionSlice &
-  AuthSlice
+export type { BoundStore }
 
 // ─── Single bound store ───────────────────────────────────────────────────────
 

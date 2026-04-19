@@ -6,7 +6,8 @@ import { applyDiff } from '@/src/ai/applyDiff'
 import type { ScenePatch } from '@/src/ai/applyDiff'
 import { buildSceneContext } from '@/src/ai/liveChat'
 import { PATCH_START, PATCH_END } from '@/src/ai/prompts/live-chat'
-import { va } from '@/src/lib/analytics'
+import { analytics } from '@/src/lib/analytics'
+import { buildAIHeaders } from '@/lib/headers'
 
 // ─── useChatStream ────────────────────────────────────────────────────────────
 // Handles the full lifecycle of a streaming chat request:
@@ -49,7 +50,7 @@ export function useChatStream() {
       addUserMessage(text)
       addAssistantMessage('')
       setLoading(true)
-      va.track('chat_sent', {
+      analytics.track('chat_sent', {
         scene_id: activeScene.id,
         scene_type: activeScene.type,
         provider,
@@ -63,15 +64,7 @@ export function useChatStream() {
       // Build history snapshot BEFORE the new user message (exclude the two we just pushed)
       const history = messages.slice(0, -2)
 
-      // BYOK headers — only set if the user has a key for their selected provider
-      const byokKey = apiKeys[provider]
-      const extraHeaders: Record<string, string> = byokKey
-        ? {
-            'x-api-key': byokKey,
-            'x-provider': provider,
-            'x-model': model,
-          }
-        : {}
+      const extraHeaders = buildAIHeaders({ provider, model, apiKeys })
 
       try {
         const response = await fetch('/api/chat', {

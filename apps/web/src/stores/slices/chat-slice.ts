@@ -1,5 +1,5 @@
 import type { StateCreator } from 'zustand'
-import type { BoundStore } from '../store'
+import type { BoundStore } from '../types'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

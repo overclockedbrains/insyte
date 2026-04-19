@@ -1,5 +1,5 @@
 import type { StateCreator } from 'zustand'
-import type { BoundStore } from '../store'
+import type { BoundStore } from '../types'
 import { DEFAULT_MODELS, REGISTRY } from '@/src/ai/registry'
 import type { Provider } from '@/src/ai/registry'
 
