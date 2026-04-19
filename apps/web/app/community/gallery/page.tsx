@@ -5,6 +5,8 @@ import { GalleryPageClient } from './GalleryPageClient'
 import { getServerSupabase } from '@/lib/supabase'
 import type { CommunityScene } from '@/app/api/community/gallery/route'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Community Gallery - insyte',
   description: 'Browse AI-generated simulations created by the insyte community.',
