@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Clock, Flame, Search } from 'lucide-react'
 import type { CommunityScene } from '@/app/api/community/gallery/route'
 import { CommunityCard } from './CommunityCard'
@@ -173,7 +173,7 @@ export function GalleryPageClient({ initialScenes, initialHasMore, initialSort, 
       ) : filteredScenes.length === 0 && searchQuery ? (
         <div className="flex flex-col items-center justify-center py-24 gap-3 text-center">
           <Search className="h-8 w-8 text-on-surface-variant/20" />
-          <p className="text-sm text-on-surface-variant">No results for <span className="text-on-surface">"{searchQuery}"</span></p>
+          <p className="text-sm text-on-surface-variant">No results for <span className="text-on-surface">&ldquo;{searchQuery}&rdquo;</span></p>
         </div>
       ) : scenes.length === 0 ? (
         <EmptyState />

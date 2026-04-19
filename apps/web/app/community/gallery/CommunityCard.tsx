@@ -107,7 +107,7 @@ export function CommunityCard({ scene }: CommunityCardProps) {
 
           {/* Query prompt */}
           <div className="flex items-start gap-1.5 flex-1">
-            <span className="mt-0.5 text-primary/40 text-xs font-bold shrink-0">"</span>
+            <span className="mt-0.5 text-primary/40 text-xs font-bold shrink-0">&ldquo;</span>
             <p className="text-[11px] text-on-surface-variant/70 leading-relaxed line-clamp-3 italic">
               {scene.query.length > 80 ? `${scene.query.slice(0, 80)}…` : scene.query}
             </p>

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { StarIcon } from 'lucide-react'
-import { SITE, GITHUB_URL, NAV_LINKS } from '@/src/lib/config'
+import { GITHUB_URL, NAV_LINKS } from '@/src/lib/config'
 
 export function Footer() {
   return (
