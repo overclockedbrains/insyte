@@ -106,22 +106,16 @@ export function assembleScene(
       }))
     : []
 
-  // ── Challenges: map MCQ format to existing Scene Challenge shape ──────────
+  // ── Challenges: direct mapping — Stage 4 now generates the correct shape ──
   const challenges: Challenge[] = miscParsed
-    ? miscParsed.challenges.map((c, i) => ({
+    ? miscParsed.challenges.map(c => ({
         id: nanoid(8),
-        type: (c.type ?? (['predict', 'break-it', 'optimize'] as const)[i]) ?? 'predict',
-        title: c.question,
-        // Embed options + correct answer in description so the UI can display them
-        description: c.options
-          .map((opt, idx) => `${idx === c.answer ? '✓' : ' '} ${opt}`)
-          .join('\n'),
+        type: c.type as Challenge['type'],
+        title: c.title,
+        description: c.description,
       }))
     : []
 
-  // ── Controls: new format ({id, label, action}) doesn't map to the existing
-  //    Scene Control type ({id, type, label, config}). Skip for now —
-  //    controls were rarely used and the new prompt doesn't generate them.
   const controls: Control[] = []
 
   // ── Build raw scene ───────────────────────────────────────────────────────

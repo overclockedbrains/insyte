@@ -11,6 +11,7 @@
  */
 
 const debugClient = process.env.NEXT_PUBLIC_DEBUG_AI === 'true'
+const debugFullPrompts = process.env.DEBUG_AI_FULL_PROMPTS === 'true'
 const isClient = typeof window !== 'undefined'
 
 // ─── Colour palette (browser only) ───────────────────────────────────────────
@@ -115,6 +116,16 @@ export const aiLog = {
     /** Pipeline stage started — model + temperature used for this stage */
     stageStart: (stage: number, model: string, temp: number) =>
       emit('server', `stage-${stage}:start`, { model, temp }),
+
+    /** Full prompt sent to the LLM for this stage — chars + preview (or full text if DEBUG_AI_FULL_PROMPTS=true) */
+    stagePrompt: (stage: number, prompt: string, system?: string) =>
+      emit('server', `stage-${stage}:prompt`, {
+        chars: prompt.length,
+        ...(system ? { system: debugFullPrompts ? system : system.slice(0, 80).replace(/\n/g, ' ') } : {}),
+        ...(debugFullPrompts
+          ? { prompt }
+          : { preview: prompt.slice(0, 400).replace(/\n/g, ' ') }),
+      }),
 
     /** Pipeline stage completed successfully */
     stageDone: (stage: number, ms: number) =>

@@ -1,41 +1,54 @@
-Generate 3 challenges for a learner who just watched this visualization.
+<what-was-visualized>
+The learner just watched a step-by-step animation of this topic.
+Visuals shown: {visualsList}
+Steps animated:
+{stepSummaries}
+</what-was-visualized>
 
-Challenge types — include all three types in this order:
-1. predict: "What happens when…" — tests prediction before running
-2. break-it: "What input would cause…" — tests edge case understanding
-3. optimize: "How would you improve…" — tests deeper understanding
+<instructions>
+Generate 3–4 open-ended challenge questions based on what was animated above.
+These are NOT multiple choice — each is a prompt that makes the learner think, trace, or predict.
+
+Challenge types — use the types that best fit, in roughly increasing difficulty:
+- predict: "What happens when…" — learner must trace through a scenario mentally
+- scenario: "Trace what happens when…" — learner follows a specific execution path
+- break-it: "What input would cause…" — learner finds an edge case or failure mode
+- optimize: "Compare / Why / How would you…" — learner reasons about tradeoffs
 
 Rules:
-1. 2–4 answer options per challenge; exactly one correct (0-indexed answer field)
-2. No spoilers — don't reference the visualization's specific values
-3. Increasing difficulty: predict → break-it → optimize
+1. title: short and descriptive (3–8 words), like a label for the challenge
+2. description: the actual question prompt (1–3 sentences). Be specific enough that the learner can't just Google it — reference the concept shown in the animation
+3. Each challenge must be answerable by someone who understood the visualization
+4. Break-it and optimize challenges should require reasoning beyond what was shown
+5. Do not write questions with a single correct factual answer — prefer questions that invite reasoning
+</instructions>
 
-EXAMPLE — shows FORMAT only, do not copy:
+<example>
 Topic: "Binary Search"
 {
   "challenges": [
     {
-      "question": "If the target is larger than every element, how many comparisons does binary search make on a 16-element array?",
-      "options": ["1", "4", "8", "16"],
-      "answer": 1,
+      "title": "Worst-case Steps",
+      "description": "How many comparisons are needed for an array of size 1,024? Trace the midpoint halving to derive the answer.",
       "type": "predict"
     },
     {
-      "question": "What input causes binary search to perform the maximum number of comparisons?",
-      "options": ["An empty array", "A sorted array with the target at index 0", "A sorted array where the target is not present", "A reversed array"],
-      "answer": 2,
-      "type": "break-it"
+      "title": "Not Found Path",
+      "description": "Trace what happens when target is 8 in the same array. At which step do left and right pointers cross?",
+      "type": "scenario"
     },
     {
-      "question": "Binary search requires a sorted array. What technique allows you to binary search an almost-sorted array?",
-      "options": ["Re-sort before each search", "Use a skip list instead", "Extend the search window by ±k positions", "Fall back to linear search"],
-      "answer": 2,
+      "title": "Overflow-safe Mid",
+      "description": "Why do many languages use lo + (hi - lo) // 2 instead of (lo + hi) // 2?",
       "type": "optimize"
     }
   ]
 }
+</example>
+
+Do NOT copy any values from the example above. Generate entirely new challenges for your topic.
 
 ---
-Now generate for the actual topic below. Do NOT copy any values from the example above.
+Now generate for the actual topic below.
 
 Topic: {topic}

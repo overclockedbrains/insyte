@@ -39,9 +39,10 @@ export type SceneSkeletonParsed = z.infer<typeof SceneSkeletonSchema>
 
 // ─── Stage 2: Steps + Explanations (dynamic schema factory) ──────────────────
 
-// z.record(z.string(), z.any()) avoids additionalProperties:false in JSON Schema,
-// which Gemini's structured output API does not support.
-const VisualParamsSchema = z.record(z.string(), z.any())
+// Stage 2 uses generateJson (generateText + manual parse), NOT generateObject,
+// so this schema is never compiled to a Gemini response_schema. It's used only
+// for post-hoc Zod validation — any object shape is accepted.
+const VisualParamsSchema = z.record(z.string(), z.unknown())
 
 /**
  * buildStepsSchema creates the Stage 2 schema after Stage 1 completes.
@@ -105,24 +106,19 @@ export function buildPopupsSchema(visualIds: string[]) {
 
 export type PopupsParsed = z.infer<ReturnType<typeof buildPopupsSchema>>
 
-// ─── Stage 4: Misc (challenges + optional controls) ──────────────────────────
+// ─── Stage 4: Misc (challenges) ──────────────────────────────────────────────
 
 /**
- * MCQ-style challenges with question/options/answer fields.
- * Assembly maps these to the existing Scene Challenge shape (title + description).
+ * Open-ended challenges matching the Scene Challenge shape exactly.
+ * Each challenge is a question prompt (title + description) — not MCQ.
+ * Assembly maps directly to Challenge without transformation.
  */
 export const MiscSchema = z.object({
   challenges: z.array(z.object({
-    question: z.string().min(10).max(300),
-    options: z.array(z.string().min(1).max(100)).min(2).max(4),
-    answer: z.number().int().min(0).max(3),
-    type: z.enum(['predict', 'break-it', 'optimize']).optional(),
-  })).max(3),
-  controls: z.array(z.object({
-    id: z.string(),
-    label: z.string(),
-    action: z.string(),
-  })).optional(),
+    title: z.string().min(3).max(80),
+    description: z.string().min(10).max(400),
+    type: z.enum(['predict', 'break-it', 'optimize', 'scenario']),
+  })).min(1).max(4),
 })
 
 export type MiscParsed = z.infer<typeof MiscSchema>

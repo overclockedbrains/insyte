@@ -126,13 +126,12 @@ describe('assembleScene', () => {
     expect(result.scene!.popups).toHaveLength(0)
   })
 
-  it('maps MCQ challenges to Scene Challenge shape', () => {
+  it('maps open-ended challenges to Scene Challenge shape', () => {
     const misc: MiscParsed = {
       challenges: [
         {
-          question: 'What is the time complexity of binary search?',
-          options: ['O(1)', 'O(log n)', 'O(n)', 'O(n log n)'],
-          answer: 1,
+          title: 'Worst-case Steps',
+          description: 'How many comparisons are needed for an array of size 1,024?',
           type: 'predict',
         },
       ],
@@ -141,7 +140,8 @@ describe('assembleScene', () => {
     expect(result.ok).toBe(true)
     const challenges = result.scene!.challenges!
     expect(challenges).toHaveLength(1)
-    expect(challenges[0]!.title).toBe('What is the time complexity of binary search?')
+    expect(challenges[0]!.title).toBe('Worst-case Steps')
+    expect(challenges[0]!.description).toBe('How many comparisons are needed for an array of size 1,024?')
     expect(challenges[0]!.id).toBeTruthy()
     expect(challenges[0]!.type).toBe('predict')
   })

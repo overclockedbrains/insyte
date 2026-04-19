@@ -43,12 +43,10 @@ export function streamTraceToScene(
 
   return streamObject({
     model,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    schema: SceneSchema as any,
+    schema: SceneSchema,
     system: TRACE_TO_SCENE_SYSTEM_PROMPT,
     prompt: buildTracePrompt(trace, originalCode, language, problemStatement),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    providerOptions: REGISTRY[provider].providerOptions as any,
+    providerOptions: REGISTRY[provider].providerOptions,
     maxOutputTokens: 32768,
     maxRetries: 0,
   })

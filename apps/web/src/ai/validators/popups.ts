@@ -1,11 +1,8 @@
 import type { SceneSkeletonParsed, PopupsParsed } from '../schemas'
+import type { ValidationResult } from './index'
+import { getVisualIdSet } from './index'
 
-// ─── Result type ──────────────────────────────────────────────────────────────
-
-export interface ValidationResult {
-  valid: boolean
-  errors: string[]
-}
+export type { ValidationResult }
 
 // ─── validatePopups ───────────────────────────────────────────────────────────
 
@@ -25,7 +22,7 @@ export function validatePopups(
   popups: PopupsParsed,
   skeleton: SceneSkeletonParsed,
 ): ValidationResult {
-  const visualIds = new Set(skeleton.visuals.map(v => v.id))
+  const visualIds = getVisualIdSet(skeleton)
   const stepCount = skeleton.stepCount
   const errors: string[] = []
 

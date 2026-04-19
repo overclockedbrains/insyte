@@ -61,13 +61,45 @@ describe('validateSteps', () => {
     expect(result.errors).toHaveLength(0)
   })
 
-  it('rejects when initialStates is missing an entry for a visual ID', () => {
+  it('rejects when initialStates is missing entries for visual IDs', () => {
     const steps = makeSteps({
       initialStates: { arr: { items: [] } },  // ptr missing
     })
     const result = validateSteps(steps, makeSkeleton())
     expect(result.valid).toBe(false)
     expect(result.errors.some(e => e.includes('"ptr"'))).toBe(true)
+  })
+
+  it('rejects when initialStates is completely empty', () => {
+    const steps = makeSteps({ initialStates: {} })
+    const result = validateSteps(steps, makeSkeleton())
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.includes('empty {}'))).toBe(true)
+  })
+
+  it('rejects when an initialState value is empty {}', () => {
+    const steps = makeSteps({
+      initialStates: { arr: {}, ptr: { value: 0 } },
+    })
+    const result = validateSteps(steps, makeSkeleton())
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.includes('initialStates["arr"]'))).toBe(true)
+  })
+
+  it('rejects when an action has empty params {}', () => {
+    const steps = makeSteps({
+      steps: [
+        {
+          index: 1,
+          explanation: { heading: 'A', body: 'B' },
+          actions: [{ target: 'arr', params: {} }],
+        },
+        ...makeSteps().steps.slice(1),
+      ],
+    })
+    const result = validateSteps(steps, makeSkeleton())
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.includes('empty params {}'))).toBe(true)
   })
 
   it('rejects when initialStates has an unknown visual ID', () => {
@@ -165,26 +197,25 @@ describe('validatePopups', () => {
 // ─── MiscSchema ───────────────────────────────────────────────────────────────
 
 describe('MiscSchema', () => {
-  it('accepts valid MCQ challenges', () => {
+  it('accepts valid open-ended challenges', () => {
     const result = MiscSchema.safeParse({
       challenges: [
-        { question: 'What happens when the target is not in the array?', options: ['A', 'B', 'C'], answer: 1, type: 'predict' },
-        { question: 'What input causes the worst case?', options: ['A', 'B'], answer: 0, type: 'break-it' },
+        { title: 'Worst-case Steps', description: 'How many comparisons for 1,024 elements?', type: 'predict' },
+        { title: 'Break the cache', description: 'What input causes the most collisions?', type: 'break-it' },
       ],
     })
     expect(result.success).toBe(true)
   })
 
-  it('rejects challenges with fewer than 2 options', () => {
-    // options.min(2) rejects single-option challenges
+  it('rejects challenges with missing title', () => {
     const result = MiscSchema.safeParse({
-      challenges: [{ question: 'What happens when the array is empty?', options: ['A'], answer: 0, type: 'predict' }],
+      challenges: [{ description: 'Some question', type: 'predict' }],
     })
     expect(result.success).toBe(false)
   })
 
-  it('accepts missing challenges (empty array)', () => {
+  it('rejects empty challenges array', () => {
     const result = MiscSchema.safeParse({ challenges: [] })
-    expect(result.success).toBe(true)
+    expect(result.success).toBe(false)
   })
 })

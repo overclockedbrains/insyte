@@ -38,8 +38,7 @@ export async function instrumentCode(
       '',
       'Return instrumented code only.',
     ].join('\n'),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    providerOptions: REGISTRY[provider].providerOptions as any,
+    providerOptions: REGISTRY[provider].providerOptions,
     maxOutputTokens: 8192,
     maxRetries: 0,
   })

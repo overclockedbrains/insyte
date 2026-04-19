@@ -3,6 +3,7 @@
 // Single source of truth for every provider/model constant in the app.
 // Both client (UI components, state) and server (API routes) import from here.
 // No SDK imports — pure data only.
+import type { ProviderOptions } from './types/provider-options'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -47,7 +48,7 @@ export interface ProviderConfig {
    * field in streamText / generateText calls.
    * Keyed by the provider name as the AI SDK expects it.
    */
-  providerOptions: Record<string, unknown>
+  providerOptions: ProviderOptions
   /**
    * When true, insyte applies provider-aware tier routing when the user's
    * BYOK key is active for this provider. The model selector is hidden in

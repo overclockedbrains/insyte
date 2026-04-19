@@ -1,7 +1,8 @@
 import type { Scene, SceneType } from '@insyte/scene-engine'
 import { streamText } from 'ai'
-import { generateObject } from './client'
+import { generateObject, generateJson } from './client'
 import type { ModelConfig } from './client'
+import type { ProviderOptions } from './types/provider-options'
 import { resolveStageModel } from './model-routing'
 import type { StageKey } from './model-routing'
 import {
@@ -20,6 +21,7 @@ import {
   STAGE1_SYSTEM,
   STAGE2_SYSTEM,
   STAGE3_SYSTEM,
+  STAGE4_SYSTEM,
 } from './prompts/builders'
 import { validateSteps, validatePopups } from './validators'
 import { assembleScene } from './assembly'
@@ -136,8 +138,7 @@ export async function* generateScene(
     const { textStream } = streamText({
       model: stage0Cfg.model,
       prompt: buildStage0Prompt(topic, mode),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      providerOptions: stage0Cfg.providerOptions as any,
+      providerOptions: stage0Cfg.providerOptions,
       temperature: 1.0,
       maxOutputTokens: 8192,
       maxRetries: 0,
@@ -199,7 +200,7 @@ export async function* generateScene(
   let stepsParsed: StepsParsed
   try {
     const stepsRaw = await retryStage(MAX_RETRIES, async (lastError) => {
-      const raw = await generateObject(
+      const raw = await generateJson(
         buildStage2Prompt(topic, reasoning, skeleton, lastError),
         buildStepsSchema(visualIds),
         stageConfig('stage2', 0.2),
@@ -210,7 +211,7 @@ export async function* generateScene(
         throw new Error(`Semantic validation failed: ${validation.errors.join('; ')}`)
       }
       return raw
-    }, 45_000, 2)  // 45s — heaviest stage (co-generates both steps and explanations)
+    }, 60_000, 2)  // 60s — heaviest stage (co-generates both steps and explanations)
 
     stepsParsed = stepsRaw as StepsParsed
     aiLog.server.stageDone(2, Date.now() - t2)
@@ -240,7 +241,7 @@ export async function* generateScene(
 
     retryStage(MAX_RETRIES, (lastError) =>
       generateObject(
-        buildStage3Prompt(topic, skeleton, lastError),
+        buildStage3Prompt(topic, skeleton, stepsParsed, lastError),
         buildPopupsSchema(visualIds),
         stageConfig('stage3', 0.4),
         STAGE3_SYSTEM,
@@ -260,10 +261,10 @@ export async function* generateScene(
 
     retryStage(MAX_RETRIES, (lastError) =>
       generateObject(
-        buildStage4Prompt(topic, lastError),
+        buildStage4Prompt(topic, skeleton, stepsParsed, lastError),
         MiscSchema,
         stageConfig('stage4', 0.5),
-        // No system prompt for Stage 4
+        STAGE4_SYSTEM,
       ),
       15_000,
       4,
@@ -316,19 +317,17 @@ export async function* generateScene(
  * Each provider uses a different key/schema for extended thinking.
  */
 function buildStage0ProviderOptions(
-  baseOptions: Record<string, unknown>,
+  baseOptions: ProviderOptions,
   providerName: string,
-): Record<string, unknown> {
+): ProviderOptions {
   switch (providerName) {
     case 'gemini':
       return { ...baseOptions, google: { thinkingConfig: { thinkingBudget: 16384 } } }
     case 'anthropic':
       return { ...baseOptions, anthropic: { thinking: { type: 'enabled', budget_tokens: 16384 } } }
     case 'openai':
-      // o-series models think automatically; reasoningEffort controls depth
       return { ...baseOptions, openai: { reasoningEffort: 'high' } }
     default:
-      // groq, ollama, custom: no standard thinking API — pass through unchanged
       return baseOptions
   }
 }

@@ -1,6 +1,7 @@
 import { generateText, generateObject as aiGenerateObject } from 'ai'
 import type { LanguageModel } from 'ai'
 import { z } from 'zod'
+import type { ProviderOptions } from './types/provider-options'
 
 // ─── ModelConfig ──────────────────────────────────────────────────────────────
 
@@ -23,7 +24,7 @@ export interface ModelConfig {
    * Provider-specific options forwarded to the Vercel AI SDK (e.g. Gemini
    * thinking budget). Keyed by the provider name as the AI SDK expects it.
    */
-  providerOptions: Record<string, unknown>
+  providerOptions: ProviderOptions
   /**
    * null  = free tier — pipeline uses STAGE_MODELS per-stage routing.
    * string = BYOK active — pipeline uses this model for every stage (no routing).
@@ -55,8 +56,7 @@ export async function callLLM(prompt: string, config: ModelConfig): Promise<stri
   const result = await generateText({
     model: config.model,
     prompt,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    providerOptions: config.providerOptions as any,
+    providerOptions: config.providerOptions,
     temperature: config.temperature,
     maxOutputTokens: 8192,
     maxRetries: 0,
@@ -84,14 +84,54 @@ export async function generateObject<T>(
 ): Promise<T> {
   const { object } = await aiGenerateObject({
     model: config.model,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    schema: schema as any,
+    schema: schema as z.ZodType<T>,
     prompt,
     ...(system ? { system } : {}),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    providerOptions: config.providerOptions as any,
+    providerOptions: config.providerOptions,
     temperature: config.temperature ?? 0.1,
     maxRetries: 0,
   })
   return object as T
+}
+
+// ─── generateJson ─────────────────────────────────────────────────────────────
+
+/**
+ * Free-text generation + post-hoc Zod validation.
+ *
+ * Use instead of generateObject when the schema is too deeply nested for
+ * Gemini's constrained decoding (response_schema) to handle reliably.
+ * The model generates freely; we parse and validate the JSON afterwards.
+ * On a Zod mismatch the error propagates to retryStage, which injects it
+ * into the next prompt — same retry loop as generateObject.
+ */
+export async function generateJson<T>(
+  prompt: string,
+  schema: z.ZodSchema<T>,
+  config: ModelConfig,
+  system?: string,
+): Promise<T> {
+  const fullSystem = [
+    system,
+    'Return ONLY valid JSON — no markdown fences, no preamble, no trailing text.',
+  ].filter(Boolean).join('\n\n')
+
+  const { text } = await generateText({
+    model: config.model,
+    prompt,
+    system: fullSystem,
+    providerOptions: config.providerOptions,
+    temperature: config.temperature ?? 0.2,
+    maxOutputTokens: 16384,
+    maxRetries: 0,
+  })
+
+  // Strip markdown code fence the model may add despite instructions
+  const stripped = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '')
+
+  // Model may output chain-of-thought preamble before the JSON object (e.g. stage-2
+  // asks it to list teaching moments first). Extract the outermost JSON object.
+  const jsonMatch = stripped.match(/\{[\s\S]*\}/)
+  if (!jsonMatch) throw new SyntaxError('No JSON object found in model response')
+  return schema.parse(JSON.parse(jsonMatch[0])) as T
 }
