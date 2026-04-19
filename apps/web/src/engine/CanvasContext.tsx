@@ -43,7 +43,7 @@ const defaultToPx = (p: { x: number; y: number }) => ({
 
 // ─── Context ───────────────────────────────────────────────────────────────────
 
-export const CanvasContext = React.createContext<CanvasContextValue>({
+const CanvasContext = React.createContext<CanvasContextValue>({
   width: DEFAULT_WIDTH,
   height: DEFAULT_HEIGHT,
   toPx: defaultToPx,

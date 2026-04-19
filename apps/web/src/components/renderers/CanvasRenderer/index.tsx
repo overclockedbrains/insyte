@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import type { SceneRendererProps } from './types'
+import type { SceneRendererProps } from '../types'
 import { useCanvas } from '@/src/engine/CanvasContext'
 
 /**

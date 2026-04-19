@@ -1,4 +1,4 @@
-// Topic catalog — all 24 pre-built simulations
+// Topic catalog — all pre-built simulations
 // Used by the Explore page, search, and FeaturedSimulations.
 
 import type { SceneType } from '@insyte/scene-engine'
@@ -81,6 +81,17 @@ export const topicIndex: TopicEntry[] = [
     tags: ['git', 'branch', 'merge', 'commit', 'version control'],
     type: 'concept',
     isFeatured: false,
+    isPrebuilt: true,
+  },
+  {
+    slug: 'copilot-agent-architecture--mzlKyE',
+    title: 'How does a Copilot Agent work?',
+    description:
+      'Trace the full agent loop — LLM reasoning, tool calls, context retrieval, and multi-step planning — as Copilot resolves a coding task.',
+    category: 'System Design',
+    tags: ['ai agent', 'copilot', 'llm', 'tool use', 'rag', 'agentic', 'system design'],
+    type: 'concept',
+    isFeatured: true,
     isPrebuilt: true,
   },
 

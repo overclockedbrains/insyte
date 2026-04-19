@@ -1,0 +1,1343 @@
+{
+  "id": "_KPnLV329Wbywups6yukt",
+  "type": "concept",
+  "steps": [
+    {
+      "index": 0,
+      "actions": []
+    },
+    {
+      "index": 1,
+      "actions": [
+        {
+          "params": {
+            "text": "Plan a trip to SF: May 10-12, flight from LAX, 4-star hotel near Union Square.",
+            "style": "highlight"
+          },
+          "target": "user-goal"
+        },
+        {
+          "params": {
+            "components": [
+              {
+                "id": "user",
+                "icon": "mobile",
+                "label": "User",
+                "status": "active"
+              },
+              {
+                "id": "orchestrator",
+                "icon": "compute",
+                "label": "Orchestrator",
+                "status": "active"
+              },
+              {
+                "id": "planner",
+                "icon": "cloud",
+                "label": "Planner (LLM)",
+                "status": "normal"
+              },
+              {
+                "id": "executor",
+                "icon": "layers",
+                "label": "Tool Executor",
+                "status": "normal"
+              },
+              {
+                "id": "flight_api",
+                "icon": "server",
+                "label": "Flight API",
+                "status": "normal"
+              },
+              {
+                "id": "hotel_api",
+                "icon": "server",
+                "label": "Hotel API",
+                "status": "normal"
+              }
+            ],
+            "connections": [
+              {
+                "to": "orchestrator",
+                "from": "user",
+                "label": "Goal",
+                "style": "solid",
+                "active": true
+              },
+              {
+                "to": "planner",
+                "from": "orchestrator",
+                "label": "Plan Request",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "orchestrator",
+                "from": "planner",
+                "label": "Plan",
+                "style": "dashed",
+                "active": false
+              },
+              {
+                "to": "executor",
+                "from": "orchestrator",
+                "label": "Tool Call",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "flight_api",
+                "from": "executor",
+                "label": "",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "hotel_api",
+                "from": "executor",
+                "label": "",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "executor",
+                "from": "flight_api",
+                "label": "Observation",
+                "style": "dashed",
+                "active": false
+              },
+              {
+                "to": "executor",
+                "from": "hotel_api",
+                "label": "Observation",
+                "style": "dashed",
+                "active": false
+              },
+              {
+                "to": "orchestrator",
+                "from": "executor",
+                "label": "",
+                "style": "dashed",
+                "active": false
+              },
+              {
+                "to": "user",
+                "from": "orchestrator",
+                "label": "Final Answer",
+                "style": "dashed",
+                "active": false
+              }
+            ]
+          },
+          "target": "agent-system"
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "actions": [
+        {
+          "params": {
+            "text": "Plan a trip to SF: May 10-12, flight from LAX, 4-star hotel near Union Square.",
+            "style": "default"
+          },
+          "target": "user-goal"
+        },
+        {
+          "params": {
+            "text": "Thinking: I need to break this down. First, find a flight. Second, find a hotel.",
+            "style": "highlight"
+          },
+          "target": "llm-thought"
+        },
+        {
+          "params": {
+            "components": [
+              {
+                "id": "user",
+                "icon": "mobile",
+                "label": "User",
+                "status": "normal"
+              },
+              {
+                "id": "orchestrator",
+                "icon": "compute",
+                "label": "Orchestrator",
+                "status": "active"
+              },
+              {
+                "id": "planner",
+                "icon": "cloud",
+                "label": "Planner (LLM)",
+                "status": "active"
+              },
+              {
+                "id": "executor",
+                "icon": "layers",
+                "label": "Tool Executor",
+                "status": "normal"
+              },
+              {
+                "id": "flight_api",
+                "icon": "server",
+                "label": "Flight API",
+                "status": "normal"
+              },
+              {
+                "id": "hotel_api",
+                "icon": "server",
+                "label": "Hotel API",
+                "status": "normal"
+              }
+            ],
+            "connections": [
+              {
+                "to": "orchestrator",
+                "from": "user",
+                "label": "Goal",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "planner",
+                "from": "orchestrator",
+                "label": "Plan Request",
+                "style": "solid",
+                "active": true
+              },
+              {
+                "to": "orchestrator",
+                "from": "planner",
+                "label": "Plan",
+                "style": "dashed",
+                "active": false
+              },
+              {
+                "to": "executor",
+                "from": "orchestrator",
+                "label": "Tool Call",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "flight_api",
+                "from": "executor",
+                "label": "",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "hotel_api",
+                "from": "executor",
+                "label": "",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "executor",
+                "from": "flight_api",
+                "label": "Observation",
+                "style": "dashed",
+                "active": false
+              },
+              {
+                "to": "executor",
+                "from": "hotel_api",
+                "label": "Observation",
+                "style": "dashed",
+                "active": false
+              },
+              {
+                "to": "orchestrator",
+                "from": "executor",
+                "label": "",
+                "style": "dashed",
+                "active": false
+              },
+              {
+                "to": "user",
+                "from": "orchestrator",
+                "label": "Final Answer",
+                "style": "dashed",
+                "active": false
+              }
+            ]
+          },
+          "target": "agent-system"
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "actions": [
+        {
+          "params": {
+            "text": "Thinking: I need to break this down. First, find a flight. Second, find a hotel.",
+            "style": "default"
+          },
+          "target": "llm-thought"
+        },
+        {
+          "params": {
+            "items": [
+              {
+                "id": "s0",
+                "value": "Find Hotel(SF, Union Square, 4-star)"
+              },
+              {
+                "id": "s1",
+                "value": "Find Flight(LAX, SFO, 5/10-5/12)"
+              }
+            ]
+          },
+          "target": "plan-stack"
+        },
+        {
+          "params": {
+            "components": [
+              {
+                "id": "user",
+                "icon": "mobile",
+                "label": "User",
+                "status": "normal"
+              },
+              {
+                "id": "orchestrator",
+                "icon": "compute",
+                "label": "Orchestrator",
+                "status": "active"
+              },
+              {
+                "id": "planner",
+                "icon": "cloud",
+                "label": "Planner (LLM)",
+                "status": "active"
+              },
+              {
+                "id": "executor",
+                "icon": "layers",
+                "label": "Tool Executor",
+                "status": "normal"
+              },
+              {
+                "id": "flight_api",
+                "icon": "server",
+                "label": "Flight API",
+                "status": "normal"
+              },
+              {
+                "id": "hotel_api",
+                "icon": "server",
+                "label": "Hotel API",
+                "status": "normal"
+              }
+            ],
+            "connections": [
+              {
+                "to": "orchestrator",
+                "from": "user",
+                "label": "Goal",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "planner",
+                "from": "orchestrator",
+                "label": "Plan Request",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "orchestrator",
+                "from": "planner",
+                "label": "Plan",
+                "style": "dashed",
+                "active": true
+              },
+              {
+                "to": "executor",
+                "from": "orchestrator",
+                "label": "Tool Call",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "flight_api",
+                "from": "executor",
+                "label": "",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "hotel_api",
+                "from": "executor",
+                "label": "",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "executor",
+                "from": "flight_api",
+                "label": "Observation",
+                "style": "dashed",
+                "active": false
+              },
+              {
+                "to": "executor",
+                "from": "hotel_api",
+                "label": "Observation",
+                "style": "dashed",
+                "active": false
+              },
+              {
+                "to": "orchestrator",
+                "from": "executor",
+                "label": "",
+                "style": "dashed",
+                "active": false
+              },
+              {
+                "to": "user",
+                "from": "orchestrator",
+                "label": "Final Answer",
+                "style": "dashed",
+                "active": false
+              }
+            ]
+          },
+          "target": "agent-system"
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "actions": [
+        {
+          "params": {
+            "items": [
+              {
+                "id": "s0",
+                "value": "Find Hotel(SF, Union Square, 4-star)"
+              }
+            ]
+          },
+          "target": "plan-stack"
+        },
+        {
+          "params": {
+            "text": "Executing: Find Flight(LAX, SFO, 5/10-5/12)",
+            "style": "default"
+          },
+          "target": "llm-thought"
+        },
+        {
+          "params": {
+            "components": [
+              {
+                "id": "user",
+                "icon": "mobile",
+                "label": "User",
+                "status": "normal"
+              },
+              {
+                "id": "orchestrator",
+                "icon": "compute",
+                "label": "Orchestrator",
+                "status": "active"
+              },
+              {
+                "id": "planner",
+                "icon": "cloud",
+                "label": "Planner (LLM)",
+                "status": "normal"
+              },
+              {
+                "id": "executor",
+                "icon": "layers",
+                "label": "Tool Executor",
+                "status": "active"
+              },
+              {
+                "id": "flight_api",
+                "icon": "server",
+                "label": "Flight API",
+                "status": "active"
+              },
+              {
+                "id": "hotel_api",
+                "icon": "server",
+                "label": "Hotel API",
+                "status": "normal"
+              }
+            ],
+            "connections": [
+              {
+                "to": "orchestrator",
+                "from": "user",
+                "label": "Goal",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "planner",
+                "from": "orchestrator",
+                "label": "Plan Request",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "orchestrator",
+                "from": "planner",
+                "label": "Plan",
+                "style": "dashed",
+                "active": false
+              },
+              {
+                "to": "executor",
+                "from": "orchestrator",
+                "label": "Tool Call",
+                "style": "solid",
+                "active": true
+              },
+              {
+                "to": "flight_api",
+                "from": "executor",
+                "label": "",
+                "style": "solid",
+                "active": true
+              },
+              {
+                "to": "hotel_api",
+                "from": "executor",
+                "label": "",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "executor",
+                "from": "flight_api",
+                "label": "Observation",
+                "style": "dashed",
+                "active": false
+              },
+              {
+                "to": "executor",
+                "from": "hotel_api",
+                "label": "Observation",
+                "style": "dashed",
+                "active": false
+              },
+              {
+                "to": "orchestrator",
+                "from": "executor",
+                "label": "",
+                "style": "dashed",
+                "active": false
+              },
+              {
+                "to": "user",
+                "from": "orchestrator",
+                "label": "Final Answer",
+                "style": "dashed",
+                "active": false
+              }
+            ]
+          },
+          "target": "agent-system"
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "actions": [
+        {
+          "params": {
+            "text": "Observation: Found flight UA123. Storing result.",
+            "style": "default"
+          },
+          "target": "llm-thought"
+        },
+        {
+          "params": {
+            "components": [
+              {
+                "id": "user",
+                "icon": "mobile",
+                "label": "User",
+                "status": "normal"
+              },
+              {
+                "id": "orchestrator",
+                "icon": "compute",
+                "label": "Orchestrator",
+                "status": "active"
+              },
+              {
+                "id": "planner",
+                "icon": "cloud",
+                "label": "Planner (LLM)",
+                "status": "normal"
+              },
+              {
+                "id": "executor",
+                "icon": "layers",
+                "label": "Tool Executor",
+                "status": "active"
+              },
+              {
+                "id": "flight_api",
+                "icon": "server",
+                "label": "Flight API",
+                "status": "active"
+              },
+              {
+                "id": "hotel_api",
+                "icon": "server",
+                "label": "Hotel API",
+                "status": "normal"
+              }
+            ],
+            "connections": [
+              {
+                "to": "orchestrator",
+                "from": "user",
+                "label": "Goal",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "planner",
+                "from": "orchestrator",
+                "label": "Plan Request",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "orchestrator",
+                "from": "planner",
+                "label": "Plan",
+                "style": "dashed",
+                "active": false
+              },
+              {
+                "to": "executor",
+                "from": "orchestrator",
+                "label": "Tool Call",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "flight_api",
+                "from": "executor",
+                "label": "",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "hotel_api",
+                "from": "executor",
+                "label": "",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "executor",
+                "from": "flight_api",
+                "label": "Observation",
+                "style": "dashed",
+                "active": true
+              },
+              {
+                "to": "executor",
+                "from": "hotel_api",
+                "label": "Observation",
+                "style": "dashed",
+                "active": false
+              },
+              {
+                "to": "orchestrator",
+                "from": "executor",
+                "label": "",
+                "style": "dashed",
+                "active": true
+              },
+              {
+                "to": "user",
+                "from": "orchestrator",
+                "label": "Final Answer",
+                "style": "dashed",
+                "active": false
+              }
+            ]
+          },
+          "target": "agent-system"
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "actions": [
+        {
+          "params": {
+            "items": []
+          },
+          "target": "plan-stack"
+        },
+        {
+          "params": {
+            "text": "Executing: Find Hotel(SF, Union Square, 4-star)",
+            "style": "default"
+          },
+          "target": "llm-thought"
+        },
+        {
+          "params": {
+            "components": [
+              {
+                "id": "user",
+                "icon": "mobile",
+                "label": "User",
+                "status": "normal"
+              },
+              {
+                "id": "orchestrator",
+                "icon": "compute",
+                "label": "Orchestrator",
+                "status": "active"
+              },
+              {
+                "id": "planner",
+                "icon": "cloud",
+                "label": "Planner (LLM)",
+                "status": "normal"
+              },
+              {
+                "id": "executor",
+                "icon": "layers",
+                "label": "Tool Executor",
+                "status": "active"
+              },
+              {
+                "id": "flight_api",
+                "icon": "server",
+                "label": "Flight API",
+                "status": "normal"
+              },
+              {
+                "id": "hotel_api",
+                "icon": "server",
+                "label": "Hotel API",
+                "status": "active"
+              }
+            ],
+            "connections": [
+              {
+                "to": "orchestrator",
+                "from": "user",
+                "label": "Goal",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "planner",
+                "from": "orchestrator",
+                "label": "Plan Request",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "orchestrator",
+                "from": "planner",
+                "label": "Plan",
+                "style": "dashed",
+                "active": false
+              },
+              {
+                "to": "executor",
+                "from": "orchestrator",
+                "label": "Tool Call",
+                "style": "solid",
+                "active": true
+              },
+              {
+                "to": "flight_api",
+                "from": "executor",
+                "label": "",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "hotel_api",
+                "from": "executor",
+                "label": "",
+                "style": "solid",
+                "active": true
+              },
+              {
+                "to": "executor",
+                "from": "flight_api",
+                "label": "Observation",
+                "style": "dashed",
+                "active": false
+              },
+              {
+                "to": "executor",
+                "from": "hotel_api",
+                "label": "Observation",
+                "style": "dashed",
+                "active": false
+              },
+              {
+                "to": "orchestrator",
+                "from": "executor",
+                "label": "",
+                "style": "dashed",
+                "active": false
+              },
+              {
+                "to": "user",
+                "from": "orchestrator",
+                "label": "Final Answer",
+                "style": "dashed",
+                "active": false
+              }
+            ]
+          },
+          "target": "agent-system"
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "actions": [
+        {
+          "params": {
+            "text": "Thinking: I have all the data. Now I will synthesize a final answer for the user.",
+            "style": "highlight"
+          },
+          "target": "llm-thought"
+        },
+        {
+          "params": {
+            "components": [
+              {
+                "id": "user",
+                "icon": "mobile",
+                "label": "User",
+                "status": "normal"
+              },
+              {
+                "id": "orchestrator",
+                "icon": "compute",
+                "label": "Orchestrator",
+                "status": "active"
+              },
+              {
+                "id": "planner",
+                "icon": "cloud",
+                "label": "Planner (LLM)",
+                "status": "active"
+              },
+              {
+                "id": "executor",
+                "icon": "layers",
+                "label": "Tool Executor",
+                "status": "normal"
+              },
+              {
+                "id": "flight_api",
+                "icon": "server",
+                "label": "Flight API",
+                "status": "normal"
+              },
+              {
+                "id": "hotel_api",
+                "icon": "server",
+                "label": "Hotel API",
+                "status": "normal"
+              }
+            ],
+            "connections": [
+              {
+                "to": "orchestrator",
+                "from": "user",
+                "label": "Goal",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "planner",
+                "from": "orchestrator",
+                "label": "Plan Request",
+                "style": "solid",
+                "active": true
+              },
+              {
+                "to": "orchestrator",
+                "from": "planner",
+                "label": "Plan",
+                "style": "dashed",
+                "active": false
+              },
+              {
+                "to": "executor",
+                "from": "orchestrator",
+                "label": "Tool Call",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "flight_api",
+                "from": "executor",
+                "label": "",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "hotel_api",
+                "from": "executor",
+                "label": "",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "executor",
+                "from": "flight_api",
+                "label": "Observation",
+                "style": "dashed",
+                "active": false
+              },
+              {
+                "to": "executor",
+                "from": "hotel_api",
+                "label": "Observation",
+                "style": "dashed",
+                "active": false
+              },
+              {
+                "to": "orchestrator",
+                "from": "executor",
+                "label": "",
+                "style": "dashed",
+                "active": false
+              },
+              {
+                "to": "user",
+                "from": "orchestrator",
+                "label": "Final Answer",
+                "style": "dashed",
+                "active": false
+              }
+            ]
+          },
+          "target": "agent-system"
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "actions": [
+        {
+          "params": {
+            "text": "Thinking: I have all the data. Now I will synthesize a final answer for the user.",
+            "style": "default"
+          },
+          "target": "llm-thought"
+        },
+        {
+          "params": {
+            "text": "Here's your trip plan: Flight UA123 from LAX, and a room at the Grand Hyatt near Union Square.",
+            "style": "success"
+          },
+          "target": "synthesized-answer"
+        },
+        {
+          "params": {
+            "components": [
+              {
+                "id": "user",
+                "icon": "mobile",
+                "label": "User",
+                "status": "active"
+              },
+              {
+                "id": "orchestrator",
+                "icon": "compute",
+                "label": "Orchestrator",
+                "status": "active"
+              },
+              {
+                "id": "planner",
+                "icon": "cloud",
+                "label": "Planner (LLM)",
+                "status": "active"
+              },
+              {
+                "id": "executor",
+                "icon": "layers",
+                "label": "Tool Executor",
+                "status": "normal"
+              },
+              {
+                "id": "flight_api",
+                "icon": "server",
+                "label": "Flight API",
+                "status": "normal"
+              },
+              {
+                "id": "hotel_api",
+                "icon": "server",
+                "label": "Hotel API",
+                "status": "normal"
+              }
+            ],
+            "connections": [
+              {
+                "to": "orchestrator",
+                "from": "user",
+                "label": "Goal",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "planner",
+                "from": "orchestrator",
+                "label": "Plan Request",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "orchestrator",
+                "from": "planner",
+                "label": "Plan",
+                "style": "dashed",
+                "active": true
+              },
+              {
+                "to": "executor",
+                "from": "orchestrator",
+                "label": "Tool Call",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "flight_api",
+                "from": "executor",
+                "label": "",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "hotel_api",
+                "from": "executor",
+                "label": "",
+                "style": "solid",
+                "active": false
+              },
+              {
+                "to": "executor",
+                "from": "flight_api",
+                "label": "Observation",
+                "style": "dashed",
+                "active": false
+              },
+              {
+                "to": "executor",
+                "from": "hotel_api",
+                "label": "Observation",
+                "style": "dashed",
+                "active": false
+              },
+              {
+                "to": "orchestrator",
+                "from": "executor",
+                "label": "",
+                "style": "dashed",
+                "active": false
+              },
+              {
+                "to": "user",
+                "from": "orchestrator",
+                "label": "Final Answer",
+                "style": "dashed",
+                "active": true
+              }
+            ]
+          },
+          "target": "agent-system"
+        }
+      ]
+    }
+  ],
+  "title": "Copilot Agent Architecture",
+  "layout": "text-left-canvas-right",
+  "popups": [
+    {
+      "id": "ToiGWhAe",
+      "text": "The initial user goal is often high-level; the agent's first task is to interpret and refine it into an actionable objective.",
+      "style": "info",
+      "attachTo": "user-goal",
+      "hideAtStep": 2,
+      "showAtStep": 1
+    },
+    {
+      "id": "9cgqER0S",
+      "text": "The LLM's internal thought process translates the refined goal into a concrete, executable plan of sub-tasks.",
+      "style": "insight",
+      "attachTo": "llm-thought",
+      "hideAtStep": 3,
+      "showAtStep": 2
+    },
+    {
+      "id": "SvQ_Oe1n",
+      "text": "The plan stack ensures sequential execution of sub-tasks, providing structure and state to the agent's workflow.",
+      "style": "info",
+      "attachTo": "plan-stack",
+      "hideAtStep": 4,
+      "showAtStep": 3
+    },
+    {
+      "id": "jqdx7PjY",
+      "text": "Observation and reflection are crucial for self-correction, allowing the LLM to adapt its plan based on tool outputs.",
+      "style": "success",
+      "attachTo": "llm-thought",
+      "hideAtStep": 6,
+      "showAtStep": 5
+    },
+    {
+      "id": "kMWgfDK_",
+      "text": "The synthesized answer integrates all gathered information, representing the final, coherent response to the user's original goal.",
+      "style": "success",
+      "attachTo": "synthesized-answer",
+      "hideAtStep": 8,
+      "showAtStep": 8
+    }
+  ],
+  "visuals": [
+    {
+      "id": "agent-system",
+      "type": "system-diagram",
+      "layoutHint": "dagre-TB",
+      "initialState": {
+        "components": [
+          {
+            "id": "user",
+            "icon": "mobile",
+            "label": "User",
+            "status": "normal"
+          },
+          {
+            "id": "orchestrator",
+            "icon": "compute",
+            "label": "Orchestrator",
+            "status": "normal"
+          },
+          {
+            "id": "planner",
+            "icon": "cloud",
+            "label": "Planner (LLM)",
+            "status": "normal"
+          },
+          {
+            "id": "executor",
+            "icon": "layers",
+            "label": "Tool Executor",
+            "status": "normal"
+          },
+          {
+            "id": "flight_api",
+            "icon": "server",
+            "label": "Flight API",
+            "status": "normal"
+          },
+          {
+            "id": "hotel_api",
+            "icon": "server",
+            "label": "Hotel API",
+            "status": "normal"
+          }
+        ],
+        "connections": [
+          {
+            "to": "orchestrator",
+            "from": "user",
+            "label": "Goal",
+            "style": "solid",
+            "active": false
+          },
+          {
+            "to": "planner",
+            "from": "orchestrator",
+            "label": "Plan Request",
+            "style": "solid",
+            "active": false
+          },
+          {
+            "to": "orchestrator",
+            "from": "planner",
+            "label": "Plan",
+            "style": "dashed",
+            "active": false
+          },
+          {
+            "to": "executor",
+            "from": "orchestrator",
+            "label": "Tool Call",
+            "style": "solid",
+            "active": false
+          },
+          {
+            "to": "flight_api",
+            "from": "executor",
+            "label": "",
+            "style": "solid",
+            "active": false
+          },
+          {
+            "to": "hotel_api",
+            "from": "executor",
+            "label": "",
+            "style": "solid",
+            "active": false
+          },
+          {
+            "to": "executor",
+            "from": "flight_api",
+            "label": "Observation",
+            "style": "dashed",
+            "active": false
+          },
+          {
+            "to": "executor",
+            "from": "hotel_api",
+            "label": "Observation",
+            "style": "dashed",
+            "active": false
+          },
+          {
+            "to": "orchestrator",
+            "from": "executor",
+            "label": "",
+            "style": "dashed",
+            "active": false
+          },
+          {
+            "to": "user",
+            "from": "orchestrator",
+            "label": "Final Answer",
+            "style": "dashed",
+            "active": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "user-goal",
+      "slot": "top-left",
+      "type": "text-badge",
+      "layoutHint": "dagre-TB",
+      "initialState": {
+        "text": "Plan a trip to SF: May 10-12, flight from LAX, 4-star hotel near Union Square.",
+        "style": "default"
+      }
+    },
+    {
+      "id": "llm-thought",
+      "slot": "top-right",
+      "type": "text-badge",
+      "layoutHint": "dagre-TB",
+      "initialState": {
+        "text": "Waiting for a task...",
+        "style": "default"
+      }
+    },
+    {
+      "id": "synthesized-answer",
+      "slot": "bottom-left",
+      "type": "text-badge",
+      "layoutHint": "dagre-TB",
+      "initialState": {
+        "text": "No answer yet.",
+        "style": "default"
+      }
+    },
+    {
+      "id": "plan-stack",
+      "slot": "right-center",
+      "type": "stack",
+      "layoutHint": "dagre-TB",
+      "initialState": {
+        "items": []
+      }
+    }
+  ],
+  "controls": [],
+  "challenges": [
+    {
+      "id": "LVY2Axd_",
+      "type": "predict",
+      "title": "Unexpected Tool Output",
+      "description": "Imagine a tool execution returns an error message or malformed data instead of the expected output. How would the 'Observation and Reflection' step likely process this, and how might it influence the subsequent 'Planning Phase' or 'Tool Execution'?"
+    },
+    {
+      "id": "TOoC7CN_",
+      "type": "scenario",
+      "title": "Multi-step Goal Execution",
+      "description": "Trace the execution flow for the user goal: 'Find the capital of France, then tell me its population.' Focus on how the 'plan-stack' evolves from the 'Planning Phase' through 'First Tool Execution' and into the 'Observation and Reflection' step."
+    },
+    {
+      "id": "evwBEj6c",
+      "type": "break-it",
+      "title": "Infinite Planning Loop",
+      "description": "What kind of user goal or internal reasoning within the 'Planning Phase' could lead to a situation where the agent continuously generates new sub-goals or tool calls without ever reaching 'Goal Completion'?"
+    },
+    {
+      "id": "FDFwqwU5",
+      "type": "optimize",
+      "title": "Plan Refinement Strategy",
+      "description": "The visualization shows 'Observation and Reflection' leading to potential adjustments in the plan. How could the agent be designed to more intelligently decide *when* to adjust a plan versus *when* to proceed with the current plan, to balance thoroughness with efficiency?"
+    }
+  ],
+  "explanation": [
+    {
+      "body": "The process begins when a user submits a complex goal. The Orchestrator, the central brain of the agent, receives this request and prepares to process it.",
+      "heading": "Goal Ingestion",
+      "appearsAtStep": 1
+    },
+    {
+      "body": "The Orchestrator sends the user's goal to the Planner module, which is powered by a Large Language Model (LLM). The Planner's job is to break the complex goal into a sequence of smaller, concrete steps.",
+      "heading": "Planning Phase",
+      "appearsAtStep": 2
+    },
+    {
+      "body": "The Planner returns the sequence of steps to the Orchestrator. These steps are pushed onto the Plan Stack, creating a clear, executable strategy. The agent will work through this stack one item at a time.",
+      "heading": "Plan Materialization",
+      "appearsAtStep": 3
+    },
+    {
+      "body": "The Orchestrator pops the first task from the plan. It then instructs the Tool Executor to call the appropriate tool—in this case, the Flight API—with the necessary parameters.",
+      "heading": "First Tool Execution",
+      "appearsAtStep": 4
+    },
+    {
+      "body": "The Flight API returns its findings (e.g., flight details). This result, called an 'Observation', is sent back through the Executor to the Orchestrator, which stores it for later use.",
+      "heading": "Observation and Reflection",
+      "appearsAtStep": 5
+    },
+    {
+      "body": "The agent continues executing its plan. The Orchestrator pops the next task ('Find Hotel') and calls the Hotel API via the Tool Executor, demonstrating the iterative nature of the process.",
+      "heading": "Second Tool Execution",
+      "appearsAtStep": 6
+    },
+    {
+      "body": "With the plan stack empty, the Orchestrator gathers all observations (flight and hotel data). It sends this complete context to the Planner (LLM) to generate a final, user-friendly answer.",
+      "heading": "Final Synthesis",
+      "appearsAtStep": 7
+    },
+    {
+      "body": "The LLM synthesizes the data into a coherent response. This final answer is sent back through the Orchestrator and presented to the user, successfully completing the initial goal.",
+      "heading": "Goal Completion",
+      "appearsAtStep": 8
+    }
+  ]
+}

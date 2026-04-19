@@ -30,7 +30,7 @@ interface DPTableState {
   colLabels?: string[]
 }
 
-export function DPTableViz({ state }: PrimitiveProps) {
+export function DPTableViz({ id, state }: PrimitiveProps) {
   const { rows, cols, cells = [], rowLabels, colLabels } = state as DPTableState
   const [scope, animate] = useAnimate()
 
@@ -79,7 +79,7 @@ export function DPTableViz({ state }: PrimitiveProps) {
             {rowLabels && <div className="w-12 border-r border-outline-variant/30" />}
             {colLabels.map((lbl, idx) => (
               <div
-                key={`col-lbl-${idx}`}
+                key={`${id}-col-lbl-${idx}`}
                 className="w-12 h-8 flex items-center justify-center border-r border-outline-variant/20 last:border-r-0 font-mono text-[10px] font-bold text-on-surface-variant overflow-hidden"
               >
                 {lbl}
@@ -90,7 +90,7 @@ export function DPTableViz({ state }: PrimitiveProps) {
 
         <div className="flex flex-col">
           {Array.from({ length: rows }).map((_, rIdx) => (
-            <div key={`row-${rIdx}`} className="flex border-b border-outline-variant/20 last:border-b-0">
+            <div key={`${id}-row-${rIdx}`} className="flex border-b border-outline-variant/20 last:border-b-0">
               {/* Row Label */}
               {rowLabels && (
                 <div className="w-12 h-12 flex items-center justify-center bg-surface-container-highest border-r border-outline-variant/30 font-mono text-[10px] font-bold text-on-surface-variant overflow-hidden">
@@ -107,7 +107,7 @@ export function DPTableViz({ state }: PrimitiveProps) {
 
                 return (
                   <div
-                    key={`cell-${rIdx}-${cIdx}`}
+                    key={`${id}-cell-${rIdx}-${cIdx}`}
                     data-cell={`${rIdx}-${cIdx}`}
                     className="w-12 h-12 flex items-center justify-center border-r border-outline-variant/20 last:border-r-0 font-mono text-sm font-bold transition-none"
                     style={{

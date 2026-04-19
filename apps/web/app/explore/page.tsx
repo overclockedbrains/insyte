@@ -2,13 +2,14 @@ import type { Metadata } from 'next'
 import { GlowEffect } from '@/components/layout/GlowEffect'
 import { SearchBar } from '@/components/explore/SearchBar'
 import { TopicRow } from '@/components/explore/TopicRow'
-import { getFeaturedTopics, getTopicsByCategory } from '@/src/content/topic-index'
+import { getFeaturedTopics, getTopicsByCategory, topicIndex } from '@/src/content/topic-index'
 import Link from 'next/link'
+
+const totalCount = topicIndex.length
 
 export const metadata: Metadata = {
   title: 'Explore - insyte',
-  description:
-    'Browse 24 interactive simulations covering Data Structures, System Design, Networking, and more.',
+  description: `Browse ${totalCount} interactive simulations covering Data Structures, System Design, Networking, and more.`,
 }
 
 type ExploreSearchParams = {
@@ -53,7 +54,7 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-primary/70 border border-primary/20 bg-primary/5 px-3 py-1 rounded-full">
               <span className="h-1.5 w-1.5 rounded-full bg-primary/60" />
-              24 hand-crafted simulations
+              {totalCount} hand-crafted simulations
             </span>
           </div>
           <h1 className="font-headline font-extrabold text-4xl sm:text-5xl text-on-surface leading-tight">

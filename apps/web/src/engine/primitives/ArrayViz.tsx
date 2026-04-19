@@ -43,10 +43,11 @@ export function ArrayViz({ id, state }: PrimitiveProps) {
       )}
 
       {/* Cells
-       * Phase 27: key = "${id}-slot-${idx}" (slot identity, not value).
+       * key = "${id}-slot-${idx}" (slot identity, not value).
        * When the value at slot i changes, the div stays mounted and animates
        * backgroundColor / borderColor in-place. No remount = no flash.
-       * layoutId enables FLIP when the array is resized across steps.
+       * layout (not layoutId) gives FLIP for array resize without triggering
+       * FM's shared-element crossfade, which applies opacity:0 on entering.
        */}
       <div className="flex gap-2 relative z-10">
         {cells.map((cell, idx) => {
@@ -55,7 +56,7 @@ export function ArrayViz({ id, state }: PrimitiveProps) {
           return (
             <motion.div
               key={`${id}-slot-${idx}`}
-              layoutId={`${id}-slot-${idx}`}
+              layout
               className="min-w-[48px] h-12 border flex items-center justify-center rounded-md relative"
               initial={false}
               animate={{
@@ -93,7 +94,7 @@ export function ArrayViz({ id, state }: PrimitiveProps) {
           {pointers.map((ptr) => (
             <motion.div
               key={`${id}-ptr-${ptr.label}`}
-              layoutId={`${id}-ptr-${ptr.label}`}
+              layout
               className="absolute top-0 flex flex-col items-center justify-start"
               initial={false}
               animate={{

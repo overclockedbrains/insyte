@@ -1,5 +1,5 @@
 /**
- * Seed script: uploads all 24 topic entries to Supabase `topic_index` table.
+ * Seed script: uploads all topic entries to Supabase `topic_index` table.
  * Run with: pnpm seed (from apps/web) or pnpm --filter web seed
  *
  * Requires env vars: NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY

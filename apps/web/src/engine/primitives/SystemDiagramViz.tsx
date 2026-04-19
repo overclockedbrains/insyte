@@ -118,7 +118,9 @@ export function SystemDiagramViz({ id, state, visual }: PrimitiveProps) {
   const posById = new Map(layout.nodes.map(n => [n.id, n]))
   const rawById = new Map(components.map(c => [c.id, c]))
 
-  const idBase = `sys-${components.map(c => c.id).join('').slice(0, 8)}`
+  const idBase = components.length > 0
+    ? `sys-${components.slice(0, 4).map(c => c.id).join('-')}`
+    : `sys-${id}`
 
   const [,, vw] = layout.viewBox.split(' ').map(Number)
 
@@ -141,7 +143,7 @@ export function SystemDiagramViz({ id, state, visual }: PrimitiveProps) {
         </defs>
 
         {/* ── Connections ── */}
-        {connections.map((conn, idx) => {
+        {connections.map((conn) => {
           const fromNode = posById.get(conn.from)
           const toNode   = posById.get(conn.to)
           if (!fromNode || !toNode) return null
@@ -160,7 +162,7 @@ export function SystemDiagramViz({ id, state, visual }: PrimitiveProps) {
           const midY = (fromNode.y + toNode.y) / 2
 
           return (
-            <g key={`conn-${idx}`}>
+            <g key={`${id}-conn-${conn.from}-${conn.to}`}>
               <motion.path
                 d={pathD}
                 fill="none"
