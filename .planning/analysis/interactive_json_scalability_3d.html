@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Premium 3D JSON Scalability Architecture</title>
+  <!-- Apache ECharts -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2.0.9/dist/echarts-gl.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #0b0f19;
+      /* Deep premium dark mode */
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    #main {
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .header {
+      position: absolute;
+      top: 20px;
+      left: 30px;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: 1px;
+      font-weight: 600;
+      color: #58a6ff;
+    }
+
+    p {
+      margin: 5px 0 0 0;
+      color: #8b949e;
+      font-size: 14px;
+      max-width: 400px;
+      line-height: 1.4;
+    }
+
+    /* Glassmorphism Controls Overlay */
+    .controls {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      z-index: 20;
+      background: rgba(13, 17, 23, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 24px;
+      width: 320px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .controls h3 {
+      margin: 0 0 20px 0;
+      font-size: 14px;
+      color: #c9d1d9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .controls h3 span {
+      font-size: 15px;
+      background: rgba(255, 76, 76, 0.15);
+      color: #ff4c4c;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-variant-numeric: tabular-nums;
+      text-transform: none;
+      letter-spacing: normal;
+      font-weight: bold;
+    }
+
+    .control-group {
+      margin-bottom: 20px;
+    }
+
+    .control-group:last-child {
+      margin-bottom: 0px;
+    }
+
+    .control-group label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #8b949e;
+      margin-bottom: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .control-group label strong {
+      color: #fff;
+      font-size: 15px;
+    }
+
+    /* Specific header decoupling */
+    .section-split {
+      margin-top: 25px;
+      padding-top: 22px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Premium Slider Base */
+    input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    input[type=range]:focus {
+      outline: none;
+    }
+
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 6px;
+      background: #30363d;
+      border-radius: 4px;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 18px;
+      width: 18px;
+      border-radius: 50%;
+      background: #58a6ff;
+      margin-top: -6px;
+      box-shadow: 0 0 10px rgba(88, 166, 255, 0.5);
+      transition: transform 0.1s;
+    }
+
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    /* Scale Slider Color Shift */
+    .scale-slider::-webkit-slider-thumb {
+      background: #a371f7 !important;
+      box-shadow: 0 0 10px rgba(163, 113, 247, 0.5) !important;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <h1>Architecture Payload Scalability</h1>
+    <p>A high-performance WebGL surface mapping the exponential JSON bloat of heavy diagrams. Fully interactive
+      framework.</p>
+  </div>
+
+  <!-- Custom UI Panel -->
+  <div class="controls">
+    <h3>Live Tracker
+      <span id="sizeValue">37.5 KB</span>
+    </h3>
+
+    <div class="control-group">
+      <label><span>Steps</span> <strong id="stepValue">9</strong></label>
+      <input type="range" id="stepSlider" min="0" max="100" value="9" step="1">
+    </div>
+
+    <div class="control-group">
+      <label><span>Visual Elements</span> <strong id="visualValue">5</strong></label>
+      <input type="range" id="visualSlider" min="0" max="30" value="5" step="1">
+    </div>
+
+    <h3 class="section-split">Axis Scale Limits</h3>
+
+    <div class="control-group">
+      <label><span>Max Axis Steps</span> <strong id="maxStepValue">100</strong></label>
+      <input type="range" id="maxStepSlider" class="scale-slider" min="10" max="500" value="100" step="10">
+    </div>
+
+    <div class="control-group">
+      <label><span>Max Axis Visuals</span> <strong id="maxVisualValue">30</strong></label>
+      <input type="range" id="maxVisualSlider" class="scale-slider" min="5" max="100" value="30" step="5">
+    </div>
+  </div>
+
+  <div id="main"></div>
+
+  <script>
+    var chartDom = document.getElementById('main');
+    var myChart = echarts.init(chartDom);
+
+    // Core Formula Logic
+    function calculateJSONSize(steps, visuals) {
+      return 5 + (2 * visuals) + (0.5 * steps * visuals);
+    }
+
+    var currentSteps = 9;
+    var currentVisuals = 5;
+    var currentSize = calculateJSONSize(currentSteps, currentVisuals);
+
+    var maxStepsLimit = 100;
+    var maxVisualsLimit = 30;
+
+    var option = {
+      tooltip: {
+        formatter: function (params) {
+          if (params.seriesName === 'Live Tracker') {
+            return '<div style="background:#1f2937;padding:10px;border-radius:6px;border:1px solid #ff4c4c;">' +
+              '<b style="color:#ff4c4c">Live Simulator Point</b><br/>' +
+              'Steps: ' + params.value[0] + '<br/>' +
+              'Visuals: ' + params.value[1] + '<br/>' +
+              'Est Size: ' + params.value[2].toFixed(1) + ' KB</div>';
+          }
+          return 'Steps: ' + params.value[0] + '<br/>' +
+            'Visuals: ' + params.value[1] + '<br/>' +
+            'Size: ' + params.value[2].toFixed(1) + ' KB';
+        },
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        textStyle: { color: '#fff' },
+        borderWidth: 0
+      },
+      visualMap: {
+        show: true,
+        dimension: 2,
+        min: 0,
+        max: calculateJSONSize(maxStepsLimit, maxVisualsLimit), // Dynmaically scales
+        calculable: true,
+        right: 30,
+        bottom: 30,
+        inRange: {
+          color: ['#00d2ff', '#3a7bd5', '#8a2387', '#e94057', '#f27121']
+        },
+        textStyle: { color: '#8b949e' },
+        formatter: '{value} KB'
+      },
+      xAxis3D: {
+        type: 'value',
+        min: 0,
+        max: maxStepsLimit, // Bound logic
+        name: 'Number of steps',
+        nameGap: 28,
+        nameTextStyle: { color: '#ffffff', fontSize: 13, fontWeight: 'bold' },
+        axisLabel: {
+          textStyle: { color: '#8b949e' },
+          formatter: function (value) { return value === 0 ? '' : value; }
+        },
+        axisLine: { lineStyle: { color: '#30363d' } },
+        splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } }
+      },
+      yAxis3D: {
+        type: 'value',
+        min: 0,
+        max: maxVisualsLimit, // Bound logic
+        name: 'Number of visual elements',
+        nameGap: 28,
+        nameTextStyle: { color: '#ffffff', fontSize: 13, fontWeight: 'bold' },
+        axisLabel: {
+          textStyle: { color: '#8b949e' },
+          formatter: function (value) { return value === 0 ? '' : value; }
+        },
+        axisLine: { lineStyle: { color: '#30363d' } },
+        splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } }
+      },
+      zAxis3D: {
+        type: 'value',
+        min: 0,
+        name: 'Scene JSON size (KB)',
+        nameGap: 28,
+        nameTextStyle: { color: '#ffffff', fontSize: 13, fontWeight: 'bold' },
+        axisLabel: { textStyle: { color: '#8b949e' } },
+        axisLine: { lineStyle: { color: '#30363d' } },
+        splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } }
+      },
+      grid3D: {
+        viewControl: {
+          projection: 'perspective',
+          alpha: 40,
+          beta: 45,
+          distance: 250
+        },
+        boxDepth: 100,
+        boxHeight: 80,
+        boxWidth: 100,
+        environment: 'auto',
+        light: {
+          main: {
+            intensity: 1.5,
+            shadow: true,
+            shadowQuality: 'high',
+            alpha: 30,
+            beta: 40
+          },
+          ambient: { intensity: 0.4 }
+        }
+      },
+      series: [
+        {
+          type: 'surface',
+          name: 'Scalability Surface',
+          wireframe: {
+            show: false
+          },
+          shading: 'realistic',
+          realisticMaterial: {
+            roughness: 0.4,
+            metalness: 0.1
+          },
+          itemStyle: {
+            opacity: 0.95
+          },
+          equation: {
+            x: { step: 2, min: 0, max: maxStepsLimit },
+            y: { step: 1, min: 0, max: maxVisualsLimit },
+            z: function (x, y) {
+              return calculateJSONSize(x, y);
+            }
+          }
+        },
+        {
+          type: 'scatter3D',
+          name: 'Live Tracker',
+          data: [[currentSteps, currentVisuals, currentSize]],
+          symbol: 'circle',
+          symbolSize: 22,
+          itemStyle: {
+            color: '#ff2a2a',
+            borderWidth: 3,
+            borderColor: '#fff',
+            opacity: 1,
+            shadowBlur: 20,
+            shadowColor: 'rgba(255,0,0,1)'
+          },
+          label: {
+            show: false
+          }
+        }
+      ]
+    };
+
+    myChart.setOption(option);
+
+    // --- Sliders Logic ---
+
+    // Tracker Elements
+    const uiStepValue = document.getElementById('stepValue');
+    const uiVisualValue = document.getElementById('visualValue');
+    const uiSizeValue = document.getElementById('sizeValue');
+    const sliderStep = document.getElementById('stepSlider');
+    const sliderVisual = document.getElementById('visualSlider');
+
+    // Axis Bounds Elements
+    const uiMaxStepValue = document.getElementById('maxStepValue');
+    const uiMaxVisualValue = document.getElementById('maxVisualValue');
+    const sliderMaxStep = document.getElementById('maxStepSlider');
+    const sliderMaxVisual = document.getElementById('maxVisualSlider');
+
+
+    function updateScatterPoint() {
+      var newSize = calculateJSONSize(currentSteps, currentVisuals);
+
+      uiStepValue.innerText = currentSteps;
+      uiVisualValue.innerText = currentVisuals;
+      uiSizeValue.innerText = newSize.toFixed(1) + " KB";
+
+      myChart.setOption({
+        series: [
+          {}, // skip 1
+          {
+            name: 'Live Tracker',
+            data: [[currentSteps, currentVisuals, newSize]]
+          }
+        ]
+      });
+    }
+
+    function updateAxisBounds() {
+      uiMaxStepValue.innerText = maxStepsLimit;
+      uiMaxVisualValue.innerText = maxVisualsLimit;
+
+      // Make sure the tracker sliders can scale to the new max boundary
+      sliderStep.max = maxStepsLimit;
+      sliderVisual.max = maxVisualsLimit;
+
+      // Dynamically recalculate the ceiling height mapping for heatmap color graduation
+      var theoreticalHighestJSONSize = calculateJSONSize(maxStepsLimit, maxVisualsLimit);
+
+      // Re-render the Surface Equation and the Grid Scalings
+      myChart.setOption({
+        visualMap: {
+          max: theoreticalHighestJSONSize
+        },
+        xAxis3D: {
+          max: maxStepsLimit
+        },
+        yAxis3D: {
+          max: maxVisualsLimit
+        },
+        series: [
+          {
+            equation: {
+              x: { max: maxStepsLimit },
+              y: { max: maxVisualsLimit }
+            }
+          },
+          {} // skip 2
+        ]
+      });
+
+      // If dragging limits below current tracker, clamp and drag tracker down
+      if (currentSteps > maxStepsLimit) {
+        currentSteps = maxStepsLimit;
+        sliderStep.value = currentSteps;
+      }
+      if (currentVisuals > maxVisualsLimit) {
+        currentVisuals = maxVisualsLimit;
+        sliderVisual.value = currentVisuals;
+      }
+
+      updateScatterPoint(); // re-eval tracker point boundary constraints visually
+    }
+
+    // Live Tracker Listeners
+    sliderStep.addEventListener('input', function (e) {
+      currentSteps = parseFloat(e.target.value);
+      updateScatterPoint();
+    });
+
+    sliderVisual.addEventListener('input', function (e) {
+      currentVisuals = parseFloat(e.target.value);
+      updateScatterPoint();
+    });
+
+    // Axis Limit Listeners
+    sliderMaxStep.addEventListener('input', function (e) {
+      maxStepsLimit = parseFloat(e.target.value);
+      updateAxisBounds();
+    });
+
+    sliderMaxVisual.addEventListener('input', function (e) {
+      maxVisualsLimit = parseFloat(e.target.value);
+      updateAxisBounds();
+    });
+
+    // Auto-resize
+    window.addEventListener('resize', function () {
+      myChart.resize();
+    });
+  </script>
+</body>
+
+</html>
