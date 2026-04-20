@@ -110,6 +110,37 @@
       font-size: 15px;
     }
 
+    select.profile-dropdown {
+      width: 100%;
+      background: #0d1117;
+      color: #c9d1d9;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: bold;
+      appearance: none;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    
+    select.profile-dropdown:hover, select.profile-dropdown:focus {
+      border-color: #58a6ff;
+    }
+
+    #equationDisplay {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #58a6ff;
+      font-weight: 600;
+      background: rgba(88, 166, 255, 0.1);
+      padding: 6px 10px;
+      border-radius: 4px;
+      text-align: center;
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    }
+
     /* Specific header decoupling */
     .section-split {
       margin-top: 25px;
@@ -163,13 +194,34 @@
 <body>
   <div class="header">
     <h1>Architecture Payload Scalability</h1>
-    <p>A high-performance WebGL surface mapping the exponential JSON bloat of heavy diagrams. Fully interactive
-      framework.</p>
+    <p>A high-performance WebGL surface mapping the JSON file bloat projections between different design systems.</p>
   </div>
 
   <!-- Custom UI Panel -->
   <div class="controls">
-    <h3>Live Tracker
+    
+    <div class="control-group">
+      <label><span>Architecture Profile</span></label>
+      <select id="profileSelect" class="profile-dropdown">
+        <option value="heavy">Heavy Diagram (Multiplicative)</option>
+        <option value="light">Light DSA Component (Linear)</option>
+        <option value="optimized">Topology-Split (Optimized Delta)</option>
+        <option value="compare">Compare: Heavy vs Optimized</option>
+        <option value="custom">Custom Equation (Dynamic)</option>
+      </select>
+      <div id="equationDisplay">Eq: Z = 5 + 2V + 0.5(S*V)</div>
+      
+      <div id="customEquationGroup" style="display: none; margin-top: 15px;">
+          <label><span>Custom Math Formula</span></label>
+          <div id="customInputWrapper" style="display: flex; align-items: center; background: #0d1117; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; transition: border-color 0.2s;">
+              <div style="padding: 8px 0 8px 12px; color: #58a6ff; font-weight: bold; font-family: monospace;">Z = </div>
+              <input type="text" id="customEquationInput" value="0.5 * s * Math.pow(v, 1.2)" style="width:100%; box-sizing:border-box; background:transparent; color:#f2c94c; border:none; padding: 8px 12px 8px 6px; font-family: monospace; outline: none;">
+          </div>
+          <div style="font-size: 10px; color: #8b949e; margin-top: 5px;">Use 's' for steps, 'v' for visuals. Standard JS Math available.</div>
+      </div>
+    </div>
+
+    <h3 class="section-split">Live Tracker
       <span id="sizeValue">37.5 KB</span>
     </h3>
 
@@ -202,14 +254,89 @@
     var chartDom = document.getElementById('main');
     var myChart = echarts.init(chartDom);
 
-    // Core Formula Logic
+    var currentProfile = 'heavy';
+
+    // Core Formula Logic Router
     function calculateJSONSize(steps, visuals) {
-      return 5 + (2 * visuals) + (0.5 * steps * visuals);
+      if (currentProfile === 'heavy') {
+         // Heavy Multiplicative Bloat
+         return 5 + (2 * visuals) + (0.5 * steps * visuals);
+      } else if (currentProfile === 'light') {
+         // Light Linear Pipeline
+         return 0.25 + (0.75 * steps) + (3.10 * visuals);
+      } else if (currentProfile === 'optimized') {
+         // Optimized Topology-Split Delta (94% per-step reduction)
+         return 5 + (2.5 * visuals) + (0.03 * steps * visuals);
+      } else {
+         // Custom runtime mathematical evaluation
+         try {
+            const eqStr = document.getElementById('customEquationInput').value;
+            const compute = new Function('s', 'v', 'return (' + eqStr + ');');
+            const result = compute(steps, visuals);
+            return isNaN(result) || result < 0 ? 0 : result;
+         } catch(e) {
+            return 0; // Temporary fallback while user types incomplete syntax
+         }
+      }
     }
 
     var currentSteps = 9;
     var currentVisuals = 5;
     var currentSize = calculateJSONSize(currentSteps, currentVisuals);
+
+    function buildSeriesArray(steps, visuals, maxS, maxV) {
+      if (currentProfile === 'compare') {
+        let heavySize = 5 + (2 * visuals) + (0.5 * steps * visuals);
+        let optSize = 5 + (2.5 * visuals) + (0.03 * steps * visuals);
+        return [
+          {
+            type: 'surface', name: 'Heavy (Unoptimized)',
+            wireframe: { show: true, lineStyle: { color: 'rgba(255, 76, 76, 0.2)'} }, shading: 'realistic',
+            itemStyle: { color: '#ff4c4c', opacity: 0.4 },
+            equation: { x: { step: 2, min: 0, max: maxS }, y: { step: 1, min: 0, max: maxV }, z: function (x, y) { return 5 + 2*y + 0.5*x*y; } }
+          },
+          {
+            type: 'surface', name: 'Topology-Split (Optimized)',
+            wireframe: { show: true, lineStyle: { color: 'rgba(66, 244, 98, 0.4)'} }, shading: 'realistic',
+            itemStyle: { color: '#42f462', opacity: 0.8 },
+            equation: { x: { step: 2, min: 0, max: maxS }, y: { step: 1, min: 0, max: maxV }, z: function (x, y) { return 5 + 2.5*y + 0.03*x*y; } }
+          },
+          {
+            type: 'scatter3D', name: 'Live Tracker (Heavy)',
+            data: [[steps, visuals, heavySize]], symbol: 'circle', symbolSize: 22,
+            itemStyle: { color: '#ff4c4c', borderWidth: 2, borderColor: '#fff' }, label: { show: false }
+          },
+          {
+            type: 'scatter3D', name: 'Live Tracker (Optimized)',
+            data: [[steps, visuals, optSize]], symbol: 'circle', symbolSize: 22,
+            itemStyle: { color: '#42f462', borderWidth: 2, borderColor: '#fff' }, label: { show: false }
+          }
+        ];
+      } else {
+        var size = calculateJSONSize(steps, visuals);
+        return [
+          {
+            type: 'surface', name: 'Scalability Surface',
+            wireframe: { show: false }, shading: 'realistic',
+            realisticMaterial: { roughness: 0.4, metalness: 0.1 },
+            itemStyle: { opacity: 0.95 },
+            equation: { x: { step: 2, min: 0, max: maxS }, y: { step: 1, min: 0, max: maxV }, z: function (x, y) { return calculateJSONSize(x, y); } }
+          },
+          {
+            type: 'surface', name: 'Hidden Surface',
+            itemStyle: { opacity: 0 }, equation: { x: { step: 2, min: 0, max: maxS }, y: { step: 1, min: 0, max: maxV }, z: function() { return -100; } }
+          },
+          {
+            type: 'scatter3D', name: 'Live Tracker',
+            data: [[steps, visuals, size]], symbol: 'circle', symbolSize: 22,
+            itemStyle: { color: '#ff2a2a', borderWidth: 3, borderColor: '#fff', shadowBlur: 20, shadowColor: 'rgba(255,0,0,1)' }, label: { show: false }
+          },
+          {
+            type: 'scatter3D', name: 'Hidden Scatter', data: [], itemStyle: { opacity: 0 }
+          }
+        ];
+      }
+    }
 
     var maxStepsLimit = 100;
     var maxVisualsLimit = 30;
@@ -217,9 +344,9 @@
     var option = {
       tooltip: {
         formatter: function (params) {
-          if (params.seriesName === 'Live Tracker') {
+          if (params.seriesName.includes('Live Tracker')) {
             return '<div style="background:#1f2937;padding:10px;border-radius:6px;border:1px solid #ff4c4c;">' +
-              '<b style="color:#ff4c4c">Live Simulator Point</b><br/>' +
+              '<b style="color:#ff4c4c">' + params.seriesName + '</b><br/>' +
               'Steps: ' + params.value[0] + '<br/>' +
               'Visuals: ' + params.value[1] + '<br/>' +
               'Est Size: ' + params.value[2].toFixed(1) + ' KB</div>';
@@ -234,9 +361,10 @@
       },
       visualMap: {
         show: true,
+        seriesIndex: [0],
         dimension: 2,
         min: 0,
-        max: calculateJSONSize(maxStepsLimit, maxVisualsLimit), // Dynmaically scales
+        max: calculateJSONSize(maxStepsLimit, maxVisualsLimit),
         calculable: true,
         right: 30,
         bottom: 30,
@@ -247,179 +375,147 @@
         formatter: '{value} KB'
       },
       xAxis3D: {
-        type: 'value',
-        min: 0,
-        max: maxStepsLimit, // Bound logic
-        name: 'Number of steps',
-        nameGap: 28,
+        type: 'value', min: 0, max: maxStepsLimit, name: 'Number of steps', nameGap: 28,
         nameTextStyle: { color: '#ffffff', fontSize: 13, fontWeight: 'bold' },
-        axisLabel: {
-          textStyle: { color: '#8b949e' },
-          formatter: function (value) { return value === 0 ? '' : value; }
-        },
-        axisLine: { lineStyle: { color: '#30363d' } },
-        splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } }
+        axisLabel: { textStyle: { color: '#8b949e' }, formatter: function (value) { return value === 0 ? '' : value; } },
+        axisLine: { lineStyle: { color: '#30363d' } }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } }
       },
       yAxis3D: {
-        type: 'value',
-        min: 0,
-        max: maxVisualsLimit, // Bound logic
-        name: 'Number of visual elements',
-        nameGap: 28,
+        type: 'value', min: 0, max: maxVisualsLimit, name: 'Number of visual elements', nameGap: 28,
         nameTextStyle: { color: '#ffffff', fontSize: 13, fontWeight: 'bold' },
-        axisLabel: {
-          textStyle: { color: '#8b949e' },
-          formatter: function (value) { return value === 0 ? '' : value; }
-        },
-        axisLine: { lineStyle: { color: '#30363d' } },
-        splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } }
+        axisLabel: { textStyle: { color: '#8b949e' }, formatter: function (value) { return value === 0 ? '' : value; } },
+        axisLine: { lineStyle: { color: '#30363d' } }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } }
       },
       zAxis3D: {
-        type: 'value',
-        min: 0,
-        name: 'Scene JSON size (KB)',
-        nameGap: 28,
+        type: 'value', min: 0, name: 'Scene JSON size (KB)', nameGap: 28,
         nameTextStyle: { color: '#ffffff', fontSize: 13, fontWeight: 'bold' },
         axisLabel: { textStyle: { color: '#8b949e' } },
-        axisLine: { lineStyle: { color: '#30363d' } },
-        splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } }
+        axisLine: { lineStyle: { color: '#30363d' } }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } }
       },
       grid3D: {
-        viewControl: {
-          projection: 'perspective',
-          alpha: 40,
-          beta: 45,
-          distance: 250
-        },
-        boxDepth: 100,
-        boxHeight: 80,
-        boxWidth: 100,
-        environment: 'auto',
-        light: {
-          main: {
-            intensity: 1.5,
-            shadow: true,
-            shadowQuality: 'high',
-            alpha: 30,
-            beta: 40
-          },
-          ambient: { intensity: 0.4 }
-        }
+        viewControl: { projection: 'perspective', alpha: 40, beta: 45, distance: 250 },
+        boxDepth: 100, boxHeight: 80, boxWidth: 100, environment: 'auto',
+        light: { main: { intensity: 1.5, shadow: true, shadowQuality: 'high', alpha: 30, beta: 40 }, ambient: { intensity: 0.4 } }
       },
-      series: [
-        {
-          type: 'surface',
-          name: 'Scalability Surface',
-          wireframe: {
-            show: false
-          },
-          shading: 'realistic',
-          realisticMaterial: {
-            roughness: 0.4,
-            metalness: 0.1
-          },
-          itemStyle: {
-            opacity: 0.95
-          },
-          equation: {
-            x: { step: 2, min: 0, max: maxStepsLimit },
-            y: { step: 1, min: 0, max: maxVisualsLimit },
-            z: function (x, y) {
-              return calculateJSONSize(x, y);
-            }
-          }
-        },
-        {
-          type: 'scatter3D',
-          name: 'Live Tracker',
-          data: [[currentSteps, currentVisuals, currentSize]],
-          symbol: 'circle',
-          symbolSize: 22,
-          itemStyle: {
-            color: '#ff2a2a',
-            borderWidth: 3,
-            borderColor: '#fff',
-            opacity: 1,
-            shadowBlur: 20,
-            shadowColor: 'rgba(255,0,0,1)'
-          },
-          label: {
-            show: false
-          }
-        }
-      ]
+      series: buildSeriesArray(currentSteps, currentVisuals, maxStepsLimit, maxVisualsLimit)
     };
 
     myChart.setOption(option);
 
-    // --- Sliders Logic ---
+    // --- Control Logic ---
 
-    // Tracker Elements
+    const profileSelect = document.getElementById('profileSelect');
+    const equationDisplay = document.getElementById('equationDisplay');
+
     const uiStepValue = document.getElementById('stepValue');
     const uiVisualValue = document.getElementById('visualValue');
     const uiSizeValue = document.getElementById('sizeValue');
     const sliderStep = document.getElementById('stepSlider');
     const sliderVisual = document.getElementById('visualSlider');
 
-    // Axis Bounds Elements
     const uiMaxStepValue = document.getElementById('maxStepValue');
     const uiMaxVisualValue = document.getElementById('maxVisualValue');
     const sliderMaxStep = document.getElementById('maxStepSlider');
     const sliderMaxVisual = document.getElementById('maxVisualSlider');
 
+    const customGroup = document.getElementById('customEquationGroup');
+    const customInput = document.getElementById('customEquationInput');
+
+    // Profile Switcher Event
+    profileSelect.addEventListener('change', function(e) {
+        currentProfile = e.target.value;
+        if(currentProfile === 'heavy') {
+            customGroup.style.display = "none";
+            equationDisplay.style.display = "block";
+            equationDisplay.innerText = "Eq: Z = 5 + 2V + 0.5(S*V)";
+            equationDisplay.style.color = "#ff4c4c";
+            equationDisplay.style.background = "rgba(255, 76, 76, 0.15)";
+        } else if (currentProfile === 'light') {
+            customGroup.style.display = "none";
+            equationDisplay.style.display = "block";
+            equationDisplay.innerText = "Eq: Z = 0.25 + 0.75S + 3.10V";
+            equationDisplay.style.color = "#42f462";
+            equationDisplay.style.background = "rgba(66, 244, 98, 0.15)";
+        } else if (currentProfile === 'optimized') {
+            customGroup.style.display = "none";
+            equationDisplay.style.display = "block";
+            equationDisplay.innerText = "Eq: Z = 5 + 2.5V + 0.03(S*V)";
+            equationDisplay.style.color = "#a371f7";
+            equationDisplay.style.background = "rgba(163, 113, 247, 0.15)";
+        } else if (currentProfile === 'compare') {
+            customGroup.style.display = "none";
+            equationDisplay.style.display = "block";
+            equationDisplay.innerText = "Compare: Heavy (Red) vs Optimized (Green)";
+            equationDisplay.style.color = "#ffffff";
+            equationDisplay.style.background = "linear-gradient(90deg, rgba(255,76,76,0.25) 0%, rgba(66,244,98,0.25) 100%)";
+        } else if (currentProfile === 'custom') {
+            customGroup.style.display = "block";
+            equationDisplay.style.display = "none";
+            
+            // Custom Input Glow Logic (Optional Style Focus)
+            customInput.focus();
+        }
+        
+        // Force full re-eval of mathematical bounds
+        updateAxisBounds(); 
+    });
+
+    customInput.addEventListener('input', function() {
+        if(currentProfile === 'custom') {
+            updateAxisBounds(); // Re-simulate physics immediately on keystroke
+        }
+    });
+
+    // Custom Input stylistic focus wrapper
+    const customInputWrapper = document.getElementById('customInputWrapper');
+    customInput.addEventListener('focus', function() {
+        customInputWrapper.style.borderColor = '#58a6ff';
+    });
+    customInput.addEventListener('blur', function() {
+        customInputWrapper.style.borderColor = 'rgba(255,255,255,0.2)';
+    });
+
 
     function updateScatterPoint() {
-      var newSize = calculateJSONSize(currentSteps, currentVisuals);
-
-      uiStepValue.innerText = currentSteps;
-      uiVisualValue.innerText = currentVisuals;
-      uiSizeValue.innerText = newSize.toFixed(1) + " KB";
-
       myChart.setOption({
-        series: [
-          {}, // skip 1
-          {
-            name: 'Live Tracker',
-            data: [[currentSteps, currentVisuals, newSize]]
-          }
-        ]
+        series: buildSeriesArray(currentSteps, currentVisuals, maxStepsLimit, maxVisualsLimit)
       });
+
+      if (currentProfile === 'compare') {
+          var hSize = 5 + (2 * currentVisuals) + (0.5 * currentSteps * currentVisuals);
+          var oSize = 5 + (2.5 * currentVisuals) + (0.03 * currentSteps * currentVisuals);
+          uiStepValue.innerText = currentSteps;
+          uiVisualValue.innerText = currentVisuals;
+          uiSizeValue.innerHTML = `<span style="color:#ff4c4c">${hSize.toFixed(1)} KB</span> vs <span style="color:#42f462">${oSize.toFixed(1)} KB</span>`;
+      } else {
+          var newSize = calculateJSONSize(currentSteps, currentVisuals);
+          uiStepValue.innerText = currentSteps;
+          uiVisualValue.innerText = currentVisuals;
+          uiSizeValue.innerText = newSize.toFixed(1) + " KB";
+      }
     }
 
     function updateAxisBounds() {
       uiMaxStepValue.innerText = maxStepsLimit;
       uiMaxVisualValue.innerText = maxVisualsLimit;
 
-      // Make sure the tracker sliders can scale to the new max boundary
       sliderStep.max = maxStepsLimit;
       sliderVisual.max = maxVisualsLimit;
 
-      // Dynamically recalculate the ceiling height mapping for heatmap color graduation
-      var theoreticalHighestJSONSize = calculateJSONSize(maxStepsLimit, maxVisualsLimit);
+      var theoreticalHighestJSONSize = currentProfile === 'compare' 
+        ? (5 + (2 * maxVisualsLimit) + (0.5 * maxStepsLimit * maxVisualsLimit)) 
+        : calculateJSONSize(maxStepsLimit, maxVisualsLimit);
 
-      // Re-render the Surface Equation and the Grid Scalings
       myChart.setOption({
         visualMap: {
+          show: currentProfile !== 'compare',
+          seriesIndex: currentProfile === 'compare' ? [] : [0],
           max: theoreticalHighestJSONSize
         },
-        xAxis3D: {
-          max: maxStepsLimit
-        },
-        yAxis3D: {
-          max: maxVisualsLimit
-        },
-        series: [
-          {
-            equation: {
-              x: { max: maxStepsLimit },
-              y: { max: maxVisualsLimit }
-            }
-          },
-          {} // skip 2
-        ]
+        xAxis3D: { max: maxStepsLimit },
+        yAxis3D: { max: maxVisualsLimit }
       });
 
-      // If dragging limits below current tracker, clamp and drag tracker down
       if (currentSteps > maxStepsLimit) {
         currentSteps = maxStepsLimit;
         sliderStep.value = currentSteps;
@@ -429,32 +525,27 @@
         sliderVisual.value = currentVisuals;
       }
 
-      updateScatterPoint(); // re-eval tracker point boundary constraints visually
+      updateScatterPoint(); 
     }
 
-    // Live Tracker Listeners
     sliderStep.addEventListener('input', function (e) {
       currentSteps = parseFloat(e.target.value);
       updateScatterPoint();
     });
-
     sliderVisual.addEventListener('input', function (e) {
       currentVisuals = parseFloat(e.target.value);
       updateScatterPoint();
     });
 
-    // Axis Limit Listeners
     sliderMaxStep.addEventListener('input', function (e) {
       maxStepsLimit = parseFloat(e.target.value);
       updateAxisBounds();
     });
-
     sliderMaxVisual.addEventListener('input', function (e) {
       maxVisualsLimit = parseFloat(e.target.value);
       updateAxisBounds();
     });
 
-    // Auto-resize
     window.addEventListener('resize', function () {
       myChart.resize();
     });
