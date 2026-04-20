@@ -73,6 +73,7 @@ R1 released on 8 April 2026. R2 released on 14 April 2026. R3 in progress.
 | **Phase 31** | ✅ | BYOK Model Routing — provider-aware tier routing so BYOK users get full routing benefits |
 | **Phase 32** | ✅ | Dev Pipeline Playground — per-stage runner, JSON editor, scene studio (`/dev/pipeline` + `/dev/scene`). Zero prod code changes. Completed April 19, 2026. |
 | **Phase 33** | ✅ | Community Gallery — `/community/gallery` showing all AI-generated scenes via `user_generated_scenes` join (pre-builts naturally excluded, no user data). Sort by recency/popularity, load-more, Navbar link. `/community` base kept for future sub-routes. Completed April 19, 2026. |
+| **Phase 34** | 🔄 | Scene Spec v2 — Canonical `SCENE_SPEC` as single source of truth: `spec.ts` (pure data contract) + `spec.build.ts` (derives Zod schema, AI prompt guide, JSON Schema). Restructures `visuals[]` into `canvas[]` + `activeText` + `hud[]`. Eliminates two-dialect drift, removes dead fields (`duration`, `tags`, `popup.anchor`), enforces discriminated union per visual type. Two-phase: spec-in-isolation first, full integration second. |
 
 ---
 
@@ -719,6 +720,48 @@ _OG Images_
 - "Community" link added to Navbar
 
 **Plan:** [→ phases/phase-33/PLAN.md](phases/phase-33/PLAN.md)
+
+---
+
+### Phase 34 — Scene Spec v2
+
+**Goal:** Establish `SCENE_SPEC` as the single source of truth for all Scene JSON definitions. Eliminate the two-dialect drift between hand-crafted and AI-generated scenes. Restructure `visuals[]` into semantically distinct `canvas[]`, `activeText`, and `hud[]` sections. After this phase: no field can drift — Zod schemas, AI prompt guides, and TypeScript types are all derived from one file.
+
+**Status:** 🔄 In design — implementation not started. April 21, 2026.
+
+**Prerequisite:** Phase 30 ✅ (AI pipeline redesign, ISCL removed) · Phase 32 ✅ (dev pipeline stable)
+
+**Key decisions:**
+- Stay on Zod — no TypeBox, no new schema libs
+- Runtime derivation (no codegen script)
+- Discriminated union per canvas visual type (better errors, faster validation, cleaner AI output)
+- `spec.ts` (pure data constant) + `spec.build.ts` (derivation functions) — two files, no mixing
+- `visuals[]` split into `canvas[]` (data structures) + `activeText` (top-left overlay string) + `hud[]` (top-right label:value pairs, max 3)
+- Remove: `duration` on steps, `tags`, `popup.anchor`, `popup.targetPoint`, `slot` on canvas visuals
+- `items` as canonical field name for array visual (consistent with stack/queue)
+- `bezier-connector`, `straight-arrow`, `data-flow-dot` removed from VisualTypeSchema (zero JSON usage)
+- Fix `dsa-trace` layout derivation in assembly: `code-left-canvas-right` (was `canvas-only`)
+
+**Deliverables:**
+
+*Phase 1 (spec in isolation):*
+- `packages/scene-engine/src/spec.ts` — full spec constant (ROOT_FIELD_SPEC, CANVAS_VISUAL_SPEC, STEP_SPEC, HUD_SPEC, ACTIVE_TEXT_SPEC, POPUP_SPEC)
+- `packages/scene-engine/src/spec.build.ts` — derivation functions (buildCanvasVisualSchema, buildStepSchema, buildSceneSchema, buildPromptGuide, buildJsonSchema)
+- `packages/scene-engine/src/spec.test.ts` — completeness + validation tests
+
+*Phase 2 (full integration):*
+- `schema.ts` + `types.ts` — replaced with spec-derived outputs
+- `ai/schemas.ts` — updated for new step format (canvas/activeText/hud instead of actions)
+- `ai/prompts/builders.ts` — VISUAL_PARAMS_REFERENCE removed, replaced by buildPromptGuide()
+- `ai/assembly.ts` — new schema shape, fixed layout derivation
+- 26 hand-crafted JSON files migrated to v2 format
+- Renderers updated for canvas/activeText/hud sections
+- `public/scene-schema.json` — JSON Schema export for IDE autocomplete
+- Docs updated
+
+**Design:** [→ phases/phase-34/DESIGN.md](phases/phase-34/DESIGN.md)
+
+**Plan:** [→ phases/phase-34/PLAN.md](phases/phase-34/PLAN.md)
 
 ---
 
