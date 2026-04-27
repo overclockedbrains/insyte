@@ -39,8 +39,8 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   const scene = staticScene ?? cachedScene ?? null
 
   if (scene) {
-    const descriptionFromExplanation = scene.explanation?.[0]?.body
-      ? firstSentence(scene.explanation[0].body)
+    const descriptionFromExplanation = scene.steps[0]?.explanation?.body
+      ? firstSentence(scene.steps[0].explanation.body)
       : ''
 
     const description =

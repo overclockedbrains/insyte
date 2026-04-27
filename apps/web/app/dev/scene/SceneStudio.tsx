@@ -2,11 +2,13 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Code2, X, Play, AlertCircle, CheckCircle2, FileCode } from 'lucide-react'
+import { Code2, X, Play, AlertCircle, CheckCircle2, FileCode, RotateCcw } from 'lucide-react'
 import { safeParseScene } from '@insyte/scene-engine'
 import type { Scene } from '@insyte/scene-engine'
 import { useBoundStore } from '@/src/stores/store'
 import { SimulationLayout } from '@/src/engine/SimulationLayout'
+
+const SESSION_KEY = 'dev:scene-studio'
 
 // ─── Live scene renderer (mirrors ScenePageClient StaticScene) ────────────────
 
@@ -33,27 +35,43 @@ function LivePreview({ scene }: { scene: Scene }) {
   return <SimulationLayout scene={scene} />
 }
 
-// ─── Read sessionStorage once (safe for SSR — only runs on client) ────────────
-
-function readSession(): { json: string; openPanel: boolean } {
-  try {
-    const stored = sessionStorage.getItem('dev:scene-studio')
-    if (stored) {
-      sessionStorage.removeItem('dev:scene-studio')
-      return { json: JSON.stringify(JSON.parse(stored), null, 2), openPanel: true }
-    }
-  } catch { /* ignore */ }
-  return { json: '', openPanel: false }
-}
-
 // ─── SceneStudio ──────────────────────────────────────────────────────────────
 
 export function SceneStudio() {
-  const [session] = useState(readSession)
-  const [json, setJson] = useState(session.json)
-  const [panelOpen, setPanelOpen] = useState(session.openPanel)
+  const [json, setJson] = useState('')
+  const [panelOpen, setPanelOpen] = useState(false)
   const [parsedScene, setParsedScene] = useState<Scene | null>(null)
   const [parseErrors, setParseErrors] = useState<string[]>([])
+
+  // Read session only on client after mount to avoid SSR/hydration mismatch
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem(SESSION_KEY)
+      if (stored) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setJson(JSON.stringify(JSON.parse(stored), null, 2))
+        setPanelOpen(true)
+      }
+    } catch { /* ignore */ }
+  }, [])
+
+  // Persist json to session as user types
+  useEffect(() => {
+    try {
+      if (json.trim()) {
+        sessionStorage.setItem(SESSION_KEY, json)
+      } else {
+        sessionStorage.removeItem(SESSION_KEY)
+      }
+    } catch { /* ignore */ }
+  }, [json])
+
+  const handleReset = useCallback(() => {
+    setJson('')
+    setParsedScene(null)
+    setParseErrors([])
+    try { sessionStorage.removeItem(SESSION_KEY) } catch { /* ignore */ }
+  }, [])
 
   const handleRender = useCallback(() => {
     setParseErrors([])
@@ -124,7 +142,7 @@ export function SceneStudio() {
             exit={{ opacity: 0, scale: 0.9 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setPanelOpen(true)}
-            className="fixed bottom-24 right-6 z-40 flex items-center gap-2 rounded-lg glass-panel glow-border px-4 py-3 text-sm font-semibold text-primary shadow-lg cursor-pointer"
+            className="fixed bottom-24 right-6 z-40 flex items-center gap-2 rounded-lg glass-panel px-4 py-3 text-sm font-semibold text-primary shadow-lg cursor-pointer"
           >
             <Code2 className="h-4 w-4" />
             JSON Editor
@@ -144,7 +162,7 @@ export function SceneStudio() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            className="fixed top-20 bottom-20 right-6 z-40 flex w-[560px] max-w-[calc(100vw-3rem)] flex-col glass-panel glow-border rounded-lg shadow-2xl"
+            className="fixed top-20 bottom-20 right-6 z-40 flex w-[560px] max-w-[calc(100vw-3rem)] flex-col glass-panel rounded-lg shadow-2xl"
           >
             {/* Panel header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-outline-variant/20 shrink-0">
@@ -154,6 +172,16 @@ export function SceneStudio() {
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-[11px] text-on-surface-variant/50">⌘ + Enter to render</span>
+                {json.trim() && (
+                  <button
+                    type="button"
+                    onClick={handleReset}
+                    title="Clear editor and reset session"
+                    className="flex h-7 w-7 items-center justify-center rounded text-on-surface-variant/50 hover:bg-surface-container hover:text-on-surface transition-colors cursor-pointer"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" />
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => setPanelOpen(false)}
@@ -210,7 +238,7 @@ export function SceneStudio() {
                   >
                     <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
                     <span className="text-xs font-medium text-primary">
-                      {parsedScene.steps.length} steps · {parsedScene.visuals.length} visuals
+                      {parsedScene.steps.length} steps · {parsedScene.canvas.length} visuals
                     </span>
                   </motion.div>
                 )}

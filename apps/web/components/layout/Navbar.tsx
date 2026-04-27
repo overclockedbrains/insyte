@@ -253,6 +253,17 @@ export function Navbar() {
               >
                 Scene Studio
               </Link>
+              <Link
+                href="/dev/primitives"
+                className={[
+                  'px-3 py-1.5 text-sm font-medium rounded-md transition-colors',
+                  pathname === '/dev/primitives'
+                    ? 'text-on-surface bg-surface-container-high'
+                    : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high',
+                ].join(' ')}
+              >
+                Primitives Showcase
+              </Link>
             </div>
 
             <div className="ml-auto flex items-center gap-3">
@@ -374,9 +385,21 @@ export function Navbar() {
                 <StarIcon className="h-3.5 w-3.5" />
                 GitHub
               </a>
+              <Link
+                href="/dev"
+                className={[
+                  'flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition-colors',
+                  pathname?.startsWith('/dev')
+                    ? 'text-primary bg-primary/10'
+                    : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high',
+                ].join(' ')}
+              >
+                <Terminal className="h-3.5 w-3.5" />
+                Dev
+              </Link>
               <SettingsLink
                 showLabel
-                className="ml-2 flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors rounded-md hover:bg-surface-container-high"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors rounded-md hover:bg-surface-container-high"
               />
               {/* Auth UI */}
               <div className="ml-2">
@@ -425,6 +448,19 @@ export function Navbar() {
                       <StarIcon className="h-4 w-4" />
                       GitHub
                     </a>
+                    <Link
+                      href="/dev"
+                      onClick={() => setMobileOpen(false)}
+                      className={[
+                        'flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-md transition-colors',
+                        pathname?.startsWith('/dev')
+                          ? 'text-primary bg-primary/10'
+                          : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high',
+                      ].join(' ')}
+                    >
+                      <Terminal className="h-4 w-4" />
+                      Dev
+                    </Link>
                     <SettingsLink
                       showLabel
                       onClick={() => setMobileOpen(false)}
@@ -442,7 +478,7 @@ export function Navbar() {
       </nav>
 
       <AnimatePresence>
-                {showShareFallback && (
+        {showShareFallback && (
           <>
             <motion.div
               className="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm"
