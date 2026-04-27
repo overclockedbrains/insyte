@@ -7,59 +7,73 @@ export type {
   SceneType,
   SceneLayout,
   VisualType,
+  CanvasVisual,
   CodeLanguage,
-  Visual,
-  Action,
-  Step,
   Control,
-  ControlType,
-  ExplanationSection,
   Popup,
   Challenge,
   Condition,
   SceneCode,
   VisualState,
   LayoutHint,
-  SlotPosition,
+  HudItem,
+  ActiveText,
+  Step,
+  // Per-type canvas visual aliases
+  LinearVisual,
+  MapVisual,
+  TreeVisual,
+  GraphVisual,
+  GridVisual,
+  SystemDiagramVisual,
+  TreeNode,
 } from './types'
-
-// SceneJSON namespace
-export type { SceneJSON } from './types'
 
 // ─── Zod Schemas ──────────────────────────────────────────────────────────────
 export {
   SceneSchema,
   SceneLayoutSchema,
   SceneTypeSchema,
-  VisualSchema,
-  VisualTypeSchema,
-  ActionSchema,
-  StepSchema,
+  LayoutHintSchema,
   ControlSchema,
-  ControlTypeSchema,
-  ExplanationSectionSchema,
   PopupSchema,
   ChallengeSchema,
   ConditionSchema,
   SceneCodeSchema,
-  LayoutHintSchema,
-  SlotPositionSchema,
-  // Schema-level parse helpers (throw/safe variants)
+  HudItemSchema,
+  ActiveTextSchema,
+  // Schema-level parse helpers (throw/safe variants, no normalization)
   parseScene as parseSceneSchema,
   safeParseScene as safeParseSceneSchema,
 } from './schema'
 
+// ─── Spec builders (for AI pipeline) ─────────────────────────────────────────
+export {
+  buildCanvasVisualSchema,
+  buildStepSchema,
+  buildSceneSchema,
+  buildPromptGuide,
+  buildJsonSchema,
+  // Per-type state schemas (used by apps/web/src/ai/schemas.ts to build typed Stage 2 validation)
+  LinearStateSchema,
+  MapStateSchema,
+  GridStateSchema,
+  ChartStateSchema,
+  TreeStateSchema,
+  GraphStateSchema,
+  SystemDiagramStateSchema,
+  GraphStepCanvasSchema,
+  TreeStepCanvasSchema,
+  SystemDiagramStepCanvasSchema,
+} from './spec.build'
+
 // ─── Parser ───────────────────────────────────────────────────────────────────
 export {
-  // Main API — validates + normalizes in one call
   parseScene,
   safeParseScene,
-  // Utilities
   normalizeScene,
   computeVisualStateAtStep,
-  // Errors
   SceneParseError,
-  // Legacy (deprecated)
   tryParseScene,
 } from './parser'
 
@@ -71,6 +85,7 @@ export type { LayoutResult, PositionedNode, PositionedEdge } from './layout/type
 export {
   applyStepActionsUpTo,
   getVisualStateAtStep,
+  applyOverlaysAtStep,
   computeTopologyAtStep,
   hashTopologyAtStep,
   evaluateCondition,
@@ -93,6 +108,3 @@ export type {
 
 // ─── Runtime ──────────────────────────────────────────────────────────────────
 export { LRUCache } from './runtime'
-
-// ─── ISCL ─────────────────────────────────────────────────────────────────────
-export * from './iscl'
