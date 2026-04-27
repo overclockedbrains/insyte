@@ -16,6 +16,7 @@ const STEPS = [
   { name: 'Build', command: 'pnpm', args: ['build'], color: '\x1b[36m' },   // Cyan
   { name: 'Type Check', command: 'pnpm', args: ['type-check'], color: '\x1b[33m' }, // Yellow
   { name: 'Test', command: 'pnpm', args: ['test'], color: '\x1b[32m' },    // Green
+  { name: 'Validate Scenes', command: 'pnpm', args: ['validate-scenes'], color: '\x1b[36m' }, // Cyan
 ];
 
 // --- Constants & Styles ---

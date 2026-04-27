@@ -1,0 +1,1849 @@
+{
+  "$ref": "#/definitions/InsyteScene",
+  "definitions": {
+    "InsyteScene": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "concept",
+            "dsa-trace",
+            "lld",
+            "hld"
+          ]
+        },
+        "layout": {
+          "type": "string",
+          "enum": [
+            "canvas-only",
+            "code-left-canvas-right",
+            "text-left-canvas-right"
+          ]
+        },
+        "description": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "code": {
+          "type": "object",
+          "properties": {
+            "language": {
+              "type": "string",
+              "enum": [
+                "python",
+                "javascript"
+              ]
+            },
+            "source": {
+              "type": "string"
+            },
+            "highlightByStep": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          },
+          "required": [
+            "language",
+            "source",
+            "highlightByStep"
+          ],
+          "additionalProperties": false
+        },
+        "canvas": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9-]*$"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "layoutHint": {
+                    "type": "string",
+                    "enum": [
+                      "dagre-TB",
+                      "dagre-LR",
+                      "dagre-BT",
+                      "tree-RT",
+                      "linear-H",
+                      "linear-V",
+                      "grid-2d",
+                      "hashmap-buckets",
+                      "radial"
+                    ]
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "array"
+                  },
+                  "initialState": {
+                    "type": "object",
+                    "properties": {
+                      "items": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "value": {},
+                            "highlight": {
+                              "type": "string",
+                              "enum": [
+                                "default",
+                                "active",
+                                "hit",
+                                "insert",
+                                "error"
+                              ]
+                            },
+                            "id": {
+                              "type": "string"
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "required": [
+                      "items"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "id",
+                  "layoutHint",
+                  "type",
+                  "initialState"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9-]*$"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "layoutHint": {
+                    "type": "string",
+                    "enum": [
+                      "dagre-TB",
+                      "dagre-LR",
+                      "dagre-BT",
+                      "tree-RT",
+                      "linear-H",
+                      "linear-V",
+                      "grid-2d",
+                      "hashmap-buckets",
+                      "radial"
+                    ]
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "hashmap"
+                  },
+                  "initialState": {
+                    "type": "object",
+                    "properties": {
+                      "entries": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "key": {
+                              "type": "string"
+                            },
+                            "value": {
+                              "type": "string"
+                            },
+                            "highlight": {
+                              "type": "string",
+                              "enum": [
+                                "default",
+                                "insert",
+                                "hit",
+                                "remove"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "key",
+                            "value"
+                          ],
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "required": [
+                      "entries"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "id",
+                  "layoutHint",
+                  "type",
+                  "initialState"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9-]*$"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "layoutHint": {
+                    "type": "string",
+                    "enum": [
+                      "dagre-TB",
+                      "dagre-LR",
+                      "dagre-BT",
+                      "tree-RT",
+                      "linear-H",
+                      "linear-V",
+                      "grid-2d",
+                      "hashmap-buckets",
+                      "radial"
+                    ]
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "stack"
+                  },
+                  "initialState": {
+                    "type": "object",
+                    "properties": {
+                      "items": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "value": {},
+                            "highlight": {
+                              "type": "string",
+                              "enum": [
+                                "default",
+                                "active",
+                                "pop",
+                                "push"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id"
+                          ],
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "required": [
+                      "items"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "id",
+                  "layoutHint",
+                  "type",
+                  "initialState"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9-]*$"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "layoutHint": {
+                    "type": "string",
+                    "enum": [
+                      "dagre-TB",
+                      "dagre-LR",
+                      "dagre-BT",
+                      "tree-RT",
+                      "linear-H",
+                      "linear-V",
+                      "grid-2d",
+                      "hashmap-buckets",
+                      "radial"
+                    ]
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "queue"
+                  },
+                  "initialState": {
+                    "type": "object",
+                    "properties": {
+                      "items": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "value": {},
+                            "highlight": {
+                              "type": "string",
+                              "enum": [
+                                "default",
+                                "active",
+                                "enqueue",
+                                "dequeue"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id"
+                          ],
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "required": [
+                      "items"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "id",
+                  "layoutHint",
+                  "type",
+                  "initialState"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9-]*$"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "layoutHint": {
+                    "type": "string",
+                    "enum": [
+                      "dagre-TB",
+                      "dagre-LR",
+                      "dagre-BT",
+                      "tree-RT",
+                      "linear-H",
+                      "linear-V",
+                      "grid-2d",
+                      "hashmap-buckets",
+                      "radial"
+                    ]
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "linked-list"
+                  },
+                  "initialState": {
+                    "type": "object",
+                    "properties": {
+                      "nodes": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "value": {},
+                            "highlight": {
+                              "type": "string",
+                              "enum": [
+                                "default",
+                                "active",
+                                "insert",
+                                "delete"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id"
+                          ],
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "required": [
+                      "nodes"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "id",
+                  "layoutHint",
+                  "type",
+                  "initialState"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9-]*$"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "layoutHint": {
+                    "type": "string",
+                    "enum": [
+                      "dagre-TB",
+                      "dagre-LR",
+                      "dagre-BT",
+                      "tree-RT",
+                      "linear-H",
+                      "linear-V",
+                      "grid-2d",
+                      "hashmap-buckets",
+                      "radial"
+                    ]
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "tree"
+                  },
+                  "initialState": {
+                    "type": "object",
+                    "properties": {
+                      "root": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "value": {},
+                              "highlight": {
+                                "type": "string",
+                                "enum": [
+                                  "default",
+                                  "active",
+                                  "found",
+                                  "visited"
+                                ]
+                              },
+                              "left": {
+                                "anyOf": [
+                                  {},
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "right": {
+                                "anyOf": [
+                                  {},
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "root"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "id",
+                  "layoutHint",
+                  "type",
+                  "initialState"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9-]*$"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "layoutHint": {
+                    "type": "string",
+                    "enum": [
+                      "dagre-TB",
+                      "dagre-LR",
+                      "dagre-BT",
+                      "tree-RT",
+                      "linear-H",
+                      "linear-V",
+                      "grid-2d",
+                      "hashmap-buckets",
+                      "radial"
+                    ]
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "recursion-tree"
+                  },
+                  "initialState": {
+                    "type": "object",
+                    "properties": {
+                      "root": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "value": {
+                                "type": "string"
+                              },
+                              "highlight": {
+                                "type": "string",
+                                "enum": [
+                                  "default",
+                                  "active",
+                                  "returned"
+                                ]
+                              },
+                              "children": {
+                                "type": "array",
+                                "items": {}
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "value",
+                              "children"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "root"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "id",
+                  "layoutHint",
+                  "type",
+                  "initialState"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9-]*$"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "layoutHint": {
+                    "type": "string",
+                    "enum": [
+                      "dagre-TB",
+                      "dagre-LR",
+                      "dagre-BT",
+                      "tree-RT",
+                      "linear-H",
+                      "linear-V",
+                      "grid-2d",
+                      "hashmap-buckets",
+                      "radial"
+                    ]
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "graph"
+                  },
+                  "initialState": {
+                    "type": "object",
+                    "properties": {
+                      "nodes": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "label": {
+                              "type": "string"
+                            },
+                            "highlight": {
+                              "type": "string",
+                              "enum": [
+                                "default",
+                                "active",
+                                "visited",
+                                "found"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "label"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "edges": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "from": {
+                              "type": "string"
+                            },
+                            "to": {
+                              "type": "string"
+                            },
+                            "label": {
+                              "type": "string"
+                            },
+                            "highlight": {
+                              "type": "string",
+                              "enum": [
+                                "default",
+                                "active"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "from",
+                            "to"
+                          ],
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "required": [
+                      "nodes",
+                      "edges"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "id",
+                  "layoutHint",
+                  "type",
+                  "initialState"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9-]*$"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "layoutHint": {
+                    "type": "string",
+                    "enum": [
+                      "dagre-TB",
+                      "dagre-LR",
+                      "dagre-BT",
+                      "tree-RT",
+                      "linear-H",
+                      "linear-V",
+                      "grid-2d",
+                      "hashmap-buckets",
+                      "radial"
+                    ]
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "dp-table"
+                  },
+                  "initialState": {
+                    "type": "object",
+                    "properties": {
+                      "cells": {
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "value": {},
+                              "highlight": {
+                                "type": "string",
+                                "enum": [
+                                  "default",
+                                  "active",
+                                  "filled",
+                                  "source"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      }
+                    },
+                    "required": [
+                      "cells"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "id",
+                  "layoutHint",
+                  "type",
+                  "initialState"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9-]*$"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "layoutHint": {
+                    "type": "string",
+                    "enum": [
+                      "dagre-TB",
+                      "dagre-LR",
+                      "dagre-BT",
+                      "tree-RT",
+                      "linear-H",
+                      "linear-V",
+                      "grid-2d",
+                      "hashmap-buckets",
+                      "radial"
+                    ]
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "system-diagram"
+                  },
+                  "initialState": {
+                    "type": "object",
+                    "properties": {
+                      "components": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "label": {
+                              "type": "string"
+                            },
+                            "icon": {
+                              "type": "string",
+                              "enum": [
+                                "server",
+                                "database",
+                                "mobile",
+                                "web",
+                                "compute",
+                                "cloud",
+                                "shield",
+                                "layers",
+                                "zap"
+                              ]
+                            },
+                            "status": {
+                              "type": "string",
+                              "enum": [
+                                "normal",
+                                "active",
+                                "overloaded",
+                                "dead"
+                              ]
+                            },
+                            "sublabel": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "label",
+                            "icon",
+                            "status"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "connections": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "from": {
+                              "type": "string"
+                            },
+                            "to": {
+                              "type": "string"
+                            },
+                            "active": {
+                              "type": "boolean"
+                            },
+                            "style": {
+                              "type": "string",
+                              "enum": [
+                                "solid",
+                                "dashed"
+                              ]
+                            },
+                            "label": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "from",
+                            "to",
+                            "active"
+                          ],
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "required": [
+                      "components",
+                      "connections"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "id",
+                  "layoutHint",
+                  "type",
+                  "initialState"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9-]*$"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "layoutHint": {
+                    "type": "string",
+                    "enum": [
+                      "dagre-TB",
+                      "dagre-LR",
+                      "dagre-BT",
+                      "tree-RT",
+                      "linear-H",
+                      "linear-V",
+                      "grid-2d",
+                      "hashmap-buckets",
+                      "radial"
+                    ]
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "grid"
+                  },
+                  "initialState": {
+                    "type": "object",
+                    "properties": {
+                      "cells": {
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "value": {},
+                              "highlight": {
+                                "type": "string",
+                                "enum": [
+                                  "default",
+                                  "active",
+                                  "visited",
+                                  "wall",
+                                  "path"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      }
+                    },
+                    "required": [
+                      "cells"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "id",
+                  "layoutHint",
+                  "type",
+                  "initialState"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "activeText": {
+          "type": "object",
+          "properties": {
+            "initialValue": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "initialValue"
+          ],
+          "additionalProperties": false
+        },
+        "hud": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]*$"
+              },
+              "label": {
+                "type": "string"
+              },
+              "initialValue": {
+                "type": [
+                  "string",
+                  "number"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "initialValue"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 3
+        },
+        "controls": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "button"
+                  },
+                  "config": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                },
+                "required": [
+                  "id",
+                  "label",
+                  "type"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "toggle"
+                  },
+                  "config": {
+                    "type": "object",
+                    "properties": {
+                      "defaultValue": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "defaultValue"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "id",
+                  "label",
+                  "type",
+                  "config"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "slider"
+                  },
+                  "config": {
+                    "type": "object",
+                    "properties": {
+                      "min": {
+                        "type": "number"
+                      },
+                      "max": {
+                        "type": "number"
+                      },
+                      "step": {
+                        "type": "number"
+                      },
+                      "defaultValue": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "defaultValue"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "id",
+                  "label",
+                  "type",
+                  "config"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "toggle-group"
+                  },
+                  "config": {
+                    "type": "object",
+                    "properties": {
+                      "options": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "defaultValue": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "options",
+                      "defaultValue"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "id",
+                  "label",
+                  "type",
+                  "config"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "index": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "explanation": {
+                "type": "object",
+                "properties": {
+                  "heading": {
+                    "type": "string",
+                    "maxLength": 80
+                  },
+                  "body": {
+                    "type": "string",
+                    "maxLength": 500
+                  },
+                  "callout": {
+                    "type": "string",
+                    "maxLength": 200
+                  }
+                },
+                "required": [
+                  "heading",
+                  "body"
+                ],
+                "additionalProperties": false
+              },
+              "activeText": {
+                "type": "string",
+                "minLength": 1
+              },
+              "hud": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": [
+                    "string",
+                    "number"
+                  ]
+                }
+              },
+              "canvas": {
+                "type": "object",
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "value": {},
+                              "highlight": {
+                                "type": "string",
+                                "enum": [
+                                  "default",
+                                  "active",
+                                  "hit",
+                                  "insert",
+                                  "error"
+                                ]
+                              },
+                              "id": {
+                                "type": "string"
+                              }
+                            },
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "items"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "entries": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "key": {
+                                "type": "string"
+                              },
+                              "value": {
+                                "type": "string"
+                              },
+                              "highlight": {
+                                "type": "string",
+                                "enum": [
+                                  "default",
+                                  "insert",
+                                  "hit",
+                                  "remove"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "key",
+                              "value"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "entries"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "value": {},
+                              "highlight": {
+                                "type": "string",
+                                "enum": [
+                                  "default",
+                                  "active",
+                                  "pop",
+                                  "push"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "items"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "value": {},
+                              "highlight": {
+                                "type": "string",
+                                "enum": [
+                                  "default",
+                                  "active",
+                                  "enqueue",
+                                  "dequeue"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "items"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "nodes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "value": {},
+                              "highlight": {
+                                "type": "string",
+                                "enum": [
+                                  "default",
+                                  "active",
+                                  "insert",
+                                  "delete"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "nodes"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "root": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "value": {},
+                                "highlight": {
+                                  "type": "string",
+                                  "enum": [
+                                    "default",
+                                    "active",
+                                    "found",
+                                    "visited"
+                                  ]
+                                },
+                                "left": {
+                                  "anyOf": [
+                                    {},
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "right": {
+                                  "anyOf": [
+                                    {},
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "id"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "root"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "root": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "value": {
+                                  "type": "string"
+                                },
+                                "highlight": {
+                                  "type": "string",
+                                  "enum": [
+                                    "default",
+                                    "active",
+                                    "returned"
+                                  ]
+                                },
+                                "children": {
+                                  "type": "array",
+                                  "items": {}
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "value",
+                                "children"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "root"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "nodes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "highlight": {
+                                "type": "string",
+                                "enum": [
+                                  "default",
+                                  "active",
+                                  "visited",
+                                  "found"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "label"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "edges": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "from": {
+                                "type": "string"
+                              },
+                              "to": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "highlight": {
+                                "type": "string",
+                                "enum": [
+                                  "default",
+                                  "active"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "from",
+                              "to"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "nodes",
+                        "edges"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "cells": {
+                          "type": "array",
+                          "items": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "value": {},
+                                "highlight": {
+                                  "type": "string",
+                                  "enum": [
+                                    "default",
+                                    "active",
+                                    "filled",
+                                    "source"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "id"
+                              ],
+                              "additionalProperties": false
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "cells"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "components": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "icon": {
+                                "type": "string",
+                                "enum": [
+                                  "server",
+                                  "database",
+                                  "mobile",
+                                  "web",
+                                  "compute",
+                                  "cloud",
+                                  "shield",
+                                  "layers",
+                                  "zap"
+                                ]
+                              },
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "normal",
+                                  "active",
+                                  "overloaded",
+                                  "dead"
+                                ]
+                              },
+                              "sublabel": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "label",
+                              "icon",
+                              "status"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "connections": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "from": {
+                                "type": "string"
+                              },
+                              "to": {
+                                "type": "string"
+                              },
+                              "active": {
+                                "type": "boolean"
+                              },
+                              "style": {
+                                "type": "string",
+                                "enum": [
+                                  "solid",
+                                  "dashed"
+                                ]
+                              },
+                              "label": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "from",
+                              "to",
+                              "active"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "components",
+                        "connections"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "cells": {
+                          "type": "array",
+                          "items": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "value": {},
+                                "highlight": {
+                                  "type": "string",
+                                  "enum": [
+                                    "default",
+                                    "active",
+                                    "visited",
+                                    "wall",
+                                    "path"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "id"
+                              ],
+                              "additionalProperties": false
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "cells"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "index"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "popups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "attachTo": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "showAtStep": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "hideAtStep": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "style": {
+                "type": "string",
+                "enum": [
+                  "info",
+                  "warning",
+                  "success",
+                  "insight"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "attachTo",
+              "text",
+              "showAtStep",
+              "hideAtStep"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "challenges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "predict",
+                  "break-it",
+                  "optimize",
+                  "scenario"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "description",
+              "type"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "complexity": {
+          "type": "object",
+          "properties": {
+            "time": {
+              "type": "string"
+            },
+            "space": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "type",
+        "layout",
+        "canvas",
+        "controls",
+        "steps",
+        "popups"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}
