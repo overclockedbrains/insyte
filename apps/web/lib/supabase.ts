@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { createHash } from 'crypto'
+import { safeParseScene } from '@insyte/scene-engine'
 import type { Scene } from '@insyte/scene-engine'
 import type { Database, Json } from './database.types'
 
@@ -273,7 +274,8 @@ export async function getCachedScene(slug: string): Promise<Scene | null> {
       .maybeSingle()
 
     if (error || !data) return null
-    return data.scene_json as unknown as Scene
+    const parsed = safeParseScene(data.scene_json)
+    return parsed.success ? parsed.scene : null
   } catch {
     return null
   }
