@@ -1,14 +1,13 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import type { SceneGraph, SceneGroup } from '@insyte/scene-engine'
+import type { SceneGroup } from '@insyte/scene-engine'
 import { PrimitiveRegistry } from '@/src/engine/primitives'
 import { getGroupState } from '../helpers'
 import { DEV_BORDERS } from '../constants'
 
 interface CanvasGroupProps {
   group: SceneGroup
-  sceneGraph: SceneGraph
   step: number
   speed: number
 }
@@ -23,10 +22,10 @@ interface CanvasGroupProps {
  * no position FLIP need; per-cell FLIP animations (HashMapViz etc.) use their
  * own internal layoutId scopes and are unaffected.
  */
-export function CanvasGroup({ group, sceneGraph, step, speed }: CanvasGroupProps) {
+export function CanvasGroup({ group, step, speed }: CanvasGroupProps) {
   const PrimitiveComponent = PrimitiveRegistry[group.visualType]
   if (!PrimitiveComponent) return null
-  const state = getGroupState(group, sceneGraph)
+  const state = getGroupState(group)
 
   return (
     <motion.div
@@ -50,6 +49,7 @@ export function CanvasGroup({ group, sceneGraph, step, speed }: CanvasGroupProps
         state={state}
         step={step}
         label={group.label}
+        visual={group.visual}
       />
     </motion.div>
   )

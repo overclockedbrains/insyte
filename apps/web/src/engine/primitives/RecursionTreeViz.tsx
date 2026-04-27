@@ -1,9 +1,8 @@
 /**
- * RecursionTreeViz — Phase 20: computeLayout() from @insyte/scene-engine
- * Phase 27: resolveHighlight() for status-based colors. Stable node IDs.
+ * RecursionTreeViz — layout via computeLayout() from @insyte/scene-engine
  *
- * Positions are computed by the deterministic Reingold-Tilford algorithm
- * (d3-hierarchy) inside the layout engine.
+ * State uses flat node array (nodes[], rootId). highlight field directly
+ * encodes rendering state: active | returned | memoized | default.
  */
 
 'use client'
@@ -18,26 +17,15 @@ import { resolveHighlight } from '../styles/colors'
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface RecursionNode {
   id: string
-  label: string
+  value: string
   result?: string
-  status: 'pending' | 'computing' | 'memoized' | 'complete'
+  highlight?: string
   children?: string[]
 }
 
 interface RecursionTreeState {
   nodes: RecursionNode[]
   rootId: string
-}
-
-/** Map recursion status → semantic highlight token */
-function statusToHighlight(status: RecursionNode['status']): string | undefined {
-  switch (status) {
-    case 'computing': return 'active'
-    case 'complete':  return 'hit'
-    case 'memoized':  return 'mru'
-    case 'pending':
-    default:          return undefined
-  }
 }
 
 // ─── Component ─────────────────────────────────────────────────────────────────
@@ -53,7 +41,7 @@ export function RecursionTreeViz({ id, state, visual }: PrimitiveProps) {
     )
   }
 
-  const resolvedVisual = visual ?? { id, type: 'recursion-tree' as const, initialState: {} }
+  const resolvedVisual = visual ?? { id, type: 'tree' as const, variant: 'recursion', layoutHint: 'tree-RT' as const, initialState: { nodes: [], rootId: '' } }
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const layout = useMemo(
@@ -85,7 +73,7 @@ export function RecursionTreeViz({ id, state, visual }: PrimitiveProps) {
           const sx = wp0.x, sy = wp0.y
           const ex = wp1.x, ey = wp1.y
           const midY = (sy + ey) / 2
-          const isMemoized = rawById.get(edge.to)?.status === 'memoized'
+          const isMemoized = rawById.get(edge.to)?.highlight === 'memoized'
           return (
             <motion.path
               key={edge.id}
@@ -102,17 +90,16 @@ export function RecursionTreeViz({ id, state, visual }: PrimitiveProps) {
         })}
 
         {/* ── Nodes ──
-         * Phase 27: status → semantic highlight token → resolveHighlight colors.
+         * highlight directly encodes rendering state: active | returned | memoized | default.
          * Stable key = posNode.id.
          */}
         {layout.nodes.map((posNode) => {
           const raw = rawById.get(posNode.id)
-          const isMemoized = raw?.status === 'memoized'
+          const isMemoized = raw?.highlight === 'memoized'
           const isRoot     = posNode.id === effectiveRootId
 
-          const highlightToken = statusToHighlight(raw?.status ?? 'pending')
-          const colors = resolveHighlight(highlightToken)
-          const isHighlighted = !!highlightToken
+          const colors = resolveHighlight(raw?.highlight)
+          const isHighlighted = !!raw?.highlight && raw.highlight !== 'default'
 
           return (
             <foreignObject
@@ -145,7 +132,7 @@ export function RecursionTreeViz({ id, state, visual }: PrimitiveProps) {
                   transition={{ duration: 0.2 }}
                 >
                   <div style={{ fontSize: 12, fontFamily: 'monospace', fontWeight: 700, lineHeight: 1.2 }}>
-                    {raw?.label ?? posNode.id}
+                    {raw?.value ?? posNode.id}
                   </div>
                   {raw?.result && (
                     <div style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--color-secondary)', marginTop: 2 }}>

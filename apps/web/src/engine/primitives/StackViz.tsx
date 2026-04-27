@@ -4,28 +4,14 @@ import { resolveHighlight } from '../styles/colors'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface StackItem {
+  id: string
   value: string
-  /** Phase 27: semantic highlight token ('active', 'insert', 'remove', …) */
   highlight?: string
 }
 
 interface StackState {
   /** items[0] = bottom of stack, items[items.length-1] = top */
-  items: (string | StackItem)[]
-  /** Legacy: index-based highlight for backward compatibility */
-  highlight?: number
-}
-
-// ─── Helpers ───────────────────────────────────────────────────────────────────
-
-function normaliseItem(item: string | StackItem, idx: number, highlightIdx: number | undefined): StackItem {
-  if (typeof item === 'string') {
-    return {
-      value: item,
-      highlight: highlightIdx === idx ? 'active' : undefined,
-    }
-  }
-  return item
+  items: StackItem[]
 }
 
 // ─── StackViz ──────────────────────────────────────────────────────────────────
@@ -34,7 +20,7 @@ function normaliseItem(item: string | StackItem, idx: number, highlightIdx: numb
 // flex-col-reverse so pushed frames appear at the top of the container.
 
 export function StackViz({ id, state }: PrimitiveProps) {
-  const { items = [], highlight } = state as StackState
+  const { items = [] } = state as StackState
 
   return (
     <div className="flex flex-col items-center p-4 w-full">
@@ -66,9 +52,8 @@ export function StackViz({ id, state }: PrimitiveProps) {
             )}
 
             {/* flex-col-reverse: items[last] appears at top, items[0] at bottom */}
-            {[...items].reverse().map((rawItem, reversedIdx) => {
+            {[...items].reverse().map((item, reversedIdx) => {
               const originalIdx = items.length - 1 - reversedIdx
-              const item = normaliseItem(rawItem, originalIdx, highlight)
               const colors = resolveHighlight(item.highlight)
               const isHighlighted = !!item.highlight && item.highlight !== 'default'
 

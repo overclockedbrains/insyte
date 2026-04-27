@@ -3,7 +3,7 @@ import type { SceneGraph } from '@insyte/scene-engine'
 /**
  * SceneRenderer interface contract
  *
- * The SceneGraph is the boundary. Everything above it (ISCL, layout engine,
+ * The SceneGraph is the boundary. Everything above it (layout engine,
  * step engine, Zustand stores, playback controls, explanation panel) is
  * renderer-agnostic. Everything below is owned by the renderer implementation.
  *
@@ -15,7 +15,7 @@ import type { SceneGraph } from '@insyte/scene-engine'
  * The renderer team only needs:
  *   - SceneGraph types (this file + @insyte/scene-engine)
  *   - A dev environment that produces a SceneGraph
- *   - No knowledge of AI, ISCL, layout algorithms, or Zustand
+ *   - No knowledge of AI, layout algorithms, or Zustand
  */
 
 // ─── ResolvedPopup ────────────────────────────────────────────────────────────

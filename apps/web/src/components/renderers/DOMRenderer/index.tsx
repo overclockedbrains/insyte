@@ -13,7 +13,7 @@ import { useEdgeAnimations } from './useEdgeAnimations'
  * Thin orchestrator: classifies groups, composes the groups layer and popups
  * layer, and delegates edge draw-on animation to useEdgeAnimations.
  *
- * The SceneGraph is the boundary. Everything above (ISCL, layout engine,
+ * The SceneGraph is the boundary. Everything above (layout engine,
  * step engine, Zustand) is renderer-agnostic. Everything below is owned here.
  *
  * Layers:
@@ -47,7 +47,6 @@ export function DOMRenderer({ sceneGraph, resolvedPopups, step, speed }: SceneRe
             <CanvasGroup
               key={group.id}
               group={group}
-              sceneGraph={sceneGraph}
               step={step}
               speed={speed}
             />

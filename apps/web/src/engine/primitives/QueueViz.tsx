@@ -4,28 +4,14 @@ import { resolveHighlight } from '../styles/colors'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface QueueItem {
+  id: string
   value: string
-  /** Phase 27: semantic highlight token ('active', 'insert', 'remove', …) */
   highlight?: string
 }
 
 interface QueueState {
   /** items[0] = front of queue (dequeued first) */
-  items: (string | QueueItem)[]
-  /** Legacy: index-based highlight for backward compatibility */
-  highlight?: number
-}
-
-// ─── Helpers ───────────────────────────────────────────────────────────────────
-
-function normaliseItem(item: string | QueueItem, idx: number, highlightIdx: number | undefined): QueueItem {
-  if (typeof item === 'string') {
-    return {
-      value: item,
-      highlight: highlightIdx === idx ? 'active' : undefined,
-    }
-  }
-  return item
+  items: QueueItem[]
 }
 
 // ─── QueueViz ──────────────────────────────────────────────────────────────────
@@ -34,7 +20,7 @@ function normaliseItem(item: string | QueueItem, idx: number, highlightIdx: numb
 // Items enter from the right (enqueue) and exit from the left (dequeue).
 
 export function QueueViz({ id, state }: PrimitiveProps) {
-  const { items = [], highlight } = state as QueueState
+  const { items = [] } = state as QueueState
 
   return (
     <div className="flex flex-col items-center p-4 w-full">
@@ -68,8 +54,7 @@ export function QueueViz({ id, state }: PrimitiveProps) {
               </motion.div>
             )}
 
-            {items.map((rawItem, idx) => {
-              const item = normaliseItem(rawItem, idx, highlight)
+            {items.map((item, idx) => {
               const colors = resolveHighlight(item.highlight)
               const isHighlighted = !!item.highlight && item.highlight !== 'default'
 

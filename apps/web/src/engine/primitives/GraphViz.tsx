@@ -17,22 +17,21 @@ import type { PrimitiveProps } from '.'
 import { computeLayout } from '@insyte/scene-engine'
 import { useCanvas } from '../CanvasContext'
 import { resolveHighlight } from '../styles/colors'
+import { WeightedGraphViz } from './WeightedGraphViz'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface GraphNode {
   id: string
   label: string
-  /** Phase 27: semantic highlight token ('active', 'insert', 'remove', …) */
   highlight?: string
-  /** Legacy: raw hex color — kept for backwards compatibility */
-  color?: string
 }
 
 interface GraphEdge {
+  id?: string
   from: string
   to: string
   directed?: boolean
-  highlighted?: boolean
+  highlight?: string
   label?: string
 }
 
@@ -66,11 +65,16 @@ function straightEdgePath(
 }
 
 // ─── Component ─────────────────────────────────────────────────────────────────
-export function GraphViz({ id, state, visual }: PrimitiveProps) {
+export function GraphViz(props: PrimitiveProps) {
+  if (props.visual?.variant === 'weighted') return <WeightedGraphViz {...props} />
+  return <UnweightedGraphViz {...props} />
+}
+
+function UnweightedGraphViz({ id, state, visual }: PrimitiveProps) {
   const { width: canvasW, height: canvasH } = useCanvas()
   const { nodes = [], edges = [] } = state as { nodes: GraphNode[]; edges: GraphEdge[] }
 
-  const resolvedVisual = visual ?? { id, type: 'graph' as const, initialState: {} }
+  const resolvedVisual = visual ?? { id, type: 'graph' as const, layoutHint: 'dagre-TB' as const, initialState: { nodes: [], edges: [] } }
 
   const layout = useMemo(
     () => computeLayout(resolvedVisual, state as Record<string, unknown>, canvasW, canvasH),
@@ -121,7 +125,7 @@ export function GraphViz({ id, state, visual }: PrimitiveProps) {
 
           if (!pathD) return null
 
-          const isHighlight = edge.highlighted
+          const isHighlight = edge.highlight === 'active'
           const color = isHighlight
             ? 'var(--color-secondary)'
             : 'var(--color-outline-variant)'
@@ -155,30 +159,12 @@ export function GraphViz({ id, state, visual }: PrimitiveProps) {
         {layout.nodes.map((posNode) => {
           const raw = rawById.get(posNode.id)
 
-          // Resolve colors: prefer semantic highlight, fall back to legacy raw color
-          let bgColor: string
-          let borderColor: string
-          let textColor: string
-          let shadow: string
-
-          if (raw?.highlight) {
-            const hColors = resolveHighlight(raw.highlight)
-            bgColor     = hColors.bg
-            borderColor = hColors.border
-            textColor   = hColors.text
-            shadow      = `0 0 16px ${hColors.border}60`
-          } else if (raw?.color) {
-            // Legacy raw-color fallback
-            bgColor     = raw.color
-            borderColor = raw.color
-            textColor   = '#000000'
-            shadow      = `0 0 16px ${raw.color}60`
-          } else {
-            bgColor     = 'var(--color-surface-container)'
-            borderColor = 'var(--color-outline-variant)'
-            textColor   = 'var(--color-on-surface)'
-            shadow      = 'none'
-          }
+          const hColors = resolveHighlight(raw?.highlight)
+          const isHighlighted = !!raw?.highlight && raw.highlight !== 'default'
+          const bgColor     = hColors.bg
+          const borderColor = hColors.border
+          const textColor   = hColors.text
+          const shadow      = isHighlighted ? `0 0 16px ${hColors.border}60` : 'none'
 
           return (
             <foreignObject

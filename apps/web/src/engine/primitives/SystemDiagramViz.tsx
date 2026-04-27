@@ -46,7 +46,7 @@ interface SystemConnection {
   from: string
   to: string
   label?: string
-  style?: 'solid' | 'dashed'
+  style?: 'solid' | 'dashed' | 'dotted'
   active?: boolean
 }
 
@@ -107,7 +107,7 @@ export function SystemDiagramViz({ id, state, visual }: PrimitiveProps) {
   const { width: canvasW, height: canvasH } = useCanvas()
   const { components = [], connections = [] } = state as SystemDiagramState
 
-  const resolvedVisual = visual ?? { id, type: 'system-diagram' as const, initialState: {} }
+  const resolvedVisual = visual ?? { id, type: 'system-diagram' as const, layoutHint: 'dagre-LR' as const, initialState: { components: [], connections: [] } }
 
   const layout = useMemo(
     () => computeLayout(resolvedVisual, state as Record<string, unknown>, canvasW, canvasH),
@@ -156,6 +156,7 @@ export function SystemDiagramViz({ id, state, visual }: PrimitiveProps) {
           if (!pathD) return null
 
           const isDashed  = conn.style === 'dashed'
+          const isDotted  = conn.style === 'dotted'
           const isActive  = !!conn.active
           const strokeColor = isActive ? 'var(--color-secondary)' : 'var(--color-outline-variant)'
           const midX = (fromNode.x + toNode.x) / 2
@@ -168,7 +169,7 @@ export function SystemDiagramViz({ id, state, visual }: PrimitiveProps) {
                 fill="none"
                 stroke={strokeColor}
                 strokeWidth={isActive ? 2.5 : 1.8}
-                strokeDasharray={isActive ? '8 5' : isDashed ? '6 4' : undefined}
+                strokeDasharray={isActive ? '8 5' : isDashed ? '6 4' : isDotted ? '2 4' : undefined}
                 markerEnd={isActive ? `url(#${idBase}-arrow-active)` : `url(#${idBase}-arrow)`}
                 style={{
                   filter: isActive ? 'drop-shadow(0 0 5px var(--color-secondary))' : 'none',

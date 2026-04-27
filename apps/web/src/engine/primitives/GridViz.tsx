@@ -1,11 +1,12 @@
 import { motion } from 'framer-motion'
 import type { PrimitiveProps } from '.'
+import { DPTableViz } from './DPTableViz'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
-type CellState = 'empty' | 'wall' | 'visited' | 'path' | 'start' | 'end' | 'active'
+type PathfindingHighlight = 'default' | 'active' | 'visited' | 'wall' | 'path' | 'start' | 'end'
 
 interface GridCell {
-  state: CellState
+  highlight?: string
   value?: string | number
 }
 
@@ -23,17 +24,9 @@ interface GridState {
 // for brief flashes). Using resolveHighlight() here makes land/water
 // indistinguishable, so we maintain a dedicated color table at appropriate
 // opacity levels.
-//
-//   empty    → dark resting surface
-//   wall     → very dark / blocked (water, barrier)
-//   start    → green ~40% opacity  (unvisited land — clearly visible as "land")
-//   visited  → cyan ~25% opacity   (flood-filled / explored land)
-//   active   → cyan ~40% opacity   (currently active DFS cell)
-//   path     → green ~55% opacity  (solution path — most vivid)
-//   end      → amber ~35% opacity  (target destination)
 
-const GRID_CELL_COLORS: Record<CellState, { bg: string; border: string; text: string; shadow: string }> = {
-  empty:   { bg: '#19191f',                    border: '#48474d',  text: '#6b7280', shadow: 'none' },
+const GRID_CELL_COLORS: Record<PathfindingHighlight, { bg: string; border: string; text: string; shadow: string }> = {
+  default: { bg: '#19191f',                    border: '#48474d',  text: '#6b7280', shadow: 'none' },
   wall:    { bg: '#0c0c14',                    border: '#1c1c26',  text: '#2a2a38', shadow: 'none' },
   start:   { bg: 'rgba(34, 197, 94, 0.40)',    border: '#22c55e',  text: '#e2e8f0', shadow: '0 0 10px rgba(34,197,94,0.30)' },
   visited: { bg: 'rgba(58, 223, 250, 0.22)',   border: '#3adffa',  text: '#3adffa', shadow: '0 0 8px rgba(58,223,250,0.20)' },
@@ -42,16 +35,21 @@ const GRID_CELL_COLORS: Record<CellState, { bg: string; border: string; text: st
   end:     { bg: 'rgba(245, 158, 11, 0.35)',   border: '#f59e0b',  text: '#f59e0b', shadow: '0 0 10px rgba(245,158,11,0.30)' },
 }
 
-function resolveCellColors(cellState: CellState): { bg: string; border: string; text: string; shadow: string } {
-  return GRID_CELL_COLORS[cellState] ?? GRID_CELL_COLORS.empty
+function resolveCellColors(highlight: string | undefined): { bg: string; border: string; text: string; shadow: string } {
+  return GRID_CELL_COLORS[(highlight as PathfindingHighlight) ?? 'default'] ?? GRID_CELL_COLORS.default
 }
 
 // ─── GridViz ───────────────────────────────────────────────────────────────────
-//
-// Phase 27: resolveHighlight() maps grid cell states to the shared semantic
-// color system. Wall cells keep their structural dark style.
 
-export function GridViz({ id, state }: PrimitiveProps) {
+export function GridViz(props: PrimitiveProps) {
+  // Route dp variant to its dedicated renderer
+  if (props.visual?.variant === 'dp') {
+    return <DPTableViz {...props} />
+  }
+  return <PathfindingGridViz {...props} />
+}
+
+function PathfindingGridViz({ id, state }: PrimitiveProps) {
   const { rows, cols, cells = [], currentCell } = state as GridState
 
   return (
@@ -62,11 +60,11 @@ export function GridViz({ id, state }: PrimitiveProps) {
           <div key={`gr-${rIdx}`} className="flex gap-1.5">
             {Array.from({ length: cols }).map((_, cIdx) => {
               const cell      = cells[rIdx]?.[cIdx]
-              const cellState = (cell?.state ?? 'empty') as CellState
+              const highlight = cell?.highlight
               const value     = cell?.value
               const isCurrent = currentCell?.row === rIdx && currentCell?.col === cIdx
 
-              const { bg, border, text, shadow } = resolveCellColors(cellState)
+              const { bg, border, text, shadow } = resolveCellColors(highlight)
 
               return (
                 <div key={`gc-${rIdx}-${cIdx}`} className="relative w-9 h-9">

@@ -15,6 +15,8 @@ import type { PrimitiveProps } from '.'
 import { computeLayout } from '@insyte/scene-engine'
 import { useCanvas } from '../CanvasContext'
 import { resolveHighlight } from '../styles/colors'
+import { RecursionTreeViz } from './RecursionTreeViz'
+import { TrieViz } from './TrieViz'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface TreeNode {
@@ -30,7 +32,13 @@ interface TreeState {
 }
 
 // ─── Component ─────────────────────────────────────────────────────────────────
-export function TreeViz({ id, state, visual }: PrimitiveProps) {
+export function TreeViz(props: PrimitiveProps) {
+  if (props.visual?.variant === 'recursion') return <RecursionTreeViz {...props} />
+  if (props.visual?.variant === 'trie')      return <TrieViz {...props} />
+  return <BinaryTreeViz {...props} />
+}
+
+function BinaryTreeViz({ id, state, visual }: PrimitiveProps) {
   const { width: canvasW, height: canvasH } = useCanvas()
   const { nodes = [], rootId } = state as TreeState
 
@@ -42,7 +50,7 @@ export function TreeViz({ id, state, visual }: PrimitiveProps) {
     )
   }
 
-  const resolvedVisual = visual ?? { id, type: 'tree' as const, initialState: {} }
+  const resolvedVisual = visual ?? { id, type: 'tree' as const, layoutHint: 'dagre-TB' as const, initialState: { nodes: [], rootId: '' } }
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const layout = useMemo(

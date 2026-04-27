@@ -5,11 +5,11 @@ import { ArrayViz } from '../ArrayViz'
 describe('ArrayViz primitive', () => {
   it('renders standard cells without crashing', () => {
     const state = {
-      cells: [
-        { value: 10 },
-        { value: 20 },
-        { value: 30 }
-      ]
+      items: [
+        { id: 'i0', value: 10 },
+        { id: 'i1', value: 20 },
+        { id: 'i2', value: 30 },
+      ],
     }
 
     const { container } = render(<ArrayViz id="test-arr" state={state} step={0} />)
@@ -20,12 +20,12 @@ describe('ArrayViz primitive', () => {
 
   it('renders pointers alongside cells', () => {
     const state = {
-      cells: [{ value: 99 }],
-      pointers: [{ index: 0, label: 'i' }]
+      items: [{ id: 'i0', value: 99 }],
+      pointers: [{ index: 0, label: 'i' }],
     }
 
     const { container } = render(<ArrayViz id="test-arr" state={state} step={0} />)
     expect(container.textContent).toContain('99')
-    expect(container.textContent).toContain('i') // Pointer label should be visible
+    expect(container.textContent).toContain('i')
   })
 })

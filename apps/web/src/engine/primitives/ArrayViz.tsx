@@ -3,13 +3,14 @@ import type { PrimitiveProps } from '.'
 import { resolveHighlight } from '../styles/colors'
 
 // ─── State ────────────────────────────────────────────────────────────────────
-interface CellItem {
+interface LinearItem {
+  id?: string
   value: string | number
   highlight?: string
 }
 
-interface ArrayState {
-  cells: CellItem[]
+interface LinearState {
+  items: LinearItem[]
   pointers?: { index: number; label: string; color?: string }[]
   windowHighlight?: { start: number; end: number }
 }
@@ -20,111 +21,124 @@ interface ArrayState {
 // in-place (no remount). layoutId enables FLIP when the array grows/shrinks.
 
 export function ArrayViz({ id, state }: PrimitiveProps) {
-  const { cells = [], pointers = [], windowHighlight } = state as ArrayState
+  const { items = [], pointers = [], windowHighlight } = state as LinearState
+
+  const hasPointers = pointers.length > 0
+
+  // Helper to find pointer(s) at a given index
+  const pointersAt = (idx: number) => pointers.filter(p => p.index === idx)
 
   return (
     <div className="relative flex flex-col items-center justify-center p-4 w-full">
+      <div className="relative flex flex-col items-center justify-center p-4 border border-outline-variant/20 rounded-2xl shadow-md bg-surface-container-low min-w-[160px]">
 
-      {/* Window highlight bracket */}
-      {windowHighlight && (
-        <motion.div
-          className="absolute h-16 rounded-xl border-2 pointer-events-none"
-          style={{
-            borderColor: 'rgba(183, 159, 255, 0.4)',
-            backgroundColor: 'rgba(183, 159, 255, 0.1)',
-          }}
-          initial={false}
-          animate={{
-            left: `calc(50% - ${(cells.length * 56) / 2}px + ${windowHighlight.start * 56}px - 4px)`,
-            width: `${(windowHighlight.end - windowHighlight.start + 1) * 56 + 8}px`,
-          }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        />
-      )}
 
-      {/* Cells
-       * key = "${id}-slot-${idx}" (slot identity, not value).
-       * When the value at slot i changes, the div stays mounted and animates
-       * backgroundColor / borderColor in-place. No remount = no flash.
-       * layout (not layoutId) gives FLIP for array resize without triggering
-       * FM's shared-element crossfade, which applies opacity:0 on entering.
-       */}
-      <div className="flex gap-2 relative z-10">
-        {cells.map((cell, idx) => {
-          const colors = resolveHighlight(cell.highlight)
-          const isHighlighted = !!cell.highlight && cell.highlight !== 'default'
-          return (
+
+        {/* Pointer labels above cells — one column per slot */}
+        {hasPointers && (
+          <div className="flex gap-2 mb-2 relative z-10 items-end">
+            {items.map((_, idx) => {
+              const slotPtrs = pointersAt(idx)
+              return (
+                <div
+                  key={`${id}-ptrtop-${idx}`}
+                  className="min-w-[48px] flex flex-col items-center justify-end"
+                >
+                  {slotPtrs.map(ptr => (
+                    <motion.div
+                      key={ptr.label}
+                      layout
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex flex-col items-center"
+                    >
+                      <span
+                        className="text-[10px] font-mono font-bold uppercase tracking-widest leading-none"
+                        style={{ color: ptr.color ?? 'var(--color-primary)' }}
+                      >
+                        {ptr.label}
+                      </span>
+                      {/* Downward arrow */}
+                      <svg
+                        width="14" height="14" viewBox="0 0 24 24" fill="none"
+                        className="mt-0.5"
+                        style={{ color: ptr.color ?? 'var(--color-primary)' }}
+                      >
+                        <path
+                          d="M12 4v16m0 0l-6-6m6 6l6-6"
+                          stroke="currentColor"
+                          strokeWidth="3"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </motion.div>
+                  ))}
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Items — window highlight bracket sits inside here so it positions relative to the cells, not the container */}
+        <div className="flex gap-2 relative z-10">
+          {windowHighlight && (
             <motion.div
-              key={`${id}-slot-${idx}`}
-              layout
-              className="min-w-[48px] h-12 border flex items-center justify-center rounded-md relative"
-              initial={false}
-              animate={{
-                backgroundColor: colors.bg,
-                borderColor: colors.border,
-                boxShadow: isHighlighted ? `0 0 8px ${colors.border}60` : 'none',
+              className="absolute rounded-2xl border-2 pointer-events-none"
+              style={{
+                borderColor: 'rgba(183, 159, 255, 0.45)',
+                backgroundColor: 'rgba(183, 159, 255, 0.07)',
+                top: '-6px',
+                bottom: '-6px',
+                zIndex: 0,
               }}
-              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            >
-              <span className="viz-label-primary" style={{ color: colors.text }}>
-                {cell.value}
-              </span>
-            </motion.div>
-          )
-        })}
-      </div>
-
-      {/* Index labels */}
-      {cells.length > 0 && (
-        <div className="flex gap-2 mt-1 relative z-10">
-          {cells.map((_, idx) => (
-            <div
-              key={`${id}-idx-${idx}`}
-              className="min-w-[48px] flex items-center justify-center"
-            >
-              <span className="viz-index-label">{idx}</span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Pointers (e.g. i, j, lo, hi) */}
-      {pointers.length > 0 && (
-        <div className="relative w-full h-12 mt-2">
-          {pointers.map((ptr) => (
-            <motion.div
-              key={`${id}-ptr-${ptr.label}`}
-              layout
-              className="absolute top-0 flex flex-col items-center justify-start"
               initial={false}
               animate={{
-                left: `calc(50% - ${(cells.length * 56) / 2}px + ${ptr.index * 56 + 24}px)`,
-                x: '-50%',
+                left: `${windowHighlight.start * 56 - 4}px`,
+                width: `${(windowHighlight.end - windowHighlight.start + 1) * 56}px`,
               }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            >
-              <svg
-                width="12" height="12" viewBox="0 0 24 24" fill="none"
-                style={{ color: ptr.color ?? 'var(--color-primary)' }}
+            />
+          )}
+          {items.map((item, idx) => {
+            const colors = resolveHighlight(item.highlight)
+            const isHighlighted = !!item.highlight && item.highlight !== 'default'
+            return (
+              <motion.div
+                key={`${id}-slot-${idx}`}
+                layout
+                className="min-w-[48px] h-12 border flex items-center justify-center rounded-md relative"
+                initial={false}
+                animate={{
+                  backgroundColor: colors.bg,
+                  borderColor: colors.border,
+                  boxShadow: isHighlighted ? `0 0 8px ${colors.border}60` : 'none',
+                }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
               >
-                <path
-                  d="M12 4L12 20M12 4L6 10M12 4L18 10"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <span
-                className="mt-1 viz-index-label uppercase font-bold"
-                style={{ color: ptr.color ?? 'var(--color-primary)' }}
-              >
-                {ptr.label}
-              </span>
-            </motion.div>
-          ))}
+                <span className="viz-label-primary" style={{ color: colors.text }}>
+                  {item.value}
+                </span>
+              </motion.div>
+            )
+          })}
         </div>
-      )}
+
+        {/* Index labels below cells */}
+        {items.length > 0 && (
+          <div className="flex gap-2 mt-1.5 relative z-10">
+            {items.map((_, idx) => (
+              <div
+                key={`${id}-idx-${idx}`}
+                className="min-w-[48px] flex items-center justify-center"
+              >
+                <span className="viz-index-label">{idx}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
+
