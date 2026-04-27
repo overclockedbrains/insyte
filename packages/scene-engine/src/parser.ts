@@ -1,76 +1,6 @@
 import { SceneSchema } from './schema'
-import type { Scene, Visual, VisualState } from './types'
+import type { Scene, VisualState } from './types'
 import { ZodError } from 'zod'
-
-// ─── Migration helpers ────────────────────────────────────────────────────────
-
-/**
- * Convert legacy Condition format { control, equals } → { type: 'control-toggle', controlId, value }.
- * Runs as part of visual migration before schema validation.
- */
-function migrateCondition(cond: unknown): unknown {
-  if (!cond || typeof cond !== 'object' || Array.isArray(cond)) return cond
-  const c = cond as Record<string, unknown>
-  if ('control' in c && !('type' in c)) {
-    return { type: 'control-toggle', controlId: c['control'], value: c['equals'] }
-  }
-  return cond
-}
-
-/**
- * Silently drops the legacy `position` field from a visual if present.
- * Also drops `x`/`y` from node arrays inside initialState (graph, tree,
- * recursion-tree, system-diagram use "nodes" or "components").
- * Migrates legacy Condition format { control, equals } to the new discriminated union.
- * Runs before schema validation so old JSONs parse cleanly during the transition.
- */
-function stripLegacyPositions(raw: Record<string, unknown>): Record<string, unknown> {
-  // Migrate legacy showWhen on popups
-  const popups = raw['popups']
-  const migratedPopups = Array.isArray(popups)
-    ? popups.map((p: unknown) => {
-        if (!p || typeof p !== 'object') return p
-        const popup = p as Record<string, unknown>
-        return popup['showWhen']
-          ? { ...popup, showWhen: migrateCondition(popup['showWhen']) }
-          : popup
-      })
-    : popups
-
-  const visuals = raw['visuals']
-  if (!Array.isArray(visuals)) return { ...raw, popups: migratedPopups }
-  return {
-    ...raw,
-    popups: migratedPopups,
-    visuals: visuals.map((v: unknown) => {
-      if (!v || typeof v !== 'object') return v
-      const visual = v as Record<string, unknown>
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { position, ...rest } = visual
-
-      // Migrate legacy showWhen condition format
-      const migratedRest: typeof rest = rest['showWhen']
-        ? { ...rest, showWhen: migrateCondition(rest['showWhen']) }
-        : rest
-
-      // Strip x/y from node/component arrays inside initialState
-      const initialState = migratedRest['initialState']
-      if (initialState && typeof initialState === 'object') {
-        const state = initialState as Record<string, unknown>
-        const stripped: Record<string, unknown> = { ...state }
-        for (const key of ['nodes', 'components']) {
-          if (Array.isArray(state[key])) {
-            stripped[key] = (state[key] as Array<Record<string, unknown>>).map(
-              ({ x: _x, y: _y, ...node }) => node,
-            )
-          }
-        }
-        return { ...migratedRest, initialState: stripped }
-      }
-      return migratedRest
-    }),
-  }
-}
 
 // ─── Errors ───────────────────────────────────────────────────────────────────
 
@@ -88,31 +18,29 @@ export class SceneParseError extends Error {
 
 /**
  * Fills in defaults and ensures arrays are never undefined.
- * Also sorts steps by index and reassigns sequential indices starting from 0.
+ * Sorts steps by index and reassigns sequential 1-based indices.
+ * Normalizes code.highlightByStep to steps.length + 1 (step 0 + all steps).
  */
 export function normalizeScene(raw: Scene): Scene {
-  // Sort steps by index and re-number sequentially from 0
   const steps = [...raw.steps]
     .sort((a, b) => a.index - b.index)
-    .map((step, i) => ({ ...step, index: i }))
+    .map((step, i) => ({ ...step, index: i + 1 }))
 
-  // Normalize code.highlightByStep to match step count
   let code = raw.code
   if (code) {
+    const needed = steps.length + 1 // step 0 (initial state) + n animation steps
     const highlights = [...code.highlightByStep]
-    // Pad (repeat last value) or trim to match step count
-    while (highlights.length < steps.length) {
+    while (highlights.length < needed) {
       highlights.push(highlights[highlights.length - 1] ?? 0)
     }
-    code = { ...code, highlightByStep: highlights.slice(0, steps.length) }
+    code = { ...code, highlightByStep: highlights.slice(0, needed) }
   }
 
   return {
     ...raw,
-    visuals: raw.visuals ?? [],
+    canvas: raw.canvas ?? [],
     steps,
     controls: raw.controls ?? [],
-    explanation: raw.explanation ?? [],
     popups: raw.popups ?? [],
     challenges: raw.challenges ?? [],
     code,
@@ -122,38 +50,26 @@ export function normalizeScene(raw: Scene): Scene {
 // ─── computeVisualStateAtStep ─────────────────────────────────────────────────
 
 /**
- * Applies all actions targeting a specific visual from step 0 up to (and
- * including) stepIndex, starting from the visual's initialState.
+ * Returns the full state of a canvas visual at a given step index.
+ * stepIndex=0 → initialState. stepIndex=N → applies all canvas updates up to step N.
  *
- * This is a pure function with no side effects — safe to call repeatedly.
- *
- * New universal format: each action.params is the complete visual state at
- * that step — a shallow merge of params onto the running state is sufficient.
- *
- * Legacy format (action.action present) is also handled for backwards
- * compatibility with any scenes not yet migrated to Phase 19 format.
+ * Each step.canvas[id] is a FULL STATE SNAPSHOT, so the last snapshot wins.
  */
 export function computeVisualStateAtStep(
   scene: Scene,
   visualId: string,
   stepIndex: number,
 ): VisualState {
-  const visual = scene.visuals.find((v: Visual) => v.id === visualId)
+  const visual = scene.canvas.find(v => v.id === visualId)
   if (!visual) return {}
 
-  // Start from the visual's initial state (spread to avoid mutation)
-  let state: VisualState =
-    visual.initialState !== null && typeof visual.initialState === 'object'
-      ? { ...(visual.initialState as Record<string, unknown>) }
-      : {}
+  let state: VisualState = { ...(visual.initialState as Record<string, unknown>) }
 
-  // Apply each action in order up to stepIndex
-  const stepsUpTo = scene.steps.filter((s) => s.index <= stepIndex)
-  for (const step of stepsUpTo) {
-    for (const action of step.actions) {
-      if (action.target !== visualId) continue
-      // Universal format: shallow-merge params directly
-      state = { ...state, ...action.params }
+  for (const step of scene.steps) {
+    if (step.index > stepIndex) break
+    const update = step.canvas?.[visualId]
+    if (update) {
+      state = { ...(update as Record<string, unknown>) }
     }
   }
 
@@ -164,16 +80,10 @@ export function computeVisualStateAtStep(
 
 /**
  * Validates and normalizes raw unknown input as a Scene.
- * Applies legacy migration shims (strips position/x/y) before validation.
  * Throws SceneParseError if validation fails.
  */
 export function parseScene(raw: unknown): Scene {
-  // Apply migration shims to strip legacy position/xy fields before validation
-  const migrated =
-    raw && typeof raw === 'object' && !Array.isArray(raw)
-      ? stripLegacyPositions(raw as Record<string, unknown>)
-      : raw
-  const result = SceneSchema.safeParse(migrated)
+  const result = SceneSchema.safeParse(raw)
   if (!result.success) {
     throw new SceneParseError(
       `Invalid Scene JSON: ${result.error.issues.length} validation error(s)`,
@@ -185,18 +95,12 @@ export function parseScene(raw: unknown): Scene {
 
 /**
  * Safely validates and normalizes raw input without throwing.
- * Applies legacy migration shims (strips position/x/y) before validation.
  * Returns { success: true, scene } or { success: false, error }.
  */
 export function safeParseScene(
   raw: unknown,
 ): { success: true; scene: Scene } | { success: false; error: ZodError } {
-  // Apply migration shims to strip legacy position/xy fields before validation
-  const migrated =
-    raw && typeof raw === 'object' && !Array.isArray(raw)
-      ? stripLegacyPositions(raw as Record<string, unknown>)
-      : raw
-  const result = SceneSchema.safeParse(migrated)
+  const result = SceneSchema.safeParse(raw)
   if (!result.success) {
     return { success: false, error: result.error }
   }

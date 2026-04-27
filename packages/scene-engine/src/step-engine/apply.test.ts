@@ -1,67 +1,71 @@
 import { describe, it, expect } from 'vitest'
 import { applyStepActionsUpTo, getVisualStateAtStep } from './apply'
-import type { Visual, Step } from '../types'
+import type { CanvasVisual, Step } from '../types'
 
 describe('step-engine apply', () => {
-  const mockVisuals: Visual[] = [
+  const mockCanvas: CanvasVisual[] = [
     {
-      id: 'v1',
-      type: 'array',
-      initialState: { cells: [] }
+      id: 'arr',
+      type: 'linear',
+      variant: 'array',
+      layoutHint: 'linear-H',
+      initialState: { items: [] },
     },
     {
-      id: 'v2',
-      type: 'text-badge',
-      initialState: { text: "Init" }
-    }
+      id: 'seen',
+      type: 'map',
+      layoutHint: 'hashmap-buckets',
+      initialState: { entries: [] },
+    },
   ]
 
   const mockSteps: Step[] = [
     {
-      index: 0,
-      actions: [
-        { target: 'v1', params: { cells: [1, 2] } }
-      ]
+      index: 1,
+      explanation: { heading: 'Step 1', body: 'First step' },
+      canvas: {
+        arr: { items: [{ id: 'i0', value: 2, highlight: 'active' }] },
+      },
     },
     {
-      index: 1,
-      actions: [
-        { target: 'v1', params: { cells: [1, 2, 3] } },
-        { target: 'v2', params: { text: "Running" } }
-      ]
-    }
+      index: 2,
+      explanation: { heading: 'Step 2', body: 'Second step' },
+      canvas: {
+        arr: { items: [{ id: 'i0', value: 2 }, { id: 'i1', value: 7, highlight: 'active' }] },
+        seen: { entries: [{ id: 'e0', key: '2', value: '0', highlight: 'insert' }] },
+      },
+    },
   ]
 
   describe('applyStepActionsUpTo', () => {
-    it('applies up to step 0', () => {
-      const state = applyStepActionsUpTo(mockVisuals, mockSteps, 0)
-      
-      // v1 was modified in step 0
-      expect(state.get('v1')).toEqual({ cells: [1, 2] })
-      // v2 shouldn't be modified until step 1, retains initial
-      expect(state.get('v2')).toEqual({ text: 'Init' })
+    it('returns initialStates at step 0', () => {
+      const state = applyStepActionsUpTo(mockCanvas, mockSteps, 0)
+      expect(state.get('arr')).toEqual({ items: [] })
+      expect(state.get('seen')).toEqual({ entries: [] })
     })
 
-    it('applies up to step 1 (fully merged state)', () => {
-      const state = applyStepActionsUpTo(mockVisuals, mockSteps, 1)
-      
-      expect(state.get('v1')).toEqual({ cells: [1, 2, 3] })
-      expect(state.get('v2')).toEqual({ text: 'Running' })
+    it('applies step 1 canvas snapshot', () => {
+      const state = applyStepActionsUpTo(mockCanvas, mockSteps, 1)
+      expect(state.get('arr')).toEqual({ items: [{ id: 'i0', value: 2, highlight: 'active' }] })
+      expect(state.get('seen')).toEqual({ entries: [] })
     })
 
-    it('handles out of bounds step correctly (caps at limits)', () => {
-      const state = applyStepActionsUpTo(mockVisuals, mockSteps, 99)
-      
-      // Should equal state at max valid step (step 1)
-      expect(state.get('v1')).toEqual({ cells: [1, 2, 3] })
-      expect(state.get('v2')).toEqual({ text: 'Running' })
+    it('applies step 2 canvas snapshots', () => {
+      const state = applyStepActionsUpTo(mockCanvas, mockSteps, 2)
+      expect(state.get('arr')).toEqual({ items: [{ id: 'i0', value: 2 }, { id: 'i1', value: 7, highlight: 'active' }] })
+      expect((state.get('seen') as any).entries).toHaveLength(1)
+    })
+
+    it('handles out-of-bounds step (returns last known state)', () => {
+      const state = applyStepActionsUpTo(mockCanvas, mockSteps, 99)
+      expect(state.get('arr')).toEqual({ items: [{ id: 'i0', value: 2 }, { id: 'i1', value: 7, highlight: 'active' }] })
     })
   })
 
   describe('getVisualStateAtStep', () => {
-    it('retrieves specific visual state correctly', () => {
-      const state = getVisualStateAtStep(mockVisuals[0]!, mockSteps, 1)
-      expect(state).toEqual({ cells: [1, 2, 3] })
+    it('returns state for a specific visual', () => {
+      const state = getVisualStateAtStep(mockCanvas[0]!, mockSteps, 1)
+      expect(state).toEqual({ items: [{ id: 'i0', value: 2, highlight: 'active' }] })
     })
   })
 })

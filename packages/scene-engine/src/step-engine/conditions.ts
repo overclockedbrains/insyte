@@ -1,18 +1,16 @@
-import type { Condition, Step } from '../types'
+import type { Condition } from '../types'
 
 /**
  * Evaluate a showWhen condition at a given step index.
- * Returns true if the visual should be visible at this step.
+ * Returns true if the element should be visible at this step.
  *
  * Note on `control-toggle`: toggle state is driven by user interaction (PlaybackStore),
  * not by step index — so the step engine returns `true` as the structural default.
  * The renderer applies the actual toggle value as a final visibility filter.
- * This keeps the step engine pure (no Zustand dependency).
  */
 export function evaluateCondition(
   condition: Condition,
-  _steps: Step[],
-  stepIndex: number
+  stepIndex: number,
 ): boolean {
   switch (condition.type) {
     case 'step-range':
@@ -25,7 +23,7 @@ export function evaluateCondition(
       return stepIndex < condition.before
 
     case 'control-toggle':
-      return true  // overridden by PlaybackStore control state at render time
+      return true
 
     case 'always':
     default:

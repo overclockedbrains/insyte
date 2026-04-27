@@ -1,4 +1,4 @@
-export { applyStepActionsUpTo, getVisualStateAtStep } from './apply'
+export { applyStepActionsUpTo, getVisualStateAtStep, applyOverlaysAtStep } from './apply'
 export { computeTopologyAtStep, hashTopologyAtStep } from './topology'
 export { evaluateCondition } from './conditions'
 export { validateStepSequence } from './validation'

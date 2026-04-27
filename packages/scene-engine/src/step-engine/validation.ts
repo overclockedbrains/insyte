@@ -1,4 +1,4 @@
-import type { Visual, Step } from '../types'
+import type { CanvasVisual, Step } from '../types'
 
 export interface StepValidationResult {
   ok: boolean
@@ -7,32 +7,33 @@ export interface StepValidationResult {
 
 /**
  * Validate step sequence integrity at load time — before any rendering occurs.
- * Catches structural errors that would otherwise surface as silent runtime bugs.
+ * Steps must be 1-based with sequential indices (1, 2, 3…).
+ * Canvas update targets must reference declared canvas visual IDs.
  */
 export function validateStepSequence(
-  visuals: Visual[],
-  steps: Step[]
+  canvas: CanvasVisual[],
+  steps: Step[],
 ): StepValidationResult {
   const errors: string[] = []
-  const visualIds = new Set(visuals.map(v => v.id))
+  const canvasIds = new Set(canvas.map(v => v.id))
 
-  // Indices must be 0, 1, 2, ... with no gaps or duplicates
   for (let i = 0; i < steps.length; i++) {
     const step = steps[i]
     if (!step) continue
-    if (step.index !== i) {
+    const expected = i + 1
+    if (step.index !== expected) {
       errors.push(
-        `Step indices non-monotonic at position ${i}: expected ${i}, got ${step.index}`
+        `Step indices non-monotonic at position ${i}: expected ${expected}, got ${step.index}`,
       )
     }
   }
 
-  // Every action target must reference a declared visual ID
   for (const step of steps) {
-    for (const action of step.actions) {
-      if (!visualIds.has(action.target)) {
+    if (!step.canvas) continue
+    for (const id of Object.keys(step.canvas)) {
+      if (!canvasIds.has(id)) {
         errors.push(
-          `Step ${step.index}: action targets unknown visual "${action.target}" (declared: ${[...visualIds].join(', ')})`
+          `Step ${step.index}: canvas update targets unknown visual "${id}" (declared: ${[...canvasIds].join(', ')})`,
         )
       }
     }
