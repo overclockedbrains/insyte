@@ -1,5 +1,5 @@
 import { safeParseScene } from '@insyte/scene-engine'
-import type { Scene, Visual, Step, Popup } from '@insyte/scene-engine'
+import type { Scene, CanvasVisual, Step, Popup } from '@insyte/scene-engine'
 
 // ─── Error types ──────────────────────────────────────────────────────────────
 
@@ -47,7 +47,7 @@ export interface UpdatePopupPatch {
 
 export interface AddVisualPatch {
   type: 'add-visual'
-  visual: Visual
+  visual: CanvasVisual
 }
 
 export interface UpdateVisualPatch {
@@ -96,12 +96,12 @@ export function applyDiff(
 
   switch (patch.type) {
     case 'add-steps': {
-      // Guard: every action in every new step must reference an existing visual
-      const existingIds = new Set(scene.visuals.map((v) => v.id))
+      // Guard: every canvas update key in every new step must reference an existing visual
+      const existingIds = new Set(scene.canvas.map((v) => v.id))
       for (const step of patch.steps) {
-        for (const action of step.actions) {
-          if (!existingIds.has(action.target)) {
-            throw new MissingVisualError(action.target)
+        for (const id of Object.keys(step.canvas ?? {})) {
+          if (!existingIds.has(id)) {
+            throw new MissingVisualError(id)
           }
         }
       }
@@ -142,33 +142,34 @@ export function applyDiff(
         )
       }
 
-      patched = { ...scene, visuals: [...scene.visuals, v] }
+      patched = { ...scene, canvas: [...scene.canvas, v] }
       intent = { action: 'none' }
       break
     }
 
     case 'update-visual': {
-      const idx = scene.visuals.findIndex((v) => v.id === patch.id)
+      const idx = scene.canvas.findIndex((v) => v.id === patch.id)
       if (idx === -1) {
         throw new MissingVisualError(patch.id)
       }
 
-      const updatedVisuals: Visual[] = scene.visuals.map((v) =>
-        v.id === patch.id
-          ? {
-              ...v,
-              initialState:
-                typeof v.initialState === 'object' &&
-                v.initialState !== null &&
-                typeof patch.initialState === 'object' &&
-                patch.initialState !== null
-                  ? { ...(v.initialState as Record<string, unknown>), ...(patch.initialState as Record<string, unknown>) }
-                  : patch.initialState,
-            }
-          : v,
-      )
-
-      patched = { ...scene, visuals: updatedVisuals }
+      patched = {
+        ...scene,
+        canvas: scene.canvas.map((v) =>
+          v.id === patch.id
+            ? {
+                ...v,
+                initialState:
+                  typeof v.initialState === 'object' &&
+                  v.initialState !== null &&
+                  typeof patch.initialState === 'object' &&
+                  patch.initialState !== null
+                    ? { ...(v.initialState as Record<string, unknown>), ...(patch.initialState as Record<string, unknown>) }
+                    : patch.initialState,
+              } as CanvasVisual
+            : v,
+        ),
+      }
       // Rewind to currentStep so the updated initialState re-renders immediately
       intent = { action: 'rewind', targetStep: currentStep }
       break

@@ -168,19 +168,18 @@ export async function POST(req: NextRequest) {
       case 2: {
         const reasoning = (inputs.reasoning as string) ?? ''
         const skeleton = inputs.skeleton as SceneSkeletonParsed
-        if (!skeleton?.visuals) {
+        if (!skeleton?.canvas) {
           return NextResponse.json(
             { ok: false, error: 'Stage 2 requires skeleton from Stage 1' },
             { status: 400 },
           )
         }
-        const visualIds = skeleton.visuals.map((v) => v.id) as [string, ...string[]]
         aiLog.server.stageStart(2, STAGE_MODELS.stage2, 0.2)
         const t2 = Date.now()
         const result = await retryStage(2, async (lastError) => {
           const prompt = buildStage2Prompt(topic, reasoning, skeleton, lastError)
           aiLog.server.stagePrompt(2, prompt, STAGE2_SYSTEM)
-          const raw = await generateJson(prompt, buildStepsSchema(visualIds), makeConfig(STAGE_MODELS.stage2), STAGE2_SYSTEM)
+          const raw = await generateJson(prompt, buildStepsSchema(skeleton), makeConfig(STAGE_MODELS.stage2), STAGE2_SYSTEM)
           const validation = validateSteps(raw as StepsParsed, skeleton)
           if (!validation.valid) {
             throw new Error(`Semantic validation failed: ${validation.errors.join('; ')}`)
@@ -193,13 +192,13 @@ export async function POST(req: NextRequest) {
 
       case 3: {
         const skeleton = inputs.skeleton as SceneSkeletonParsed
-        if (!skeleton?.visuals) {
+        if (!skeleton?.canvas) {
           return NextResponse.json(
             { ok: false, error: 'Stage 3 requires skeleton from Stage 1' },
             { status: 400 },
           )
         }
-        const visualIds = skeleton.visuals.map((v) => v.id) as [string, ...string[]]
+        const visualIds = skeleton.canvas.map((v) => v.id) as [string, ...string[]]
         aiLog.server.stageStart(3, STAGE_MODELS.stage3, 0.4)
         const t3 = Date.now()
         const steps3 = (inputs.steps as StepsParsed) ?? null
@@ -218,7 +217,7 @@ export async function POST(req: NextRequest) {
         const skeleton4 = (inputs.skeleton as SceneSkeletonParsed) ?? null
         const steps4 = (inputs.steps as StepsParsed) ?? null
         const result = await retryStage(4, (lastError) => {
-          const prompt = buildStage4Prompt(topic, skeleton4 ?? { visuals: [], stepCount: 0, title: topic, type: 'dsa', layout: 'linear-H' }, steps4, lastError)
+          const prompt = buildStage4Prompt(topic, skeleton4 ?? { canvas: [], stepCount: 0, title: topic, type: 'dsa-trace' as const }, steps4, lastError)
           aiLog.server.stagePrompt(4, prompt)
           return generateObject(prompt, MiscSchema, makeConfig(STAGE_MODELS.stage4))
         }, MAX_RETRIES)

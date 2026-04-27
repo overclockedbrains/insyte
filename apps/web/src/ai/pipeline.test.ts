@@ -32,7 +32,7 @@ vi.mock('./assembly', () => ({
       title: 'Test Scene',
       type: 'concept',
       layout: 'canvas-only',
-      visuals: [],
+      canvas: [],
       steps: [],
       popups: [],
       challenges: [],
@@ -63,19 +63,19 @@ vi.mock('@/lib/ai-logger', () => ({
 function makeSkeleton(): SceneSkeletonParsed {
   return {
     title: 'Binary Search',
-    type: 'dsa',
-    layout: 'linear-H',
-    visuals: [{ id: 'arr', type: 'array' }],
+    type: 'dsa-trace',
+    canvas: [{ id: 'arr', type: 'linear', variant: 'array', layoutHint: 'linear-H' }],
     stepCount: 2,
   }
 }
 
 function makeSteps(): StepsParsed {
+  const items = [{ id: 'a0', value: '1' }, { id: 'a1', value: '2' }, { id: 'a2', value: '3' }]
   return {
-    initialStates: { arr: { items: [1, 2, 3] } },
+    initialStates: { arr: { items } },
     steps: [
-      { index: 1, explanation: { heading: 'Step 1', body: 'body' }, actions: [{ target: 'arr', params: { items: [1] } }] },
-      { index: 2, explanation: { heading: 'Step 2', body: 'body' }, actions: [{ target: 'arr', params: { items: [2] } }] },
+      { index: 1, explanation: { heading: 'Step 1', body: 'body' }, canvas: { arr: { items: [items[0]!] } } },
+      { index: 2, explanation: { heading: 'Step 2', body: 'body' }, canvas: { arr: { items: [items[1]!] } } },
     ],
   }
 }
@@ -101,8 +101,14 @@ function makeModelConfig(): ModelConfig {
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('generateScene pipeline', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks()
+    // vi.clearAllMocks() clears call records but NOT mockResolvedValueOnce queues.
+    // Explicitly reset so leftover queued values from a previous test don't leak
+    // into the next test's Stage 1 mock and corrupt the skeleton return value.
+    const { generateObject, generateJson } = await import('./client')
+    vi.mocked(generateObject).mockReset()
+    vi.mocked(generateJson).mockReset()
   })
 
   it('happy path — emits reasoning → plan → content → annotations → misc → complete', async () => {

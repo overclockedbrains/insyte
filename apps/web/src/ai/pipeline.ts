@@ -189,7 +189,7 @@ export async function* generateScene(
 
   yield { type: 'plan', skeleton }
 
-  const visualIds = skeleton.visuals.map(v => v.id)
+  const visualIds = skeleton.canvas.map(v => v.id)
 
   // ── Stage 2: Steps + Explanations ───────────────────────────────────────
   // Must complete before Stage 3 — Stage 3 references visual IDs that Stage 2
@@ -202,7 +202,7 @@ export async function* generateScene(
     const stepsRaw = await retryStage(MAX_RETRIES, async (lastError) => {
       const raw = await generateJson(
         buildStage2Prompt(topic, reasoning, skeleton, lastError),
-        buildStepsSchema(visualIds),
+        buildStepsSchema(skeleton),
         stageConfig('stage2', 0.2),
         STAGE2_SYSTEM,
       )

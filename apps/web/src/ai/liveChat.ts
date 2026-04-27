@@ -31,9 +31,10 @@ export interface ChatStreamResult {
  * Only the fields the AI actually needs — no full JSON (too many tokens).
  */
 export function buildSceneContext(scene: Scene, currentStep: number): SceneContext {
-  // Find the explanation text for the current step (last section whose appearsAtStep <= currentStep)
-  const currentExplanation = [...scene.explanation]
-    .filter((s) => s.appearsAtStep <= currentStep)
+  // Find the explanation text for the current step
+  const currentExplanation = [...scene.steps]
+    .filter((s) => s.index <= currentStep && s.explanation != null)
+    .map((s) => s.explanation!)
     .pop()?.body
 
   return {
@@ -41,9 +42,10 @@ export function buildSceneContext(scene: Scene, currentStep: number): SceneConte
     type: scene.type,
     currentStep,
     currentExplanation,
-    visualSummary: scene.visuals.map((v) => ({
+    visualSummary: scene.canvas.map((v) => ({
       id: v.id,
       type: v.type,
+      ...(v.variant !== undefined && { variant: v.variant }),
       label: v.label,
     })),
   }

@@ -31,13 +31,17 @@ function buildTracePrompt(
   ].join('\n')
 }
 
+export interface TraceStreamResult {
+  toTextStreamResponse(init?: ResponseInit): Response
+}
+
 export function streamTraceToScene(
   trace: TraceData,
   originalCode: string,
   language: string,
   problemStatement: string,
   options?: TraceToSceneOptions,
-) {
+): TraceStreamResult {
   const provider = options?.provider ?? 'gemini'
   const model = options?.model ?? resolveModel(provider, null, null)
 

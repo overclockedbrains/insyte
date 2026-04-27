@@ -9,11 +9,10 @@ import type { SceneSkeletonParsed, StepsParsed, PopupsParsed } from '../schemas'
 function makeSkeleton(overrides?: Partial<SceneSkeletonParsed>): SceneSkeletonParsed {
   return {
     title: 'Binary Search',
-    type: 'dsa',
-    layout: 'linear-H',
-    visuals: [
-      { id: 'arr', type: 'array' },
-      { id: 'ptr', type: 'counter' },
+    type: 'dsa-trace',
+    canvas: [
+      { id: 'arr', type: 'linear', variant: 'array', layoutHint: 'linear-H' },
+      { id: 'ptr', type: 'linear', variant: 'array', layoutHint: 'linear-H' },
     ],
     stepCount: 4,
     ...overrides,
@@ -21,31 +20,32 @@ function makeSkeleton(overrides?: Partial<SceneSkeletonParsed>): SceneSkeletonPa
 }
 
 function makeSteps(overrides?: Partial<StepsParsed>): StepsParsed {
+  const arrItems = [{ id: 'a1', value: '1' }, { id: 'a3', value: '3' }, { id: 'a5', value: '5' }]
+  const ptrItems = [{ id: 'p0', value: '0' }]
   return {
     initialStates: {
-      arr: { items: [1, 3, 5] },
-      ptr: { value: 0 },
+      arr: { items: arrItems },
+      ptr: { items: ptrItems },
     },
     steps: [
       {
         index: 1,
         explanation: { heading: 'Step 1', body: 'First step.' },
-        actions: [{ target: 'arr', params: { highlighted: [0] } }],
+        canvas: { arr: { items: [{ ...arrItems[0]!, highlight: 'active' }] } },
       },
       {
         index: 2,
         explanation: { heading: 'Step 2', body: 'Second step.' },
-        actions: [{ target: 'ptr', params: { value: 1 } }],
+        canvas: { ptr: { items: [{ id: 'p1', value: '1' }] } },
       },
       {
         index: 3,
         explanation: { heading: 'Step 3', body: 'Third step.' },
-        actions: [],
       },
       {
         index: 4,
         explanation: { heading: 'Step 4', body: 'Fourth step.' },
-        actions: [{ target: 'arr', params: { highlighted: [1] } }],
+        canvas: { arr: { items: [{ ...arrItems[1]!, highlight: 'hit' }] } },
       },
     ],
     ...overrides,
@@ -79,20 +79,20 @@ describe('validateSteps', () => {
 
   it('rejects when an initialState value is empty {}', () => {
     const steps = makeSteps({
-      initialStates: { arr: {}, ptr: { value: 0 } },
+      initialStates: { arr: {}, ptr: { items: [] } },
     })
     const result = validateSteps(steps, makeSkeleton())
     expect(result.valid).toBe(false)
     expect(result.errors.some(e => e.includes('initialStates["arr"]'))).toBe(true)
   })
 
-  it('rejects when an action has empty params {}', () => {
+  it('rejects when a canvas update has empty params {}', () => {
     const steps = makeSteps({
       steps: [
         {
           index: 1,
           explanation: { heading: 'A', body: 'B' },
-          actions: [{ target: 'arr', params: {} }],
+          canvas: { arr: {} },
         },
         ...makeSteps().steps.slice(1),
       ],
@@ -106,7 +106,7 @@ describe('validateSteps', () => {
     const steps = makeSteps({
       initialStates: {
         arr: { items: [] },
-        ptr: { value: 0 },
+        ptr: { items: [] },
         unknown: { x: 1 },  // not in skeleton
       },
     })
@@ -118,9 +118,9 @@ describe('validateSteps', () => {
   it('rejects non-monotonic step indices', () => {
     const steps = makeSteps({
       steps: [
-        { index: 1, explanation: { heading: 'A', body: 'B' }, actions: [] },
-        { index: 3, explanation: { heading: 'C', body: 'D' }, actions: [] },  // gap!
-        { index: 4, explanation: { heading: 'E', body: 'F' }, actions: [] },
+        { index: 1, explanation: { heading: 'A', body: 'B' } },
+        { index: 3, explanation: { heading: 'C', body: 'D' } },  // gap!
+        { index: 4, explanation: { heading: 'E', body: 'F' } },
       ],
     })
     const result = validateSteps(steps, makeSkeleton())
@@ -128,13 +128,13 @@ describe('validateSteps', () => {
     expect(result.errors.some(e => e.includes('1, 2, 3'))).toBe(true)
   })
 
-  it('rejects an action targeting an unknown visual ID', () => {
+  it('rejects a canvas update targeting an unknown visual ID', () => {
     const steps = makeSteps({
       steps: [
         {
           index: 1,
           explanation: { heading: 'A', body: 'B' },
-          actions: [{ target: 'does-not-exist', params: {} }],
+          canvas: { 'does-not-exist': { items: [1, 2, 3] } },
         },
       ],
     })
@@ -143,6 +143,132 @@ describe('validateSteps', () => {
     expect(result.errors.some(e => e.includes('"does-not-exist"'))).toBe(true)
   })
 })
+
+  // ─── Check 7: identity-based topology keys in step canvas ──────────────────
+
+  it('rejects graph step canvas containing topology key "nodes"', () => {
+    const skeleton = makeSkeleton({
+      canvas: [{ id: 'g', type: 'graph', layoutHint: 'dagre-LR' }],
+    })
+    const steps: StepsParsed = {
+      initialStates: { g: { nodes: [{ id: 'a', label: 'A' }], edges: [] } },
+      steps: [
+        {
+          index: 1,
+          explanation: { heading: 'A', body: 'B' },
+          canvas: { g: { nodes: [{ id: 'a', label: 'A', highlight: 'active' }] } },
+        },
+      ],
+    }
+    const result = validateSteps(steps, skeleton)
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.includes('"nodes"') && e.includes('sparse overlay'))).toBe(true)
+  })
+
+  it('rejects system-diagram step canvas containing topology key "components"', () => {
+    const skeleton = makeSkeleton({
+      canvas: [{ id: 's', type: 'system-diagram', layoutHint: 'dagre-LR' }],
+    })
+    const steps: StepsParsed = {
+      initialStates: { s: { components: [{ id: 'c1', label: 'A', icon: 'server' }], connections: [] } },
+      steps: [
+        {
+          index: 1,
+          explanation: { heading: 'A', body: 'B' },
+          canvas: {
+            s: {
+              components: [{ id: 'c1', label: 'A', icon: 'server', status: 'active' }],
+              connections: [],
+            },
+          },
+        },
+      ],
+    }
+    const result = validateSteps(steps, skeleton)
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.includes('"components"') && e.includes('sparse overlay'))).toBe(true)
+  })
+
+  it('accepts graph step canvas with nodeStates (sparse overlay)', () => {
+    const skeleton = makeSkeleton({
+      canvas: [{ id: 'g', type: 'graph', layoutHint: 'dagre-LR' }],
+      stepCount: 1,
+    })
+    const steps: StepsParsed = {
+      initialStates: { g: { nodes: [{ id: 'a', label: 'A' }, { id: 'b', label: 'B' }], edges: [] } },
+      steps: [
+        {
+          index: 1,
+          explanation: { heading: 'Visit A', body: 'Highlight node A.' },
+          canvas: { g: { nodeStates: { a: { highlight: 'active' } } } },
+        },
+      ],
+    }
+    const result = validateSteps(steps, skeleton)
+    expect(result.valid).toBe(true)
+  })
+
+  // ─── Check 8: identity-based initialState topology coverage ─────────────────
+
+  it('rejects graph initialState missing "nodes" key', () => {
+    const skeleton = makeSkeleton({
+      canvas: [{ id: 'g', type: 'graph', layoutHint: 'dagre-LR' }],
+      stepCount: 1,
+    })
+    const steps: StepsParsed = {
+      initialStates: { g: { edges: [] } },  // missing nodes
+      steps: [{ index: 1, explanation: { heading: 'A', body: 'B' } }],
+    }
+    const result = validateSteps(steps, skeleton)
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.includes('"nodes"') && e.includes('topology'))).toBe(true)
+  })
+
+  it('rejects tree initialState with empty nodes[]', () => {
+    const skeleton = makeSkeleton({
+      canvas: [{ id: 't', type: 'tree', layoutHint: 'dagre-TB' }],
+      stepCount: 1,
+    })
+    const steps: StepsParsed = {
+      initialStates: { t: { nodes: [], rootId: 'n1' } },
+      steps: [{ index: 1, explanation: { heading: 'A', body: 'B' } }],
+    }
+    const result = validateSteps(steps, skeleton)
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.includes('empty array') && e.includes('nodes'))).toBe(true)
+  })
+
+  it('rejects tree initialState missing "rootId"', () => {
+    const skeleton = makeSkeleton({
+      canvas: [{ id: 't', type: 'tree', layoutHint: 'dagre-TB' }],
+      stepCount: 1,
+    })
+    const steps: StepsParsed = {
+      initialStates: { t: { nodes: [{ id: 'n1', value: '5', children: [] }] } },
+      steps: [{ index: 1, explanation: { heading: 'A', body: 'B' } }],
+    }
+    const result = validateSteps(steps, skeleton)
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.includes('"rootId"') && e.includes('topology'))).toBe(true)
+  })
+
+  it('accepts valid graph initialState with nodes and edges', () => {
+    const skeleton = makeSkeleton({
+      canvas: [{ id: 'g', type: 'graph', layoutHint: 'dagre-LR' }],
+      stepCount: 1,
+    })
+    const steps: StepsParsed = {
+      initialStates: {
+        g: {
+          nodes: [{ id: 'a', label: 'A' }, { id: 'b', label: 'B' }],
+          edges: [{ id: 'e0', from: 'a', to: 'b' }],
+        },
+      },
+      steps: [{ index: 1, explanation: { heading: 'A', body: 'B' } }],
+    }
+    const result = validateSteps(steps, skeleton)
+    expect(result.valid).toBe(true)
+  })
 
 // ─── validatePopups ───────────────────────────────────────────────────────────
 

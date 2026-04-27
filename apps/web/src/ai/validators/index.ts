@@ -9,5 +9,5 @@ export interface ValidationResult {
 }
 
 export function getVisualIdSet(skeleton: SceneSkeletonParsed): Set<string> {
-  return new Set(skeleton.visuals.map(v => v.id))
+  return new Set(skeleton.canvas.map(v => v.id))
 }

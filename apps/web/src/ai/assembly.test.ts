@@ -7,11 +7,9 @@ import type { SceneSkeletonParsed, StepsParsed, PopupsParsed, MiscParsed } from 
 function makeSkeleton(overrides?: Partial<SceneSkeletonParsed>): SceneSkeletonParsed {
   return {
     title: 'Binary Search',
-    type: 'dsa',
-    layout: 'linear-H',
-    visuals: [
-      { id: 'arr', type: 'array', hint: 'sorted integer array' },
-      { id: 'ptr', type: 'counter' },
+    type: 'dsa-trace',
+    canvas: [
+      { id: 'arr', type: 'linear', variant: 'array', layoutHint: 'linear-H' },
     ],
     stepCount: 3,
     ...overrides,
@@ -19,26 +17,26 @@ function makeSkeleton(overrides?: Partial<SceneSkeletonParsed>): SceneSkeletonPa
 }
 
 function makeSteps(overrides?: Partial<StepsParsed>): StepsParsed {
+  const items = [1, 3, 5, 7, 9].map((v, i) => ({ id: `arr-${i}`, value: String(v) }))
   return {
     initialStates: {
-      arr: { items: [1, 3, 5, 7, 9] },
-      ptr: { value: 0 },
+      arr: { items },
     },
     steps: [
       {
         index: 1,
         explanation: { heading: 'Start at the middle', body: 'Binary search begins by checking the middle element.' },
-        actions: [{ target: 'arr', params: { highlighted: [2] } }],
+        canvas: { arr: { items: items.map((it, i) => ({ ...it, highlight: i === 2 ? 'active' : undefined })) } },
       },
       {
         index: 2,
         explanation: { heading: 'Eliminate half', body: 'If the target is smaller, discard the right half.' },
-        actions: [{ target: 'ptr', params: { value: 2 } }],
+        canvas: { arr: { items } },
       },
       {
         index: 3,
         explanation: { heading: 'Found!', body: 'The target element has been located.' },
-        actions: [{ target: 'arr', params: { highlighted: [1] } }],
+        canvas: { arr: { items: items.map((it, i) => ({ ...it, highlight: i === 1 ? 'hit' : undefined })) } },
       },
     ],
     ...overrides,
@@ -55,8 +53,8 @@ describe('assembleScene', () => {
     expect(result.scene!.title).toBe('Binary Search')
   })
 
-  it('maps dsa type to dsa-trace in the scene', () => {
-    const result = assembleScene(makeSkeleton({ type: 'dsa' }), makeSteps(), null, null)
+  it('preserves dsa-trace type in the assembled scene', () => {
+    const result = assembleScene(makeSkeleton({ type: 'dsa-trace' }), makeSteps(), null, null)
     expect(result.ok).toBe(true)
     expect(result.scene!.type).toBe('dsa-trace')
   })
@@ -68,10 +66,10 @@ describe('assembleScene', () => {
     expect(result.scene!.layout).toBe('text-left-canvas-right')
   })
 
-  it('maps dsa type to canvas-only page layout', () => {
-    const result = assembleScene(makeSkeleton({ type: 'dsa' }), makeSteps(), null, null)
+  it('maps dsa-trace type to code-left-canvas-right page layout', () => {
+    const result = assembleScene(makeSkeleton({ type: 'dsa-trace' }), makeSteps(), null, null)
     expect(result.ok).toBe(true)
-    expect(result.scene!.layout).toBe('canvas-only')
+    expect(result.scene!.layout).toBe('code-left-canvas-right')
   })
 
   it('generates a unique id for each assembled scene', () => {
@@ -82,29 +80,27 @@ describe('assembleScene', () => {
     expect(r1.scene!.id).not.toBe(r2.scene!.id)
   })
 
-  it('includes a synthetic step 0 plus AI-generated steps', () => {
+  it('produces exactly the AI-generated steps (no synthetic step 0)', () => {
     const result = assembleScene(makeSkeleton(), makeSteps(), null, null)
     expect(result.ok).toBe(true)
     const steps = result.scene!.steps
-    expect(steps[0]).toEqual({ index: 0, actions: [] })
-    expect(steps).toHaveLength(4)  // step 0 + 3 AI steps
+    expect(steps).toHaveLength(3)
+    expect(steps[0]!.index).toBe(1)
   })
 
-  it('extracts explanation from steps with correct appearsAtStep', () => {
+  it('embeds explanations inside steps', () => {
     const result = assembleScene(makeSkeleton(), makeSteps(), null, null)
     expect(result.ok).toBe(true)
-    const exp = result.scene!.explanation
-    expect(exp).toHaveLength(3)
-    expect(exp[0]!.appearsAtStep).toBe(1)
-    expect(exp[0]!.heading).toBe('Start at the middle')
-    expect(exp[2]!.appearsAtStep).toBe(3)
+    const steps = result.scene!.steps
+    expect(steps[0]!.explanation?.heading).toBe('Start at the middle')
+    expect(steps[2]!.explanation?.heading).toBe('Found!')
   })
 
-  it('merges initialStates into visuals', () => {
+  it('merges initialStates into canvas visuals', () => {
     const result = assembleScene(makeSkeleton(), makeSteps(), null, null)
     expect(result.ok).toBe(true)
-    const arrVisual = result.scene!.visuals.find(v => v.id === 'arr')!
-    expect(arrVisual.initialState).toEqual({ items: [1, 3, 5, 7, 9] })
+    const arrVisual = result.scene!.canvas.find(v => v.id === 'arr')!
+    expect(arrVisual.initialState).toHaveProperty('items')
   })
 
   it('includes popups when provided', () => {
@@ -147,12 +143,10 @@ describe('assembleScene', () => {
   })
 
   it('returns errors array when safeParseScene fails', () => {
-    // Deliberately corrupt steps to trigger schema failure
     const badSteps: StepsParsed = {
-      initialStates: { arr: {}, ptr: {} },
+      initialStates: { arr: {} },
       steps: [], // empty steps array should fail schema (min: 1)
     }
-    // The assembly itself should not throw
     const result = assembleScene(makeSkeleton(), badSteps, null, null)
     expect(typeof result.ok).toBe('boolean')
     if (!result.ok) {

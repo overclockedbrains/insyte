@@ -40,10 +40,10 @@ export function validateSteps(
 
   // Check 2: initialStates must not be empty and must cover all visual IDs
   if (Object.keys(steps.initialStates).length === 0) {
-    const required = skeleton.visuals.map(v => `"${v.id}"`).join(', ')
+    const required = skeleton.canvas.map(v => `"${v.id}"`).join(', ')
     errors.push(`initialStates is empty {} — every visual needs an initial state. Required keys: ${required}`)
   } else {
-    const missingIds = skeleton.visuals.map(v => v.id).filter(id => !(id in steps.initialStates))
+    const missingIds = skeleton.canvas.map(v => v.id).filter(id => !(id in steps.initialStates))
     if (missingIds.length > 0) {
       errors.push(`initialStates missing entries for: ${missingIds.map(id => `"${id}"`).join(', ')}`)
     }
@@ -88,15 +88,72 @@ export function validateSteps(
     }
   }
 
-  // Check 5: action targets must match skeleton IDs (defence-in-depth)
-  // Check 6: action params must never be empty {} — empty params render as blank visuals
+  // Check 5: canvas update targets must match skeleton IDs (defence-in-depth)
+  // Check 6: canvas update params must never be empty {} — empty params render as blank visuals
   for (const step of steps.steps) {
-    for (const action of step.actions) {
-      if (!visualIds.has(action.target)) {
-        errors.push(`Step ${step.index}: action target "${action.target}" not in skeleton`)
+    if (step.canvas) {
+      for (const [target, params] of Object.entries(step.canvas)) {
+        if (!visualIds.has(target)) {
+          errors.push(`Step ${step.index}: canvas update target "${target}" not in skeleton`)
+        }
+        if (typeof params === 'object' && params !== null && Object.keys(params).length === 0) {
+          errors.push(`Step ${step.index}: canvas update for "${target}" has empty params {} — supply complete visual state matching the visual-params-guide`)
+        }
       }
-      if (Object.keys(action.params).length === 0) {
-        errors.push(`Step ${step.index}: action on "${action.target}" has empty params {} — supply complete visual state matching the visual-params-guide`)
+    }
+  }
+
+  // Check 7: identity-based step canvas must NOT contain topology keys
+  // (nodes/edges/components/connections belong in initialState, not steps)
+  const IDENTITY_BASED = new Set(['graph', 'tree', 'system-diagram'])
+  const TOPOLOGY_KEYS: Record<string, string[]> = {
+    'graph':          ['nodes', 'edges'],
+    'tree':           ['nodes'],
+    'system-diagram': ['components', 'connections'],
+  }
+  for (const step of steps.steps) {
+    if (!step.canvas) continue
+    for (const [target, params] of Object.entries(step.canvas)) {
+      const visual = skeleton.canvas.find(v => v.id === target)
+      if (!visual || !IDENTITY_BASED.has(visual.type)) continue
+      const forbidden = TOPOLOGY_KEYS[visual.type] ?? []
+      for (const key of forbidden) {
+        if (key in (params as Record<string, unknown>)) {
+          errors.push(
+            `Step ${step.index}: canvas["${target}"] contains topology key "${key}". ` +
+            `${visual.type} uses sparse overlay in steps — use nodeStates/edgeStates/` +
+            `componentStates/connectionStates instead. Move "${key}" to initialStates["${target}"].`,
+          )
+        }
+      }
+    }
+  }
+
+  // Check 8: identity-based initialState must contain required topology keys
+  const REQUIRED_TOPOLOGY: Record<string, { key: string; label: string }[]> = {
+    'graph':          [{ key: 'nodes', label: 'nodes[] with id + label' }],
+    'tree':           [
+      { key: 'nodes',  label: 'nodes[] with id + value + children' },
+      { key: 'rootId', label: 'rootId string' },
+    ],
+    'system-diagram': [{ key: 'components', label: 'components[] with id + label + icon' }],
+  }
+  for (const visual of skeleton.canvas) {
+    if (!IDENTITY_BASED.has(visual.type)) continue
+    const state = steps.initialStates[visual.id]
+    if (!state) continue // already caught by Check 2
+    const required = REQUIRED_TOPOLOGY[visual.type] ?? []
+    for (const { key, label } of required) {
+      if (!(key in state)) {
+        errors.push(
+          `initialStates["${visual.id}"] (${visual.type}) is missing required topology key "${key}". ` +
+          `Identity-based primitives declare full topology in initialState: ${label}.`,
+        )
+      } else if (Array.isArray(state[key]) && (state[key] as unknown[]).length === 0) {
+        errors.push(
+          `initialStates["${visual.id}"].${key} is an empty array — ` +
+          `declare all ${key} with stable IDs in initialState.`,
+        )
       }
     }
   }
