@@ -28,6 +28,7 @@ const SCENE_MODULES: Record<string, () => Promise<{ default: unknown }>> = {
   'twitter-feed': () => import('@/src/content/scenes/hld/twitter-feed.json'),
   'consistent-hashing': () => import('@/src/content/scenes/hld/consistent-hashing.json'),
   'chat-system': () => import('@/src/content/scenes/hld/chat-system.json'),
+  'copilot-agent-architecture': () => import('@/src/content/scenes/hld/copilot-agent-architecture.json'),
 
   // Phase 12 — DSA simulations
   'two-sum': () => import('@/src/content/scenes/dsa/two-sum.json'),

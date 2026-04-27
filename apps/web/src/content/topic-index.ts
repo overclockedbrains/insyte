@@ -84,7 +84,7 @@ export const topicIndex: TopicEntry[] = [
     isPrebuilt: true,
   },
   {
-    slug: 'copilot-agent-architecture--mzlKyE',
+    slug: 'copilot-agent-architecture',
     title: 'How does a Copilot Agent work?',
     description:
       'Trace the full agent loop — LLM reasoning, tool calls, context retrieval, and multi-step planning — as Copilot resolves a coding task.',
