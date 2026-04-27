@@ -1,401 +1,41 @@
 {
+  "$schema": "/scene-schema.json",
   "id": "min-stack",
   "title": "MinStack — O(1) getMin()",
   "type": "lld",
   "layout": "text-left-canvas-right",
   "description": "Design a stack that returns the minimum element in O(1) — without sorting. Uses a clever auxiliary stack to track minimums at every level.",
   "category": "Low Level Design",
-  "tags": [
-    "stack",
-    "min-stack",
-    "design",
-    "lld",
-    "interview"
-  ],
-  "visuals": [
+  "canvas": [
     {
       "id": "main-stack",
-      "type": "stack",
+      "type": "linear",
+      "variant": "stack",
+      "layoutHint": "linear-V",
       "label": "Main Stack",
       "initialState": {
-        "items": [],
-        "highlight": -1
-      },
-      "layoutHint": "linear-V"
+        "items": []
+      }
     },
     {
       "id": "min-stack-viz",
-      "type": "stack",
+      "type": "linear",
+      "variant": "stack",
+      "layoutHint": "linear-V",
       "label": "Min Stack (tracks min per level)",
       "initialState": {
-        "items": [],
-        "highlight": -1
-      },
-      "layoutHint": "linear-V"
-    },
-    {
-      "id": "current-min",
-      "type": "counter",
-      "label": "getMin()",
-      "initialState": {
-        "value": 0,
-        "label": "getMin()",
-        "color": "secondary"
-      },
-      "slot": "bottom-left"
-    },
-    {
-      "id": "op-badge",
-      "type": "text-badge",
-      "label": "Operation",
-      "initialState": {
-        "text": "MinStack initialized — both stacks empty",
-        "style": "default"
-      },
-      "slot": "top-center"
+        "items": []
+      }
     }
   ],
-  "steps": [
+  "activeText": {
+    "initialValue": "MinStack initialized — both stacks empty"
+  },
+  "hud": [
     {
-      "index": 0,
-      "actions": [],
-      "duration": 1800
-    },
-    {
-      "index": 1,
-      "actions": [
-        {
-          "target": "op-badge",
-          "params": {
-            "text": "push(5)  →  Min stack: [5]  (5 is minimum so far)",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "main-stack",
-          "params": {
-            "items": [
-              "5"
-            ],
-            "highlight": 0
-          }
-        },
-        {
-          "target": "min-stack-viz",
-          "params": {
-            "items": [
-              "5"
-            ],
-            "highlight": 0
-          }
-        },
-        {
-          "target": "current-min",
-          "params": {
-            "value": 5,
-            "label": "getMin()",
-            "color": "secondary"
-          }
-        }
-      ],
-      "duration": 1800
-    },
-    {
-      "index": 2,
-      "actions": [
-        {
-          "target": "op-badge",
-          "params": {
-            "text": "push(3)  →  3 < 5 (current min)  →  push 3 to min stack",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "main-stack",
-          "params": {
-            "items": [
-              "3",
-              "5"
-            ],
-            "highlight": 0
-          }
-        },
-        {
-          "target": "min-stack-viz",
-          "params": {
-            "items": [
-              "3",
-              "5"
-            ],
-            "highlight": 0
-          }
-        },
-        {
-          "target": "current-min",
-          "params": {
-            "value": 3,
-            "label": "getMin()",
-            "color": "secondary"
-          }
-        }
-      ],
-      "duration": 1800
-    },
-    {
-      "index": 3,
-      "actions": [
-        {
-          "target": "op-badge",
-          "params": {
-            "text": "push(7)  →  7 > 3 (current min)  →  push 3 again to min stack",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "main-stack",
-          "params": {
-            "items": [
-              "7",
-              "3",
-              "5"
-            ],
-            "highlight": 0
-          }
-        },
-        {
-          "target": "min-stack-viz",
-          "params": {
-            "items": [
-              "3",
-              "3",
-              "5"
-            ],
-            "highlight": 0
-          }
-        },
-        {
-          "target": "current-min",
-          "params": {
-            "value": 3,
-            "label": "getMin()",
-            "color": "secondary"
-          }
-        }
-      ],
-      "duration": 2000
-    },
-    {
-      "index": 4,
-      "actions": [
-        {
-          "target": "op-badge",
-          "params": {
-            "text": "push(2)  →  2 < 3 (current min)  →  push 2 to min stack",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "main-stack",
-          "params": {
-            "items": [
-              "2",
-              "7",
-              "3",
-              "5"
-            ],
-            "highlight": 0
-          }
-        },
-        {
-          "target": "min-stack-viz",
-          "params": {
-            "items": [
-              "2",
-              "3",
-              "3",
-              "5"
-            ],
-            "highlight": 0
-          }
-        },
-        {
-          "target": "current-min",
-          "params": {
-            "value": 2,
-            "label": "getMin()",
-            "color": "secondary"
-          }
-        }
-      ],
-      "duration": 1800
-    },
-    {
-      "index": 5,
-      "actions": [
-        {
-          "target": "op-badge",
-          "params": {
-            "text": "getMin()  →  peek top of min stack  →  returns 2  ✓ O(1)",
-            "style": "success"
-          }
-        },
-        {
-          "target": "main-stack",
-          "params": {
-            "items": [
-              "2",
-              "7",
-              "3",
-              "5"
-            ],
-            "highlight": -1
-          }
-        },
-        {
-          "target": "min-stack-viz",
-          "params": {
-            "items": [
-              "2",
-              "3",
-              "3",
-              "5"
-            ],
-            "highlight": 0
-          }
-        },
-        {
-          "target": "current-min",
-          "params": {
-            "value": 2,
-            "label": "getMin() = 2",
-            "color": "secondary"
-          }
-        }
-      ],
-      "duration": 2000
-    },
-    {
-      "index": 6,
-      "actions": [
-        {
-          "target": "op-badge",
-          "params": {
-            "text": "pop()  →  removes 2 from main stack + min stack  →  min is now 3",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "main-stack",
-          "params": {
-            "items": [
-              "7",
-              "3",
-              "5"
-            ],
-            "highlight": 0
-          }
-        },
-        {
-          "target": "min-stack-viz",
-          "params": {
-            "items": [
-              "3",
-              "3",
-              "5"
-            ],
-            "highlight": 0
-          }
-        },
-        {
-          "target": "current-min",
-          "params": {
-            "value": 3,
-            "label": "getMin()",
-            "color": "secondary"
-          }
-        }
-      ],
-      "duration": 2000
-    },
-    {
-      "index": 7,
-      "actions": [
-        {
-          "target": "op-badge",
-          "params": {
-            "text": "pop()  →  removes 7 from main  →  7 was not a min, pop min stack  →  min still 3",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "main-stack",
-          "params": {
-            "items": [
-              "3",
-              "5"
-            ],
-            "highlight": 0
-          }
-        },
-        {
-          "target": "min-stack-viz",
-          "params": {
-            "items": [
-              "3",
-              "5"
-            ],
-            "highlight": 0
-          }
-        },
-        {
-          "target": "current-min",
-          "params": {
-            "value": 3,
-            "label": "getMin()",
-            "color": "secondary"
-          }
-        }
-      ],
-      "duration": 2200
-    },
-    {
-      "index": 8,
-      "actions": [
-        {
-          "target": "op-badge",
-          "params": {
-            "text": "pop()  →  removes 3 (the actual min)  →  min stack reveals next min: 5",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "main-stack",
-          "params": {
-            "items": [
-              "5"
-            ],
-            "highlight": 0
-          }
-        },
-        {
-          "target": "min-stack-viz",
-          "params": {
-            "items": [
-              "5"
-            ],
-            "highlight": 0
-          }
-        },
-        {
-          "target": "current-min",
-          "params": {
-            "value": 5,
-            "label": "getMin()",
-            "color": "secondary"
-          }
-        }
-      ],
-      "duration": 2200
+      "id": "current-min",
+      "label": "getMin()",
+      "initialValue": 0
     }
   ],
   "controls": [
@@ -454,27 +94,335 @@
       }
     }
   ],
-  "explanation": [
+  "steps": [
     {
-      "heading": "The Problem",
-      "body": "Design a stack that supports `push`, `pop`, `top`, and `getMin()` — all in **O(1)**.\n\nNaive: iterate the stack to find minimum → **O(n)**. Unacceptable.",
-      "appearsAtStep": 0
+      "index": 1,
+      "explanation": {
+        "heading": "The Insight: Auxiliary Min Stack",
+        "body": "Maintain a **second stack** that tracks the minimum at every level.\n\n**Push rule**: push to main stack AND push `min(new_val, current_min)` to min stack.\n\nNow `getMin()` is just `min_stack.peek()` — O(1).",
+        "callout": "The min stack always has the correct minimum for the current stack size."
+      },
+      "activeText": "push(5)  →  Min stack: [5]  (5 is minimum so far)",
+      "hud": {
+        "current-min": 5
+      },
+      "canvas": {
+        "main-stack": {
+          "items": [
+            {
+              "id": "item-0",
+              "value": "5"
+            }
+          ]
+        },
+        "min-stack-viz": {
+          "items": [
+            {
+              "id": "item-0",
+              "value": "5"
+            }
+          ]
+        }
+      }
     },
     {
-      "heading": "The Insight: Auxiliary Min Stack",
-      "body": "Maintain a **second stack** that tracks the minimum at every level.\n\n**Push rule**: push to main stack AND push `min(new_val, current_min)` to min stack.\n\nNow `getMin()` is just `min_stack.peek()` — O(1).",
-      "appearsAtStep": 1,
-      "callout": "The min stack always has the correct minimum for the current stack size."
+      "index": 2,
+      "explanation": {
+        "heading": "Step 2",
+        "body": "State updated."
+      },
+      "activeText": "push(3)  →  3 < 5 (current min)  →  push 3 to min stack",
+      "hud": {
+        "current-min": 3
+      },
+      "canvas": {
+        "main-stack": {
+          "items": [
+            {
+              "id": "item-0",
+              "value": "3"
+            },
+            {
+              "id": "item-1",
+              "value": "5"
+            }
+          ]
+        },
+        "min-stack-viz": {
+          "items": [
+            {
+              "id": "item-0",
+              "value": "3"
+            },
+            {
+              "id": "item-1",
+              "value": "5"
+            }
+          ]
+        }
+      }
     },
     {
-      "heading": "Why push current min on non-minimums?",
-      "body": "When push(7) and current min is 3:\n- Min stack pushes **3 again** (not 7)\n\nThis preserves the invariant: **min_stack[i] = minimum of main_stack[0..i]**\n\nWhen you pop 7, you pop the corresponding 3 from min stack — and the minimum is still correct.",
-      "appearsAtStep": 3
+      "index": 3,
+      "explanation": {
+        "heading": "Why push current min on non-minimums?",
+        "body": "When push(7) and current min is 3:\n- Min stack pushes **3 again** (not 7)\n\nThis preserves the invariant: **min_stack[i] = minimum of main_stack[0..i]**\n\nWhen you pop 7, you pop the corresponding 3 from min stack — and the minimum is still correct."
+      },
+      "activeText": "push(7)  →  7 > 3 (current min)  →  push 3 again to min stack",
+      "hud": {
+        "current-min": 3
+      },
+      "canvas": {
+        "main-stack": {
+          "items": [
+            {
+              "id": "item-0",
+              "value": "7"
+            },
+            {
+              "id": "item-1",
+              "value": "3"
+            },
+            {
+              "id": "item-2",
+              "value": "5"
+            }
+          ]
+        },
+        "min-stack-viz": {
+          "items": [
+            {
+              "id": "item-0",
+              "value": "3"
+            },
+            {
+              "id": "item-1",
+              "value": "3"
+            },
+            {
+              "id": "item-2",
+              "value": "5"
+            }
+          ]
+        }
+      }
     },
     {
-      "heading": "Pop — Keep Stacks in Sync",
-      "body": "On `pop()`, always pop **both** stacks simultaneously.\n\nThe sync is critical: min_stack.size == main_stack.size at all times.\n\nWhen the actual minimum is popped, the next element in min_stack reveals the new minimum — no scanning needed.",
-      "appearsAtStep": 6
+      "index": 4,
+      "explanation": {
+        "heading": "Step 4",
+        "body": "State updated."
+      },
+      "activeText": "push(2)  →  2 < 3 (current min)  →  push 2 to min stack",
+      "hud": {
+        "current-min": 2
+      },
+      "canvas": {
+        "main-stack": {
+          "items": [
+            {
+              "id": "item-0",
+              "value": "2"
+            },
+            {
+              "id": "item-1",
+              "value": "7"
+            },
+            {
+              "id": "item-2",
+              "value": "3"
+            },
+            {
+              "id": "item-3",
+              "value": "5"
+            }
+          ]
+        },
+        "min-stack-viz": {
+          "items": [
+            {
+              "id": "item-0",
+              "value": "2"
+            },
+            {
+              "id": "item-1",
+              "value": "3"
+            },
+            {
+              "id": "item-2",
+              "value": "3"
+            },
+            {
+              "id": "item-3",
+              "value": "5"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 5,
+      "explanation": {
+        "heading": "Step 5",
+        "body": "State updated."
+      },
+      "activeText": "getMin()  →  peek top of min stack  →  returns 2  ✓ O(1)",
+      "hud": {
+        "current-min": 2
+      },
+      "canvas": {
+        "main-stack": {
+          "items": [
+            {
+              "id": "item-0",
+              "value": "2"
+            },
+            {
+              "id": "item-1",
+              "value": "7"
+            },
+            {
+              "id": "item-2",
+              "value": "3"
+            },
+            {
+              "id": "item-3",
+              "value": "5"
+            }
+          ]
+        },
+        "min-stack-viz": {
+          "items": [
+            {
+              "id": "item-0",
+              "value": "2"
+            },
+            {
+              "id": "item-1",
+              "value": "3"
+            },
+            {
+              "id": "item-2",
+              "value": "3"
+            },
+            {
+              "id": "item-3",
+              "value": "5"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 6,
+      "explanation": {
+        "heading": "Pop — Keep Stacks in Sync",
+        "body": "On `pop()`, always pop **both** stacks simultaneously.\n\nThe sync is critical: min_stack.size == main_stack.size at all times.\n\nWhen the actual minimum is popped, the next element in min_stack reveals the new minimum — no scanning needed."
+      },
+      "activeText": "pop()  →  removes 2 from main stack + min stack  →  min is now 3",
+      "hud": {
+        "current-min": 3
+      },
+      "canvas": {
+        "main-stack": {
+          "items": [
+            {
+              "id": "item-0",
+              "value": "7"
+            },
+            {
+              "id": "item-1",
+              "value": "3"
+            },
+            {
+              "id": "item-2",
+              "value": "5"
+            }
+          ]
+        },
+        "min-stack-viz": {
+          "items": [
+            {
+              "id": "item-0",
+              "value": "3"
+            },
+            {
+              "id": "item-1",
+              "value": "3"
+            },
+            {
+              "id": "item-2",
+              "value": "5"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 7,
+      "explanation": {
+        "heading": "Step 7",
+        "body": "State updated."
+      },
+      "activeText": "pop()  →  removes 7 from main  →  7 was not a min, pop min stack  →  min still 3",
+      "hud": {
+        "current-min": 3
+      },
+      "canvas": {
+        "main-stack": {
+          "items": [
+            {
+              "id": "item-0",
+              "value": "3"
+            },
+            {
+              "id": "item-1",
+              "value": "5"
+            }
+          ]
+        },
+        "min-stack-viz": {
+          "items": [
+            {
+              "id": "item-0",
+              "value": "3"
+            },
+            {
+              "id": "item-1",
+              "value": "5"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 8,
+      "explanation": {
+        "heading": "Step 8",
+        "body": "State updated."
+      },
+      "activeText": "pop()  →  removes 3 (the actual min)  →  min stack reveals next min: 5",
+      "hud": {
+        "current-min": 5
+      },
+      "canvas": {
+        "main-stack": {
+          "items": [
+            {
+              "id": "item-0",
+              "value": "5"
+            }
+          ]
+        },
+        "min-stack-viz": {
+          "items": [
+            {
+              "id": "item-0",
+              "value": "5"
+            }
+          ]
+        }
+      }
     }
   ],
   "popups": [
@@ -484,15 +432,11 @@
       "text": "Same size as main stack — always in sync",
       "showAtStep": 3,
       "hideAtStep": 5,
-      "style": "info",
-      "anchor": {
-        "x": 70,
-        "y": 15
-      }
+      "style": "info"
     },
     {
       "id": "pop-o1-get",
-      "attachTo": "current-min",
+      "attachTo": "main-stack",
       "text": "O(1) — just peek top of min stack",
       "showAtStep": 5,
       "hideAtStep": 6,

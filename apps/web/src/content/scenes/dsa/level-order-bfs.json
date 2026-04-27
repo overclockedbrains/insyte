@@ -1,15 +1,11 @@
 {
+  "$schema": "/scene-schema.json",
   "id": "level-order-bfs",
   "title": "Binary Tree Level Order Traversal",
   "type": "dsa-trace",
   "layout": "code-left-canvas-right",
   "description": "Traverse tree level by level using a queue (BFS).",
   "category": "Data Structures & Algorithms",
-  "tags": [
-    "bfs",
-    "tree",
-    "queue"
-  ],
   "code": {
     "language": "python",
     "source": "from collections import deque\n\ndef level_order(root):\n    if not root:\n        return []\n    result = []\n    q = deque([root])\n    while q:\n        level_size = len(q)\n        level = []\n        for _ in range(level_size):\n            node = q.popleft()\n            level.append(node.val)\n            if node.left:\n                q.append(node.left)\n            if node.right:\n                q.append(node.right)\n        result.append(level)\n    return result\n",
@@ -26,428 +22,228 @@
       16
     ]
   },
-  "visuals": [
+  "canvas": [
     {
       "id": "tree",
       "type": "tree",
+      "layoutHint": "tree-RT",
       "label": "Binary Tree",
       "initialState": {
-        "rootId": "n1",
         "nodes": [
-          {
-            "id": "n1",
-            "value": "1",
-            "children": [
-              "n2",
-              "n3"
-            ]
-          },
-          {
-            "id": "n2",
-            "value": "2",
-            "children": [
-              "n4",
-              "n5"
-            ]
-          },
-          {
-            "id": "n3",
-            "value": "3",
-            "children": [
-              "n6"
-            ]
-          },
-          {
-            "id": "n4",
-            "value": "4",
-            "children": []
-          },
-          {
-            "id": "n5",
-            "value": "5",
-            "children": []
-          },
-          {
-            "id": "n6",
-            "value": "6",
-            "children": []
-          }
-        ]
-      },
-      "layoutHint": "tree-RT"
+          { "id": "n1", "value": "1", "children": ["n2", "n3"] },
+          { "id": "n2", "value": "2", "children": ["n4", "n5"] },
+          { "id": "n3", "value": "3", "children": ["n6"] },
+          { "id": "n4", "value": "4", "children": [] },
+          { "id": "n5", "value": "5", "children": [] },
+          { "id": "n6", "value": "6", "children": [] }
+        ],
+        "rootId": "n1"
+      }
     },
     {
       "id": "queue",
-      "type": "queue",
+      "type": "linear",
+      "variant": "queue",
+      "layoutHint": "linear-H",
       "label": "Queue",
       "initialState": {
         "items": [
-          "1"
-        ],
-        "highlight": 0
-      },
-      "layoutHint": "linear-H"
-    },
-    {
-      "id": "op",
-      "type": "text-badge",
-      "label": "Operation",
-      "initialState": {
-        "text": "Initialize queue with root",
-        "style": "default"
-      },
-      "slot": "top-center"
+          {
+            "id": "item-0",
+            "value": "1"
+          }
+        ]
+      }
     }
   ],
+  "activeText": {
+    "initialValue": "Initialize queue with root"
+  },
+  "controls": [],
   "steps": [
     {
-      "index": 0,
-      "actions": [],
-      "duration": 900
-    },
-    {
       "index": 1,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Dequeue node 1",
-            "style": "highlight"
-          }
+      "explanation": {
+        "heading": "Step 1",
+        "body": "State updated."
+      },
+      "activeText": "Dequeue node 1",
+      "canvas": {
+        "queue": {
+          "items": []
         },
-        {
-          "target": "queue",
-          "params": {
-            "items": [],
-            "highlight": 0
-          }
-        },
-        {
-          "target": "tree",
-          "params": {
-            "rootId": "n1",
-            "nodes": [
-              {
-                "id": "n1",
-                "value": "1",
-                "children": [
-                  "n2",
-                  "n3"
-                ],
-                "highlight": "active"
-              },
-              {
-                "id": "n2",
-                "value": "2",
-                "children": [
-                  "n4",
-                  "n5"
-                ]
-              },
-              {
-                "id": "n3",
-                "value": "3",
-                "children": [
-                  "n6"
-                ]
-              },
-              {
-                "id": "n4",
-                "value": "4",
-                "children": []
-              },
-              {
-                "id": "n5",
-                "value": "5",
-                "children": []
-              },
-              {
-                "id": "n6",
-                "value": "6",
-                "children": []
-              }
-            ]
+        "tree": {
+          "nodeStates": {
+            "n1": { "highlight": "active" }
           }
         }
-      ],
-      "duration": 900
+      }
     },
     {
       "index": 2,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Enqueue children 2,3",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "queue",
-          "params": {
-            "items": [
-              "2",
-              "3"
-            ],
-            "highlight": 0
-          }
+      "explanation": {
+        "heading": "Level Grouping",
+        "body": "At each outer loop, `level_size` snapshots current queue length to isolate one level."
+      },
+      "activeText": "Enqueue children 2,3",
+      "canvas": {
+        "queue": {
+          "items": [
+            {
+              "id": "item-0",
+              "value": "2"
+            },
+            {
+              "id": "item-1",
+              "value": "3"
+            }
+          ]
         }
-      ],
-      "duration": 900
+      }
     },
     {
       "index": 3,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Dequeue node 2",
-            "style": "highlight"
-          }
+      "explanation": {
+        "heading": "Step 3",
+        "body": "State updated."
+      },
+      "activeText": "Dequeue node 2",
+      "canvas": {
+        "queue": {
+          "items": [
+            {
+              "id": "item-0",
+              "value": "3"
+            }
+          ]
         },
-        {
-          "target": "queue",
-          "params": {
-            "items": [
-              "3"
-            ],
-            "highlight": 0
-          }
-        },
-        {
-          "target": "tree",
-          "params": {
-            "rootId": "n1",
-            "nodes": [
-              {
-                "id": "n1",
-                "value": "1",
-                "children": [
-                  "n2",
-                  "n3"
-                ],
-                "highlight": "found"
-              },
-              {
-                "id": "n2",
-                "value": "2",
-                "children": [
-                  "n4",
-                  "n5"
-                ],
-                "highlight": "active"
-              },
-              {
-                "id": "n3",
-                "value": "3",
-                "children": [
-                  "n6"
-                ]
-              },
-              {
-                "id": "n4",
-                "value": "4",
-                "children": []
-              },
-              {
-                "id": "n5",
-                "value": "5",
-                "children": []
-              },
-              {
-                "id": "n6",
-                "value": "6",
-                "children": []
-              }
-            ]
+        "tree": {
+          "nodeStates": {
+            "n1": { "highlight": "found" },
+            "n2": { "highlight": "active" }
           }
         }
-      ],
-      "duration": 900
+      }
     },
     {
       "index": 4,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Enqueue children 4,5",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "queue",
-          "params": {
-            "items": [
-              "3",
-              "4",
-              "5"
-            ],
-            "highlight": 0
-          }
+      "explanation": {
+        "heading": "Step 4",
+        "body": "State updated."
+      },
+      "activeText": "Enqueue children 4,5",
+      "canvas": {
+        "queue": {
+          "items": [
+            {
+              "id": "item-0",
+              "value": "3"
+            },
+            {
+              "id": "item-1",
+              "value": "4"
+            },
+            {
+              "id": "item-2",
+              "value": "5"
+            }
+          ]
         }
-      ],
-      "duration": 900
+      }
     },
     {
       "index": 5,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Dequeue node 3",
-            "style": "highlight"
-          }
+      "explanation": {
+        "heading": "Step 5",
+        "body": "State updated."
+      },
+      "activeText": "Dequeue node 3",
+      "canvas": {
+        "queue": {
+          "items": [
+            {
+              "id": "item-0",
+              "value": "4"
+            },
+            {
+              "id": "item-1",
+              "value": "5"
+            }
+          ]
         },
-        {
-          "target": "queue",
-          "params": {
-            "items": [
-              "4",
-              "5"
-            ],
-            "highlight": 0
-          }
-        },
-        {
-          "target": "tree",
-          "params": {
-            "rootId": "n1",
-            "nodes": [
-              {
-                "id": "n1",
-                "value": "1",
-                "children": [
-                  "n2",
-                  "n3"
-                ],
-                "highlight": "found"
-              },
-              {
-                "id": "n2",
-                "value": "2",
-                "children": [
-                  "n4",
-                  "n5"
-                ],
-                "highlight": "found"
-              },
-              {
-                "id": "n3",
-                "value": "3",
-                "children": [
-                  "n6"
-                ],
-                "highlight": "active"
-              },
-              {
-                "id": "n4",
-                "value": "4",
-                "children": []
-              },
-              {
-                "id": "n5",
-                "value": "5",
-                "children": []
-              },
-              {
-                "id": "n6",
-                "value": "6",
-                "children": []
-              }
-            ]
+        "tree": {
+          "nodeStates": {
+            "n1": { "highlight": "found" },
+            "n2": { "highlight": "found" },
+            "n3": { "highlight": "active" }
           }
         }
-      ],
-      "duration": 900
+      }
     },
     {
       "index": 6,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Enqueue child 6",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "queue",
-          "params": {
-            "items": [
-              "4",
-              "5",
-              "6"
-            ],
-            "highlight": 0
-          }
+      "explanation": {
+        "heading": "Step 6",
+        "body": "State updated."
+      },
+      "activeText": "Enqueue child 6",
+      "canvas": {
+        "queue": {
+          "items": [
+            {
+              "id": "item-0",
+              "value": "4"
+            },
+            {
+              "id": "item-1",
+              "value": "5"
+            },
+            {
+              "id": "item-2",
+              "value": "6"
+            }
+          ]
         }
-      ],
-      "duration": 900
+      }
     },
     {
       "index": 7,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Process leaf nodes 4,5,6",
-            "style": "highlight"
-          }
+      "explanation": {
+        "heading": "Step 7",
+        "body": "State updated."
+      },
+      "activeText": "Process leaf nodes 4,5,6",
+      "canvas": {
+        "queue": {
+          "items": []
         },
-        {
-          "target": "queue",
-          "params": {
-            "items": [],
-            "highlight": 0
+        "tree": {
+          "nodeStates": {
+            "n1": { "highlight": "found" },
+            "n2": { "highlight": "found" },
+            "n3": { "highlight": "found" },
+            "n4": { "highlight": "found" },
+            "n5": { "highlight": "found" },
+            "n6": { "highlight": "found" }
           }
         }
-      ],
-      "duration": 1000
+      }
     },
     {
       "index": 8,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Collected levels: [1],[2,3],[4,5,6]",
-            "style": "success"
-          }
-        }
-      ],
-      "duration": 900
+      "explanation": {
+        "heading": "Traversal Order",
+        "body": "Final level order is `[[1], [2,3], [4,5,6]]`."
+      },
+      "activeText": "Collected levels: [1],[2,3],[4,5,6]"
     },
     {
       "index": 9,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "BFS complete",
-            "style": "default"
-          }
-        }
-      ],
-      "duration": 800
-    }
-  ],
-  "controls": [],
-  "explanation": [
-    {
-      "heading": "Queue Drives BFS",
-      "body": "A queue ensures nodes are visited in first-in, first-out order per level.",
-      "appearsAtStep": 0
-    },
-    {
-      "heading": "Level Grouping",
-      "body": "At each outer loop, `level_size` snapshots current queue length to isolate one level.",
-      "appearsAtStep": 2
-    },
-    {
-      "heading": "Traversal Order",
-      "body": "Final level order is `[[1], [2,3], [4,5,6]]`.",
-      "appearsAtStep": 8
+      "explanation": {
+        "heading": "Step 9",
+        "body": "State updated."
+      },
+      "activeText": "BFS complete"
     }
   ],
   "popups": [

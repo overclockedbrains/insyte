@@ -1,21 +1,16 @@
 {
+  "$schema": "/scene-schema.json",
   "id": "dns-resolution",
   "title": "DNS Resolution",
   "type": "concept",
   "layout": "text-left-canvas-right",
   "description": "Watch how a domain name like insyte.amanarya.com gets resolved to an IP address — from browser cache to root servers and back.",
   "category": "Networking",
-  "tags": [
-    "dns",
-    "networking",
-    "caching",
-    "ttl",
-    "http"
-  ],
-  "visuals": [
+  "canvas": [
     {
       "id": "dns-system",
       "type": "system-diagram",
+      "layoutHint": "dagre-LR",
       "label": "DNS Resolution Chain",
       "initialState": {
         "components": [
@@ -23,7 +18,7 @@
             "id": "browser",
             "label": "Browser",
             "icon": "web",
-            "status": "normal"
+            "status": "active"
           },
           {
             "id": "resolver",
@@ -52,843 +47,41 @@
         ],
         "connections": [
           {
+            "id": "conn-browser-resolver",
             "from": "browser",
             "to": "resolver",
             "active": false
           },
           {
+            "id": "conn-resolver-root-ns",
             "from": "resolver",
             "to": "root-ns",
             "active": false
           },
           {
+            "id": "conn-resolver-tld-ns",
             "from": "resolver",
             "to": "tld-ns",
             "active": false
           },
           {
+            "id": "conn-resolver-auth-ns",
             "from": "resolver",
             "to": "auth-ns",
             "active": false
           }
         ]
-      },
-      "layoutHint": "dagre-LR"
-    },
-    {
-      "id": "cache-status",
-      "type": "text-badge",
-      "label": "Cache Status",
-      "initialState": {
-        "text": "Looking up: insyte.amanarya.com",
-        "style": "default"
-      },
-      "slot": "top-center"
-    },
-    {
-      "id": "latency",
-      "type": "counter",
-      "label": "Total Latency",
-      "initialState": {
-        "value": 0,
-        "label": "Latency (ms)",
-        "color": "secondary"
-      },
-      "slot": "bottom-left"
+      }
     }
   ],
-  "steps": [
+  "activeText": {
+    "initialValue": "Browser: lookup insyte.amanarya.com → local cache MISS"
+  },
+  "hud": [
     {
-      "index": 0,
-      "actions": [
-        {
-          "target": "cache-status",
-          "params": {
-            "text": "Browser: lookup insyte.amanarya.com → local cache MISS",
-            "style": "error"
-          }
-        },
-        {
-          "target": "dns-system",
-          "params": {
-            "components": [
-              {
-                "id": "browser",
-                "label": "Browser",
-                "icon": "web",
-                "status": "active"
-              },
-              {
-                "id": "resolver",
-                "label": "Recursive Resolver",
-                "icon": "compute",
-                "status": "normal"
-              },
-              {
-                "id": "root-ns",
-                "label": "Root NS",
-                "icon": "database",
-                "status": "normal"
-              },
-              {
-                "id": "tld-ns",
-                "label": ".com TLD NS",
-                "icon": "database",
-                "status": "normal"
-              },
-              {
-                "id": "auth-ns",
-                "label": "Authoritative NS",
-                "icon": "database",
-                "status": "normal"
-              }
-            ],
-            "connections": [
-              {
-                "from": "browser",
-                "to": "resolver",
-                "active": false
-              },
-              {
-                "from": "resolver",
-                "to": "root-ns",
-                "active": false
-              },
-              {
-                "from": "resolver",
-                "to": "tld-ns",
-                "active": false
-              },
-              {
-                "from": "resolver",
-                "to": "auth-ns",
-                "active": false
-              }
-            ]
-          }
-        }
-      ],
-      "duration": 1800
-    },
-    {
-      "index": 1,
-      "actions": [
-        {
-          "target": "cache-status",
-          "params": {
-            "text": "Query sent to Recursive Resolver — resolver cache MISS",
-            "style": "error"
-          }
-        },
-        {
-          "target": "dns-system",
-          "params": {
-            "components": [
-              {
-                "id": "browser",
-                "label": "Browser",
-                "icon": "web",
-                "status": "active"
-              },
-              {
-                "id": "resolver",
-                "label": "Recursive Resolver",
-                "icon": "compute",
-                "status": "active"
-              },
-              {
-                "id": "root-ns",
-                "label": "Root NS",
-                "icon": "database",
-                "status": "normal"
-              },
-              {
-                "id": "tld-ns",
-                "label": ".com TLD NS",
-                "icon": "database",
-                "status": "normal"
-              },
-              {
-                "id": "auth-ns",
-                "label": "Authoritative NS",
-                "icon": "database",
-                "status": "normal"
-              }
-            ],
-            "connections": [
-              {
-                "from": "browser",
-                "to": "resolver",
-                "active": true
-              },
-              {
-                "from": "resolver",
-                "to": "root-ns",
-                "active": false
-              },
-              {
-                "from": "resolver",
-                "to": "tld-ns",
-                "active": false
-              },
-              {
-                "from": "resolver",
-                "to": "auth-ns",
-                "active": false
-              }
-            ]
-          }
-        },
-        {
-          "target": "latency",
-          "params": {
-            "value": 5,
-            "label": "Latency (ms)",
-            "color": "secondary"
-          }
-        }
-      ],
-      "duration": 1600
-    },
-    {
-      "index": 2,
-      "actions": [
-        {
-          "target": "cache-status",
-          "params": {
-            "text": "Resolver asks Root NS: Who handles .com?",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "dns-system",
-          "params": {
-            "components": [
-              {
-                "id": "browser",
-                "label": "Browser",
-                "icon": "web",
-                "status": "normal"
-              },
-              {
-                "id": "resolver",
-                "label": "Recursive Resolver",
-                "icon": "compute",
-                "status": "active"
-              },
-              {
-                "id": "root-ns",
-                "label": "Root NS",
-                "icon": "database",
-                "status": "active"
-              },
-              {
-                "id": "tld-ns",
-                "label": ".com TLD NS",
-                "icon": "database",
-                "status": "normal"
-              },
-              {
-                "id": "auth-ns",
-                "label": "Authoritative NS",
-                "icon": "database",
-                "status": "normal"
-              }
-            ],
-            "connections": [
-              {
-                "from": "browser",
-                "to": "resolver",
-                "active": false
-              },
-              {
-                "from": "resolver",
-                "to": "root-ns",
-                "active": true
-              },
-              {
-                "from": "resolver",
-                "to": "tld-ns",
-                "active": false
-              },
-              {
-                "from": "resolver",
-                "to": "auth-ns",
-                "active": false
-              }
-            ]
-          }
-        },
-        {
-          "target": "latency",
-          "params": {
-            "value": 35,
-            "label": "Latency (ms)",
-            "color": "secondary"
-          }
-        }
-      ],
-      "duration": 1800
-    },
-    {
-      "index": 3,
-      "actions": [
-        {
-          "target": "cache-status",
-          "params": {
-            "text": "Root NS replies: .com TLD NS is at a Verisign .com name server",
-            "style": "success"
-          }
-        },
-        {
-          "target": "dns-system",
-          "params": {
-            "components": [
-              {
-                "id": "browser",
-                "label": "Browser",
-                "icon": "web",
-                "status": "normal"
-              },
-              {
-                "id": "resolver",
-                "label": "Recursive Resolver",
-                "icon": "compute",
-                "status": "active"
-              },
-              {
-                "id": "root-ns",
-                "label": "Root NS ✓",
-                "icon": "database",
-                "status": "normal"
-              },
-              {
-                "id": "tld-ns",
-                "label": ".com TLD NS",
-                "icon": "database",
-                "status": "active"
-              },
-              {
-                "id": "auth-ns",
-                "label": "Authoritative NS",
-                "icon": "database",
-                "status": "normal"
-              }
-            ],
-            "connections": [
-              {
-                "from": "browser",
-                "to": "resolver",
-                "active": false
-              },
-              {
-                "from": "resolver",
-                "to": "root-ns",
-                "active": false
-              },
-              {
-                "from": "resolver",
-                "to": "tld-ns",
-                "active": true
-              },
-              {
-                "from": "resolver",
-                "to": "auth-ns",
-                "active": false
-              }
-            ]
-          }
-        },
-        {
-          "target": "latency",
-          "params": {
-            "value": 70,
-            "label": "Latency (ms)",
-            "color": "secondary"
-          }
-        }
-      ],
-      "duration": 1800
-    },
-    {
-      "index": 4,
-      "actions": [
-        {
-          "target": "cache-status",
-          "params": {
-            "text": "TLD NS replies: amanarya.com NS is at ns1.vercel-dns.com",
-            "style": "success"
-          }
-        },
-        {
-          "target": "dns-system",
-          "params": {
-            "components": [
-              {
-                "id": "browser",
-                "label": "Browser",
-                "icon": "web",
-                "status": "normal"
-              },
-              {
-                "id": "resolver",
-                "label": "Recursive Resolver",
-                "icon": "compute",
-                "status": "active"
-              },
-              {
-                "id": "root-ns",
-                "label": "Root NS ✓",
-                "icon": "database",
-                "status": "normal"
-              },
-              {
-                "id": "tld-ns",
-                "label": ".com TLD NS ✓",
-                "icon": "database",
-                "status": "normal"
-              },
-              {
-                "id": "auth-ns",
-                "label": "Authoritative NS",
-                "icon": "database",
-                "status": "active"
-              }
-            ],
-            "connections": [
-              {
-                "from": "browser",
-                "to": "resolver",
-                "active": false
-              },
-              {
-                "from": "resolver",
-                "to": "root-ns",
-                "active": false
-              },
-              {
-                "from": "resolver",
-                "to": "tld-ns",
-                "active": false
-              },
-              {
-                "from": "resolver",
-                "to": "auth-ns",
-                "active": true
-              }
-            ]
-          }
-        },
-        {
-          "target": "latency",
-          "params": {
-            "value": 110,
-            "label": "Latency (ms)",
-            "color": "secondary"
-          }
-        }
-      ],
-      "duration": 1800
-    },
-    {
-      "index": 5,
-      "actions": [
-        {
-          "target": "cache-status",
-          "params": {
-            "text": "Authoritative NS returns: insyte.amanarya.com → 76.76.21.21",
-            "style": "success"
-          }
-        },
-        {
-          "target": "dns-system",
-          "params": {
-            "components": [
-              {
-                "id": "browser",
-                "label": "Browser",
-                "icon": "web",
-                "status": "active"
-              },
-              {
-                "id": "resolver",
-                "label": "Recursive Resolver ✓",
-                "icon": "compute",
-                "status": "active"
-              },
-              {
-                "id": "root-ns",
-                "label": "Root NS ✓",
-                "icon": "database",
-                "status": "normal"
-              },
-              {
-                "id": "tld-ns",
-                "label": ".com TLD NS ✓",
-                "icon": "database",
-                "status": "normal"
-              },
-              {
-                "id": "auth-ns",
-                "label": "Auth NS ✓",
-                "icon": "database",
-                "status": "normal"
-              }
-            ],
-            "connections": [
-              {
-                "from": "browser",
-                "to": "resolver",
-                "active": true
-              },
-              {
-                "from": "resolver",
-                "to": "root-ns",
-                "active": false
-              },
-              {
-                "from": "resolver",
-                "to": "tld-ns",
-                "active": false
-              },
-              {
-                "from": "resolver",
-                "to": "auth-ns",
-                "active": false
-              }
-            ]
-          }
-        },
-        {
-          "target": "latency",
-          "params": {
-            "value": 145,
-            "label": "Latency (ms)",
-            "color": "secondary"
-          }
-        }
-      ],
-      "duration": 1800
-    },
-    {
-      "index": 6,
-      "actions": [
-        {
-          "target": "cache-status",
-          "params": {
-            "text": "IP cached by browser (TTL: 300s) and resolver",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "dns-system",
-          "params": {
-            "components": [
-              {
-                "id": "browser",
-                "label": "Browser (cached)",
-                "icon": "web",
-                "status": "active"
-              },
-              {
-                "id": "resolver",
-                "label": "Resolver (cached)",
-                "icon": "compute",
-                "status": "active"
-              },
-              {
-                "id": "root-ns",
-                "label": "Root NS",
-                "icon": "database",
-                "status": "normal"
-              },
-              {
-                "id": "tld-ns",
-                "label": ".com TLD NS",
-                "icon": "database",
-                "status": "normal"
-              },
-              {
-                "id": "auth-ns",
-                "label": "Authoritative NS",
-                "icon": "database",
-                "status": "normal"
-              }
-            ],
-            "connections": [
-              {
-                "from": "browser",
-                "to": "resolver",
-                "active": false
-              },
-              {
-                "from": "resolver",
-                "to": "root-ns",
-                "active": false
-              },
-              {
-                "from": "resolver",
-                "to": "tld-ns",
-                "active": false
-              },
-              {
-                "from": "resolver",
-                "to": "auth-ns",
-                "active": false
-              }
-            ]
-          }
-        },
-        {
-          "target": "latency",
-          "params": {
-            "value": 150,
-            "label": "Latency (ms)",
-            "color": "secondary"
-          }
-        }
-      ],
-      "duration": 2000
-    },
-    {
-      "index": 7,
-      "actions": [
-        {
-          "target": "cache-status",
-          "params": {
-            "text": "Second request: browser cache HIT → instant! (0ms)",
-            "style": "success"
-          }
-        },
-        {
-          "target": "dns-system",
-          "params": {
-            "components": [
-              {
-                "id": "browser",
-                "label": "Browser ✓ HIT",
-                "icon": "web",
-                "status": "active"
-              },
-              {
-                "id": "resolver",
-                "label": "Resolver (skipped)",
-                "icon": "compute",
-                "status": "normal"
-              },
-              {
-                "id": "root-ns",
-                "label": "Root NS (skipped)",
-                "icon": "database",
-                "status": "normal"
-              },
-              {
-                "id": "tld-ns",
-                "label": ".com TLD (skipped)",
-                "icon": "database",
-                "status": "normal"
-              },
-              {
-                "id": "auth-ns",
-                "label": "Auth NS (skipped)",
-                "icon": "database",
-                "status": "normal"
-              }
-            ],
-            "connections": [
-              {
-                "from": "browser",
-                "to": "resolver",
-                "active": false
-              },
-              {
-                "from": "resolver",
-                "to": "root-ns",
-                "active": false
-              },
-              {
-                "from": "resolver",
-                "to": "tld-ns",
-                "active": false
-              },
-              {
-                "from": "resolver",
-                "to": "auth-ns",
-                "active": false
-              }
-            ]
-          }
-        },
-        {
-          "target": "latency",
-          "params": {
-            "value": 0,
-            "label": "Latency (ms)",
-            "color": "secondary"
-          }
-        }
-      ],
-      "duration": 1800
-    },
-    {
-      "index": 8,
-      "actions": [
-        {
-          "target": "cache-status",
-          "params": {
-            "text": "TTL expired (300s elapsed) — cache cleared",
-            "style": "error"
-          }
-        },
-        {
-          "target": "dns-system",
-          "params": {
-            "components": [
-              {
-                "id": "browser",
-                "label": "Browser (expired)",
-                "icon": "web",
-                "status": "normal"
-              },
-              {
-                "id": "resolver",
-                "label": "Recursive Resolver",
-                "icon": "compute",
-                "status": "normal"
-              },
-              {
-                "id": "root-ns",
-                "label": "Root NS",
-                "icon": "database",
-                "status": "normal"
-              },
-              {
-                "id": "tld-ns",
-                "label": ".com TLD NS",
-                "icon": "database",
-                "status": "normal"
-              },
-              {
-                "id": "auth-ns",
-                "label": "Authoritative NS",
-                "icon": "database",
-                "status": "normal"
-              }
-            ],
-            "connections": [
-              {
-                "from": "browser",
-                "to": "resolver",
-                "active": false
-              },
-              {
-                "from": "resolver",
-                "to": "root-ns",
-                "active": false
-              },
-              {
-                "from": "resolver",
-                "to": "tld-ns",
-                "active": false
-              },
-              {
-                "from": "resolver",
-                "to": "auth-ns",
-                "active": false
-              }
-            ]
-          }
-        },
-        {
-          "target": "latency",
-          "params": {
-            "value": 0,
-            "label": "Latency (ms)",
-            "color": "secondary"
-          }
-        }
-      ],
-      "duration": 1800
-    },
-    {
-      "index": 9,
-      "actions": [
-        {
-          "target": "cache-status",
-          "params": {
-            "text": "Fresh lookup needed — full resolution chain repeats",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "dns-system",
-          "params": {
-            "components": [
-              {
-                "id": "browser",
-                "label": "Browser",
-                "icon": "web",
-                "status": "active"
-              },
-              {
-                "id": "resolver",
-                "label": "Recursive Resolver",
-                "icon": "compute",
-                "status": "active"
-              },
-              {
-                "id": "root-ns",
-                "label": "Root NS",
-                "icon": "database",
-                "status": "active"
-              },
-              {
-                "id": "tld-ns",
-                "label": ".com TLD NS",
-                "icon": "database",
-                "status": "active"
-              },
-              {
-                "id": "auth-ns",
-                "label": "Authoritative NS",
-                "icon": "database",
-                "status": "active"
-              }
-            ],
-            "connections": [
-              {
-                "from": "browser",
-                "to": "resolver",
-                "active": true
-              },
-              {
-                "from": "resolver",
-                "to": "root-ns",
-                "active": true
-              },
-              {
-                "from": "resolver",
-                "to": "tld-ns",
-                "active": true
-              },
-              {
-                "from": "resolver",
-                "to": "auth-ns",
-                "active": true
-              }
-            ]
-          }
-        },
-        {
-          "target": "latency",
-          "params": {
-            "value": 150,
-            "label": "Latency (ms)",
-            "color": "secondary"
-          }
-        }
-      ],
-      "duration": 2000
+      "id": "latency",
+      "label": "Total Latency",
+      "initialValue": 0
     }
   ],
   "controls": [
@@ -930,33 +123,260 @@
       }
     }
   ],
-  "explanation": [
+  "steps": [
     {
-      "heading": "What is DNS?",
-      "body": "DNS (Domain Name System) is the internet's phone book. Humans use names like `insyte.amanarya.com`; computers need IP addresses like `76.76.21.21`.\n\nDNS translates between the two. Every time you visit a website, a DNS lookup happens (unless it's cached).",
-      "appearsAtStep": 0
+      "index": 1,
+      "explanation": {
+        "heading": "The Recursive Resolver",
+        "body": "Your ISP or a public DNS service (like `1.1.1.1` or `8.8.8.8`) runs a **recursive resolver** — it does the legwork of querying multiple name servers on your behalf and returns the final answer.\n\nWithout caching, a full lookup involves **3 round-trips** to 3 different servers.",
+        "callout": "Cloudflare's 1.1.1.1 and Google's 8.8.8.8 are the most popular public recursive resolvers."
+      },
+      "activeText": "Query sent to Recursive Resolver — resolver cache MISS",
+      "hud": {
+        "latency": 5
+      },
+      "canvas": {
+        "dns-system": {
+          "componentStates": {
+            "browser": { "status": "active" },
+            "resolver": { "status": "active" },
+            "root-ns": { "status": "normal" },
+            "tld-ns": { "status": "normal" },
+            "auth-ns": { "status": "normal" }
+          },
+          "connectionStates": {
+            "conn-browser-resolver": { "active": true },
+            "conn-resolver-root-ns": { "active": false },
+            "conn-resolver-tld-ns": { "active": false },
+            "conn-resolver-auth-ns": { "active": false }
+          }
+        }
+      }
     },
     {
-      "heading": "The Recursive Resolver",
-      "body": "Your ISP or a public DNS service (like `1.1.1.1` or `8.8.8.8`) runs a **recursive resolver** — it does the legwork of querying multiple name servers on your behalf and returns the final answer.\n\nWithout caching, a full lookup involves **3 round-trips** to 3 different servers.",
-      "appearsAtStep": 1,
-      "callout": "Cloudflare's 1.1.1.1 and Google's 8.8.8.8 are the most popular public recursive resolvers."
+      "index": 2,
+      "explanation": {
+        "heading": "The DNS Hierarchy",
+        "body": "DNS is organized as a tree:\n- **Root (`.`)**: 13 root server clusters worldwide, knows where all TLD servers are\n- **TLD (`.dev`, `.com`, `.io`)**: knows which authoritative NS handles each domain\n- **Authoritative NS**: the definitive answer — stores actual DNS records like A, CNAME, MX"
+      },
+      "activeText": "Resolver asks Root NS: Who handles .com?",
+      "hud": {
+        "latency": 35
+      },
+      "canvas": {
+        "dns-system": {
+          "componentStates": {
+            "browser": { "status": "normal" },
+            "resolver": { "status": "active" },
+            "root-ns": { "status": "active" },
+            "tld-ns": { "status": "normal" },
+            "auth-ns": { "status": "normal" }
+          },
+          "connectionStates": {
+            "conn-browser-resolver": { "active": false },
+            "conn-resolver-root-ns": { "active": true },
+            "conn-resolver-tld-ns": { "active": false },
+            "conn-resolver-auth-ns": { "active": false }
+          }
+        }
+      }
     },
     {
-      "heading": "The DNS Hierarchy",
-      "body": "DNS is organized as a tree:\n- **Root (`.`)**: 13 root server clusters worldwide, knows where all TLD servers are\n- **TLD (`.dev`, `.com`, `.io`)**: knows which authoritative NS handles each domain\n- **Authoritative NS**: the definitive answer — stores actual DNS records like A, CNAME, MX",
-      "appearsAtStep": 2
+      "index": 3,
+      "explanation": {
+        "heading": "Step 3",
+        "body": "State updated."
+      },
+      "activeText": "Root NS replies: .com TLD NS is at a Verisign .com name server",
+      "hud": {
+        "latency": 70
+      },
+      "canvas": {
+        "dns-system": {
+          "componentStates": {
+            "browser": { "status": "normal" },
+            "resolver": { "status": "active" },
+            "root-ns": { "status": "normal" },
+            "tld-ns": { "status": "active" },
+            "auth-ns": { "status": "normal" }
+          },
+          "connectionStates": {
+            "conn-browser-resolver": { "active": false },
+            "conn-resolver-root-ns": { "active": false },
+            "conn-resolver-tld-ns": { "active": true },
+            "conn-resolver-auth-ns": { "active": false }
+          }
+        }
+      }
     },
     {
-      "heading": "Caching — The Real Performance Win",
-      "body": "A cold DNS lookup can take 100–300ms. But the result is **cached** at both the resolver and browser levels.\n\nSubsequent requests to the same domain are served from cache in **< 1ms** — a 300× speedup. Most domains have a TTL (Time to Live) of 300–3600 seconds.",
-      "appearsAtStep": 6,
-      "callout": "This is why DNS changes take time to propagate — existing cached entries must expire first."
+      "index": 4,
+      "explanation": {
+        "heading": "Step 4",
+        "body": "State updated."
+      },
+      "activeText": "TLD NS replies: amanarya.com NS is at ns1.vercel-dns.com",
+      "hud": {
+        "latency": 110
+      },
+      "canvas": {
+        "dns-system": {
+          "componentStates": {
+            "browser": { "status": "normal" },
+            "resolver": { "status": "active" },
+            "root-ns": { "status": "normal" },
+            "tld-ns": { "status": "normal" },
+            "auth-ns": { "status": "active" }
+          },
+          "connectionStates": {
+            "conn-browser-resolver": { "active": false },
+            "conn-resolver-root-ns": { "active": false },
+            "conn-resolver-tld-ns": { "active": false },
+            "conn-resolver-auth-ns": { "active": true }
+          }
+        }
+      }
     },
     {
-      "heading": "TTL and Cache Expiry",
-      "body": "Every DNS record has a **TTL** (Time to Live) in seconds. When it hits zero, the cached entry is discarded and the next request triggers a full re-resolution.\n\nChoosing TTL is a trade-off: **low TTL** = changes propagate fast but more DNS traffic; **high TTL** = fewer queries but slow propagation.",
-      "appearsAtStep": 8
+      "index": 5,
+      "explanation": {
+        "heading": "Step 5",
+        "body": "State updated."
+      },
+      "activeText": "Authoritative NS returns: insyte.amanarya.com → 76.76.21.21",
+      "hud": {
+        "latency": 145
+      },
+      "canvas": {
+        "dns-system": {
+          "componentStates": {
+            "browser": { "status": "active" },
+            "resolver": { "status": "active" },
+            "root-ns": { "status": "normal" },
+            "tld-ns": { "status": "normal" },
+            "auth-ns": { "status": "normal" }
+          },
+          "connectionStates": {
+            "conn-browser-resolver": { "active": true },
+            "conn-resolver-root-ns": { "active": false },
+            "conn-resolver-tld-ns": { "active": false },
+            "conn-resolver-auth-ns": { "active": false }
+          }
+        }
+      }
+    },
+    {
+      "index": 6,
+      "explanation": {
+        "heading": "Caching — The Real Performance Win",
+        "body": "A cold DNS lookup can take 100–300ms. But the result is **cached** at both the resolver and browser levels.\n\nSubsequent requests to the same domain are served from cache in **< 1ms** — a 300× speedup. Most domains have a TTL (Time to Live) of 300–3600 seconds.",
+        "callout": "This is why DNS changes take time to propagate — existing cached entries must expire first."
+      },
+      "activeText": "IP cached by browser (TTL: 300s) and resolver",
+      "hud": {
+        "latency": 150
+      },
+      "canvas": {
+        "dns-system": {
+          "componentStates": {
+            "browser": { "status": "active" },
+            "resolver": { "status": "active" },
+            "root-ns": { "status": "normal" },
+            "tld-ns": { "status": "normal" },
+            "auth-ns": { "status": "normal" }
+          },
+          "connectionStates": {
+            "conn-browser-resolver": { "active": false },
+            "conn-resolver-root-ns": { "active": false },
+            "conn-resolver-tld-ns": { "active": false },
+            "conn-resolver-auth-ns": { "active": false }
+          }
+        }
+      }
+    },
+    {
+      "index": 7,
+      "explanation": {
+        "heading": "Step 7",
+        "body": "State updated."
+      },
+      "activeText": "Second request: browser cache HIT → instant! (0ms)",
+      "hud": {
+        "latency": 0
+      },
+      "canvas": {
+        "dns-system": {
+          "componentStates": {
+            "browser": { "status": "active" },
+            "resolver": { "status": "normal" },
+            "root-ns": { "status": "normal" },
+            "tld-ns": { "status": "normal" },
+            "auth-ns": { "status": "normal" }
+          },
+          "connectionStates": {
+            "conn-browser-resolver": { "active": false },
+            "conn-resolver-root-ns": { "active": false },
+            "conn-resolver-tld-ns": { "active": false },
+            "conn-resolver-auth-ns": { "active": false }
+          }
+        }
+      }
+    },
+    {
+      "index": 8,
+      "explanation": {
+        "heading": "TTL and Cache Expiry",
+        "body": "Every DNS record has a **TTL** (Time to Live) in seconds. When it hits zero, the cached entry is discarded and the next request triggers a full re-resolution.\n\nChoosing TTL is a trade-off: **low TTL** = changes propagate fast but more DNS traffic; **high TTL** = fewer queries but slow propagation."
+      },
+      "activeText": "TTL expired (300s elapsed) — cache cleared",
+      "hud": {
+        "latency": 0
+      },
+      "canvas": {
+        "dns-system": {
+          "componentStates": {
+            "browser": { "status": "normal" },
+            "resolver": { "status": "normal" },
+            "root-ns": { "status": "normal" },
+            "tld-ns": { "status": "normal" },
+            "auth-ns": { "status": "normal" }
+          },
+          "connectionStates": {
+            "conn-browser-resolver": { "active": false },
+            "conn-resolver-root-ns": { "active": false },
+            "conn-resolver-tld-ns": { "active": false },
+            "conn-resolver-auth-ns": { "active": false }
+          }
+        }
+      }
+    },
+    {
+      "index": 9,
+      "explanation": {
+        "heading": "Step 9",
+        "body": "State updated."
+      },
+      "activeText": "Fresh lookup needed — full resolution chain repeats",
+      "hud": {
+        "latency": 150
+      },
+      "canvas": {
+        "dns-system": {
+          "componentStates": {
+            "browser": { "status": "active" },
+            "resolver": { "status": "active" },
+            "root-ns": { "status": "active" },
+            "tld-ns": { "status": "active" },
+            "auth-ns": { "status": "active" }
+          },
+          "connectionStates": {
+            "conn-browser-resolver": { "active": true },
+            "conn-resolver-root-ns": { "active": true },
+            "conn-resolver-tld-ns": { "active": true },
+            "conn-resolver-auth-ns": { "active": true }
+          }
+        }
+      }
     }
   ],
   "popups": [
@@ -964,7 +384,7 @@
       "id": "pop-miss-browser",
       "attachTo": "dns-system",
       "text": "Cache MISS — no local record found",
-      "showAtStep": 0,
+      "showAtStep": 1,
       "hideAtStep": 1,
       "style": "warning"
     },
@@ -986,7 +406,7 @@
     },
     {
       "id": "pop-ttl",
-      "attachTo": "cache-status",
+      "attachTo": "dns-system",
       "text": "Low TTL = fast propagation, high TTL = fewer queries",
       "showAtStep": 8,
       "hideAtStep": 9,

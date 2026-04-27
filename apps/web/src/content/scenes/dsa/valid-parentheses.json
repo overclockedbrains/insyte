@@ -1,15 +1,11 @@
 {
+  "$schema": "/scene-schema.json",
   "id": "valid-parentheses",
   "title": "Valid Parentheses",
   "type": "dsa-trace",
   "layout": "code-left-canvas-right",
   "description": "Validate bracket strings using a stack.",
   "category": "Data Structures & Algorithms",
-  "tags": [
-    "stack",
-    "parentheses",
-    "strings"
-  ],
   "code": {
     "language": "python",
     "source": "def is_valid(s):\n    pairs = {')': '(', ']': '[', '}': '{'}\n    stack = []\n    for ch in s:\n        if ch in '([{':\n            stack.append(ch)\n        else:\n            if not stack or stack[-1] != pairs[ch]:\n                return False\n            stack.pop()\n    return len(stack) == 0\n\nfinalResult = is_valid('()[]{}')\n",
@@ -24,406 +20,191 @@
       10
     ]
   },
-  "visuals": [
+  "canvas": [
     {
       "id": "input",
-      "type": "array",
+      "type": "linear",
+      "variant": "array",
+      "layoutHint": "linear-H",
       "label": "Input chars",
       "initialState": {
-        "cells": [
-          {
-            "value": "(",
-            "highlight": "default"
-          },
-          {
-            "value": ")",
-            "highlight": "default"
-          },
-          {
-            "value": "[",
-            "highlight": "default"
-          },
-          {
-            "value": "]",
-            "highlight": "default"
-          },
-          {
-            "value": "{",
-            "highlight": "default"
-          },
-          {
-            "value": "}",
-            "highlight": "default"
-          }
+        "items": [
+          { "id": "a0", "value": "(" },
+          { "id": "a1", "value": ")" },
+          { "id": "a2", "value": "[" },
+          { "id": "a3", "value": "]" },
+          { "id": "a4", "value": "{" },
+          { "id": "a5", "value": "}" }
         ]
-      },
-      "layoutHint": "linear-H"
+      }
     },
     {
       "id": "stack",
-      "type": "stack",
+      "type": "linear",
+      "variant": "stack",
+      "layoutHint": "linear-V",
       "label": "Stack",
       "initialState": {
         "items": []
-      },
-      "layoutHint": "linear-V"
-    },
-    {
-      "id": "op",
-      "type": "text-badge",
-      "label": "Operation",
-      "initialState": {
-        "text": "Scan left to right",
-        "style": "default"
-      },
-      "slot": "top-center"
+      }
     }
   ],
+  "activeText": {
+    "initialValue": "Scan left to right"
+  },
+  "controls": [],
   "steps": [
     {
-      "index": 0,
-      "actions": [],
-      "duration": 900
-    },
-    {
       "index": 1,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Read '(' -> push",
-            "style": "highlight"
-          }
+      "explanation": {
+        "heading": "Step 1",
+        "body": "State updated."
+      },
+      "activeText": "Read '(' -> push",
+      "canvas": {
+        "input": {
+          "items": [
+            { "id": "a0", "value": "(", "highlight": "active" },
+            { "id": "a1", "value": ")" },
+            { "id": "a2", "value": "[" },
+            { "id": "a3", "value": "]" },
+            { "id": "a4", "value": "{" },
+            { "id": "a5", "value": "}" }
+          ]
         },
-        {
-          "target": "input",
-          "params": {
-            "cells": [
-              {
-                "value": "(",
-                "highlight": "active"
-              },
-              {
-                "value": ")",
-                "highlight": "default"
-              },
-              {
-                "value": "[",
-                "highlight": "default"
-              },
-              {
-                "value": "]",
-                "highlight": "default"
-              },
-              {
-                "value": "{",
-                "highlight": "default"
-              },
-              {
-                "value": "}",
-                "highlight": "default"
-              }
-            ]
-          }
-        },
-        {
-          "target": "stack",
-          "params": {
-            "items": [
-              "("
-            ],
-            "highlight": 0
-          }
+        "stack": {
+          "items": [
+            { "id": "item-0", "value": "(" }
+          ]
         }
-      ],
-      "duration": 1000
+      }
     },
     {
       "index": 2,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Read ')' -> top matches -> pop",
-            "style": "success"
-          }
+      "explanation": {
+        "heading": "Mismatch Detection",
+        "body": "If the stack is empty when a closing bracket appears, or the top does not match, return `False` immediately."
+      },
+      "activeText": "Read ')' -> top matches -> pop",
+      "canvas": {
+        "input": {
+          "items": [
+            { "id": "a0", "value": "(" },
+            { "id": "a1", "value": ")", "highlight": "active" },
+            { "id": "a2", "value": "[" },
+            { "id": "a3", "value": "]" },
+            { "id": "a4", "value": "{" },
+            { "id": "a5", "value": "}" }
+          ]
         },
-        {
-          "target": "input",
-          "params": {
-            "cells": [
-              {
-                "value": "(",
-                "highlight": "default"
-              },
-              {
-                "value": ")",
-                "highlight": "active"
-              },
-              {
-                "value": "[",
-                "highlight": "default"
-              },
-              {
-                "value": "]",
-                "highlight": "default"
-              },
-              {
-                "value": "{",
-                "highlight": "default"
-              },
-              {
-                "value": "}",
-                "highlight": "default"
-              }
-            ]
-          }
-        },
-        {
-          "target": "stack",
-          "params": {
-            "items": []
-          }
+        "stack": {
+          "items": []
         }
-      ],
-      "duration": 1000
+      }
     },
     {
       "index": 3,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Read '[' -> push",
-            "style": "highlight"
-          }
+      "explanation": {
+        "heading": "Step 3",
+        "body": "State updated."
+      },
+      "activeText": "Read '[' -> push",
+      "canvas": {
+        "input": {
+          "items": [
+            { "id": "a0", "value": "(" },
+            { "id": "a1", "value": ")" },
+            { "id": "a2", "value": "[", "highlight": "active" },
+            { "id": "a3", "value": "]" },
+            { "id": "a4", "value": "{" },
+            { "id": "a5", "value": "}" }
+          ]
         },
-        {
-          "target": "input",
-          "params": {
-            "cells": [
-              {
-                "value": "(",
-                "highlight": "default"
-              },
-              {
-                "value": ")",
-                "highlight": "default"
-              },
-              {
-                "value": "[",
-                "highlight": "active"
-              },
-              {
-                "value": "]",
-                "highlight": "default"
-              },
-              {
-                "value": "{",
-                "highlight": "default"
-              },
-              {
-                "value": "}",
-                "highlight": "default"
-              }
-            ]
-          }
-        },
-        {
-          "target": "stack",
-          "params": {
-            "items": [
-              "["
-            ],
-            "highlight": 0
-          }
+        "stack": {
+          "items": [
+            { "id": "item-0", "value": "[" }
+          ]
         }
-      ],
-      "duration": 900
+      }
     },
     {
       "index": 4,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Read ']' -> pop '['",
-            "style": "success"
-          }
+      "explanation": {
+        "heading": "Step 4",
+        "body": "State updated."
+      },
+      "activeText": "Read ']' -> pop '['",
+      "canvas": {
+        "input": {
+          "items": [
+            { "id": "a0", "value": "(" },
+            { "id": "a1", "value": ")" },
+            { "id": "a2", "value": "[" },
+            { "id": "a3", "value": "]", "highlight": "active" },
+            { "id": "a4", "value": "{" },
+            { "id": "a5", "value": "}" }
+          ]
         },
-        {
-          "target": "input",
-          "params": {
-            "cells": [
-              {
-                "value": "(",
-                "highlight": "default"
-              },
-              {
-                "value": ")",
-                "highlight": "default"
-              },
-              {
-                "value": "[",
-                "highlight": "default"
-              },
-              {
-                "value": "]",
-                "highlight": "active"
-              },
-              {
-                "value": "{",
-                "highlight": "default"
-              },
-              {
-                "value": "}",
-                "highlight": "default"
-              }
-            ]
-          }
-        },
-        {
-          "target": "stack",
-          "params": {
-            "items": []
-          }
+        "stack": {
+          "items": []
         }
-      ],
-      "duration": 900
+      }
     },
     {
       "index": 5,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Read '{' -> push",
-            "style": "highlight"
-          }
+      "explanation": {
+        "heading": "Step 5",
+        "body": "State updated."
+      },
+      "activeText": "Read '{' -> push",
+      "canvas": {
+        "input": {
+          "items": [
+            { "id": "a0", "value": "(" },
+            { "id": "a1", "value": ")" },
+            { "id": "a2", "value": "[" },
+            { "id": "a3", "value": "]" },
+            { "id": "a4", "value": "{", "highlight": "active" },
+            { "id": "a5", "value": "}" }
+          ]
         },
-        {
-          "target": "input",
-          "params": {
-            "cells": [
-              {
-                "value": "(",
-                "highlight": "default"
-              },
-              {
-                "value": ")",
-                "highlight": "default"
-              },
-              {
-                "value": "[",
-                "highlight": "default"
-              },
-              {
-                "value": "]",
-                "highlight": "default"
-              },
-              {
-                "value": "{",
-                "highlight": "active"
-              },
-              {
-                "value": "}",
-                "highlight": "default"
-              }
-            ]
-          }
-        },
-        {
-          "target": "stack",
-          "params": {
-            "items": [
-              "{"
-            ],
-            "highlight": 0
-          }
+        "stack": {
+          "items": [
+            { "id": "item-0", "value": "{" }
+          ]
         }
-      ],
-      "duration": 900
+      }
     },
     {
       "index": 6,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Read '}' -> pop '{'",
-            "style": "success"
-          }
+      "explanation": {
+        "heading": "Step 6",
+        "body": "State updated."
+      },
+      "activeText": "Read '}' -> pop '{'",
+      "canvas": {
+        "input": {
+          "items": [
+            { "id": "a0", "value": "(" },
+            { "id": "a1", "value": ")" },
+            { "id": "a2", "value": "[" },
+            { "id": "a3", "value": "]" },
+            { "id": "a4", "value": "{" },
+            { "id": "a5", "value": "}", "highlight": "active" }
+          ]
         },
-        {
-          "target": "input",
-          "params": {
-            "cells": [
-              {
-                "value": "(",
-                "highlight": "default"
-              },
-              {
-                "value": ")",
-                "highlight": "default"
-              },
-              {
-                "value": "[",
-                "highlight": "default"
-              },
-              {
-                "value": "]",
-                "highlight": "default"
-              },
-              {
-                "value": "{",
-                "highlight": "default"
-              },
-              {
-                "value": "}",
-                "highlight": "active"
-              }
-            ]
-          }
-        },
-        {
-          "target": "stack",
-          "params": {
-            "items": []
-          }
+        "stack": {
+          "items": []
         }
-      ],
-      "duration": 900
+      }
     },
     {
       "index": 7,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "End of scan and stack empty -> valid",
-            "style": "success"
-          }
-        }
-      ],
-      "duration": 900
-    }
-  ],
-  "controls": [],
-  "explanation": [
-    {
-      "heading": "Use a Stack for Open Brackets",
-      "body": "Push every opening bracket. For every closing bracket, verify the top of stack matches.",
-      "appearsAtStep": 0
-    },
-    {
-      "heading": "Mismatch Detection",
-      "body": "If the stack is empty when a closing bracket appears, or the top does not match, return `False` immediately.",
-      "appearsAtStep": 2
-    },
-    {
-      "heading": "Final Check",
-      "body": "The string is valid only if the stack is empty after processing all characters.",
-      "appearsAtStep": 7
+      "explanation": {
+        "heading": "Final Check",
+        "body": "The string is valid only if the stack is empty after processing all characters."
+      },
+      "activeText": "End of scan and stack empty -> valid"
     }
   ],
   "popups": [

@@ -1,15 +1,11 @@
 {
+  "$schema": "/scene-schema.json",
   "id": "merge-sort",
   "title": "Merge Sort",
   "type": "dsa-trace",
   "layout": "code-left-canvas-right",
   "description": "Visualize recursive split and merge in merge sort.",
   "category": "Data Structures & Algorithms",
-  "tags": [
-    "merge-sort",
-    "recursion",
-    "divide-conquer"
-  ],
   "code": {
     "language": "python",
     "source": "def merge_sort(arr):\n    if len(arr) <= 1:\n        return arr\n    mid = len(arr) // 2\n    left = merge_sort(arr[:mid])\n    right = merge_sort(arr[mid:])\n    i = j = 0\n    merged = []\n    while i < len(left) and j < len(right):\n        if left[i] <= right[j]:\n            merged.append(left[i])\n            i += 1\n        else:\n            merged.append(right[j])\n            j += 1\n    merged.extend(left[i:])\n    merged.extend(right[j:])\n    return merged\n\nfinalResult = merge_sort([8, 3, 5, 4, 7, 6, 1, 2])\n",
@@ -26,434 +22,215 @@
       17
     ]
   },
-  "visuals": [
+  "canvas": [
     {
       "id": "arr",
-      "type": "array",
+      "type": "linear",
+      "variant": "array",
+      "layoutHint": "linear-H",
       "label": "Array",
       "initialState": {
-        "cells": [
-          {
-            "value": 8,
-            "highlight": "default"
-          },
-          {
-            "value": 3,
-            "highlight": "default"
-          },
-          {
-            "value": 5,
-            "highlight": "default"
-          },
-          {
-            "value": 4,
-            "highlight": "default"
-          },
-          {
-            "value": 7,
-            "highlight": "default"
-          },
-          {
-            "value": 6,
-            "highlight": "default"
-          },
-          {
-            "value": 1,
-            "highlight": "default"
-          },
-          {
-            "value": 2,
-            "highlight": "default"
-          }
+        "items": [
+          { "id": "a0", "value": 8 },
+          { "id": "a1", "value": 3 },
+          { "id": "a2", "value": 5 },
+          { "id": "a3", "value": 4 },
+          { "id": "a4", "value": 7 },
+          { "id": "a5", "value": 6 },
+          { "id": "a6", "value": 1 },
+          { "id": "a7", "value": 2 }
         ]
-      },
-      "layoutHint": "linear-H"
-    },
-    {
-      "id": "op",
-      "type": "text-badge",
-      "label": "Phase",
-      "initialState": {
-        "text": "Start with full array",
-        "style": "default"
-      },
-      "slot": "top-center"
+      }
     }
   ],
+  "activeText": {
+    "initialValue": "Start with full array"
+  },
+  "controls": [],
   "steps": [
     {
-      "index": 0,
-      "actions": [],
-      "duration": 800
-    },
-    {
       "index": 1,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Split [8,3,5,4,7,6,1,2] into two halves",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "arr",
-          "params": {
-            "windowHighlight": {
-              "start": 0,
-              "end": 7
-            }
-          }
+      "explanation": {
+        "heading": "Step 1",
+        "body": "State updated."
+      },
+      "activeText": "Split [8,3,5,4,7,6,1,2] into two halves",
+      "canvas": {
+        "arr": {
+          "items": [
+            { "id": "a0", "value": 8 },
+            { "id": "a1", "value": 3 },
+            { "id": "a2", "value": 5 },
+            { "id": "a3", "value": 4 },
+            { "id": "a4", "value": 7 },
+            { "id": "a5", "value": 6 },
+            { "id": "a6", "value": 1 },
+            { "id": "a7", "value": 2 }
+          ]
         }
-      ],
-      "duration": 900
+      }
     },
     {
       "index": 2,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Recursively split left half [8,3,5,4]",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "arr",
-          "params": {
-            "windowHighlight": {
-              "start": 0,
-              "end": 3
-            }
-          }
+      "explanation": {
+        "heading": "Step 2",
+        "body": "State updated."
+      },
+      "activeText": "Recursively split left half [8,3,5,4]",
+      "canvas": {
+        "arr": {
+          "items": [
+            { "id": "a0", "value": 8, "highlight": "active" },
+            { "id": "a1", "value": 3, "highlight": "active" },
+            { "id": "a2", "value": 5, "highlight": "active" },
+            { "id": "a3", "value": 4, "highlight": "active" },
+            { "id": "a4", "value": 7 },
+            { "id": "a5", "value": 6 },
+            { "id": "a6", "value": 1 },
+            { "id": "a7", "value": 2 }
+          ]
         }
-      ],
-      "duration": 900
+      }
     },
     {
       "index": 3,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Recursively split right half [7,6,1,2]",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "arr",
-          "params": {
-            "windowHighlight": {
-              "start": 4,
-              "end": 7
-            }
-          }
+      "explanation": {
+        "heading": "Step 3",
+        "body": "State updated."
+      },
+      "activeText": "Recursively split right half [7,6,1,2]",
+      "canvas": {
+        "arr": {
+          "items": [
+            { "id": "a0", "value": 8 },
+            { "id": "a1", "value": 3 },
+            { "id": "a2", "value": 5 },
+            { "id": "a3", "value": 4 },
+            { "id": "a4", "value": 7, "highlight": "active" },
+            { "id": "a5", "value": 6, "highlight": "active" },
+            { "id": "a6", "value": 1, "highlight": "active" },
+            { "id": "a7", "value": 2, "highlight": "active" }
+          ]
         }
-      ],
-      "duration": 900
+      }
     },
     {
       "index": 4,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Base subarrays reached, begin merge",
-            "style": "default"
-          }
-        },
-        {
-          "target": "arr",
-          "params": {
-            "cells": [
-              {
-                "value": 3,
-                "highlight": "compare"
-              },
-              {
-                "value": 8,
-                "highlight": "compare"
-              },
-              {
-                "value": 4,
-                "highlight": "compare"
-              },
-              {
-                "value": 5,
-                "highlight": "compare"
-              },
-              {
-                "value": 6,
-                "highlight": "compare"
-              },
-              {
-                "value": 7,
-                "highlight": "compare"
-              },
-              {
-                "value": 1,
-                "highlight": "compare"
-              },
-              {
-                "value": 2,
-                "highlight": "compare"
-              }
-            ]
-          }
+      "explanation": {
+        "heading": "Merge Phase",
+        "body": "Pairs of sorted subarrays are merged while preserving order."
+      },
+      "activeText": "Base subarrays reached, begin merge",
+      "canvas": {
+        "arr": {
+          "items": [
+            { "id": "a0", "value": 3, "highlight": "active" },
+            { "id": "a1", "value": 8, "highlight": "active" },
+            { "id": "a2", "value": 4, "highlight": "active" },
+            { "id": "a3", "value": 5, "highlight": "active" },
+            { "id": "a4", "value": 6, "highlight": "active" },
+            { "id": "a5", "value": 7, "highlight": "active" },
+            { "id": "a6", "value": 1, "highlight": "active" },
+            { "id": "a7", "value": 2, "highlight": "active" }
+          ]
         }
-      ],
-      "duration": 1000
+      }
     },
     {
       "index": 5,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Merge left side -> [3,4,5,8]",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "arr",
-          "params": {
-            "cells": [
-              {
-                "value": 3,
-                "highlight": "active"
-              },
-              {
-                "value": 4,
-                "highlight": "active"
-              },
-              {
-                "value": 5,
-                "highlight": "active"
-              },
-              {
-                "value": 8,
-                "highlight": "active"
-              },
-              {
-                "value": 6,
-                "highlight": "default"
-              },
-              {
-                "value": 7,
-                "highlight": "default"
-              },
-              {
-                "value": 1,
-                "highlight": "default"
-              },
-              {
-                "value": 2,
-                "highlight": "default"
-              }
-            ],
-            "windowHighlight": {
-              "start": 0,
-              "end": 3
-            }
-          }
+      "explanation": {
+        "heading": "Step 5",
+        "body": "State updated."
+      },
+      "activeText": "Merge left side -> [3,4,5,8]",
+      "canvas": {
+        "arr": {
+          "items": [
+            { "id": "a0", "value": 3, "highlight": "active" },
+            { "id": "a1", "value": 4, "highlight": "active" },
+            { "id": "a2", "value": 5, "highlight": "active" },
+            { "id": "a3", "value": 8, "highlight": "active" },
+            { "id": "a4", "value": 6 },
+            { "id": "a5", "value": 7 },
+            { "id": "a6", "value": 1 },
+            { "id": "a7", "value": 2 }
+          ]
         }
-      ],
-      "duration": 1000
+      }
     },
     {
       "index": 6,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Merge right side -> [1,2,6,7]",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "arr",
-          "params": {
-            "cells": [
-              {
-                "value": 3,
-                "highlight": "default"
-              },
-              {
-                "value": 4,
-                "highlight": "default"
-              },
-              {
-                "value": 5,
-                "highlight": "default"
-              },
-              {
-                "value": 8,
-                "highlight": "default"
-              },
-              {
-                "value": 1,
-                "highlight": "active"
-              },
-              {
-                "value": 2,
-                "highlight": "active"
-              },
-              {
-                "value": 6,
-                "highlight": "active"
-              },
-              {
-                "value": 7,
-                "highlight": "active"
-              }
-            ],
-            "windowHighlight": {
-              "start": 4,
-              "end": 7
-            }
-          }
+      "explanation": {
+        "heading": "Step 6",
+        "body": "State updated."
+      },
+      "activeText": "Merge right side -> [1,2,6,7]",
+      "canvas": {
+        "arr": {
+          "items": [
+            { "id": "a0", "value": 3 },
+            { "id": "a1", "value": 4 },
+            { "id": "a2", "value": 5 },
+            { "id": "a3", "value": 8 },
+            { "id": "a4", "value": 1, "highlight": "active" },
+            { "id": "a5", "value": 2, "highlight": "active" },
+            { "id": "a6", "value": 6, "highlight": "active" },
+            { "id": "a7", "value": 7, "highlight": "active" }
+          ]
         }
-      ],
-      "duration": 1000
+      }
     },
     {
       "index": 7,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Final merge compares both sorted halves",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "arr",
-          "params": {
-            "cells": [
-              {
-                "value": 3,
-                "highlight": "compare"
-              },
-              {
-                "value": 4,
-                "highlight": "compare"
-              },
-              {
-                "value": 5,
-                "highlight": "compare"
-              },
-              {
-                "value": 8,
-                "highlight": "compare"
-              },
-              {
-                "value": 1,
-                "highlight": "compare"
-              },
-              {
-                "value": 2,
-                "highlight": "compare"
-              },
-              {
-                "value": 6,
-                "highlight": "compare"
-              },
-              {
-                "value": 7,
-                "highlight": "compare"
-              }
-            ],
-            "windowHighlight": {
-              "start": 0,
-              "end": 7
-            }
-          }
+      "explanation": {
+        "heading": "Step 7",
+        "body": "State updated."
+      },
+      "activeText": "Final merge compares both sorted halves",
+      "canvas": {
+        "arr": {
+          "items": [
+            { "id": "a0", "value": 3, "highlight": "active" },
+            { "id": "a1", "value": 4, "highlight": "active" },
+            { "id": "a2", "value": 5, "highlight": "active" },
+            { "id": "a3", "value": 8, "highlight": "active" },
+            { "id": "a4", "value": 1, "highlight": "active" },
+            { "id": "a5", "value": 2, "highlight": "active" },
+            { "id": "a6", "value": 6, "highlight": "active" },
+            { "id": "a7", "value": 7, "highlight": "active" }
+          ]
         }
-      ],
-      "duration": 1000
+      }
     },
     {
       "index": 8,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Write back merged order",
-            "style": "success"
-          }
-        },
-        {
-          "target": "arr",
-          "params": {
-            "cells": [
-              {
-                "value": 1,
-                "highlight": "insert"
-              },
-              {
-                "value": 2,
-                "highlight": "insert"
-              },
-              {
-                "value": 3,
-                "highlight": "insert"
-              },
-              {
-                "value": 4,
-                "highlight": "insert"
-              },
-              {
-                "value": 5,
-                "highlight": "insert"
-              },
-              {
-                "value": 6,
-                "highlight": "insert"
-              },
-              {
-                "value": 7,
-                "highlight": "insert"
-              },
-              {
-                "value": 8,
-                "highlight": "insert"
-              }
-            ]
-          }
+      "explanation": {
+        "heading": "Stable O(n log n)",
+        "body": "Every level processes all `n` elements, across `log n` levels."
+      },
+      "activeText": "Write back merged order",
+      "canvas": {
+        "arr": {
+          "items": [
+            { "id": "a0", "value": 1, "highlight": "insert" },
+            { "id": "a1", "value": 2, "highlight": "insert" },
+            { "id": "a2", "value": 3, "highlight": "insert" },
+            { "id": "a3", "value": 4, "highlight": "insert" },
+            { "id": "a4", "value": 5, "highlight": "insert" },
+            { "id": "a5", "value": 6, "highlight": "insert" },
+            { "id": "a6", "value": 7, "highlight": "insert" },
+            { "id": "a7", "value": 8, "highlight": "insert" }
+          ]
         }
-      ],
-      "duration": 1000
+      }
     },
     {
       "index": 9,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Sorted array complete",
-            "style": "default"
-          }
-        }
-      ],
-      "duration": 800
-    }
-  ],
-  "controls": [],
-  "explanation": [
-    {
-      "heading": "Divide and Conquer",
-      "body": "Merge sort recursively splits the array until size 1 subarrays remain.",
-      "appearsAtStep": 0
-    },
-    {
-      "heading": "Merge Phase",
-      "body": "Pairs of sorted subarrays are merged while preserving order.",
-      "appearsAtStep": 4
-    },
-    {
-      "heading": "Stable O(n log n)",
-      "body": "Every level processes all `n` elements, across `log n` levels.",
-      "appearsAtStep": 8
+      "explanation": {
+        "heading": "Step 9",
+        "body": "State updated."
+      },
+      "activeText": "Sorted array complete"
     }
   ],
   "popups": [

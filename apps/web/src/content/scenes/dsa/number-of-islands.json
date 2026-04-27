@@ -1,15 +1,11 @@
 {
+  "$schema": "/scene-schema.json",
   "id": "number-of-islands",
   "title": "Number of Islands",
   "type": "dsa-trace",
   "layout": "code-left-canvas-right",
   "description": "Count connected land components with flood fill on a grid.",
   "category": "Data Structures & Algorithms",
-  "tags": [
-    "grid",
-    "dfs",
-    "flood-fill"
-  ],
   "code": {
     "language": "python",
     "source": "def num_islands(grid):\n    rows, cols = len(grid), len(grid[0])\n    seen = set()\n\n    def dfs(r, c):\n        if r < 0 or c < 0 or r >= rows or c >= cols:\n            return\n        if grid[r][c] == '0' or (r, c) in seen:\n            return\n        seen.add((r, c))\n        dfs(r + 1, c)\n        dfs(r - 1, c)\n        dfs(r, c + 1)\n        dfs(r, c - 1)\n\n    islands = 0\n    for r in range(rows):\n        for c in range(cols):\n            if grid[r][c] == '1' and (r, c) not in seen:\n                islands += 1\n                dfs(r, c)\n    return islands\n",
@@ -24,10 +20,12 @@
       20
     ]
   },
-  "visuals": [
+  "canvas": [
     {
       "id": "grid",
       "type": "grid",
+      "variant": "pathfinding",
+      "layoutHint": "grid-2d",
       "label": "Grid",
       "initialState": {
         "rows": 4,
@@ -35,610 +33,898 @@
         "cells": [
           [
             {
-              "state": "start",
+              "id": "r0c0",
               "value": "1"
             },
             {
-              "state": "start",
+              "id": "r0c1",
               "value": "1"
             },
             {
-              "state": "wall",
-              "value": "0"
+              "id": "r0c2",
+              "value": "0",
+              "highlight": "wall"
             },
             {
-              "state": "wall",
-              "value": "0"
+              "id": "r0c3",
+              "value": "0",
+              "highlight": "wall"
             },
             {
-              "state": "wall",
-              "value": "0"
+              "id": "r0c4",
+              "value": "0",
+              "highlight": "wall"
             }
           ],
           [
             {
-              "state": "start",
+              "id": "r1c0",
               "value": "1"
             },
             {
-              "state": "start",
+              "id": "r1c1",
               "value": "1"
             },
             {
-              "state": "wall",
-              "value": "0"
+              "id": "r1c2",
+              "value": "0",
+              "highlight": "wall"
             },
             {
-              "state": "wall",
-              "value": "0"
+              "id": "r1c3",
+              "value": "0",
+              "highlight": "wall"
             },
             {
-              "state": "wall",
-              "value": "0"
+              "id": "r1c4",
+              "value": "0",
+              "highlight": "wall"
             }
           ],
           [
             {
-              "state": "wall",
-              "value": "0"
+              "id": "r2c0",
+              "value": "0",
+              "highlight": "wall"
             },
             {
-              "state": "wall",
-              "value": "0"
+              "id": "r2c1",
+              "value": "0",
+              "highlight": "wall"
             },
             {
-              "state": "start",
+              "id": "r2c2",
               "value": "1"
             },
             {
-              "state": "wall",
-              "value": "0"
+              "id": "r2c3",
+              "value": "0",
+              "highlight": "wall"
             },
             {
-              "state": "wall",
-              "value": "0"
+              "id": "r2c4",
+              "value": "0",
+              "highlight": "wall"
             }
           ],
           [
             {
-              "state": "wall",
-              "value": "0"
+              "id": "r3c0",
+              "value": "0",
+              "highlight": "wall"
             },
             {
-              "state": "wall",
-              "value": "0"
+              "id": "r3c1",
+              "value": "0",
+              "highlight": "wall"
             },
             {
-              "state": "wall",
-              "value": "0"
+              "id": "r3c2",
+              "value": "0",
+              "highlight": "wall"
             },
             {
-              "state": "start",
+              "id": "r3c3",
               "value": "1"
             },
             {
-              "state": "start",
+              "id": "r3c4",
               "value": "1"
             }
           ]
-        ],
-        "currentCell": {
-          "row": 0,
-          "col": 0
-        }
-      },
-      "layoutHint": "grid-2d"
+        ]
+      }
     },
     {
       "id": "frontier",
-      "type": "queue",
+      "type": "linear",
+      "variant": "queue",
+      "layoutHint": "linear-H",
       "label": "DFS frontier (conceptual)",
       "initialState": {
         "items": []
-      },
-      "layoutHint": "linear-H"
-    },
-    {
-      "id": "op",
-      "type": "text-badge",
-      "label": "Operation",
-      "initialState": {
-        "text": "Scan for unvisited land",
-        "style": "default"
-      },
-      "slot": "top-center"
+      }
     }
   ],
+  "activeText": {
+    "initialValue": "Scan for unvisited land"
+  },
+  "controls": [],
   "steps": [
     {
-      "index": 0,
-      "actions": [],
-      "duration": 900
-    },
-    {
       "index": 1,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Found island #1 at (0,0)",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "frontier",
-          "params": {
-            "items": [
-              "(0,0)"
-            ],
-            "highlight": 0
-          }
-        },
-        {
-          "target": "grid",
-          "params": {
-            "currentCell": {
-              "row": 0,
-              "col": 0
+      "explanation": {
+        "heading": "Step 1",
+        "body": "State updated."
+      },
+      "activeText": "Found island #1 at (0,0)",
+      "canvas": {
+        "frontier": {
+          "items": [
+            {
+              "id": "item-0",
+              "value": "(0,0)"
             }
-          }
+          ]
+        },
+        "grid": {
+          "rows": 4,
+          "cols": 5,
+          "cells": [
+            [
+              {
+                "id": "r0c0",
+                "value": "1",
+                "highlight": "active"
+              },
+              {
+                "id": "r0c1",
+                "value": "1"
+              },
+              {
+                "id": "r0c2",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r0c3",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r0c4",
+                "value": "0",
+                "highlight": "wall"
+              }
+            ],
+            [
+              {
+                "id": "r1c0",
+                "value": "1"
+              },
+              {
+                "id": "r1c1",
+                "value": "1"
+              },
+              {
+                "id": "r1c2",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r1c3",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r1c4",
+                "value": "0",
+                "highlight": "wall"
+              }
+            ],
+            [
+              {
+                "id": "r2c0",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r2c1",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r2c2",
+                "value": "1"
+              },
+              {
+                "id": "r2c3",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r2c4",
+                "value": "0",
+                "highlight": "wall"
+              }
+            ],
+            [
+              {
+                "id": "r3c0",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r3c1",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r3c2",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r3c3",
+                "value": "1"
+              },
+              {
+                "id": "r3c4",
+                "value": "1"
+              }
+            ]
+          ]
         }
-      ],
-      "duration": 900
+      }
     },
     {
       "index": 2,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Flood-fill connected land cells",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "grid",
-          "params": {
-            "rows": 4,
-            "cols": 5,
-            "cells": [
-              [
-                {
-                  "state": "visited",
-                  "value": "1"
-                },
-                {
-                  "state": "visited",
-                  "value": "1"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                }
-              ],
-              [
-                {
-                  "state": "visited",
-                  "value": "1"
-                },
-                {
-                  "state": "visited",
-                  "value": "1"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                }
-              ],
-              [
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "start",
-                  "value": "1"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                }
-              ],
-              [
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "start",
-                  "value": "1"
-                },
-                {
-                  "state": "start",
-                  "value": "1"
-                }
-              ]
+      "explanation": {
+        "heading": "Flood Fill",
+        "body": "DFS/BFS marks all reachable land from the start cell so it is counted once."
+      },
+      "activeText": "Flood-fill connected land cells",
+      "canvas": {
+        "grid": {
+          "rows": 4,
+          "cols": 5,
+          "cells": [
+            [
+              {
+                "id": "r0c0",
+                "value": "1",
+                "highlight": "visited"
+              },
+              {
+                "id": "r0c1",
+                "value": "1",
+                "highlight": "visited"
+              },
+              {
+                "id": "r0c2",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r0c3",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r0c4",
+                "value": "0",
+                "highlight": "wall"
+              }
             ],
-            "currentCell": {
-              "row": 1,
-              "col": 1
-            }
-          }
+            [
+              {
+                "id": "r1c0",
+                "value": "1",
+                "highlight": "visited"
+              },
+              {
+                "id": "r1c1",
+                "value": "1",
+                "highlight": "visited"
+              },
+              {
+                "id": "r1c2",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r1c3",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r1c4",
+                "value": "0",
+                "highlight": "wall"
+              }
+            ],
+            [
+              {
+                "id": "r2c0",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r2c1",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r2c2",
+                "value": "1"
+              },
+              {
+                "id": "r2c3",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r2c4",
+                "value": "0",
+                "highlight": "wall"
+              }
+            ],
+            [
+              {
+                "id": "r3c0",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r3c1",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r3c2",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r3c3",
+                "value": "1"
+              },
+              {
+                "id": "r3c4",
+                "value": "1"
+              }
+            ]
+          ]
         },
-        {
-          "target": "frontier",
-          "params": {
-            "items": []
-          }
+        "frontier": {
+          "items": []
         }
-      ],
-      "duration": 1200
+      }
     },
     {
       "index": 3,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Continue scanning: find island #2 at (2,2)",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "frontier",
-          "params": {
-            "items": [
-              "(2,2)"
-            ],
-            "highlight": 0
-          }
-        },
-        {
-          "target": "grid",
-          "params": {
-            "currentCell": {
-              "row": 2,
-              "col": 2
+      "explanation": {
+        "heading": "Step 3",
+        "body": "State updated."
+      },
+      "activeText": "Continue scanning: find island #2 at (2,2)",
+      "canvas": {
+        "frontier": {
+          "items": [
+            {
+              "id": "item-0",
+              "value": "(2,2)"
             }
-          }
+          ]
+        },
+        "grid": {
+          "rows": 4,
+          "cols": 5,
+          "cells": [
+            [
+              {
+                "id": "r0c0",
+                "value": "1",
+                "highlight": "visited"
+              },
+              {
+                "id": "r0c1",
+                "value": "1",
+                "highlight": "visited"
+              },
+              {
+                "id": "r0c2",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r0c3",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r0c4",
+                "value": "0",
+                "highlight": "wall"
+              }
+            ],
+            [
+              {
+                "id": "r1c0",
+                "value": "1",
+                "highlight": "visited"
+              },
+              {
+                "id": "r1c1",
+                "value": "1",
+                "highlight": "visited"
+              },
+              {
+                "id": "r1c2",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r1c3",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r1c4",
+                "value": "0",
+                "highlight": "wall"
+              }
+            ],
+            [
+              {
+                "id": "r2c0",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r2c1",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r2c2",
+                "value": "1",
+                "highlight": "active"
+              },
+              {
+                "id": "r2c3",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r2c4",
+                "value": "0",
+                "highlight": "wall"
+              }
+            ],
+            [
+              {
+                "id": "r3c0",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r3c1",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r3c2",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r3c3",
+                "value": "1"
+              },
+              {
+                "id": "r3c4",
+                "value": "1"
+              }
+            ]
+          ]
         }
-      ],
-      "duration": 900
+      }
     },
     {
       "index": 4,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Island #2 has no land neighbors",
-            "style": "default"
-          }
-        },
-        {
-          "target": "grid",
-          "params": {
-            "rows": 4,
-            "cols": 5,
-            "cells": [
-              [
-                {
-                  "state": "visited",
-                  "value": "1"
-                },
-                {
-                  "state": "visited",
-                  "value": "1"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                }
-              ],
-              [
-                {
-                  "state": "visited",
-                  "value": "1"
-                },
-                {
-                  "state": "visited",
-                  "value": "1"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                }
-              ],
-              [
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "visited",
-                  "value": "1"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                }
-              ],
-              [
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "start",
-                  "value": "1"
-                },
-                {
-                  "state": "start",
-                  "value": "1"
-                }
-              ]
+      "explanation": {
+        "heading": "Step 4",
+        "body": "State updated."
+      },
+      "activeText": "Island #2 has no land neighbors",
+      "canvas": {
+        "grid": {
+          "rows": 4,
+          "cols": 5,
+          "cells": [
+            [
+              {
+                "id": "r0c0",
+                "value": "1",
+                "highlight": "visited"
+              },
+              {
+                "id": "r0c1",
+                "value": "1",
+                "highlight": "visited"
+              },
+              {
+                "id": "r0c2",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r0c3",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r0c4",
+                "value": "0",
+                "highlight": "wall"
+              }
             ],
-            "currentCell": {
-              "row": 2,
-              "col": 2
-            }
-          }
+            [
+              {
+                "id": "r1c0",
+                "value": "1",
+                "highlight": "visited"
+              },
+              {
+                "id": "r1c1",
+                "value": "1",
+                "highlight": "visited"
+              },
+              {
+                "id": "r1c2",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r1c3",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r1c4",
+                "value": "0",
+                "highlight": "wall"
+              }
+            ],
+            [
+              {
+                "id": "r2c0",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r2c1",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r2c2",
+                "value": "1",
+                "highlight": "visited"
+              },
+              {
+                "id": "r2c3",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r2c4",
+                "value": "0",
+                "highlight": "wall"
+              }
+            ],
+            [
+              {
+                "id": "r3c0",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r3c1",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r3c2",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r3c3",
+                "value": "1"
+              },
+              {
+                "id": "r3c4",
+                "value": "1"
+              }
+            ]
+          ]
         },
-        {
-          "target": "frontier",
-          "params": {
-            "items": []
-          }
+        "frontier": {
+          "items": []
         }
-      ],
-      "duration": 900
+      }
     },
     {
       "index": 5,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Find island #3 at (3,3)",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "frontier",
-          "params": {
-            "items": [
-              "(3,3)",
-              "(3,4)"
-            ],
-            "highlight": 0
-          }
-        },
-        {
-          "target": "grid",
-          "params": {
-            "currentCell": {
-              "row": 3,
-              "col": 3
+      "explanation": {
+        "heading": "Step 5",
+        "body": "State updated."
+      },
+      "activeText": "Find island #3 at (3,3)",
+      "canvas": {
+        "frontier": {
+          "items": [
+            {
+              "id": "item-0",
+              "value": "(3,3)"
+            },
+            {
+              "id": "item-1",
+              "value": "(3,4)"
             }
-          }
+          ]
+        },
+        "grid": {
+          "rows": 4,
+          "cols": 5,
+          "cells": [
+            [
+              {
+                "id": "r0c0",
+                "value": "1",
+                "highlight": "visited"
+              },
+              {
+                "id": "r0c1",
+                "value": "1",
+                "highlight": "visited"
+              },
+              {
+                "id": "r0c2",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r0c3",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r0c4",
+                "value": "0",
+                "highlight": "wall"
+              }
+            ],
+            [
+              {
+                "id": "r1c0",
+                "value": "1",
+                "highlight": "visited"
+              },
+              {
+                "id": "r1c1",
+                "value": "1",
+                "highlight": "visited"
+              },
+              {
+                "id": "r1c2",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r1c3",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r1c4",
+                "value": "0",
+                "highlight": "wall"
+              }
+            ],
+            [
+              {
+                "id": "r2c0",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r2c1",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r2c2",
+                "value": "1",
+                "highlight": "visited"
+              },
+              {
+                "id": "r2c3",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r2c4",
+                "value": "0",
+                "highlight": "wall"
+              }
+            ],
+            [
+              {
+                "id": "r3c0",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r3c1",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r3c2",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r3c3",
+                "value": "1",
+                "highlight": "active"
+              },
+              {
+                "id": "r3c4",
+                "value": "1"
+              }
+            ]
+          ]
         }
-      ],
-      "duration": 900
+      }
     },
     {
       "index": 6,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Flood-fill marks final island",
-            "style": "success"
-          }
-        },
-        {
-          "target": "grid",
-          "params": {
-            "rows": 4,
-            "cols": 5,
-            "cells": [
-              [
-                {
-                  "state": "visited",
-                  "value": "1"
-                },
-                {
-                  "state": "visited",
-                  "value": "1"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                }
-              ],
-              [
-                {
-                  "state": "visited",
-                  "value": "1"
-                },
-                {
-                  "state": "visited",
-                  "value": "1"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                }
-              ],
-              [
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "visited",
-                  "value": "1"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                }
-              ],
-              [
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "wall",
-                  "value": "0"
-                },
-                {
-                  "state": "visited",
-                  "value": "1"
-                },
-                {
-                  "state": "visited",
-                  "value": "1"
-                }
-              ]
+      "explanation": {
+        "heading": "Step 6",
+        "body": "State updated."
+      },
+      "activeText": "Flood-fill marks final island",
+      "canvas": {
+        "grid": {
+          "rows": 4,
+          "cols": 5,
+          "cells": [
+            [
+              {
+                "id": "r0c0",
+                "value": "1",
+                "highlight": "visited"
+              },
+              {
+                "id": "r0c1",
+                "value": "1",
+                "highlight": "visited"
+              },
+              {
+                "id": "r0c2",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r0c3",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r0c4",
+                "value": "0",
+                "highlight": "wall"
+              }
             ],
-            "currentCell": {
-              "row": 3,
-              "col": 4
-            }
-          }
+            [
+              {
+                "id": "r1c0",
+                "value": "1",
+                "highlight": "visited"
+              },
+              {
+                "id": "r1c1",
+                "value": "1",
+                "highlight": "visited"
+              },
+              {
+                "id": "r1c2",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r1c3",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r1c4",
+                "value": "0",
+                "highlight": "wall"
+              }
+            ],
+            [
+              {
+                "id": "r2c0",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r2c1",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r2c2",
+                "value": "1",
+                "highlight": "visited"
+              },
+              {
+                "id": "r2c3",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r2c4",
+                "value": "0",
+                "highlight": "wall"
+              }
+            ],
+            [
+              {
+                "id": "r3c0",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r3c1",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r3c2",
+                "value": "0",
+                "highlight": "wall"
+              },
+              {
+                "id": "r3c3",
+                "value": "1",
+                "highlight": "visited"
+              },
+              {
+                "id": "r3c4",
+                "value": "1",
+                "highlight": "visited"
+              }
+            ]
+          ]
         },
-        {
-          "target": "frontier",
-          "params": {
-            "items": []
-          }
+        "frontier": {
+          "items": []
         }
-      ],
-      "duration": 1100
+      }
     },
     {
       "index": 7,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Scan complete -> islands = 3",
-            "style": "success"
-          }
-        }
-      ],
-      "duration": 900
-    }
-  ],
-  "controls": [],
-  "explanation": [
-    {
-      "heading": "Connected Components on a Grid",
-      "body": "Every unvisited land cell starts a new island count.",
-      "appearsAtStep": 0
-    },
-    {
-      "heading": "Flood Fill",
-      "body": "DFS/BFS marks all reachable land from the start cell so it is counted once.",
-      "appearsAtStep": 2
-    },
-    {
-      "heading": "Final Count",
-      "body": "After full scan, each component contributed exactly one increment.",
-      "appearsAtStep": 7
+      "explanation": {
+        "heading": "Final Count",
+        "body": "After full scan, each component contributed exactly one increment."
+      },
+      "activeText": "Scan complete -> islands = 3"
     }
   ],
   "popups": [

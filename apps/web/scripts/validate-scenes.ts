@@ -54,13 +54,38 @@ async function main() {
     const result = safeParseScene(parsedJson)
     const fileName = path.relative(SCENES_ROOT, sceneFile).replaceAll('\\', '/')
 
-    if (result.success) {
-      console.log(`✓ ${fileName}`)
+    if (!result.success) {
+      hasFailures = true
+      console.error(formatIssues(fileName, result.error))
       continue
     }
 
-    hasFailures = true
-    console.error(formatIssues(fileName, result.error))
+    const scene = result.scene
+    const semanticErrors: string[] = []
+
+    // canvas[] must not be empty — a scene with no visuals renders blank
+    if (scene.canvas.length === 0) {
+      semanticErrors.push('canvas[] is empty — scene will render blank (Task 2e migration incomplete)')
+    }
+
+    // popup.attachTo must reference a declared canvas visual ID
+    // (also caught by superRefine, but kept here for a clear error message)
+    const canvasIds = new Set(scene.canvas.map((v) => v.id))
+    for (const popup of scene.popups) {
+      if (canvasIds.size > 0 && !canvasIds.has(popup.attachTo)) {
+        semanticErrors.push(`popup "${popup.id}" attachTo "${popup.attachTo}" not in canvas[]`)
+      }
+    }
+
+    if (semanticErrors.length > 0) {
+      hasFailures = true
+      for (const err of semanticErrors) {
+        console.error(`✗ ${fileName}: ${err}`)
+      }
+      continue
+    }
+
+    console.log(`✓ ${fileName}`)
   }
 
   console.log(`Validated ${sceneFiles.length} production scene files.`)

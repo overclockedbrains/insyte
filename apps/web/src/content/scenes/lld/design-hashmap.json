@@ -1,711 +1,48 @@
 {
+  "$schema": "/scene-schema.json",
   "id": "design-hashmap",
   "title": "Design HashMap from Scratch",
   "type": "lld",
   "layout": "text-left-canvas-right",
   "description": "Build a HashMap from scratch: hash function, collision handling via chaining, and dynamic resizing. Understand why average O(1) get/put is possible.",
   "category": "Low Level Design",
-  "tags": [
-    "hashmap",
-    "hash-table",
-    "chaining",
-    "design",
-    "lld"
-  ],
-  "visuals": [
+  "canvas": [
     {
       "id": "bucket-array",
-      "type": "array",
+      "type": "linear",
+      "variant": "array",
+      "layoutHint": "linear-H",
       "label": "Underlying Array  (index = hash(key) % size)",
       "initialState": {
-        "cells": [
-          {
-            "value": "[ ]"
-          },
-          {
-            "value": "[ ]"
-          },
-          {
-            "value": "[ ]"
-          },
-          {
-            "value": "[ ]"
-          },
-          {
-            "value": "[ ]"
-          },
-          {
-            "value": "[ ]"
-          },
-          {
-            "value": "[ ]"
-          }
-        ],
-        "pointers": [
-          {
-            "index": 0,
-            "label": "0"
-          },
-          {
-            "index": 1,
-            "label": "1"
-          },
-          {
-            "index": 2,
-            "label": "2"
-          },
-          {
-            "index": 3,
-            "label": "3"
-          },
-          {
-            "index": 4,
-            "label": "4"
-          },
-          {
-            "index": 5,
-            "label": "5"
-          },
-          {
-            "index": 6,
-            "label": "6"
-          }
+        "items": [
+          { "id": "a0", "value": "[ ]" },
+          { "id": "a1", "value": "[ ]" },
+          { "id": "a2", "value": "[ ]" },
+          { "id": "a3", "value": "[ ]" },
+          { "id": "a4", "value": "[ ]" },
+          { "id": "a5", "value": "[ ]" },
+          { "id": "a6", "value": "[ ]" }
         ]
-      },
-      "layoutHint": "linear-H"
+      }
     },
     {
       "id": "hashmap-view",
-      "type": "hashmap",
+      "type": "map",
+      "layoutHint": "hashmap-buckets",
       "label": "Logical View",
       "initialState": {
         "entries": []
-      },
-      "layoutHint": "hashmap-buckets"
-    },
-    {
-      "id": "load-factor",
-      "type": "counter",
-      "label": "Load Factor",
-      "initialState": {
-        "value": 0,
-        "label": "Load Factor ×100",
-        "color": "primary"
-      },
-      "slot": "bottom-left"
-    },
-    {
-      "id": "op-badge",
-      "type": "text-badge",
-      "label": "Operation",
-      "initialState": {
-        "text": "Empty HashMap  (size=7, 0 entries)",
-        "style": "default"
-      },
-      "slot": "top-center"
+      }
     }
   ],
-  "steps": [
+  "activeText": {
+    "initialValue": "Empty HashMap  (size=7, 0 entries)"
+  },
+  "hud": [
     {
-      "index": 0,
-      "actions": [],
-      "duration": 1800
-    },
-    {
-      "index": 1,
-      "actions": [
-        {
-          "target": "op-badge",
-          "params": {
-            "text": "put('name','Alice')  →  hash('name') % 7 = 5  →  bucket[5]",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "bucket-array",
-          "params": {
-            "cells": [
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[name]",
-                "highlight": "insert"
-              },
-              {
-                "value": "[ ]"
-              }
-            ],
-            "pointers": [
-              {
-                "index": 5,
-                "label": "hash=5",
-                "color": "primary"
-              }
-            ]
-          }
-        },
-        {
-          "target": "hashmap-view",
-          "params": {
-            "entries": [
-              {
-                "key": "name",
-                "value": "Alice",
-                "highlight": "insert"
-              }
-            ]
-          }
-        },
-        {
-          "target": "load-factor",
-          "params": {
-            "value": 14,
-            "label": "Load Factor ×100",
-            "color": "primary"
-          }
-        }
-      ],
-      "duration": 2200
-    },
-    {
-      "index": 2,
-      "actions": [
-        {
-          "target": "op-badge",
-          "params": {
-            "text": "put('age', 30)  →  hash('age') % 7 = 1  →  bucket[1]",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "bucket-array",
-          "params": {
-            "cells": [
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[age]",
-                "highlight": "insert"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[name]"
-              },
-              {
-                "value": "[ ]"
-              }
-            ],
-            "pointers": [
-              {
-                "index": 1,
-                "label": "hash=1",
-                "color": "primary"
-              }
-            ]
-          }
-        },
-        {
-          "target": "hashmap-view",
-          "params": {
-            "entries": [
-              {
-                "key": "name",
-                "value": "Alice"
-              },
-              {
-                "key": "age",
-                "value": "30",
-                "highlight": "insert"
-              }
-            ]
-          }
-        },
-        {
-          "target": "load-factor",
-          "params": {
-            "value": 29,
-            "label": "Load Factor ×100",
-            "color": "primary"
-          }
-        }
-      ],
-      "duration": 2200
-    },
-    {
-      "index": 3,
-      "actions": [
-        {
-          "target": "op-badge",
-          "params": {
-            "text": "put('city','NYC')  →  hash('city') % 7 = 5  →  COLLISION! Same bucket as 'name'",
-            "style": "error"
-          }
-        },
-        {
-          "target": "bucket-array",
-          "params": {
-            "cells": [
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[age]"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[name→city]",
-                "highlight": "collision"
-              },
-              {
-                "value": "[ ]"
-              }
-            ],
-            "pointers": [
-              {
-                "index": 5,
-                "label": "collision!",
-                "color": "error"
-              }
-            ]
-          }
-        },
-        {
-          "target": "hashmap-view",
-          "params": {
-            "entries": [
-              {
-                "key": "name",
-                "value": "Alice"
-              },
-              {
-                "key": "age",
-                "value": "30"
-              },
-              {
-                "key": "city",
-                "value": "NYC",
-                "highlight": "insert"
-              }
-            ]
-          }
-        },
-        {
-          "target": "load-factor",
-          "params": {
-            "value": 43,
-            "label": "Load Factor ×100",
-            "color": "primary"
-          }
-        }
-      ],
-      "duration": 2500
-    },
-    {
-      "index": 4,
-      "actions": [
-        {
-          "target": "op-badge",
-          "params": {
-            "text": "Chaining: bucket[5] is a linked list  →  name→Alice → city→NYC",
-            "style": "info"
-          }
-        },
-        {
-          "target": "bucket-array",
-          "params": {
-            "cells": [
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[age]"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[name→city]",
-                "highlight": "active"
-              },
-              {
-                "value": "[ ]"
-              }
-            ],
-            "pointers": []
-          }
-        }
-      ],
-      "duration": 2000
-    },
-    {
-      "index": 5,
-      "actions": [
-        {
-          "target": "op-badge",
-          "params": {
-            "text": "get('name')  →  hash=5  →  scan bucket[5] list  →  found!  O(1) avg",
-            "style": "success"
-          }
-        },
-        {
-          "target": "bucket-array",
-          "params": {
-            "cells": [
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[age]"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[name→city]",
-                "highlight": "found"
-              },
-              {
-                "value": "[ ]"
-              }
-            ],
-            "pointers": [
-              {
-                "index": 5,
-                "label": "hash=5",
-                "color": "secondary"
-              }
-            ]
-          }
-        },
-        {
-          "target": "hashmap-view",
-          "params": {
-            "entries": [
-              {
-                "key": "name",
-                "value": "Alice",
-                "highlight": "hit"
-              },
-              {
-                "key": "age",
-                "value": "30"
-              },
-              {
-                "key": "city",
-                "value": "NYC"
-              }
-            ]
-          }
-        }
-      ],
-      "duration": 2200
-    },
-    {
-      "index": 6,
-      "actions": [
-        {
-          "target": "op-badge",
-          "params": {
-            "text": "put() more keys…  →  load factor approaching 0.75  →  trigger RESIZE!",
-            "style": "error"
-          }
-        },
-        {
-          "target": "bucket-array",
-          "params": {
-            "cells": [
-              {
-                "value": "[e]"
-              },
-              {
-                "value": "[age→f]"
-              },
-              {
-                "value": "[g]"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[h]"
-              },
-              {
-                "value": "[name→city]"
-              },
-              {
-                "value": "[i]"
-              }
-            ],
-            "pointers": [
-              {
-                "index": 3,
-                "label": "threshold!",
-                "color": "error"
-              }
-            ]
-          }
-        },
-        {
-          "target": "hashmap-view",
-          "params": {
-            "entries": [
-              {
-                "key": "name",
-                "value": "Alice"
-              },
-              {
-                "key": "age",
-                "value": "30"
-              },
-              {
-                "key": "city",
-                "value": "NYC"
-              },
-              {
-                "key": "email",
-                "value": "a@b.c"
-              },
-              {
-                "key": "role",
-                "value": "admin"
-              }
-            ]
-          }
-        },
-        {
-          "target": "load-factor",
-          "params": {
-            "value": 71,
-            "label": "Load Factor ×100",
-            "color": "error"
-          }
-        }
-      ],
-      "duration": 2500
-    },
-    {
-      "index": 7,
-      "actions": [
-        {
-          "target": "op-badge",
-          "params": {
-            "text": "Resize!  →  double array size (7→14)  →  rehash all keys  →  new distribution",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "bucket-array",
-          "params": {
-            "cells": [
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[age]",
-                "highlight": "insert"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[city]",
-                "highlight": "insert"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[name]",
-                "highlight": "insert"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[email]",
-                "highlight": "insert"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[role]",
-                "highlight": "insert"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[ ]"
-              }
-            ],
-            "pointers": []
-          }
-        },
-        {
-          "target": "load-factor",
-          "params": {
-            "value": 36,
-            "label": "Load Factor ×100",
-            "color": "primary"
-          }
-        }
-      ],
-      "duration": 2500
-    },
-    {
-      "index": 8,
-      "actions": [
-        {
-          "target": "op-badge",
-          "params": {
-            "text": "remove('city')  →  hash=3 in new array  →  unlink from bucket chain",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "bucket-array",
-          "params": {
-            "cells": [
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[age]"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[city]",
-                "highlight": "delete"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[name]"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[email]"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[role]"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[ ]"
-              },
-              {
-                "value": "[ ]"
-              }
-            ],
-            "pointers": [
-              {
-                "index": 3,
-                "label": "delete",
-                "color": "error"
-              }
-            ]
-          }
-        },
-        {
-          "target": "hashmap-view",
-          "params": {
-            "entries": [
-              {
-                "key": "name",
-                "value": "Alice"
-              },
-              {
-                "key": "age",
-                "value": "30"
-              },
-              {
-                "key": "city",
-                "value": "NYC",
-                "highlight": "delete"
-              },
-              {
-                "key": "email",
-                "value": "a@b.c"
-              },
-              {
-                "key": "role",
-                "value": "admin"
-              }
-            ]
-          }
-        },
-        {
-          "target": "load-factor",
-          "params": {
-            "value": 29,
-            "label": "Load Factor ×100",
-            "color": "primary"
-          }
-        }
-      ],
-      "duration": 2200
+      "id": "load-factor",
+      "label": "Load Factor",
+      "initialValue": 0
     }
   ],
   "controls": [
@@ -755,28 +92,332 @@
       }
     }
   ],
-  "explanation": [
+  "steps": [
     {
-      "heading": "HashMap Internals",
-      "body": "Under the hood, a HashMap is an array of **buckets**.\n\n`put(key, val)` computes `index = hash(key) % array_size` and stores the entry at that index.",
-      "appearsAtStep": 0
+      "index": 1,
+      "explanation": {
+        "heading": "Hash Function",
+        "body": "A good hash function:\n- Distributes keys **uniformly** across buckets\n- Is **fast** to compute (O(1))\n- Produces the **same index** for equal keys\n\nJava's `hashCode()` and Python's `hash()` XOR the bits of the key representation.",
+        "callout": "Bad hash function → all keys land in same bucket → O(n) performance."
+      },
+      "activeText": "put('name','Alice')  →  hash('name') % 7 = 5  →  bucket[5]",
+      "hud": {
+        "load-factor": 14
+      },
+      "canvas": {
+        "bucket-array": {
+          "items": [
+            { "id": "a0", "value": "[ ]" },
+            { "id": "a1", "value": "[ ]" },
+            { "id": "a2", "value": "[ ]" },
+            { "id": "a3", "value": "[ ]" },
+            { "id": "a4", "value": "[ ]" },
+            { "id": "a5", "value": "[name]", "highlight": "insert" },
+            { "id": "a6", "value": "[ ]" }
+          ]
+        },
+        "hashmap-view": {
+          "entries": [
+            {
+              "id": "entry-name",
+              "key": "name",
+              "value": "Alice",
+              "highlight": "insert"
+            }
+          ]
+        }
+      }
     },
     {
-      "heading": "Hash Function",
-      "body": "A good hash function:\n- Distributes keys **uniformly** across buckets\n- Is **fast** to compute (O(1))\n- Produces the **same index** for equal keys\n\nJava's `hashCode()` and Python's `hash()` XOR the bits of the key representation.",
-      "appearsAtStep": 1,
-      "callout": "Bad hash function → all keys land in same bucket → O(n) performance."
+      "index": 2,
+      "explanation": {
+        "heading": "Step 2",
+        "body": "State updated."
+      },
+      "activeText": "put('age', 30)  →  hash('age') % 7 = 1  →  bucket[1]",
+      "hud": {
+        "load-factor": 29
+      },
+      "canvas": {
+        "bucket-array": {
+          "items": [
+            { "id": "a0", "value": "[ ]" },
+            { "id": "a1", "value": "[age]", "highlight": "insert" },
+            { "id": "a2", "value": "[ ]" },
+            { "id": "a3", "value": "[ ]" },
+            { "id": "a4", "value": "[ ]" },
+            { "id": "a5", "value": "[name]" },
+            { "id": "a6", "value": "[ ]" }
+          ]
+        },
+        "hashmap-view": {
+          "entries": [
+            {
+              "id": "entry-name",
+              "key": "name",
+              "value": "Alice"
+            },
+            {
+              "id": "entry-age",
+              "key": "age",
+              "value": "30",
+              "highlight": "insert"
+            }
+          ]
+        }
+      }
     },
     {
-      "heading": "Collision → Chaining",
-      "body": "Two different keys can hash to the same bucket — this is a **collision**.\n\n**Chaining**: each bucket holds a **linked list** of all entries that map there.\n\nLookup: hash(key) → find bucket → scan the chain for matching key.\n\nAverage case: O(1) if load factor is low.",
-      "appearsAtStep": 3
+      "index": 3,
+      "explanation": {
+        "heading": "Collision → Chaining",
+        "body": "Two different keys can hash to the same bucket — this is a **collision**.\n\n**Chaining**: each bucket holds a **linked list** of all entries that map there.\n\nLookup: hash(key) → find bucket → scan the chain for matching key.\n\nAverage case: O(1) if load factor is low."
+      },
+      "activeText": "put('city','NYC')  →  hash('city') % 7 = 5  →  COLLISION! Same bucket as 'name'",
+      "hud": {
+        "load-factor": 43
+      },
+      "canvas": {
+        "bucket-array": {
+          "items": [
+            { "id": "a0", "value": "[ ]" },
+            { "id": "a1", "value": "[age]" },
+            { "id": "a2", "value": "[ ]" },
+            { "id": "a3", "value": "[ ]" },
+            { "id": "a4", "value": "[ ]" },
+            { "id": "a5", "value": "[name→city]", "highlight": "active" },
+            { "id": "a6", "value": "[ ]" }
+          ]
+        },
+        "hashmap-view": {
+          "entries": [
+            {
+              "id": "entry-name",
+              "key": "name",
+              "value": "Alice"
+            },
+            {
+              "id": "entry-age",
+              "key": "age",
+              "value": "30"
+            },
+            {
+              "id": "entry-city",
+              "key": "city",
+              "value": "NYC",
+              "highlight": "insert"
+            }
+          ]
+        }
+      }
     },
     {
-      "heading": "Load Factor & Resizing",
-      "body": "Load factor = `entries / bucket_count`.\n\nWhen load factor exceeds **0.75** (threshold used by Java's HashMap):\n1. Allocate a new array 2× the size\n2. **Rehash** all entries into new buckets\n\nThis keeps average chain length close to 1, maintaining O(1) lookups.",
-      "appearsAtStep": 6,
-      "callout": "Resize is O(n), but amortized over n insertions it's still O(1) average per put()."
+      "index": 4,
+      "explanation": {
+        "heading": "Step 4",
+        "body": "State updated."
+      },
+      "activeText": "Chaining: bucket[5] is a linked list  →  name→Alice → city→NYC",
+      "canvas": {
+        "bucket-array": {
+          "items": [
+            { "id": "a0", "value": "[ ]" },
+            { "id": "a1", "value": "[age]" },
+            { "id": "a2", "value": "[ ]" },
+            { "id": "a3", "value": "[ ]" },
+            { "id": "a4", "value": "[ ]" },
+            { "id": "a5", "value": "[name→city]", "highlight": "active" },
+            { "id": "a6", "value": "[ ]" }
+          ]
+        }
+      }
+    },
+    {
+      "index": 5,
+      "explanation": {
+        "heading": "Step 5",
+        "body": "State updated."
+      },
+      "activeText": "get('name')  →  hash=5  →  scan bucket[5] list  →  found!  O(1) avg",
+      "canvas": {
+        "bucket-array": {
+          "items": [
+            { "id": "a0", "value": "[ ]" },
+            { "id": "a1", "value": "[age]" },
+            { "id": "a2", "value": "[ ]" },
+            { "id": "a3", "value": "[ ]" },
+            { "id": "a4", "value": "[ ]" },
+            { "id": "a5", "value": "[name→city]", "highlight": "hit" },
+            { "id": "a6", "value": "[ ]" }
+          ]
+        },
+        "hashmap-view": {
+          "entries": [
+            {
+              "id": "entry-name",
+              "key": "name",
+              "value": "Alice",
+              "highlight": "hit"
+            },
+            {
+              "id": "entry-age",
+              "key": "age",
+              "value": "30"
+            },
+            {
+              "id": "entry-city",
+              "key": "city",
+              "value": "NYC"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 6,
+      "explanation": {
+        "heading": "Load Factor & Resizing",
+        "body": "Load factor = `entries / bucket_count`.\n\nWhen load factor exceeds **0.75** (threshold used by Java's HashMap):\n1. Allocate a new array 2× the size\n2. **Rehash** all entries into new buckets\n\nThis keeps average chain length close to 1, maintaining O(1) lookups.",
+        "callout": "Resize is O(n), but amortized over n insertions it's still O(1) average per put()."
+      },
+      "activeText": "put() more keys…  →  load factor approaching 0.75  →  trigger RESIZE!",
+      "hud": {
+        "load-factor": 71
+      },
+      "canvas": {
+        "bucket-array": {
+          "items": [
+            { "id": "a0", "value": "[e]" },
+            { "id": "a1", "value": "[age→f]" },
+            { "id": "a2", "value": "[g]" },
+            { "id": "a3", "value": "[ ]" },
+            { "id": "a4", "value": "[h]" },
+            { "id": "a5", "value": "[name→city]" },
+            { "id": "a6", "value": "[i]" }
+          ]
+        },
+        "hashmap-view": {
+          "entries": [
+            {
+              "id": "entry-name",
+              "key": "name",
+              "value": "Alice"
+            },
+            {
+              "id": "entry-age",
+              "key": "age",
+              "value": "30"
+            },
+            {
+              "id": "entry-city",
+              "key": "city",
+              "value": "NYC"
+            },
+            {
+              "id": "entry-email",
+              "key": "email",
+              "value": "a@b.c"
+            },
+            {
+              "id": "entry-role",
+              "key": "role",
+              "value": "admin"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 7,
+      "explanation": {
+        "heading": "Step 7",
+        "body": "State updated."
+      },
+      "activeText": "Resize!  →  double array size (7→14)  →  rehash all keys  →  new distribution",
+      "hud": {
+        "load-factor": 36
+      },
+      "canvas": {
+        "bucket-array": {
+          "items": [
+            { "id": "b0", "value": "[ ]" },
+            { "id": "b1", "value": "[age]", "highlight": "insert" },
+            { "id": "b2", "value": "[ ]" },
+            { "id": "b3", "value": "[city]", "highlight": "insert" },
+            { "id": "b4", "value": "[ ]" },
+            { "id": "b5", "value": "[name]", "highlight": "insert" },
+            { "id": "b6", "value": "[ ]" },
+            { "id": "b7", "value": "[email]", "highlight": "insert" },
+            { "id": "b8", "value": "[ ]" },
+            { "id": "b9", "value": "[role]", "highlight": "insert" },
+            { "id": "b10", "value": "[ ]" },
+            { "id": "b11", "value": "[ ]" },
+            { "id": "b12", "value": "[ ]" },
+            { "id": "b13", "value": "[ ]" }
+          ]
+        }
+      }
+    },
+    {
+      "index": 8,
+      "explanation": {
+        "heading": "Step 8",
+        "body": "State updated."
+      },
+      "activeText": "remove('city')  →  hash=3 in new array  →  unlink from bucket chain",
+      "hud": {
+        "load-factor": 29
+      },
+      "canvas": {
+        "bucket-array": {
+          "items": [
+            { "id": "b0", "value": "[ ]" },
+            { "id": "b1", "value": "[age]" },
+            { "id": "b2", "value": "[ ]" },
+            { "id": "b3", "value": "[city]", "highlight": "error" },
+            { "id": "b4", "value": "[ ]" },
+            { "id": "b5", "value": "[name]" },
+            { "id": "b6", "value": "[ ]" },
+            { "id": "b7", "value": "[email]" },
+            { "id": "b8", "value": "[ ]" },
+            { "id": "b9", "value": "[role]" },
+            { "id": "b10", "value": "[ ]" },
+            { "id": "b11", "value": "[ ]" },
+            { "id": "b12", "value": "[ ]" },
+            { "id": "b13", "value": "[ ]" }
+          ]
+        },
+        "hashmap-view": {
+          "entries": [
+            {
+              "id": "entry-name",
+              "key": "name",
+              "value": "Alice"
+            },
+            {
+              "id": "entry-age",
+              "key": "age",
+              "value": "30"
+            },
+            {
+              "id": "entry-city",
+              "key": "city",
+              "value": "NYC",
+              "highlight": "remove"
+            },
+            {
+              "id": "entry-email",
+              "key": "email",
+              "value": "a@b.c"
+            },
+            {
+              "id": "entry-role",
+              "key": "role",
+              "value": "admin"
+            }
+          ]
+        }
+      }
     }
   ],
   "popups": [
@@ -786,11 +427,7 @@
       "text": "Collision! Two keys map to same index.",
       "showAtStep": 3,
       "hideAtStep": 5,
-      "style": "warning",
-      "anchor": {
-        "x": 50,
-        "y": 8
-      }
+      "style": "warning"
     },
     {
       "id": "pop-resize",
@@ -798,11 +435,7 @@
       "text": "Load > 0.75 → resize! All keys rehashed.",
       "showAtStep": 7,
       "hideAtStep": 8,
-      "style": "insight",
-      "anchor": {
-        "x": 50,
-        "y": 8
-      }
+      "style": "insight"
     }
   ],
   "challenges": [

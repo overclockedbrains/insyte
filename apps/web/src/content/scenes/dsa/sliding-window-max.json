@@ -1,15 +1,11 @@
 {
+  "$schema": "/scene-schema.json",
   "id": "sliding-window-max",
   "title": "Sliding Window Maximum",
   "type": "dsa-trace",
   "layout": "code-left-canvas-right",
   "description": "Use a monotonic deque to track max of each window.",
   "category": "Data Structures & Algorithms",
-  "tags": [
-    "sliding-window",
-    "deque",
-    "array"
-  ],
   "code": {
     "language": "python",
     "source": "from collections import deque\n\ndef max_sliding_window(nums, k):\n    dq = deque()  # stores indices\n    out = []\n    for i, num in enumerate(nums):\n        while dq and dq[0] <= i - k:\n            dq.popleft()\n        while dq and nums[dq[-1]] <= num:\n            dq.pop()\n        dq.append(i)\n        if i >= k - 1:\n            out.append(nums[dq[0]])\n    return out\n\nfinalResult = max_sliding_window([1, 3, -1, -3, 5, 3, 6, 7], 3)\n",
@@ -24,452 +20,233 @@
       11
     ]
   },
-  "visuals": [
+  "canvas": [
     {
       "id": "nums",
-      "type": "array",
+      "type": "linear",
+      "variant": "array",
+      "layoutHint": "linear-H",
       "label": "nums",
       "initialState": {
-        "cells": [
-          {
-            "value": 1,
-            "highlight": "default"
-          },
-          {
-            "value": 3,
-            "highlight": "default"
-          },
-          {
-            "value": -1,
-            "highlight": "default"
-          },
-          {
-            "value": -3,
-            "highlight": "default"
-          },
-          {
-            "value": 5,
-            "highlight": "default"
-          },
-          {
-            "value": 3,
-            "highlight": "default"
-          },
-          {
-            "value": 6,
-            "highlight": "default"
-          },
-          {
-            "value": 7,
-            "highlight": "default"
-          }
-        ],
-        "windowHighlight": {
-          "start": 0,
-          "end": 2
-        }
-      },
-      "layoutHint": "linear-H"
+        "items": [
+          { "id": "a0", "value": 1 },
+          { "id": "a1", "value": 3 },
+          { "id": "a2", "value": -1 },
+          { "id": "a3", "value": -3 },
+          { "id": "a4", "value": 5 },
+          { "id": "a5", "value": 3 },
+          { "id": "a6", "value": 6 },
+          { "id": "a7", "value": 7 }
+        ]
+      }
     },
     {
       "id": "dq",
-      "type": "queue",
+      "type": "linear",
+      "variant": "queue",
+      "layoutHint": "linear-H",
       "label": "Monotonic deque (indices)",
       "initialState": {
         "items": []
-      },
-      "layoutHint": "linear-H"
-    },
-    {
-      "id": "op",
-      "type": "text-badge",
-      "label": "Operation",
-      "initialState": {
-        "text": "Build first window",
-        "style": "default"
-      },
-      "slot": "top-center"
+      }
     }
   ],
+  "activeText": {
+    "initialValue": "Build first window"
+  },
+  "controls": [],
   "steps": [
     {
-      "index": 0,
-      "actions": [],
-      "duration": 900
-    },
-    {
       "index": 1,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "i=0 add index 0",
-            "style": "highlight"
-          }
+      "explanation": {
+        "heading": "Step 1",
+        "body": "State updated."
+      },
+      "activeText": "i=0 add index 0",
+      "canvas": {
+        "dq": {
+          "items": [
+            { "id": "item-0", "value": "0" }
+          ]
         },
-        {
-          "target": "dq",
-          "params": {
-            "items": [
-              "0"
-            ],
-            "highlight": 0
-          }
-        },
-        {
-          "target": "nums",
-          "params": {
-            "cells": [
-              {
-                "value": 1,
-                "highlight": "active"
-              },
-              {
-                "value": 3,
-                "highlight": "default"
-              },
-              {
-                "value": -1,
-                "highlight": "default"
-              },
-              {
-                "value": -3,
-                "highlight": "default"
-              },
-              {
-                "value": 5,
-                "highlight": "default"
-              },
-              {
-                "value": 3,
-                "highlight": "default"
-              },
-              {
-                "value": 6,
-                "highlight": "default"
-              },
-              {
-                "value": 7,
-                "highlight": "default"
-              }
-            ],
-            "windowHighlight": {
-              "start": 0,
-              "end": 2
-            }
-          }
+        "nums": {
+          "items": [
+            { "id": "a0", "value": 1, "highlight": "active" },
+            { "id": "a1", "value": 3 },
+            { "id": "a2", "value": -1 },
+            { "id": "a3", "value": -3 },
+            { "id": "a4", "value": 5 },
+            { "id": "a5", "value": 3 },
+            { "id": "a6", "value": 6 },
+            { "id": "a7", "value": 7 }
+          ]
         }
-      ],
-      "duration": 900
+      }
     },
     {
       "index": 2,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "i=1 pop smaller 1, push 1",
-            "style": "highlight"
-          }
+      "explanation": {
+        "heading": "Step 2",
+        "body": "State updated."
+      },
+      "activeText": "i=1 pop smaller 1, push 1",
+      "canvas": {
+        "dq": {
+          "items": [
+            { "id": "item-0", "value": "1" }
+          ]
         },
-        {
-          "target": "dq",
-          "params": {
-            "items": [
-              "1"
-            ],
-            "highlight": 0
-          }
-        },
-        {
-          "target": "nums",
-          "params": {
-            "cells": [
-              {
-                "value": 1,
-                "highlight": "miss"
-              },
-              {
-                "value": 3,
-                "highlight": "active"
-              },
-              {
-                "value": -1,
-                "highlight": "default"
-              },
-              {
-                "value": -3,
-                "highlight": "default"
-              },
-              {
-                "value": 5,
-                "highlight": "default"
-              },
-              {
-                "value": 3,
-                "highlight": "default"
-              },
-              {
-                "value": 6,
-                "highlight": "default"
-              },
-              {
-                "value": 7,
-                "highlight": "default"
-              }
-            ],
-            "windowHighlight": {
-              "start": 0,
-              "end": 2
-            }
-          }
+        "nums": {
+          "items": [
+            { "id": "a0", "value": 1, "highlight": "error" },
+            { "id": "a1", "value": 3, "highlight": "active" },
+            { "id": "a2", "value": -1 },
+            { "id": "a3", "value": -3 },
+            { "id": "a4", "value": 5 },
+            { "id": "a5", "value": 3 },
+            { "id": "a6", "value": 6 },
+            { "id": "a7", "value": 7 }
+          ]
         }
-      ],
-      "duration": 1000
+      }
     },
     {
       "index": 3,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "i=2 push -1, first max = 3",
-            "style": "success"
-          }
+      "explanation": {
+        "heading": "Step 3",
+        "body": "State updated."
+      },
+      "activeText": "i=2 push -1, first max = 3",
+      "canvas": {
+        "dq": {
+          "items": [
+            { "id": "item-0", "value": "1" },
+            { "id": "item-1", "value": "2" }
+          ]
         },
-        {
-          "target": "dq",
-          "params": {
-            "items": [
-              "1",
-              "2"
-            ],
-            "highlight": 0
-          }
-        },
-        {
-          "target": "nums",
-          "params": {
-            "cells": [
-              {
-                "value": 1,
-                "highlight": "default"
-              },
-              {
-                "value": 3,
-                "highlight": "hit"
-              },
-              {
-                "value": -1,
-                "highlight": "active"
-              },
-              {
-                "value": -3,
-                "highlight": "default"
-              },
-              {
-                "value": 5,
-                "highlight": "default"
-              },
-              {
-                "value": 3,
-                "highlight": "default"
-              },
-              {
-                "value": 6,
-                "highlight": "default"
-              },
-              {
-                "value": 7,
-                "highlight": "default"
-              }
-            ],
-            "windowHighlight": {
-              "start": 0,
-              "end": 2
-            }
-          }
+        "nums": {
+          "items": [
+            { "id": "a0", "value": 1 },
+            { "id": "a1", "value": 3, "highlight": "hit" },
+            { "id": "a2", "value": -1, "highlight": "active" },
+            { "id": "a3", "value": -3 },
+            { "id": "a4", "value": 5 },
+            { "id": "a5", "value": 3 },
+            { "id": "a6", "value": 6 },
+            { "id": "a7", "value": 7 }
+          ]
         }
-      ],
-      "duration": 1000
+      }
     },
     {
       "index": 4,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Slide to window [1..3], keep deque monotonic",
-            "style": "highlight"
-          }
+      "explanation": {
+        "heading": "Drop Out-of-window and Smaller Values",
+        "body": "Before appending current index, pop expired front and pop smaller values from back."
+      },
+      "activeText": "Slide to window [1..3], keep deque monotonic",
+      "canvas": {
+        "dq": {
+          "items": [
+            { "id": "item-0", "value": "1" },
+            { "id": "item-1", "value": "2" },
+            { "id": "item-2", "value": "3" }
+          ]
         },
-        {
-          "target": "dq",
-          "params": {
-            "items": [
-              "1",
-              "2",
-              "3"
-            ],
-            "highlight": 0
-          }
-        },
-        {
-          "target": "nums",
-          "params": {
-            "windowHighlight": {
-              "start": 1,
-              "end": 3
-            }
-          }
+        "nums": {
+          "items": [
+            { "id": "a0", "value": 1 },
+            { "id": "a1", "value": 3 },
+            { "id": "a2", "value": -1 },
+            { "id": "a3", "value": -3, "highlight": "active" },
+            { "id": "a4", "value": 5 },
+            { "id": "a5", "value": 3 },
+            { "id": "a6", "value": 6 },
+            { "id": "a7", "value": 7 }
+          ]
         }
-      ],
-      "duration": 900
+      }
     },
     {
       "index": 5,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "i=4 value=5 pops 3,-1 and 3 from deque",
-            "style": "highlight"
-          }
+      "explanation": {
+        "heading": "Step 5",
+        "body": "State updated."
+      },
+      "activeText": "i=4 value=5 pops 3,-1 and 3 from deque",
+      "canvas": {
+        "dq": {
+          "items": [
+            { "id": "item-0", "value": "4" }
+          ]
         },
-        {
-          "target": "dq",
-          "params": {
-            "items": [
-              "4"
-            ],
-            "highlight": 0
-          }
-        },
-        {
-          "target": "nums",
-          "params": {
-            "cells": [
-              {
-                "value": 1,
-                "highlight": "default"
-              },
-              {
-                "value": 3,
-                "highlight": "default"
-              },
-              {
-                "value": -1,
-                "highlight": "miss"
-              },
-              {
-                "value": -3,
-                "highlight": "miss"
-              },
-              {
-                "value": 5,
-                "highlight": "active"
-              },
-              {
-                "value": 3,
-                "highlight": "default"
-              },
-              {
-                "value": 6,
-                "highlight": "default"
-              },
-              {
-                "value": 7,
-                "highlight": "default"
-              }
-            ],
-            "windowHighlight": {
-              "start": 2,
-              "end": 4
-            }
-          }
+        "nums": {
+          "items": [
+            { "id": "a0", "value": 1 },
+            { "id": "a1", "value": 3 },
+            { "id": "a2", "value": -1, "highlight": "error" },
+            { "id": "a3", "value": -3, "highlight": "error" },
+            { "id": "a4", "value": 5, "highlight": "active" },
+            { "id": "a5", "value": 3 },
+            { "id": "a6", "value": 6 },
+            { "id": "a7", "value": 7 }
+          ]
         }
-      ],
-      "duration": 1100
+      }
     },
     {
       "index": 6,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "i=6 value=6 becomes new max",
-            "style": "highlight"
-          }
+      "explanation": {
+        "heading": "Step 6",
+        "body": "State updated."
+      },
+      "activeText": "i=6 value=6 becomes new max",
+      "canvas": {
+        "dq": {
+          "items": [
+            { "id": "item-0", "value": "6" }
+          ]
         },
-        {
-          "target": "dq",
-          "params": {
-            "items": [
-              "6"
-            ],
-            "highlight": 0
-          }
-        },
-        {
-          "target": "nums",
-          "params": {
-            "windowHighlight": {
-              "start": 4,
-              "end": 6
-            }
-          }
+        "nums": {
+          "items": [
+            { "id": "a0", "value": 1 },
+            { "id": "a1", "value": 3 },
+            { "id": "a2", "value": -1 },
+            { "id": "a3", "value": -3 },
+            { "id": "a4", "value": 5 },
+            { "id": "a5", "value": 3 },
+            { "id": "a6", "value": 6, "highlight": "active" },
+            { "id": "a7", "value": 7 }
+          ]
         }
-      ],
-      "duration": 1000
+      }
     },
     {
       "index": 7,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "i=7 value=7 final max list: [3,3,5,5,6,7]",
-            "style": "success"
-          }
+      "explanation": {
+        "heading": "Front Is Window Max",
+        "body": "At each full window, `nums[dq[0]]` is the maximum."
+      },
+      "activeText": "i=7 value=7 final max list: [3,3,5,5,6,7]",
+      "canvas": {
+        "dq": {
+          "items": [
+            { "id": "item-0", "value": "7" }
+          ]
         },
-        {
-          "target": "dq",
-          "params": {
-            "items": [
-              "7"
-            ],
-            "highlight": 0
-          }
-        },
-        {
-          "target": "nums",
-          "params": {
-            "windowHighlight": {
-              "start": 5,
-              "end": 7
-            }
-          }
+        "nums": {
+          "items": [
+            { "id": "a0", "value": 1 },
+            { "id": "a1", "value": 3 },
+            { "id": "a2", "value": -1 },
+            { "id": "a3", "value": -3 },
+            { "id": "a4", "value": 5 },
+            { "id": "a5", "value": 3 },
+            { "id": "a6", "value": 6 },
+            { "id": "a7", "value": 7, "highlight": "active" }
+          ]
         }
-      ],
-      "duration": 1000
-    }
-  ],
-  "controls": [],
-  "explanation": [
-    {
-      "heading": "Monotonic Deque",
-      "body": "Deque stores candidate indices in decreasing value order.",
-      "appearsAtStep": 0
-    },
-    {
-      "heading": "Drop Out-of-window and Smaller Values",
-      "body": "Before appending current index, pop expired front and pop smaller values from back.",
-      "appearsAtStep": 4
-    },
-    {
-      "heading": "Front Is Window Max",
-      "body": "At each full window, `nums[dq[0]]` is the maximum.",
-      "appearsAtStep": 7
+      }
     }
   ],
   "popups": [

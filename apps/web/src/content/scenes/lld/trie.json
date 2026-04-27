@@ -1,711 +1,29 @@
 {
+  "$schema": "/scene-schema.json",
   "id": "trie",
   "title": "Trie (Prefix Tree)",
   "type": "lld",
   "layout": "text-left-canvas-right",
   "description": "See how a Trie (Prefix Tree) enables O(m) search, insert, and startsWith — where m is the word length. Powers autocomplete in every search bar you've used.",
   "category": "Low Level Design",
-  "tags": [
-    "trie",
-    "prefix-tree",
-    "autocomplete",
-    "design",
-    "lld",
-    "tree"
-  ],
-  "visuals": [
+  "canvas": [
     {
       "id": "trie-tree",
       "type": "tree",
+      "variant": "trie",
+      "layoutHint": "tree-RT",
       "label": "Trie Structure  (* = end of word)",
       "initialState": {
         "nodes": [
-          {
-            "id": "root",
-            "value": "·",
-            "children": []
-          }
+          { "id": "root", "value": "·", "children": [], "isEnd": false }
         ],
         "rootId": "root"
-      },
-      "layoutHint": "tree-RT"
-    },
-    {
-      "id": "char-badge",
-      "type": "text-badge",
-      "label": "Current Operation",
-      "initialState": {
-        "text": "Empty Trie  —  root node (·) represents start",
-        "style": "default"
-      },
-      "slot": "top-center"
+      }
     }
   ],
-  "steps": [
-    {
-      "index": 0,
-      "actions": [],
-      "duration": 2000
-    },
-    {
-      "index": 1,
-      "actions": [
-        {
-          "target": "char-badge",
-          "params": {
-            "text": "insert('app')  →  a → p → p*",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "trie-tree",
-          "params": {
-            "nodes": [
-              {
-                "id": "root",
-                "value": "·",
-                "children": [
-                  "a1"
-                ]
-              },
-              {
-                "id": "a1",
-                "value": "a",
-                "children": [
-                  "p1"
-                ],
-                "highlight": "active"
-              },
-              {
-                "id": "p1",
-                "value": "p",
-                "children": [
-                  "p2"
-                ],
-                "highlight": "active"
-              },
-              {
-                "id": "p2",
-                "value": "p*",
-                "children": [],
-                "highlight": "found"
-              }
-            ],
-            "rootId": "root"
-          }
-        }
-      ],
-      "duration": 2000
-    },
-    {
-      "index": 2,
-      "actions": [
-        {
-          "target": "char-badge",
-          "params": {
-            "text": "insert('apple')  →  shared prefix 'app' + new l → e*",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "trie-tree",
-          "params": {
-            "nodes": [
-              {
-                "id": "root",
-                "value": "·",
-                "children": [
-                  "a1"
-                ]
-              },
-              {
-                "id": "a1",
-                "value": "a",
-                "children": [
-                  "p1"
-                ]
-              },
-              {
-                "id": "p1",
-                "value": "p",
-                "children": [
-                  "p2"
-                ]
-              },
-              {
-                "id": "p2",
-                "value": "p*",
-                "children": [
-                  "l1"
-                ]
-              },
-              {
-                "id": "l1",
-                "value": "l",
-                "children": [
-                  "e1"
-                ],
-                "highlight": "active"
-              },
-              {
-                "id": "e1",
-                "value": "e*",
-                "children": [],
-                "highlight": "found"
-              }
-            ],
-            "rootId": "root"
-          }
-        }
-      ],
-      "duration": 2200
-    },
-    {
-      "index": 3,
-      "actions": [
-        {
-          "target": "char-badge",
-          "params": {
-            "text": "insert('ban')  →  new branch: b → a → n*  (no shared prefix)",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "trie-tree",
-          "params": {
-            "nodes": [
-              {
-                "id": "root",
-                "value": "·",
-                "children": [
-                  "a1",
-                  "b1"
-                ]
-              },
-              {
-                "id": "a1",
-                "value": "a",
-                "children": [
-                  "p1"
-                ]
-              },
-              {
-                "id": "p1",
-                "value": "p",
-                "children": [
-                  "p2"
-                ]
-              },
-              {
-                "id": "p2",
-                "value": "p*",
-                "children": [
-                  "l1"
-                ]
-              },
-              {
-                "id": "l1",
-                "value": "l",
-                "children": [
-                  "e1"
-                ]
-              },
-              {
-                "id": "e1",
-                "value": "e*",
-                "children": []
-              },
-              {
-                "id": "b1",
-                "value": "b",
-                "children": [
-                  "an1"
-                ],
-                "highlight": "active"
-              },
-              {
-                "id": "an1",
-                "value": "a",
-                "children": [
-                  "n1"
-                ],
-                "highlight": "active"
-              },
-              {
-                "id": "n1",
-                "value": "n*",
-                "children": [],
-                "highlight": "found"
-              }
-            ],
-            "rootId": "root"
-          }
-        }
-      ],
-      "duration": 2200
-    },
-    {
-      "index": 4,
-      "actions": [
-        {
-          "target": "char-badge",
-          "params": {
-            "text": "search('app')  →  traverse root→a→p→p*  →  found (word end)  ✓",
-            "style": "success"
-          }
-        },
-        {
-          "target": "trie-tree",
-          "params": {
-            "nodes": [
-              {
-                "id": "root",
-                "value": "·",
-                "children": [
-                  "a1",
-                  "b1"
-                ],
-                "highlight": "found"
-              },
-              {
-                "id": "a1",
-                "value": "a",
-                "children": [
-                  "p1"
-                ],
-                "highlight": "found"
-              },
-              {
-                "id": "p1",
-                "value": "p",
-                "children": [
-                  "p2"
-                ],
-                "highlight": "found"
-              },
-              {
-                "id": "p2",
-                "value": "p*",
-                "children": [
-                  "l1"
-                ],
-                "highlight": "found"
-              },
-              {
-                "id": "l1",
-                "value": "l",
-                "children": [
-                  "e1"
-                ]
-              },
-              {
-                "id": "e1",
-                "value": "e*",
-                "children": []
-              },
-              {
-                "id": "b1",
-                "value": "b",
-                "children": [
-                  "an1"
-                ]
-              },
-              {
-                "id": "an1",
-                "value": "a",
-                "children": [
-                  "n1"
-                ]
-              },
-              {
-                "id": "n1",
-                "value": "n*",
-                "children": []
-              }
-            ],
-            "rootId": "root"
-          }
-        }
-      ],
-      "duration": 2200
-    },
-    {
-      "index": 5,
-      "actions": [
-        {
-          "target": "char-badge",
-          "params": {
-            "text": "startsWith('ap')  →  traverse root→a→p  →  prefix exists  ✓",
-            "style": "success"
-          }
-        },
-        {
-          "target": "trie-tree",
-          "params": {
-            "nodes": [
-              {
-                "id": "root",
-                "value": "·",
-                "children": [
-                  "a1",
-                  "b1"
-                ],
-                "highlight": "found"
-              },
-              {
-                "id": "a1",
-                "value": "a",
-                "children": [
-                  "p1"
-                ],
-                "highlight": "found"
-              },
-              {
-                "id": "p1",
-                "value": "p",
-                "children": [
-                  "p2"
-                ],
-                "highlight": "found"
-              },
-              {
-                "id": "p2",
-                "value": "p*",
-                "children": [
-                  "l1"
-                ]
-              },
-              {
-                "id": "l1",
-                "value": "l",
-                "children": [
-                  "e1"
-                ]
-              },
-              {
-                "id": "e1",
-                "value": "e*",
-                "children": []
-              },
-              {
-                "id": "b1",
-                "value": "b",
-                "children": [
-                  "an1"
-                ]
-              },
-              {
-                "id": "an1",
-                "value": "a",
-                "children": [
-                  "n1"
-                ]
-              },
-              {
-                "id": "n1",
-                "value": "n*",
-                "children": []
-              }
-            ],
-            "rootId": "root"
-          }
-        }
-      ],
-      "duration": 2000
-    },
-    {
-      "index": 6,
-      "actions": [
-        {
-          "target": "char-badge",
-          "params": {
-            "text": "search('ap')  →  traverse root→a→p  →  p is NOT a word end  →  false",
-            "style": "error"
-          }
-        },
-        {
-          "target": "trie-tree",
-          "params": {
-            "nodes": [
-              {
-                "id": "root",
-                "value": "·",
-                "children": [
-                  "a1",
-                  "b1"
-                ],
-                "highlight": "active"
-              },
-              {
-                "id": "a1",
-                "value": "a",
-                "children": [
-                  "p1"
-                ],
-                "highlight": "active"
-              },
-              {
-                "id": "p1",
-                "value": "p",
-                "children": [
-                  "p2"
-                ],
-                "highlight": "miss"
-              },
-              {
-                "id": "p2",
-                "value": "p*",
-                "children": [
-                  "l1"
-                ]
-              },
-              {
-                "id": "l1",
-                "value": "l",
-                "children": [
-                  "e1"
-                ]
-              },
-              {
-                "id": "e1",
-                "value": "e*",
-                "children": []
-              },
-              {
-                "id": "b1",
-                "value": "b",
-                "children": [
-                  "an1"
-                ]
-              },
-              {
-                "id": "an1",
-                "value": "a",
-                "children": [
-                  "n1"
-                ]
-              },
-              {
-                "id": "n1",
-                "value": "n*",
-                "children": []
-              }
-            ],
-            "rootId": "root"
-          }
-        }
-      ],
-      "duration": 2200
-    },
-    {
-      "index": 7,
-      "actions": [
-        {
-          "target": "char-badge",
-          "params": {
-            "text": "insert('banana')  →  extends 'ban' with a→n→a*",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "trie-tree",
-          "params": {
-            "nodes": [
-              {
-                "id": "root",
-                "value": "·",
-                "children": [
-                  "a1",
-                  "b1"
-                ]
-              },
-              {
-                "id": "a1",
-                "value": "a",
-                "children": [
-                  "p1"
-                ]
-              },
-              {
-                "id": "p1",
-                "value": "p",
-                "children": [
-                  "p2"
-                ]
-              },
-              {
-                "id": "p2",
-                "value": "p*",
-                "children": [
-                  "l1"
-                ]
-              },
-              {
-                "id": "l1",
-                "value": "l",
-                "children": [
-                  "e1"
-                ]
-              },
-              {
-                "id": "e1",
-                "value": "e*",
-                "children": []
-              },
-              {
-                "id": "b1",
-                "value": "b",
-                "children": [
-                  "an1"
-                ]
-              },
-              {
-                "id": "an1",
-                "value": "a",
-                "children": [
-                  "n1"
-                ]
-              },
-              {
-                "id": "n1",
-                "value": "n*",
-                "children": [
-                  "na1"
-                ]
-              },
-              {
-                "id": "na1",
-                "value": "a",
-                "children": [
-                  "nan1"
-                ],
-                "highlight": "active"
-              },
-              {
-                "id": "nan1",
-                "value": "n",
-                "children": [
-                  "nana1"
-                ],
-                "highlight": "active"
-              },
-              {
-                "id": "nana1",
-                "value": "a*",
-                "children": [],
-                "highlight": "found"
-              }
-            ],
-            "rootId": "root"
-          }
-        }
-      ],
-      "duration": 2200
-    },
-    {
-      "index": 8,
-      "actions": [
-        {
-          "target": "char-badge",
-          "params": {
-            "text": "search('xyz')  →  'x' not a child of root  →  immediately false  (O(m))",
-            "style": "error"
-          }
-        },
-        {
-          "target": "trie-tree",
-          "params": {
-            "nodes": [
-              {
-                "id": "root",
-                "value": "·",
-                "children": [
-                  "a1",
-                  "b1"
-                ],
-                "highlight": "miss"
-              },
-              {
-                "id": "a1",
-                "value": "a",
-                "children": [
-                  "p1"
-                ]
-              },
-              {
-                "id": "p1",
-                "value": "p",
-                "children": [
-                  "p2"
-                ]
-              },
-              {
-                "id": "p2",
-                "value": "p*",
-                "children": [
-                  "l1"
-                ]
-              },
-              {
-                "id": "l1",
-                "value": "l",
-                "children": [
-                  "e1"
-                ]
-              },
-              {
-                "id": "e1",
-                "value": "e*",
-                "children": []
-              },
-              {
-                "id": "b1",
-                "value": "b",
-                "children": [
-                  "an1"
-                ]
-              },
-              {
-                "id": "an1",
-                "value": "a",
-                "children": [
-                  "n1"
-                ]
-              },
-              {
-                "id": "n1",
-                "value": "n*",
-                "children": [
-                  "na1"
-                ]
-              },
-              {
-                "id": "na1",
-                "value": "a",
-                "children": [
-                  "nan1"
-                ]
-              },
-              {
-                "id": "nan1",
-                "value": "n",
-                "children": [
-                  "nana1"
-                ]
-              },
-              {
-                "id": "nana1",
-                "value": "a*",
-                "children": []
-              }
-            ],
-            "rootId": "root"
-          }
-        }
-      ],
-      "duration": 2000
-    }
-  ],
+  "activeText": {
+    "initialValue": "Empty Trie  —  root node (·) represents start"
+  },
   "controls": [
     {
       "id": "btn-insert-app",
@@ -762,27 +80,167 @@
       }
     }
   ],
-  "explanation": [
+  "steps": [
     {
-      "heading": "What is a Trie?",
-      "body": "A Trie (or Prefix Tree) stores strings by sharing common prefixes.\n\nEach path from root to a marked node represents a complete word. Nodes with `*` mark word boundaries.",
-      "appearsAtStep": 0
+      "index": 1,
+      "explanation": {
+        "heading": "Step 1",
+        "body": "State updated."
+      },
+      "activeText": "insert('app')  →  a → p → p*",
+      "canvas": {
+        "trie-tree": {
+          "nodeStates": {
+            "a1": { "highlight": "active" },
+            "p1": { "highlight": "active" },
+            "p2": { "highlight": "found" }
+          },
+          "newNodes": [
+            { "id": "a1", "value": "a", "children": ["p1"], "isEnd": false },
+            { "id": "p1", "value": "p", "children": ["p2"], "isEnd": false },
+            { "id": "p2", "value": "p*", "children": [], "isEnd": true }
+          ],
+          "updateNodes": [
+            { "id": "root", "children": ["a1"] }
+          ]
+        }
+      }
     },
     {
-      "heading": "Prefix Sharing",
-      "body": "\"apple\" and \"app\" share the path `a → p → p`. Only the suffix diverges.\n\nThis sharing makes Tries memory-efficient for large dictionaries with common prefixes — like all English words starting with \"pre\" or \"un\".",
-      "appearsAtStep": 2,
-      "callout": "A 50,000-word English dictionary uses far fewer nodes than 50,000 strings stored separately."
+      "index": 2,
+      "explanation": {
+        "heading": "Prefix Sharing",
+        "body": "\"apple\" and \"app\" share the path `a → p → p`. Only the suffix diverges.\n\nThis sharing makes Tries memory-efficient for large dictionaries with common prefixes — like all English words starting with \"pre\" or \"un\".",
+        "callout": "A 50,000-word English dictionary uses far fewer nodes than 50,000 strings stored separately."
+      },
+      "activeText": "insert('apple')  →  shared prefix 'app' + new l → e*",
+      "canvas": {
+        "trie-tree": {
+          "nodeStates": {
+            "l1": { "highlight": "active" },
+            "e1": { "highlight": "found" }
+          },
+          "newNodes": [
+            { "id": "l1", "value": "l", "children": ["e1"], "isEnd": false },
+            { "id": "e1", "value": "e*", "children": [], "isEnd": true }
+          ],
+          "updateNodes": [
+            { "id": "p2", "children": ["l1"] }
+          ]
+        }
+      }
     },
     {
-      "heading": "search() vs startsWith()",
-      "body": "**search(word)**: traverse character by character. Return true only if you reach the end AND the last node has `isEnd = true`.\n\n**startsWith(prefix)**: same traversal, but return true as soon as the path exists — `isEnd` doesn't matter.\n\nBoth are O(m) where m = length of the query.",
-      "appearsAtStep": 5
+      "index": 3,
+      "explanation": {
+        "heading": "Step 3",
+        "body": "State updated."
+      },
+      "activeText": "insert('ban')  →  new branch: b → a → n*  (no shared prefix)",
+      "canvas": {
+        "trie-tree": {
+          "nodeStates": {
+            "b1": { "highlight": "active" },
+            "an1": { "highlight": "active" },
+            "n1": { "highlight": "found" }
+          },
+          "newNodes": [
+            { "id": "b1", "value": "b", "children": ["an1"], "isEnd": false },
+            { "id": "an1", "value": "a", "children": ["n1"], "isEnd": false },
+            { "id": "n1", "value": "n*", "children": [], "isEnd": true }
+          ],
+          "updateNodes": [
+            { "id": "root", "children": ["a1", "b1"] }
+          ]
+        }
+      }
     },
     {
-      "heading": "search('ap') → false, startsWith('ap') → true",
-      "body": "The node `p` at depth 2 exists — so `startsWith('ap')` is true.\n\nBut `p` at depth 2 has `isEnd = false` — 'ap' was never inserted as a complete word. So `search('ap')` is false.",
-      "appearsAtStep": 6
+      "index": 4,
+      "explanation": {
+        "heading": "Step 4",
+        "body": "State updated."
+      },
+      "activeText": "search('app')  →  traverse root→a→p→p*  →  found (word end)  ✓",
+      "canvas": {
+        "trie-tree": {
+          "nodeStates": {
+            "root": { "highlight": "found" },
+            "a1": { "highlight": "found" },
+            "p1": { "highlight": "found" },
+            "p2": { "highlight": "found" }
+          }
+        }
+      }
+    },
+    {
+      "index": 5,
+      "explanation": {
+        "heading": "search() vs startsWith()",
+        "body": "**search(word)**: traverse character by character. Return true only if you reach the end AND the last node has `isEnd = true`.\n\n**startsWith(prefix)**: same traversal, but return true as soon as the path exists — `isEnd` doesn't matter.\n\nBoth are O(m) where m = length of the query."
+      },
+      "activeText": "startsWith('ap')  →  traverse root→a→p  →  prefix exists  ✓",
+      "canvas": {
+        "trie-tree": {
+          "nodeStates": {
+            "root": { "highlight": "found" },
+            "a1": { "highlight": "found" },
+            "p1": { "highlight": "found" }
+          }
+        }
+      }
+    },
+    {
+      "index": 6,
+      "explanation": {
+        "heading": "search('ap') → false, startsWith('ap') → true",
+        "body": "The node `p` at depth 2 exists — so `startsWith('ap')` is true.\n\nBut `p` at depth 2 has `isEnd = false` — 'ap' was never inserted as a complete word. So `search('ap')` is false."
+      },
+      "activeText": "search('ap')  →  traverse root→a→p  →  p is NOT a word end  →  false",
+      "canvas": {
+        "trie-tree": {
+          "nodeStates": {
+            "root": { "highlight": "active" },
+            "a1": { "highlight": "active" }
+          }
+        }
+      }
+    },
+    {
+      "index": 7,
+      "explanation": {
+        "heading": "Step 7",
+        "body": "State updated."
+      },
+      "activeText": "insert('banana')  →  extends 'ban' with a→n→a*",
+      "canvas": {
+        "trie-tree": {
+          "nodeStates": {
+            "na1": { "highlight": "active" },
+            "nan1": { "highlight": "active" },
+            "nana1": { "highlight": "found" }
+          },
+          "newNodes": [
+            { "id": "na1", "value": "a", "children": ["nan1"], "isEnd": false },
+            { "id": "nan1", "value": "n", "children": ["nana1"], "isEnd": false },
+            { "id": "nana1", "value": "a*", "children": [], "isEnd": true }
+          ],
+          "updateNodes": [
+            { "id": "n1", "children": ["na1"] }
+          ]
+        }
+      }
+    },
+    {
+      "index": 8,
+      "explanation": {
+        "heading": "Step 8",
+        "body": "State updated."
+      },
+      "activeText": "search('xyz')  →  'x' not a child of root  →  immediately false  (O(m))",
+      "canvas": {
+        "trie-tree": {}
+      }
     }
   ],
   "popups": [
@@ -792,11 +250,7 @@
       "text": "Shared prefix! apple re-uses app's path",
       "showAtStep": 2,
       "hideAtStep": 3,
-      "style": "insight",
-      "anchor": {
-        "x": 50,
-        "y": 15
-      }
+      "style": "insight"
     },
     {
       "id": "pop-word-end",
@@ -804,11 +258,7 @@
       "text": "* = isEnd marker. search() requires this.",
       "showAtStep": 4,
       "hideAtStep": 6,
-      "style": "info",
-      "anchor": {
-        "x": 50,
-        "y": 15
-      }
+      "style": "info"
     }
   ],
   "challenges": [

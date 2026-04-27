@@ -1,15 +1,11 @@
 {
+  "$schema": "/scene-schema.json",
   "id": "binary-search",
   "title": "Binary Search",
   "type": "dsa-trace",
   "layout": "code-left-canvas-right",
   "description": "Search in a sorted array by halving the range each step.",
   "category": "Data Structures & Algorithms",
-  "tags": [
-    "binary-search",
-    "array",
-    "pointers"
-  ],
   "code": {
     "language": "python",
     "source": "def binary_search(nums, target):\n    lo, hi = 0, len(nums) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if nums[mid] == target:\n            return mid\n        if nums[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1\n\nfinalResult = binary_search([1, 3, 5, 7, 9, 11], 9)\n",
@@ -22,351 +18,117 @@
       4
     ]
   },
-  "visuals": [
+  "canvas": [
     {
       "id": "arr",
-      "type": "array",
+      "type": "linear",
+      "variant": "array",
+      "layoutHint": "linear-H",
       "label": "sorted nums",
       "initialState": {
-        "cells": [
-          {
-            "value": 1,
-            "highlight": "default"
-          },
-          {
-            "value": 3,
-            "highlight": "default"
-          },
-          {
-            "value": 5,
-            "highlight": "default"
-          },
-          {
-            "value": 7,
-            "highlight": "default"
-          },
-          {
-            "value": 9,
-            "highlight": "default"
-          },
-          {
-            "value": 11,
-            "highlight": "default"
-          }
-        ],
-        "pointers": [
-          {
-            "index": 0,
-            "label": "lo"
-          },
-          {
-            "index": 5,
-            "label": "hi",
-            "color": "#3adffa"
-          },
-          {
-            "index": 2,
-            "label": "mid",
-            "color": "#919bff"
-          }
+        "items": [
+          { "id": "a0", "value": 1 },
+          { "id": "a1", "value": 3 },
+          { "id": "a2", "value": 5 },
+          { "id": "a3", "value": 7 },
+          { "id": "a4", "value": 9 },
+          { "id": "a5", "value": 11 }
         ]
-      },
-      "layoutHint": "linear-H"
-    },
-    {
-      "id": "op",
-      "type": "text-badge",
-      "label": "Operation",
-      "initialState": {
-        "text": "Initialize search bounds",
-        "style": "default"
-      },
-      "slot": "top-center"
+      }
     }
   ],
+  "activeText": {
+    "initialValue": "Initialize search bounds"
+  },
+  "controls": [],
   "steps": [
     {
-      "index": 0,
-      "actions": [],
-      "duration": 900
-    },
-    {
       "index": 1,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "lo=0 hi=5 mid=2 (value=5)",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "arr",
-          "params": {
-            "cells": [
-              {
-                "value": 1,
-                "highlight": "default"
-              },
-              {
-                "value": 3,
-                "highlight": "default"
-              },
-              {
-                "value": 5,
-                "highlight": "active"
-              },
-              {
-                "value": 7,
-                "highlight": "default"
-              },
-              {
-                "value": 9,
-                "highlight": "default"
-              },
-              {
-                "value": 11,
-                "highlight": "default"
-              }
-            ],
-            "pointers": [
-              {
-                "index": 0,
-                "label": "lo"
-              },
-              {
-                "index": 5,
-                "label": "hi",
-                "color": "#3adffa"
-              },
-              {
-                "index": 2,
-                "label": "mid",
-                "color": "#919bff"
-              }
-            ],
-            "windowHighlight": {
-              "start": 0,
-              "end": 5
-            }
-          }
+      "explanation": {
+        "heading": "Step 1",
+        "body": "State updated."
+      },
+      "activeText": "lo=0 hi=5 mid=2 (value=5)",
+      "canvas": {
+        "arr": {
+          "items": [
+            { "id": "a0", "value": 1 },
+            { "id": "a1", "value": 3 },
+            { "id": "a2", "value": 5, "highlight": "active" },
+            { "id": "a3", "value": 7 },
+            { "id": "a4", "value": 9 },
+            { "id": "a5", "value": 11 }
+          ]
         }
-      ],
-      "duration": 1200
+      }
     },
     {
       "index": 2,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "5 < 9 -> discard left half",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "arr",
-          "params": {
-            "cells": [
-              {
-                "value": 1,
-                "highlight": "miss"
-              },
-              {
-                "value": 3,
-                "highlight": "miss"
-              },
-              {
-                "value": 5,
-                "highlight": "miss"
-              },
-              {
-                "value": 7,
-                "highlight": "default"
-              },
-              {
-                "value": 9,
-                "highlight": "default"
-              },
-              {
-                "value": 11,
-                "highlight": "default"
-              }
-            ],
-            "pointers": [
-              {
-                "index": 3,
-                "label": "lo"
-              },
-              {
-                "index": 5,
-                "label": "hi",
-                "color": "#3adffa"
-              },
-              {
-                "index": 2,
-                "label": "mid",
-                "color": "#919bff"
-              }
-            ],
-            "windowHighlight": {
-              "start": 3,
-              "end": 5
-            }
-          }
+      "explanation": {
+        "heading": "Move Bounds",
+        "body": "If `nums[mid] < target`, move `lo` right. If greater, move `hi` left."
+      },
+      "activeText": "5 < 9 -> discard left half",
+      "canvas": {
+        "arr": {
+          "items": [
+            { "id": "a0", "value": 1, "highlight": "error" },
+            { "id": "a1", "value": 3, "highlight": "error" },
+            { "id": "a2", "value": 5, "highlight": "error" },
+            { "id": "a3", "value": 7 },
+            { "id": "a4", "value": 9 },
+            { "id": "a5", "value": 11 }
+          ]
         }
-      ],
-      "duration": 1100
+      }
     },
     {
       "index": 3,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Recompute mid=4 (value=9)",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "arr",
-          "params": {
-            "cells": [
-              {
-                "value": 1,
-                "highlight": "miss"
-              },
-              {
-                "value": 3,
-                "highlight": "miss"
-              },
-              {
-                "value": 5,
-                "highlight": "miss"
-              },
-              {
-                "value": 7,
-                "highlight": "default"
-              },
-              {
-                "value": 9,
-                "highlight": "active"
-              },
-              {
-                "value": 11,
-                "highlight": "default"
-              }
-            ],
-            "pointers": [
-              {
-                "index": 3,
-                "label": "lo"
-              },
-              {
-                "index": 5,
-                "label": "hi",
-                "color": "#3adffa"
-              },
-              {
-                "index": 4,
-                "label": "mid",
-                "color": "#919bff"
-              }
-            ],
-            "windowHighlight": {
-              "start": 3,
-              "end": 5
-            }
-          }
+      "explanation": {
+        "heading": "Step 3",
+        "body": "State updated."
+      },
+      "activeText": "Recompute mid=4 (value=9)",
+      "canvas": {
+        "arr": {
+          "items": [
+            { "id": "a0", "value": 1, "highlight": "error" },
+            { "id": "a1", "value": 3, "highlight": "error" },
+            { "id": "a2", "value": 5, "highlight": "error" },
+            { "id": "a3", "value": 7 },
+            { "id": "a4", "value": 9, "highlight": "active" },
+            { "id": "a5", "value": 11 }
+          ]
         }
-      ],
-      "duration": 1000
+      }
     },
     {
       "index": 4,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "nums[mid] == target -> return 4",
-            "style": "success"
-          }
-        },
-        {
-          "target": "arr",
-          "params": {
-            "cells": [
-              {
-                "value": 1,
-                "highlight": "default"
-              },
-              {
-                "value": 3,
-                "highlight": "default"
-              },
-              {
-                "value": 5,
-                "highlight": "default"
-              },
-              {
-                "value": 7,
-                "highlight": "default"
-              },
-              {
-                "value": 9,
-                "highlight": "hit"
-              },
-              {
-                "value": 11,
-                "highlight": "default"
-              }
-            ],
-            "pointers": [
-              {
-                "index": 4,
-                "label": "mid",
-                "color": "#919bff"
-              }
-            ],
-            "windowHighlight": {
-              "start": 4,
-              "end": 4
-            }
-          }
+      "explanation": {
+        "heading": "Hit Condition",
+        "body": "As soon as `nums[mid] == target`, return `mid`."
+      },
+      "activeText": "nums[mid] == target -> return 4",
+      "canvas": {
+        "arr": {
+          "items": [
+            { "id": "a0", "value": 1 },
+            { "id": "a1", "value": 3 },
+            { "id": "a2", "value": 5 },
+            { "id": "a3", "value": 7 },
+            { "id": "a4", "value": 9, "highlight": "hit" },
+            { "id": "a5", "value": 11 }
+          ]
         }
-      ],
-      "duration": 1000
+      }
     },
     {
       "index": 5,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Search complete in O(log n)",
-            "style": "default"
-          }
-        }
-      ],
-      "duration": 900
-    }
-  ],
-  "controls": [],
-  "explanation": [
-    {
-      "heading": "Halve the Search Space",
-      "body": "Binary search relies on sorted order and discards half of the range each comparison.",
-      "appearsAtStep": 0
-    },
-    {
-      "heading": "Move Bounds",
-      "body": "If `nums[mid] < target`, move `lo` right. If greater, move `hi` left.",
-      "appearsAtStep": 2
-    },
-    {
-      "heading": "Hit Condition",
-      "body": "As soon as `nums[mid] == target`, return `mid`.",
-      "appearsAtStep": 4
+      "explanation": {
+        "heading": "Step 5",
+        "body": "State updated."
+      },
+      "activeText": "Search complete in O(log n)"
     }
   ],
   "popups": [

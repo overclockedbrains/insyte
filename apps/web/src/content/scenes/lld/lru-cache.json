@@ -1,608 +1,35 @@
 {
+  "$schema": "/scene-schema.json",
   "id": "lru-cache",
   "title": "LRU Cache",
   "type": "lld",
   "layout": "text-left-canvas-right",
   "description": "See how an LRU Cache achieves O(1) get and put using a doubly-linked list + hashmap — the same design used in Redis and CPU cache controllers.",
   "category": "Low Level Design",
-  "tags": [
-    "lru",
-    "cache",
-    "linked-list",
-    "hashmap",
-    "design",
-    "lld"
-  ],
-  "visuals": [
+  "canvas": [
     {
       "id": "lru-list",
-      "type": "linked-list",
+      "type": "linear",
+      "variant": "linked-list",
+      "layoutHint": "linear-H",
       "label": "Order List  (head = MRU ◀──── tail = LRU)",
       "initialState": {
-        "nodes": [],
-        "headId": null
-      },
-      "layoutHint": "linear-H"
+        "items": []
+      }
     },
     {
       "id": "lru-map",
-      "type": "hashmap",
+      "type": "map",
+      "layoutHint": "hashmap-buckets",
       "label": "HashMap  key → node",
       "initialState": {
         "entries": []
-      },
-      "layoutHint": "hashmap-buckets"
-    },
-    {
-      "id": "capacity-badge",
-      "type": "text-badge",
-      "label": "Status",
-      "initialState": {
-        "text": "Cache empty  (capacity = 3)",
-        "style": "default"
-      },
-      "slot": "top-center"
+      }
     }
   ],
-  "steps": [
-    {
-      "index": 0,
-      "actions": [],
-      "duration": 2000
-    },
-    {
-      "index": 1,
-      "actions": [
-        {
-          "target": "capacity-badge",
-          "params": {
-            "text": "put(1, 'A')  →  insert at head  [1/3]",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "lru-list",
-          "params": {
-            "nodes": [
-              {
-                "id": "n1",
-                "value": "1→A",
-                "next": null
-              }
-            ],
-            "headId": "n1"
-          }
-        },
-        {
-          "target": "lru-map",
-          "params": {
-            "entries": [
-              {
-                "key": "1",
-                "value": "A",
-                "highlight": "insert"
-              }
-            ]
-          }
-        }
-      ],
-      "duration": 2000
-    },
-    {
-      "index": 2,
-      "actions": [
-        {
-          "target": "capacity-badge",
-          "params": {
-            "text": "put(2, 'B')  →  insert at head  [2/3]",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "lru-list",
-          "params": {
-            "nodes": [
-              {
-                "id": "n2",
-                "value": "2→B",
-                "next": "n1"
-              },
-              {
-                "id": "n1",
-                "value": "1→A",
-                "next": null
-              }
-            ],
-            "headId": "n2"
-          }
-        },
-        {
-          "target": "lru-map",
-          "params": {
-            "entries": [
-              {
-                "key": "1",
-                "value": "A"
-              },
-              {
-                "key": "2",
-                "value": "B",
-                "highlight": "insert"
-              }
-            ]
-          }
-        }
-      ],
-      "duration": 2000
-    },
-    {
-      "index": 3,
-      "actions": [
-        {
-          "target": "capacity-badge",
-          "params": {
-            "text": "put(3, 'C')  →  CACHE FULL  [3/3]",
-            "style": "error"
-          }
-        },
-        {
-          "target": "lru-list",
-          "params": {
-            "nodes": [
-              {
-                "id": "n3",
-                "value": "3→C",
-                "next": "n2"
-              },
-              {
-                "id": "n2",
-                "value": "2→B",
-                "next": "n1"
-              },
-              {
-                "id": "n1",
-                "value": "1→A",
-                "next": null
-              }
-            ],
-            "headId": "n3"
-          }
-        },
-        {
-          "target": "lru-map",
-          "params": {
-            "entries": [
-              {
-                "key": "1",
-                "value": "A"
-              },
-              {
-                "key": "2",
-                "value": "B"
-              },
-              {
-                "key": "3",
-                "value": "C",
-                "highlight": "insert"
-              }
-            ]
-          }
-        }
-      ],
-      "duration": 2200
-    },
-    {
-      "index": 4,
-      "actions": [
-        {
-          "target": "capacity-badge",
-          "params": {
-            "text": "get(1)  →  CACHE HIT ✓  →  move key 1 to front",
-            "style": "success"
-          }
-        },
-        {
-          "target": "lru-list",
-          "params": {
-            "nodes": [
-              {
-                "id": "n1",
-                "value": "1→A",
-                "next": "n3"
-              },
-              {
-                "id": "n3",
-                "value": "3→C",
-                "next": "n2"
-              },
-              {
-                "id": "n2",
-                "value": "2→B",
-                "next": null
-              }
-            ],
-            "headId": "n1"
-          }
-        },
-        {
-          "target": "lru-map",
-          "params": {
-            "entries": [
-              {
-                "key": "1",
-                "value": "A",
-                "highlight": "hit"
-              },
-              {
-                "key": "2",
-                "value": "B"
-              },
-              {
-                "key": "3",
-                "value": "C"
-              }
-            ]
-          }
-        }
-      ],
-      "duration": 2200
-    },
-    {
-      "index": 5,
-      "actions": [
-        {
-          "target": "capacity-badge",
-          "params": {
-            "text": "put(4, 'D')  →  FULL! Evict LRU (key 2, tail)",
-            "style": "error"
-          }
-        },
-        {
-          "target": "lru-list",
-          "params": {
-            "nodes": [
-              {
-                "id": "n4",
-                "value": "4→D",
-                "next": "n1"
-              },
-              {
-                "id": "n1",
-                "value": "1→A",
-                "next": "n3"
-              },
-              {
-                "id": "n3",
-                "value": "3→C",
-                "next": null
-              }
-            ],
-            "headId": "n4"
-          }
-        },
-        {
-          "target": "lru-map",
-          "params": {
-            "entries": [
-              {
-                "key": "1",
-                "value": "A"
-              },
-              {
-                "key": "2",
-                "value": "B (evicted)",
-                "highlight": "delete"
-              },
-              {
-                "key": "3",
-                "value": "C"
-              },
-              {
-                "key": "4",
-                "value": "D",
-                "highlight": "insert"
-              }
-            ]
-          }
-        }
-      ],
-      "duration": 2500
-    },
-    {
-      "index": 6,
-      "actions": [
-        {
-          "target": "capacity-badge",
-          "params": {
-            "text": "get(2)  →  CACHE MISS ✗  →  returns -1",
-            "style": "error"
-          }
-        },
-        {
-          "target": "lru-list",
-          "params": {
-            "nodes": [
-              {
-                "id": "n4",
-                "value": "4→D",
-                "next": "n1"
-              },
-              {
-                "id": "n1",
-                "value": "1→A",
-                "next": "n3"
-              },
-              {
-                "id": "n3",
-                "value": "3→C",
-                "next": null
-              }
-            ],
-            "headId": "n4"
-          }
-        },
-        {
-          "target": "lru-map",
-          "params": {
-            "entries": [
-              {
-                "key": "1",
-                "value": "A"
-              },
-              {
-                "key": "3",
-                "value": "C"
-              },
-              {
-                "key": "4",
-                "value": "D"
-              },
-              {
-                "key": "2 (get)",
-                "value": "MISS → -1",
-                "highlight": "miss"
-              }
-            ]
-          }
-        }
-      ],
-      "duration": 2200
-    },
-    {
-      "index": 7,
-      "actions": [
-        {
-          "target": "capacity-badge",
-          "params": {
-            "text": "get(3)  →  CACHE HIT ✓  →  move key 3 to front",
-            "style": "success"
-          }
-        },
-        {
-          "target": "lru-list",
-          "params": {
-            "nodes": [
-              {
-                "id": "n3",
-                "value": "3→C",
-                "next": "n4"
-              },
-              {
-                "id": "n4",
-                "value": "4→D",
-                "next": "n1"
-              },
-              {
-                "id": "n1",
-                "value": "1→A",
-                "next": null
-              }
-            ],
-            "headId": "n3"
-          }
-        },
-        {
-          "target": "lru-map",
-          "params": {
-            "entries": [
-              {
-                "key": "1",
-                "value": "A"
-              },
-              {
-                "key": "3",
-                "value": "C",
-                "highlight": "hit"
-              },
-              {
-                "key": "4",
-                "value": "D"
-              }
-            ]
-          }
-        }
-      ],
-      "duration": 2200
-    },
-    {
-      "index": 8,
-      "actions": [
-        {
-          "target": "capacity-badge",
-          "params": {
-            "text": "put(5, 'E')  →  FULL! Evict LRU (key 1, tail)",
-            "style": "error"
-          }
-        },
-        {
-          "target": "lru-list",
-          "params": {
-            "nodes": [
-              {
-                "id": "n5",
-                "value": "5→E",
-                "next": "n3"
-              },
-              {
-                "id": "n3",
-                "value": "3→C",
-                "next": "n4"
-              },
-              {
-                "id": "n4",
-                "value": "4→D",
-                "next": null
-              }
-            ],
-            "headId": "n5"
-          }
-        },
-        {
-          "target": "lru-map",
-          "params": {
-            "entries": [
-              {
-                "key": "1",
-                "value": "A (evicted)",
-                "highlight": "delete"
-              },
-              {
-                "key": "3",
-                "value": "C"
-              },
-              {
-                "key": "4",
-                "value": "D"
-              },
-              {
-                "key": "5",
-                "value": "E",
-                "highlight": "insert"
-              }
-            ]
-          }
-        }
-      ],
-      "duration": 2500
-    },
-    {
-      "index": 9,
-      "actions": [
-        {
-          "target": "capacity-badge",
-          "params": {
-            "text": "get(4)  →  CACHE HIT ✓  →  move key 4 to front",
-            "style": "success"
-          }
-        },
-        {
-          "target": "lru-list",
-          "params": {
-            "nodes": [
-              {
-                "id": "n4",
-                "value": "4→D",
-                "next": "n5"
-              },
-              {
-                "id": "n5",
-                "value": "5→E",
-                "next": "n3"
-              },
-              {
-                "id": "n3",
-                "value": "3→C",
-                "next": null
-              }
-            ],
-            "headId": "n4"
-          }
-        },
-        {
-          "target": "lru-map",
-          "params": {
-            "entries": [
-              {
-                "key": "3",
-                "value": "C"
-              },
-              {
-                "key": "4",
-                "value": "D",
-                "highlight": "hit"
-              },
-              {
-                "key": "5",
-                "value": "E"
-              }
-            ]
-          }
-        }
-      ],
-      "duration": 2200
-    },
-    {
-      "index": 10,
-      "actions": [
-        {
-          "target": "capacity-badge",
-          "params": {
-            "text": "put(1, 'A')  →  FULL! Evict LRU (key 3, tail)",
-            "style": "error"
-          }
-        },
-        {
-          "target": "lru-list",
-          "params": {
-            "nodes": [
-              {
-                "id": "n1b",
-                "value": "1→A",
-                "next": "n4"
-              },
-              {
-                "id": "n4",
-                "value": "4→D",
-                "next": "n5"
-              },
-              {
-                "id": "n5",
-                "value": "5→E",
-                "next": null
-              }
-            ],
-            "headId": "n1b"
-          }
-        },
-        {
-          "target": "lru-map",
-          "params": {
-            "entries": [
-              {
-                "key": "1",
-                "value": "A",
-                "highlight": "insert"
-              },
-              {
-                "key": "3",
-                "value": "C (evicted)",
-                "highlight": "delete"
-              },
-              {
-                "key": "4",
-                "value": "D"
-              },
-              {
-                "key": "5",
-                "value": "E"
-              }
-            ]
-          }
-        }
-      ],
-      "duration": 2000
-    }
-  ],
+  "activeText": {
+    "initialValue": "Cache empty  (capacity = 3)"
+  },
   "controls": [
     {
       "id": "btn-put1",
@@ -650,32 +77,462 @@
       }
     }
   ],
-  "explanation": [
+  "steps": [
     {
-      "heading": "What is an LRU Cache?",
-      "body": "LRU (Least Recently Used) Cache is a fixed-size cache that **evicts the least recently used item** when it reaches capacity.\n\nUsed everywhere: CPU caches, Redis, browser caches, CDN edge nodes.",
-      "appearsAtStep": 0
+      "index": 1,
+      "explanation": {
+        "heading": "Why LinkedList + HashMap?",
+        "body": "Naive: keep a list sorted by access time — but moving an element to the front is **O(n)**.\n\nSmarter: a doubly-linked list gives O(1) move-to-front when you have the node pointer. The HashMap stores `key → node`, so you find the node in O(1) first.",
+        "callout": "Together: O(1) get and O(1) put. That's the whole trick."
+      },
+      "activeText": "put(1, 'A')  →  insert at head  [1/3]",
+      "canvas": {
+        "lru-list": {
+          "items": [
+            {
+              "id": "n1",
+              "value": "1→A"
+            }
+          ]
+        },
+        "lru-map": {
+          "entries": [
+            {
+              "id": "entry-1",
+              "key": "1",
+              "value": "A",
+              "highlight": "insert"
+            }
+          ]
+        }
+      }
     },
     {
-      "heading": "Why LinkedList + HashMap?",
-      "body": "Naive: keep a list sorted by access time — but moving an element to the front is **O(n)**.\n\nSmarter: a doubly-linked list gives O(1) move-to-front when you have the node pointer. The HashMap stores `key → node`, so you find the node in O(1) first.",
-      "appearsAtStep": 1,
-      "callout": "Together: O(1) get and O(1) put. That's the whole trick."
+      "index": 2,
+      "explanation": {
+        "heading": "Step 2",
+        "body": "State updated."
+      },
+      "activeText": "put(2, 'B')  →  insert at head  [2/3]",
+      "canvas": {
+        "lru-list": {
+          "items": [
+            {
+              "id": "n2",
+              "value": "2→B"
+            },
+            {
+              "id": "n1",
+              "value": "1→A"
+            }
+          ]
+        },
+        "lru-map": {
+          "entries": [
+            {
+              "id": "entry-1",
+              "key": "1",
+              "value": "A"
+            },
+            {
+              "id": "entry-2",
+              "key": "2",
+              "value": "B",
+              "highlight": "insert"
+            }
+          ]
+        }
+      }
     },
     {
-      "heading": "Cache Hit — Move to Front",
-      "body": "When `get(key)` finds the key in the HashMap:\n1. Look up the node in O(1)\n2. Detach node from current position\n3. Re-attach at head (MRU position)\n\nThis is why a **doubly**-linked list is needed — detach requires pointing to the previous node.",
-      "appearsAtStep": 4
+      "index": 3,
+      "explanation": {
+        "heading": "Step 3",
+        "body": "State updated."
+      },
+      "activeText": "put(3, 'C')  →  CACHE FULL  [3/3]",
+      "canvas": {
+        "lru-list": {
+          "items": [
+            {
+              "id": "n3",
+              "value": "3→C"
+            },
+            {
+              "id": "n2",
+              "value": "2→B"
+            },
+            {
+              "id": "n1",
+              "value": "1→A"
+            }
+          ]
+        },
+        "lru-map": {
+          "entries": [
+            {
+              "id": "entry-1",
+              "key": "1",
+              "value": "A"
+            },
+            {
+              "id": "entry-2",
+              "key": "2",
+              "value": "B"
+            },
+            {
+              "id": "entry-3",
+              "key": "3",
+              "value": "C",
+              "highlight": "insert"
+            }
+          ]
+        }
+      }
     },
     {
-      "heading": "Eviction — Tail is Always LRU",
-      "body": "When `put(key, val)` overflows capacity:\n1. Remove the **tail node** — it's the least recently used\n2. Delete its key from the HashMap\n3. Insert new node at head\n\nO(1) because tail pointer is maintained.",
-      "appearsAtStep": 5
+      "index": 4,
+      "explanation": {
+        "heading": "Cache Hit — Move to Front",
+        "body": "When `get(key)` finds the key in the HashMap:\n1. Look up the node in O(1)\n2. Detach node from current position\n3. Re-attach at head (MRU position)\n\nThis is why a **doubly**-linked list is needed — detach requires pointing to the previous node."
+      },
+      "activeText": "get(1)  →  CACHE HIT ✓  →  move key 1 to front",
+      "canvas": {
+        "lru-list": {
+          "items": [
+            {
+              "id": "n1",
+              "value": "1→A"
+            },
+            {
+              "id": "n3",
+              "value": "3→C"
+            },
+            {
+              "id": "n2",
+              "value": "2→B"
+            }
+          ]
+        },
+        "lru-map": {
+          "entries": [
+            {
+              "id": "entry-1",
+              "key": "1",
+              "value": "A",
+              "highlight": "hit"
+            },
+            {
+              "id": "entry-2",
+              "key": "2",
+              "value": "B"
+            },
+            {
+              "id": "entry-3",
+              "key": "3",
+              "value": "C"
+            }
+          ]
+        }
+      }
     },
     {
-      "heading": "Cache Miss — Key Doesn't Exist",
-      "body": "When `get(key)` doesn't find the key in the HashMap, it returns -1.\n\nThe evicted key 2 is gone from both structures — the cache has no memory of it.",
-      "appearsAtStep": 6
+      "index": 5,
+      "explanation": {
+        "heading": "Eviction — Tail is Always LRU",
+        "body": "When `put(key, val)` overflows capacity:\n1. Remove the **tail node** — it's the least recently used\n2. Delete its key from the HashMap\n3. Insert new node at head\n\nO(1) because tail pointer is maintained."
+      },
+      "activeText": "put(4, 'D')  →  FULL! Evict LRU (key 2, tail)",
+      "canvas": {
+        "lru-list": {
+          "items": [
+            {
+              "id": "n4",
+              "value": "4→D"
+            },
+            {
+              "id": "n1",
+              "value": "1→A"
+            },
+            {
+              "id": "n3",
+              "value": "3→C"
+            }
+          ]
+        },
+        "lru-map": {
+          "entries": [
+            {
+              "id": "entry-1",
+              "key": "1",
+              "value": "A"
+            },
+            {
+              "id": "entry-2",
+              "key": "2",
+              "value": "B (evicted)",
+              "highlight": "remove"
+            },
+            {
+              "id": "entry-3",
+              "key": "3",
+              "value": "C"
+            },
+            {
+              "id": "entry-4",
+              "key": "4",
+              "value": "D",
+              "highlight": "insert"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 6,
+      "explanation": {
+        "heading": "Cache Miss — Key Doesn't Exist",
+        "body": "When `get(key)` doesn't find the key in the HashMap, it returns -1.\n\nThe evicted key 2 is gone from both structures — the cache has no memory of it."
+      },
+      "activeText": "get(2)  →  CACHE MISS ✗  →  returns -1",
+      "canvas": {
+        "lru-list": {
+          "items": [
+            {
+              "id": "n4",
+              "value": "4→D"
+            },
+            {
+              "id": "n1",
+              "value": "1→A"
+            },
+            {
+              "id": "n3",
+              "value": "3→C"
+            }
+          ]
+        },
+        "lru-map": {
+          "entries": [
+            {
+              "id": "entry-1",
+              "key": "1",
+              "value": "A"
+            },
+            {
+              "id": "entry-3",
+              "key": "3",
+              "value": "C"
+            },
+            {
+              "id": "entry-4",
+              "key": "4",
+              "value": "D"
+            },
+            {
+              "id": "entry-2--get-",
+              "key": "2 (get)",
+              "value": "MISS → -1"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 7,
+      "explanation": {
+        "heading": "Step 7",
+        "body": "State updated."
+      },
+      "activeText": "get(3)  →  CACHE HIT ✓  →  move key 3 to front",
+      "canvas": {
+        "lru-list": {
+          "items": [
+            {
+              "id": "n3",
+              "value": "3→C"
+            },
+            {
+              "id": "n4",
+              "value": "4→D"
+            },
+            {
+              "id": "n1",
+              "value": "1→A"
+            }
+          ]
+        },
+        "lru-map": {
+          "entries": [
+            {
+              "id": "entry-1",
+              "key": "1",
+              "value": "A"
+            },
+            {
+              "id": "entry-3",
+              "key": "3",
+              "value": "C",
+              "highlight": "hit"
+            },
+            {
+              "id": "entry-4",
+              "key": "4",
+              "value": "D"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 8,
+      "explanation": {
+        "heading": "Step 8",
+        "body": "State updated."
+      },
+      "activeText": "put(5, 'E')  →  FULL! Evict LRU (key 1, tail)",
+      "canvas": {
+        "lru-list": {
+          "items": [
+            {
+              "id": "n5",
+              "value": "5→E"
+            },
+            {
+              "id": "n3",
+              "value": "3→C"
+            },
+            {
+              "id": "n4",
+              "value": "4→D"
+            }
+          ]
+        },
+        "lru-map": {
+          "entries": [
+            {
+              "id": "entry-1",
+              "key": "1",
+              "value": "A (evicted)",
+              "highlight": "remove"
+            },
+            {
+              "id": "entry-3",
+              "key": "3",
+              "value": "C"
+            },
+            {
+              "id": "entry-4",
+              "key": "4",
+              "value": "D"
+            },
+            {
+              "id": "entry-5",
+              "key": "5",
+              "value": "E",
+              "highlight": "insert"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 9,
+      "explanation": {
+        "heading": "Step 9",
+        "body": "State updated."
+      },
+      "activeText": "get(4)  →  CACHE HIT ✓  →  move key 4 to front",
+      "canvas": {
+        "lru-list": {
+          "items": [
+            {
+              "id": "n4",
+              "value": "4→D"
+            },
+            {
+              "id": "n5",
+              "value": "5→E"
+            },
+            {
+              "id": "n3",
+              "value": "3→C"
+            }
+          ]
+        },
+        "lru-map": {
+          "entries": [
+            {
+              "id": "entry-3",
+              "key": "3",
+              "value": "C"
+            },
+            {
+              "id": "entry-4",
+              "key": "4",
+              "value": "D",
+              "highlight": "hit"
+            },
+            {
+              "id": "entry-5",
+              "key": "5",
+              "value": "E"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 10,
+      "explanation": {
+        "heading": "Step 10",
+        "body": "State updated."
+      },
+      "activeText": "put(1, 'A')  →  FULL! Evict LRU (key 3, tail)",
+      "canvas": {
+        "lru-list": {
+          "items": [
+            {
+              "id": "n1b",
+              "value": "1→A"
+            },
+            {
+              "id": "n4",
+              "value": "4→D"
+            },
+            {
+              "id": "n5",
+              "value": "5→E"
+            }
+          ]
+        },
+        "lru-map": {
+          "entries": [
+            {
+              "id": "entry-1",
+              "key": "1",
+              "value": "A",
+              "highlight": "insert"
+            },
+            {
+              "id": "entry-3",
+              "key": "3",
+              "value": "C (evicted)",
+              "highlight": "remove"
+            },
+            {
+              "id": "entry-4",
+              "key": "4",
+              "value": "D"
+            },
+            {
+              "id": "entry-5",
+              "key": "5",
+              "value": "E"
+            }
+          ]
+        }
+      }
     }
   ],
   "popups": [
@@ -685,11 +542,7 @@
       "text": "Head = Most Recently Used",
       "showAtStep": 1,
       "hideAtStep": 2,
-      "style": "info",
-      "anchor": {
-        "x": 50,
-        "y": 18
-      }
+      "style": "info"
     },
     {
       "id": "pop-full",
@@ -697,11 +550,7 @@
       "text": "Cache full! Next put() will evict the tail.",
       "showAtStep": 3,
       "hideAtStep": 4,
-      "style": "warning",
-      "anchor": {
-        "x": 50,
-        "y": 18
-      }
+      "style": "warning"
     },
     {
       "id": "pop-move-front",
@@ -709,11 +558,7 @@
       "text": "Key 1 moved to head → now MRU",
       "showAtStep": 4,
       "hideAtStep": 5,
-      "style": "success",
-      "anchor": {
-        "x": 50,
-        "y": 18
-      }
+      "style": "success"
     },
     {
       "id": "pop-evict",
@@ -721,11 +566,7 @@
       "text": "Key 2 (tail = LRU) evicted!",
       "showAtStep": 5,
       "hideAtStep": 6,
-      "style": "warning",
-      "anchor": {
-        "x": 50,
-        "y": 18
-      }
+      "style": "warning"
     }
   ],
   "challenges": [

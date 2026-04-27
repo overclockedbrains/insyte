@@ -1,15 +1,11 @@
 {
+  "$schema": "/scene-schema.json",
   "id": "two-sum",
   "title": "Two Sum",
   "type": "dsa-trace",
   "layout": "code-left-canvas-right",
   "description": "Trace the O(n) hashmap solution for Two Sum.",
   "category": "Data Structures & Algorithms",
-  "tags": [
-    "array",
-    "hashmap",
-    "two-sum"
-  ],
   "code": {
     "language": "python",
     "source": "def two_sum(nums, target):\n    seen = {}\n    for i, num in enumerate(nums):\n        need = target - num\n        if need in seen:\n            return [seen[need], i]\n        seen[num] = i\n    return []\n\nfinalResult = two_sum([2, 7, 11, 15], 9)\n",
@@ -21,199 +17,109 @@
       10
     ]
   },
-  "visuals": [
+  "canvas": [
     {
       "id": "nums",
-      "type": "array",
+      "type": "linear",
+      "variant": "array",
+      "layoutHint": "linear-H",
       "label": "nums",
       "initialState": {
-        "cells": [
-          {
-            "value": 2,
-            "highlight": "default"
-          },
-          {
-            "value": 7,
-            "highlight": "default"
-          },
-          {
-            "value": 11,
-            "highlight": "default"
-          },
-          {
-            "value": 15,
-            "highlight": "default"
-          }
+        "items": [
+          { "id": "a0", "value": 2 },
+          { "id": "a1", "value": 7 },
+          { "id": "a2", "value": 11 },
+          { "id": "a3", "value": 15 }
         ]
-      },
-      "layoutHint": "linear-H"
+      }
     },
     {
       "id": "seen-map",
-      "type": "hashmap",
+      "type": "map",
+      "layoutHint": "hashmap-buckets",
       "label": "seen",
       "initialState": {
         "entries": []
-      },
-      "layoutHint": "hashmap-buckets"
-    },
-    {
-      "id": "op",
-      "type": "text-badge",
-      "label": "Operation",
-      "initialState": {
-        "text": "Start scan from left",
-        "style": "default"
-      },
-      "slot": "top-center"
+      }
     }
   ],
+  "activeText": {
+    "initialValue": "Start scan from left"
+  },
+  "controls": [],
   "steps": [
     {
-      "index": 0,
-      "actions": [],
-      "duration": 900
-    },
-    {
       "index": 1,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "i=0, num=2, need=7, miss -> store 2:0",
-            "style": "highlight"
-          }
+      "explanation": {
+        "heading": "Lookup Before Insert",
+        "body": "For each number, check whether the complement is already in `seen` before inserting the current value.",
+        "callout": "Lookup-first avoids reusing the same element."
+      },
+      "activeText": "i=0, num=2, need=7, miss -> store 2:0",
+      "canvas": {
+        "nums": {
+          "items": [
+            { "id": "a0", "value": 2, "highlight": "active" },
+            { "id": "a1", "value": 7 },
+            { "id": "a2", "value": 11 },
+            { "id": "a3", "value": 15 }
+          ]
         },
-        {
-          "target": "nums",
-          "params": {
-            "cells": [
-              {
-                "value": 2,
-                "highlight": "active"
-              },
-              {
-                "value": 7,
-                "highlight": "default"
-              },
-              {
-                "value": 11,
-                "highlight": "default"
-              },
-              {
-                "value": 15,
-                "highlight": "default"
-              }
-            ]
-          }
-        },
-        {
-          "target": "seen-map",
-          "params": {
-            "entries": [
-              {
-                "key": "2",
-                "value": "0",
-                "highlight": "insert"
-              }
-            ]
-          }
+        "seen-map": {
+          "entries": [
+            {
+              "id": "entry-2",
+              "key": "2",
+              "value": "0",
+              "highlight": "insert"
+            }
+          ]
         }
-      ],
-      "duration": 1200
+      }
     },
     {
       "index": 2,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "i=1, num=7, need=2, hit in seen",
-            "style": "success"
-          }
+      "explanation": {
+        "heading": "Hit Means Answer",
+        "body": "At `i=1`, complement `2` is present, so we immediately return the pair of indices."
+      },
+      "activeText": "i=1, num=7, need=2, hit in seen",
+      "canvas": {
+        "nums": {
+          "items": [
+            { "id": "a0", "value": 2, "highlight": "hit" },
+            { "id": "a1", "value": 7, "highlight": "active" },
+            { "id": "a2", "value": 11 },
+            { "id": "a3", "value": 15 }
+          ]
         },
-        {
-          "target": "nums",
-          "params": {
-            "cells": [
-              {
-                "value": 2,
-                "highlight": "hit"
-              },
-              {
-                "value": 7,
-                "highlight": "active"
-              },
-              {
-                "value": 11,
-                "highlight": "default"
-              },
-              {
-                "value": 15,
-                "highlight": "default"
-              }
-            ]
-          }
-        },
-        {
-          "target": "seen-map",
-          "params": {
-            "entries": [
-              {
-                "key": "2",
-                "value": "0",
-                "highlight": "hit"
-              }
-            ]
-          }
+        "seen-map": {
+          "entries": [
+            {
+              "id": "entry-2",
+              "key": "2",
+              "value": "0",
+              "highlight": "hit"
+            }
+          ]
         }
-      ],
-      "duration": 1200
+      }
     },
     {
       "index": 3,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Return indices [0, 1]",
-            "style": "success"
-          }
-        }
-      ],
-      "duration": 900
+      "explanation": {
+        "heading": "Step 3",
+        "body": "State updated."
+      },
+      "activeText": "Return indices [0, 1]"
     },
     {
       "index": 4,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Done in one pass with hashmap",
-            "style": "default"
-          }
-        }
-      ],
-      "duration": 900
-    }
-  ],
-  "controls": [],
-  "explanation": [
-    {
-      "heading": "Core Idea",
-      "body": "Use a hashmap to store numbers seen so far and their indices.",
-      "appearsAtStep": 0
-    },
-    {
-      "heading": "Lookup Before Insert",
-      "body": "For each number, check whether the complement is already in `seen` before inserting the current value.",
-      "appearsAtStep": 1,
-      "callout": "Lookup-first avoids reusing the same element."
-    },
-    {
-      "heading": "Hit Means Answer",
-      "body": "At `i=1`, complement `2` is present, so we immediately return the pair of indices.",
-      "appearsAtStep": 2
+      "explanation": {
+        "heading": "Step 4",
+        "body": "State updated."
+      },
+      "activeText": "Done in one pass with hashmap"
     }
   ],
   "popups": [

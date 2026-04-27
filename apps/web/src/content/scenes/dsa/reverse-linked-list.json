@@ -1,15 +1,11 @@
 {
+  "$schema": "/scene-schema.json",
   "id": "reverse-linked-list",
   "title": "Reverse Linked List",
   "type": "dsa-trace",
   "layout": "code-left-canvas-right",
   "description": "Reverse a singly linked list by rewiring pointers in-place.",
   "category": "Data Structures & Algorithms",
-  "tags": [
-    "linked-list",
-    "pointers",
-    "reverse"
-  ],
   "code": {
     "language": "python",
     "source": "class Node:\n    def __init__(self, value, nxt=None):\n        self.value = value\n        self.next = nxt\n\ndef reverse(head):\n    prev = None\n    curr = head\n    while curr:\n        nxt = curr.next\n        curr.next = prev\n        prev = curr\n        curr = nxt\n    return prev\n\nfinalResult = reverse(Node(1, Node(2, Node(3, Node(4)))))\n",
@@ -22,249 +18,167 @@
       12
     ]
   },
-  "visuals": [
+  "canvas": [
     {
       "id": "list",
-      "type": "linked-list",
+      "type": "linear",
+      "variant": "linked-list",
+      "layoutHint": "linear-H",
       "label": "Linked List",
       "initialState": {
-        "headId": "n1",
-        "nodes": [
+        "items": [
           {
             "id": "n1",
-            "value": "1",
-            "next": "n2"
+            "value": "1"
           },
           {
             "id": "n2",
-            "value": "2",
-            "next": "n3"
+            "value": "2"
           },
           {
             "id": "n3",
-            "value": "3",
-            "next": "n4"
+            "value": "3"
           },
           {
             "id": "n4",
-            "value": "4",
-            "next": null
+            "value": "4"
           }
         ]
-      },
-      "layoutHint": "linear-H"
-    },
-    {
-      "id": "op",
-      "type": "text-badge",
-      "label": "Pointer state",
-      "initialState": {
-        "text": "prev=None, curr=1",
-        "style": "default"
-      },
-      "slot": "top-center"
+      }
     }
   ],
+  "activeText": {
+    "initialValue": "prev=None, curr=1"
+  },
+  "controls": [],
   "steps": [
     {
-      "index": 0,
-      "actions": [],
-      "duration": 900
-    },
-    {
       "index": 1,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Take nxt=2, point 1 -> None",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "list",
-          "params": {
-            "headId": "n1",
-            "nodes": [
-              {
-                "id": "n1",
-                "value": "1",
-                "next": null
-              },
-              {
-                "id": "n2",
-                "value": "2",
-                "next": "n3"
-              },
-              {
-                "id": "n3",
-                "value": "3",
-                "next": "n4"
-              },
-              {
-                "id": "n4",
-                "value": "4",
-                "next": null
-              }
-            ]
-          }
+      "explanation": {
+        "heading": "Rewire One Node Per Iteration",
+        "body": "Each loop detaches `curr` from forward direction and points it to `prev`."
+      },
+      "activeText": "Take nxt=2, point 1 -> None",
+      "canvas": {
+        "list": {
+          "items": [
+            {
+              "id": "n1",
+              "value": "1"
+            },
+            {
+              "id": "n2",
+              "value": "2"
+            },
+            {
+              "id": "n3",
+              "value": "3"
+            },
+            {
+              "id": "n4",
+              "value": "4"
+            }
+          ]
         }
-      ],
-      "duration": 1200
+      }
     },
     {
       "index": 2,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Move prev=1, curr=2",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "list",
-          "params": {
-            "headId": "n2",
-            "nodes": [
-              {
-                "id": "n2",
-                "value": "2",
-                "next": "n1"
-              },
-              {
-                "id": "n1",
-                "value": "1",
-                "next": null
-              },
-              {
-                "id": "n3",
-                "value": "3",
-                "next": "n4"
-              },
-              {
-                "id": "n4",
-                "value": "4",
-                "next": null
-              }
-            ]
-          }
+      "explanation": {
+        "heading": "Step 2",
+        "body": "State updated."
+      },
+      "activeText": "Move prev=1, curr=2",
+      "canvas": {
+        "list": {
+          "items": [
+            {
+              "id": "n2",
+              "value": "2"
+            },
+            {
+              "id": "n1",
+              "value": "1"
+            },
+            {
+              "id": "n3",
+              "value": "3"
+            },
+            {
+              "id": "n4",
+              "value": "4"
+            }
+          ]
         }
-      ],
-      "duration": 1200
+      }
     },
     {
       "index": 3,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Rewire 3 -> 2",
-            "style": "highlight"
-          }
-        },
-        {
-          "target": "list",
-          "params": {
-            "headId": "n3",
-            "nodes": [
-              {
-                "id": "n3",
-                "value": "3",
-                "next": "n2"
-              },
-              {
-                "id": "n2",
-                "value": "2",
-                "next": "n1"
-              },
-              {
-                "id": "n1",
-                "value": "1",
-                "next": null
-              },
-              {
-                "id": "n4",
-                "value": "4",
-                "next": null
-              }
-            ]
-          }
+      "explanation": {
+        "heading": "Step 3",
+        "body": "State updated."
+      },
+      "activeText": "Rewire 3 -> 2",
+      "canvas": {
+        "list": {
+          "items": [
+            {
+              "id": "n3",
+              "value": "3"
+            },
+            {
+              "id": "n2",
+              "value": "2"
+            },
+            {
+              "id": "n1",
+              "value": "1"
+            },
+            {
+              "id": "n4",
+              "value": "4"
+            }
+          ]
         }
-      ],
-      "duration": 1200
+      }
     },
     {
       "index": 4,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "Rewire 4 -> 3",
-            "style": "success"
-          }
-        },
-        {
-          "target": "list",
-          "params": {
-            "headId": "n4",
-            "nodes": [
-              {
-                "id": "n4",
-                "value": "4",
-                "next": "n3"
-              },
-              {
-                "id": "n3",
-                "value": "3",
-                "next": "n2"
-              },
-              {
-                "id": "n2",
-                "value": "2",
-                "next": "n1"
-              },
-              {
-                "id": "n1",
-                "value": "1",
-                "next": null
-              }
-            ]
-          }
+      "explanation": {
+        "heading": "In-place Reverse",
+        "body": "No extra list is created. Pointer rewiring gives O(1) auxiliary space."
+      },
+      "activeText": "Rewire 4 -> 3",
+      "canvas": {
+        "list": {
+          "items": [
+            {
+              "id": "n4",
+              "value": "4"
+            },
+            {
+              "id": "n3",
+              "value": "3"
+            },
+            {
+              "id": "n2",
+              "value": "2"
+            },
+            {
+              "id": "n1",
+              "value": "1"
+            }
+          ]
         }
-      ],
-      "duration": 1200
+      }
     },
     {
       "index": 5,
-      "actions": [
-        {
-          "target": "op",
-          "params": {
-            "text": "curr=None -> return new head (4)",
-            "style": "success"
-          }
-        }
-      ],
-      "duration": 900
-    }
-  ],
-  "controls": [],
-  "explanation": [
-    {
-      "heading": "Three Pointers",
-      "body": "Maintain `prev`, `curr`, and `nxt` so links can be reversed safely.",
-      "appearsAtStep": 0
-    },
-    {
-      "heading": "Rewire One Node Per Iteration",
-      "body": "Each loop detaches `curr` from forward direction and points it to `prev`.",
-      "appearsAtStep": 1
-    },
-    {
-      "heading": "In-place Reverse",
-      "body": "No extra list is created. Pointer rewiring gives O(1) auxiliary space.",
-      "appearsAtStep": 4
+      "explanation": {
+        "heading": "Step 5",
+        "body": "State updated."
+      },
+      "activeText": "curr=None -> return new head (4)"
     }
   ],
   "popups": [
