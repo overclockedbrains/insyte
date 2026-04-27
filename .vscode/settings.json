@@ -1,3 +1,9 @@
 {
-  "markdown.validate.enabled": true
+  "markdown.validate.enabled": true,
+  "json.schemas": [
+    {
+      "fileMatch": ["apps/web/src/content/scenes/**/*.json"],
+      "url": "./apps/web/public/scene-schema.json"
+    }
+  ]
 }

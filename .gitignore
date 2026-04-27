@@ -101,3 +101,7 @@ htmlcov/
 # AI Agent
 .agent/
 .claude/
+.agents/
+
+.eval-cache/
+.test-scene-jsons/

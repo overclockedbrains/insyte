@@ -3,7 +3,15 @@
     "allow": [
       "WebSearch",
       "Bash(pnpm qa *)",
-      "Bash(pnpm test *)"
+      "Bash(pnpm test *)",
+      "Bash(npx tsx *)",
+      "Bash(pnpm validate-scenes *)",
+      "Bash(node -e ' *)",
+      "Bash(pnpm export-schema *)",
+      "Bash(packages/scene-engine/node_modules/.bin/tsc --noEmit -p packages/scene-engine/tsconfig.json)",
+      "Bash(apps/web/node_modules/.bin/tsc --noEmit -p apps/web/tsconfig.json)",
+      "Bash(node_modules/.bin/vitest run *)",
+      "Read(//c/Users/125ar/.claude/projects/c--Aman-Coding-Bamzii-insyte/memory/**)"
     ]
   }
 }

@@ -14,8 +14,14 @@
     "img:webp": "node scripts/image-to-webp.mjs",
     "clean": "turbo clean && pnpm -r exec rimraf .next dist .turbo tsconfig.tsbuildinfo",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "setup-symlinks": "bash scripts/setup-symlinks.sh",
-    "qa": "node scripts/qa.mjs"
+    "setup-symlinks": "node scripts/setup-symlinks.mjs",
+    "qa": "node scripts/qa.mjs",
+    "browser-skill": "pnpm --dir .github/skills/browser exec browser-skill",
+    "browser-skill:open": "pnpm --dir .github/skills/browser exec browser-skill open",
+    "browser-skill:screenshot": "pnpm --dir .github/skills/browser exec browser-skill screenshot",
+    "browser-skill:extract": "pnpm --dir .github/skills/browser exec browser-skill extract",
+    "browser-skill:fill": "pnpm --dir .github/skills/browser exec browser-skill fill",
+    "browser-skill:metadata": "pnpm --dir .github/skills/browser exec browser-skill metadata"
   },
   "repository": {
     "type": "git",
@@ -28,8 +34,15 @@
   },
   "homepage": "https://github.com/overclockedbrains/insyte#readme",
   "devDependencies": {
+    "@types/node": "^20.19.39",
     "prettier": "^3.4.2",
     "rimraf": "^6.1.3",
     "turbo": "^2.3.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "msw"
+    ]
   }
 }
