@@ -1,12 +1,12 @@
-<visual-ids>
-Attach popups ONLY to these visual IDs:
-{visualIdsList}
-</visual-ids>
+<canvas-ids>
+Attach popups ONLY to these canvas visual IDs:
+{canvasIdsList}
+</canvas-ids>
 
 <step-summaries>
-Here is what each animation step teaches and which visuals it updates.
-Use [updates: ...] to determine when each visual first has meaningful content —
-only attach a popup to a visual at or after the step where it first gets updated.
+Here is what each animation step teaches and which canvas visuals it updates.
+Use [canvas: ...] to determine when each visual first has meaningful content —
+only attach a popup to a visual at or after the step where it first gets a canvas update.
 {stepSummaries}
 </step-summaries>
 
@@ -15,8 +15,8 @@ Add 2–5 popup callouts for the visualization. Each popup appears for a range o
 Step range: 1 to {stepCount}.
 
 Rules:
-1. attachTo must be one of the visual IDs listed above
-2. showAtStep must be >= the first step where attachTo appears in [updates: ...] — a popup on a visual before it has content is invisible and wrong
+1. attachTo must be one of the canvas visual IDs listed above
+2. showAtStep must be >= the first step where attachTo appears in [canvas: ...] — a popup on a visual before it has content is invisible and wrong
 3. showAtStep must be <= hideAtStep
 4. text: say WHY (insight or warning), not WHAT (the animation already shows what)
 5. style: info (fact/context) · warning (common mistake) · success (key takeaway) · insight (pivot moment)
@@ -35,7 +35,7 @@ Topic: "Binary Search"
       "style": "info"
     },
     {
-      "attachTo": "mid-ptr",
+      "attachTo": "seen-map",
       "showAtStep": 5,
       "hideAtStep": 6,
       "text": "When left exceeds right, the target is confirmed absent — this is the termination invariant",
