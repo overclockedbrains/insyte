@@ -18,7 +18,7 @@ export function useControlValues(controls: Control[]) {
   const [values, setValues] = useState<Record<string, ControlValue>>(() => {
     const initial: Record<string, ControlValue> = {}
     for (const control of controls) {
-      const defaultVal = control.config['defaultValue']
+      const defaultVal = control.config?.['defaultValue']
       if (defaultVal !== undefined) {
         initial[control.id] = defaultVal as ControlValue
       }

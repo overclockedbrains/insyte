@@ -6,7 +6,6 @@ import { useBoundStore } from '@/src/stores/store'
 import { SliderControl } from './SliderControl'
 import { ToggleControl } from './ToggleControl'
 import { ToggleGroupControl } from './ToggleGroupControl'
-import { InputControl } from './InputControl'
 import { ButtonControl } from './ButtonControl'
 import { StatCard } from './StatCard'
 
@@ -34,7 +33,7 @@ export function ControlBar({
   if (controls.length === 0) return null
 
   // Separate known interactive controls from anything else (e.g. future 'stat' type)
-  const interactiveTypes = new Set<string>(['slider', 'toggle', 'toggle-group', 'input', 'button'])
+  const interactiveTypes = new Set<string>(['slider', 'toggle', 'toggle-group', 'button'])
   const interactiveControls = controls.filter((c) => interactiveTypes.has(c.type))
   const statControls = controls.filter((c) => !interactiveTypes.has(c.type))
 
@@ -63,8 +62,6 @@ export function ControlBar({
                 return <ToggleControl key={control.id} {...props} />
               case 'toggle-group':
                 return <ToggleGroupControl key={control.id} {...props} />
-              case 'input':
-                return <InputControl key={control.id} {...props} />
               case 'button':
                 return <ButtonControl key={control.id} control={control} onChange={setControlValue} />
               default:

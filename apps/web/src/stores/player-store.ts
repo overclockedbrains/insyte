@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext } from 'react'
-import { createStore, useStore } from 'zustand'
+import { createStore, useStore, type StoreApi } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 import type { Scene } from '@insyte/scene-engine'
 import type { PlaybackSpeed } from './slices/playback-slice'
@@ -35,7 +35,7 @@ export interface PlayerState {
 
 // ─── Factory ──────────────────────────────────────────────────────────────────
 
-export function createPlayerStore() {
+export function createPlayerStore(): StoreApi<PlayerState> {
   return createStore<PlayerState>()(
     immer((set) => ({
       activeScene: null,

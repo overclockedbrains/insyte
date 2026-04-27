@@ -1,9 +1,15 @@
 import { useEffect, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
-import type { ExplanationSection } from '@insyte/scene-engine'
+
+interface ExplanationEntry {
+  appearsAtStep: number
+  heading: string
+  body: string
+  callout?: string
+}
 
 interface ExplanationPanelProps {
-  sections: ExplanationSection[]
+  sections: ExplanationEntry[]
   currentStep: number
 }
 

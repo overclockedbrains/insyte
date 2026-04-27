@@ -1,4 +1,4 @@
-import { create } from 'zustand'
+import { create, type UseBoundStore, type StoreApi } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 import { persist } from 'zustand/middleware'
 import { enableMapSet } from 'immer'
@@ -17,7 +17,7 @@ export type { BoundStore }
 
 // ─── Single bound store ───────────────────────────────────────────────────────
 
-export const useBoundStore = create<BoundStore>()(
+export const useBoundStore: UseBoundStore<StoreApi<BoundStore>> = create<BoundStore>()(
   immer(
     persist(
       (...a) => ({

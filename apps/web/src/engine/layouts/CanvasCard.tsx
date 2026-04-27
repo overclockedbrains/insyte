@@ -3,21 +3,21 @@
 import { useEffect, useCallback, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import type { Scene, SceneGraph } from '@insyte/scene-engine'
+import type { Scene } from '@insyte/scene-engine'
+import { applyOverlaysAtStep } from '@insyte/scene-engine'
 import { useBoundStore } from '@/src/stores/store'
 import { DotGridBackground } from '@/components/layout/DotGridBackground'
 import { PlaybackControls } from '../controls/PlaybackControls'
 import { ControlBar } from '../controls/ControlBar'
 import { usePlayback } from '../hooks/usePlayback'
-import { useControlValues, type ControlValue } from '../hooks/useControls'
+import { useControlValues } from '../hooks/useControls'
 import ReactMarkdown from 'react-markdown'
 import { CanvasContextProvider } from '../CanvasContext'
 import { useSceneRuntime } from '@/src/hooks/useSceneRuntime'
-import { useVisibleSceneGraph } from '@/src/hooks/useVisibleSceneGraph'
 import { useResolvedPopups } from '@/src/hooks/useResolvedPopups'
 import { ActiveRenderer } from '@/src/components/renderers/registry'
-import { PrimitiveRegistry } from '@/src/engine/primitives'
-import { getGroupState } from '@/src/components/renderers/helpers'
+import { TextBadgeViz } from '@/src/engine/primitives/TextBadgeViz'
+import { CounterViz } from '@/src/engine/primitives/CounterViz'
 
 // ─── CanvasCard ────────────────────────────────────────────────────────────────
 // The dark card container that wraps the simulation canvas visuals.
@@ -34,57 +34,40 @@ interface CanvasCardProps {
   onRerunWithCustomInput?: (() => void) | null
 }
 
-// ─── HUD zone: badges + counters ────────────────────────────────────
-function HudZone({ sceneGraph, step }: { sceneGraph: SceneGraph, step: number }) {
-  const allGroups = [...sceneGraph.groups.values()]
-  const hudGroups = allGroups.filter(g => g.isHud)
-  const textBadgeGroups = hudGroups.filter(g => g.visualType === 'text-badge')
-  const counterGroups = hudGroups.filter(g => g.visualType === 'counter')
-  const hasHud = hudGroups.length > 0
+// ─── HUD zone: activeText + hud items ────────────────────────────────────────
+function HudZone({ scene, step }: { scene: Scene, step: number }) {
+  const { activeText, hud } = applyOverlaysAtStep(scene, step)
+  const hasActiveText = scene.activeText !== undefined
+  const hasHudItems = scene.hud != null && scene.hud.length > 0
+
+  if (!hasActiveText && !hasHudItems) return null
 
   return (
     <>
-      {hasHud && (
-        <>
-          <div className="relative z-20 flex flex-wrap items-center gap-x-4 gap-y-2.5 px-4 pt-3 pb-2 pointer-events-none flex-shrink-0">
-            {textBadgeGroups.map(group => {
-              const PrimitiveComponent = PrimitiveRegistry[group.visualType]
-              if (!PrimitiveComponent) return null
-              const state = getGroupState(group, sceneGraph)
-              return (
-                <PrimitiveComponent
-                  key={group.id}
-                  id={group.id}
-                  state={state}
-                  step={step}
-                  label={group.label}
-                />
-              )
-            })}
-            {counterGroups.length > 0 && (
-              <div className="flex items-center gap-4 flex-shrink-0 ml-auto">
-                {counterGroups.map(group => {
-                  const PrimitiveComponent = PrimitiveRegistry[group.visualType]
-                  if (!PrimitiveComponent) return null
-                  const state = getGroupState(group, sceneGraph)
-                  return (
-                    <PrimitiveComponent
-                      key={group.id}
-                      id={group.id}
-                      state={state}
-                      step={step}
-                      label={group.label}
-                    />
-                  )
-                })}
-              </div>
-            )}
+      <div className="relative z-20 flex flex-wrap items-center gap-x-4 gap-y-2.5 px-4 pt-3 pb-2 pointer-events-none flex-shrink-0">
+        {hasActiveText && activeText !== undefined && (
+          <TextBadgeViz id="active-text" state={{ text: activeText }} step={step} />
+        )}
+        {hasHudItems && (
+          <div className="flex items-center gap-4 flex-shrink-0 ml-auto">
+            {scene.hud!.map(hudItem => (
+              <CounterViz
+                key={hudItem.id}
+                id={hudItem.id}
+                state={{
+                  value: hud[hudItem.id] ?? hudItem.initialValue,
+                  label: hudItem.label,
+                }}
+                step={step}
+                label={hudItem.label}
+              />
+            ))}
           </div>
-          <div className="relative z-20 flex-shrink-0">
-            <div className="h-px bg-outline-variant/20" />
-          </div>
-        </>
-      )}
+        )}
+      </div>
+      <div className="relative z-20 flex-shrink-0">
+        <div className="h-px bg-outline-variant/20" />
+      </div>
     </>
   )
 }
@@ -92,10 +75,13 @@ function HudZone({ sceneGraph, step }: { sceneGraph: SceneGraph, step: number })
 // ─── Floating explanation card ───────────────────────────────────────────────
 
 function FloatingExplanationCard({ scene, step }: { scene: Scene, step: number }) {
-  // For canvas-only HLD scenes, overlay the active explanation section
+  // For canvas-only scenes, show the most recent step explanation at or before current step.
   const floatingExplanation =
     scene.layout === 'canvas-only'
-      ? [...scene.explanation].filter((s) => s.appearsAtStep <= step).pop()
+      ? [...scene.steps]
+        .filter(s => s.index <= step && s.explanation != null)
+        .map(s => s.explanation!)
+        .pop() ?? null
       : null
 
   return (
@@ -134,16 +120,16 @@ function FloatingExplanationCard({ scene, step }: { scene: Scene, step: number }
 
 // ─── Inner canvas visualization ───────────────────────────────────────────────
 
-function CanvasVisualization({ scene, controlValues }: { scene: Scene, controlValues: Record<string, ControlValue> }) {
+function CanvasVisualization({ scene }: { scene: Scene }) {
   const { currentStep, speed } = usePlayback()
   const { sceneGraph } = useSceneRuntime(scene, currentStep)
-  const visibleGraph = useVisibleSceneGraph(sceneGraph ?? { nodes: new Map(), edges: new Map(), groups: new Map(), stepIndex: currentStep }, controlValues)
-  const resolvedPopups = useResolvedPopups(scene, currentStep, controlValues)
+  const resolvedPopups = useResolvedPopups(scene, currentStep)
+  const visibleGraph = (sceneGraph ?? { nodes: new Map(), edges: new Map(), groups: new Map(), stepIndex: currentStep })
 
   return (
     <div className="flex-1 min-h-0 flex flex-col overflow-hidden relative">
       <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
-        <HudZone sceneGraph={visibleGraph} step={currentStep} />
+        <HudZone scene={scene} step={currentStep} />
 
         {sceneGraph && (
           <CanvasContextProvider as="div" className="relative flex-1 min-h-0 overflow-auto z-10">
@@ -165,13 +151,7 @@ function CanvasVisualization({ scene, controlValues }: { scene: Scene, controlVa
 
 // ─── Shared card content ──────────────────────────────────────────────────────
 
-function CardContent({
-  scene,
-  onRerunWithCustomInput,
-}: {
-  scene: Scene
-  onRerunWithCustomInput?: (() => void) | null
-}) {
+function CardContent({ scene, onRerunWithCustomInput }: { scene: Scene, onRerunWithCustomInput?: (() => void) | null }) {
   // Lift control values here so both CanvasVisualization and ControlBar share state.
   // This enables showWhen conditions to filter visuals based on current control values.
   const { values, setControlValue } = useControlValues(scene.controls)
@@ -184,7 +164,7 @@ function CardContent({
       </div>
 
       {/* Middle: HUD + Visualization Area */}
-      <CanvasVisualization scene={scene} controlValues={values} />
+      <CanvasVisualization scene={scene} />
 
       {/* Bottom: Control Bar */}
       <div className="flex-shrink-0">

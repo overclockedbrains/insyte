@@ -138,7 +138,7 @@ export function useStreamScene(): UseStreamSceneResult {
           scene_type: result.scene.type,
           layout: result.scene.layout,
           steps: result.scene.steps.length,
-          visuals: result.scene.visuals.length,
+          visuals: result.scene.canvas.length,
         })
         setScene(result.scene)
         aiLog.store.setScene('final', result.scene.title)

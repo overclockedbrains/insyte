@@ -1,40 +1,21 @@
 import { useMemo } from 'react'
 import type { Scene } from '@insyte/scene-engine'
-import type { ControlValue } from '@/src/engine/hooks/useControls'
 import type { ResolvedPopup } from '@/src/components/renderers/types'
 
 /**
- * Resolves the active popups for the current step and control state.
+ * Resolves the active popups for the current step.
  *
- * Filters scene.popups by:
- *   - Step range (showAtStep / hideAtStep)
- *   - control-toggle showWhen (evaluated here, not in the renderer)
- *
- * Returns a ResolvedPopup[] that renderers consume directly — no raw Scene
- * access needed inside the renderer.
+ * Phase 34: Popup.anchor and Popup.showWhen were removed from the schema.
+ * Filtering is now purely step-range based (showAtStep / hideAtStep).
  */
-export function useResolvedPopups(
-  scene: Scene,
-  step: number,
-  controlValues: Record<string, ControlValue>,
-): ResolvedPopup[] {
+export function useResolvedPopups(scene: Scene, step: number): ResolvedPopup[] {
   return useMemo(() => {
     return scene.popups
-      .filter(p => {
-        if (step < p.showAtStep) return false
-        if (p.hideAtStep !== undefined && step >= p.hideAtStep) return false
-        if (!p.showWhen) return true
-        if (p.showWhen.type !== 'control-toggle') return true
-        const val = controlValues[p.showWhen.controlId]
-        return p.showWhen.value !== undefined
-          ? val === p.showWhen.value
-          : Boolean(val)
-      })
+      .filter(p => step >= p.showAtStep && step < p.hideAtStep)
       .map(p => ({
         id: p.id,
         text: p.text,
         style: p.style,
-        anchor: p.anchor,
       }))
-  }, [scene, step, controlValues])
+  }, [scene, step])
 }

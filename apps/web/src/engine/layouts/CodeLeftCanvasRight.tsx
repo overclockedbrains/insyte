@@ -17,6 +17,9 @@ interface Props {
 export function CodeLeftCanvasRight({ scene, onRerunWithCustomInput = null }: Props) {
   const isExpanded = useBoundStore((s) => s.isExpanded)
   const { currentStep } = usePlayback()
+  const explanationSections = scene.steps
+    .filter(s => s.explanation != null)
+    .map(s => ({ appearsAtStep: s.index, ...s.explanation! }))
   const [mobileTab, setMobileTab] = useState<'code' | 'visual'>('visual')
   const [isTablet, setIsTablet] = useState(() =>
     typeof window !== 'undefined'
@@ -50,12 +53,12 @@ export function CodeLeftCanvasRight({ scene, onRerunWithCustomInput = null }: Pr
                     <CodePanel code={scene.code} currentStep={currentStep} />
                   </div>
                 )}
-                {scene.explanation && scene.explanation.length > 0 && (
+                {explanationSections.length > 0 && (
                   <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
-                    <ExplanationPanel sections={scene.explanation} currentStep={currentStep} />
+                    <ExplanationPanel sections={explanationSections} currentStep={currentStep} />
                   </div>
                 )}
-                {!scene.code && (!scene.explanation || scene.explanation.length === 0) && (
+                {!scene.code && explanationSections.length === 0 && (
                   <div className="flex items-center justify-center h-full p-6 text-sm text-on-surface-variant">
                     No content for this scene.
                   </div>
@@ -132,9 +135,9 @@ export function CodeLeftCanvasRight({ scene, onRerunWithCustomInput = null }: Pr
                     <div className="flex-shrink-0 border-b border-outline-variant/20">
                       <CodePanel code={scene.code} currentStep={currentStep} />
                     </div>
-                    {scene.explanation && scene.explanation.length > 0 && (
+                    {explanationSections.length > 0 && (
                       <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
-                        <ExplanationPanel sections={scene.explanation} currentStep={currentStep} />
+                        <ExplanationPanel sections={explanationSections} currentStep={currentStep} />
                       </div>
                     )}
                   </div>

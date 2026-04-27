@@ -15,6 +15,9 @@ interface Props {
 export function TextLeftCanvasRight({ scene }: Props) {
   const isExpanded = useBoundStore((s) => s.isExpanded)
   const { currentStep } = usePlayback()
+  const explanationSections = scene.steps
+    .filter(s => s.explanation != null)
+    .map(s => ({ appearsAtStep: s.index, ...s.explanation! }))
   const [isTablet, setIsTablet] = useState(() =>
     typeof window !== 'undefined'
       ? window.matchMedia('(min-width: 768px) and (max-width: 1023px)').matches
@@ -42,7 +45,7 @@ export function TextLeftCanvasRight({ scene }: Props) {
               className="flex-shrink-0 overflow-hidden border-r border-outline-variant/20 min-h-0"
             >
               <ExplanationPanel
-                sections={scene.explanation}
+                sections={explanationSections}
                 currentStep={currentStep}
               />
             </motion.div>
@@ -61,7 +64,7 @@ export function TextLeftCanvasRight({ scene }: Props) {
 
         <div className="flex-1 min-h-0 overflow-y-auto border-t border-outline-variant/20">
           <ExplanationPanel
-            sections={scene.explanation}
+            sections={explanationSections}
             currentStep={currentStep}
           />
         </div>
