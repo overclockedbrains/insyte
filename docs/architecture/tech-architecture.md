@@ -24,20 +24,20 @@ flowchart TB
         PIPELINE[pipeline.ts\ngenerateScene async generator]
         REGISTRY[registry.ts\nProvider · ProviderConfig · REGISTRY]
         PROVIDERS[providers/\ngemini · openai · anthropic · groq · ollama]
-        BUILDERS[prompts/builders.ts\nbuildStage1–4Prompt]
-        PREPROC[iscl-preprocess.ts\nstripCodeFences · joinStepContinuations]
-        VALIDATORS[validators/\nstates · steps · annotations · misc]
+        BUILDERS[prompts/builders.ts\nbuildStage0–4Prompt]
+        SCHEMAS[schemas.ts\nSceneSkeletonSchema · buildStepsSchema\nbuildPopupsSchema · MiscSchema]
+        VALIDATORS[validators/\nsteps · popups · misc]
         ASSEMBLY[assembly.ts\nassembleScene]
         LIVECHAT[liveChat.ts\nstreamChatResponse]
-        CLIENT[client.ts\ncallLLM via generateText]
+        CLIENT[client.ts\ngenerateObject · generateJson]
     end
 
     subgraph PKG[packages/scene-engine]
+        SPEC[spec.ts + spec.build.ts\nCANVAS_VISUAL_SPEC · buildSceneSchema\nbuildPromptGuide · buildJsonSchema]
         TYPES[types.ts]
-        SCHEMA[schema.ts · Zod]
-        PARSER[parser.ts · parseScene · safeParseScene]
-        ISCL_PKG[iscl/ · parseISCL]
-        STEP[step-engine/ · applyStepActionsUpTo\ncomputeTopologyAtStep · evaluateCondition]
+        SCHEMA[schema.ts · Zod + superRefine]
+        PARSER[parser.ts · parseScene · safeParseScene · normalizeScene]
+        STEP[step-engine/ · applyStepActionsUpTo\napplyOverlaysAtStep · computeTopologyAtStep]
         LAYOUT_PKG[layout/ · computeLayout dispatcher\ndagre · d3-hierarchy · arithmetic · radial]
         SCENEGRAPH[scene-graph/ · computeSceneGraphAtStep\ndiffSceneGraphs]
         CACHE_PKG[runtime/ · LRUCache]
@@ -64,10 +64,10 @@ flowchart TB
     GEN --> PIPELINE
     PIPELINE --> BUILDERS
     PIPELINE --> CLIENT
-    PIPELINE --> PREPROC
-    PIPELINE --> ISCL_PKG
+    PIPELINE --> SCHEMAS
     PIPELINE --> VALIDATORS
     PIPELINE --> ASSEMBLY
+    BUILDERS --> SPEC
     CLIENT --> PROVIDERS
     PROVIDERS --> REGISTRY
 

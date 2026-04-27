@@ -1,53 +1,44 @@
 # How the AI Module Works
 
+> **Note (Phase 34 / April 2026):** The pipeline was rewritten to generate Scene JSON v2 directly (3-stage JSON pipeline) instead of ISCL. The stage names below are updated, but the overall assembly-line analogy still holds.
+
 When a user types "How does binary search work?" and hits enter, the AI module's job is to turn that text prompt into a structured **Scene JSON** — the data that drives everything the user sees on screen (the animated array, the pointers, the step-by-step explanations, the quiz questions).
 
-The key insight: **it does NOT ask the AI to produce one giant JSON blob.** That approach hallucinates badly. Instead, it breaks the work into 5 small, focused calls to the LLM — each one asking for a very specific piece, and each one validated before moving on.
+The key insight: **it does NOT ask the AI to produce one giant JSON blob.** That approach hallucinates badly. Instead, it breaks the work into focused calls to the LLM — each one asking for a very specific piece, validated before moving on.
 
 ---
 
-## The 5 Stages — Like an Assembly Line
+## The Stages — Like an Assembly Line
 
 Think of it like a factory assembly line building a car:
 
-### Stage 1 — The Blueprint (ISCL Script)
+### Stage 1 — The Skeleton
 
-**"Hey AI, write me a script describing what this visualization should look like."**
+**"Hey AI, produce the scene skeleton: canvas visuals, initial states, code block, and scene metadata."**
 
-The AI writes an ISCL script — a simple text format this project invented. It says things like:
+The AI outputs a partial Scene JSON with `canvas[]`, `activeText`, `hud[]`, and `code` — but no steps yet. The canvas layout and visual types are decided here.
 
-- "I need an array visual and a text-badge visual"
-- "Step 1: set the array to [1,3,5,7,9], set the badge to 'lo=0'"
-- "Step 2: highlight index 2, badge says 'mid=2'"
+**This is the most critical stage.** If this fails, everything stops. The AI never specifies pixel coordinates — just *what* to show. Positioning is computed later by the layout engine.
 
-**This is the most critical stage.** If this fails, everything stops — there's no recovering without a blueprint. The AI never specifies pixel coordinates here — just *what* to show and *when*. Positioning is computed later by the layout engine.
+### Stage 2 — Steps
 
-Before parsing, two "cleanup" functions run on the raw output because LLMs are sloppy:
+**"Given the skeleton, fill in steps[] with state updates at each step."**
 
-- `stripCodeFences` — removes ` ```iscl ``` ` wrappers the model adds despite being told not to
-- `joinStepContinuations` — fixes lines the model broke across multiple rows
+The AI produces `steps[]` with `canvas`, `activeText`, `hud`, and `explanation` updates per step. Validated against the canvas visual IDs from Stage 1.
 
-### Stage 2a + 2b — The Parts (run in parallel)
+If this fails, the pipeline stops — there's no visualization without steps.
 
-Now the pipeline knows *what visuals exist* from Stage 1, so it asks two more questions **at the same time**:
+### Stage 3 — Popups + Challenges
 
-**2a — "What's the starting state of each visual?"** → Things like: the array starts with `[1,3,5,7,9]`, the badge starts with label "lo=0 hi=4". If this fails, no big deal — defaults kick in.
+**"Add popups and quiz challenges."**
 
-**2b — "What are the detailed step parameters?"** → The exact action details for each step. If this fails, the pipeline stops — you can't animate nothing.
+Popups are the little callout bubbles that appear on specific visuals at specific steps. Challenges are the quiz questions.
 
-Both are just "give me JSON" calls that get validated against the Stage 1 blueprint (making sure they only reference visuals that actually exist).
-
-### Stage 3 — Annotations
-
-**"Write the explanations and popups for each step."**
-
-This is the text that appears in the explanation panel on the left ("Binary search works by repeatedly halving the search space...") and the little callout bubbles that appear on specific visuals at specific steps.
-
-Non-fatal — if it fails, you just get a visualization without explanations.
+Non-fatal — if it fails, you just get a visualization without callouts or quizzes.
 
 ### Stage 4 — Extras
 
-**"Give me quiz questions and interactive controls."**
+**"Give me interactive controls."**
 
 The "What's the time complexity?" multiple choice quiz, playback speed toggles, etc. Lowest priority — gets only 1 retry attempt instead of 2 to save tokens.
 

@@ -20,9 +20,8 @@ Docs for `insyte` — last updated April 2026.
 
 ## Explained (Simple Overviews)
 
-- [How the AI Module Works](explained/ai-module.md) — the 5-stage pipeline in plain English
+- [How the AI Module Works](explained/ai-module.md) — the 6-stage pipeline in plain English
 
 ## Guides
 
 - [Adding Scenes & Primitives](guides/adding-scenes-and-primitives.md) — step-by-step checklists
-- [ISCL Quick Reference](guides/iscl-quick-reference.md) — grammar cheat-sheet, valid values, known AI quirks

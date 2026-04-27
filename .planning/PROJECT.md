@@ -73,7 +73,8 @@ R1 released on 8 April 2026. R2 released on 14 April 2026. R3 in progress.
 | **Phase 31** | ✅ | BYOK Model Routing — provider-aware tier routing so BYOK users get full routing benefits |
 | **Phase 32** | ✅ | Dev Pipeline Playground — per-stage runner, JSON editor, scene studio (`/dev/pipeline` + `/dev/scene`). Zero prod code changes. Completed April 19, 2026. |
 | **Phase 33** | ✅ | Community Gallery — `/community/gallery` showing all AI-generated scenes via `user_generated_scenes` join (pre-builts naturally excluded, no user data). Sort by recency/popularity, load-more, Navbar link. `/community` base kept for future sub-routes. Completed April 19, 2026. |
-| **Phase 34** | 🔄 | Scene Spec v2 — Canonical `SCENE_SPEC` as single source of truth: `spec.ts` (pure data contract) + `spec.build.ts` (derives Zod schema, AI prompt guide, JSON Schema). Restructures `visuals[]` into `canvas[]` + `activeText` + `hud[]`. Eliminates two-dialect drift, removes dead fields (`duration`, `tags`, `popup.anchor`), enforces discriminated union per visual type. Two-phase: spec-in-isolation first, full integration second. |
+| **Phase 34** | ✅ | Scene Spec v2 — Canonical `SCENE_SPEC` as single source of truth: `spec.ts` (pure data contract) + `spec.build.ts` (derives Zod schema, AI prompt guide, JSON Schema). Restructures `visuals[]` into `canvas[]` + `activeText` + `hud[]`. Eliminates two-dialect drift, removes dead fields (`duration`, `tags`, `popup.anchor`), enforces discriminated union per visual type. Two-phase: spec-in-isolation first, full integration second. Functionally complete ~April 23, 2026. Known bugs deferred to resolve alongside Phase 35 changes. |
+| **Phase 35** | ✅ | Scene JSON Payload Optimization — Topology-state split for identity-based types (`graph`, `tree`, `system-diagram`): `initialState` declares full topology once; steps use sparse overlays (`nodeStates`/`edgeStates`/`componentStates`/`connectionStates`). Sequential types (`linear`, `map`, `grid`, `chart`) keep full snapshots. All 26 pre-built JSONs migrated. Step-engine merge layer, per-visual-type Zod schemas in `buildStepsSchema(skeleton)`, semantic validators (Checks 7+8), and AI prompts (`stage0-reasoning.md`, `stage2-steps.md`, live-chat) all updated. 202 tests passing. Completed April 27, 2026. |
 
 ---
 
@@ -762,6 +763,43 @@ _OG Images_
 **Design:** [→ phases/phase-34/DESIGN.md](phases/phase-34/DESIGN.md)
 
 **Plan:** [→ phases/phase-34/PLAN.md](phases/phase-34/PLAN.md)
+
+---
+
+### Phase 35 — Scene JSON Payload Optimization
+
+**Goal:** Eliminate the largest source of redundancy in both pre-built and AI-generated
+scene JSONs: step canvas updates that repeat static topology data verbatim every step.
+After this phase, steps write only what **changes** — the runtime reconstructs full
+visual state by merging `initialState` topology with the sparse step overlay.
+
+**Status:** 🔄 In design. April 25, 2026. Context captured in `.planning/phases/phase-35/CONTEXT.md`.
+
+**Research:** `.planning/research/json-size-optimization/` (synthesis + 4 sub-agent reports)
+
+**Key insight (from empirical measurement):**
+- `system-diagram` steps repeat 100% of `icon`, `label`, `from`, `to`, `style` bytes every step — these fields **never change**
+- 18–27% of total file bytes in HLD/concept scenes are pure wasted repetition
+- Topology-split delivers 82–94% byte reduction per step with near-zero reliability risk
+
+**Decisions made:**
+- Compact format applies to ALL visual types, not just system-diagram
+- Merge layer lives in the step-engine (transparent to renderers)
+- Connection IDs: human-readable slugs (e.g. `"clientA-ws1"`)
+- AI-generated scenes: compact format required, not optional
+- Layer 2 (connection defaults) included in this phase
+- Layer 3 (gzip transport): Vercel handles automatically, document + verify
+- All 26 pre-built scene JSONs need migrating
+- Phase can be sub-divided into sub-phases 35.1–35.4 if needed
+
+**Open design questions (see CONTEXT.md section 10):**
+- Group B types (hashmap, stack, queue, linked-list, dp-table, recursion-tree): full snapshots vs. sparse hybrid — needs measurement first
+- Per-type step format: single format vs. two formats for types that can be either static or dynamic
+- Merge layer defaults: "not listed = reset to spec default" (recommended) vs. "carry over"
+
+**Context:** [→ phases/phase-35/CONTEXT.md](phases/phase-35/CONTEXT.md)
+
+**Plan:** [→ phases/phase-35/PLAN.md](phases/phase-35/PLAN.md) *(not yet written)*
 
 ---
 

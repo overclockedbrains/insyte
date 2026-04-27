@@ -1,6 +1,6 @@
 # Scene Engine Reference
 
-Quick reference for the scene JSON contract and engine subsystems in `packages/scene-engine`.
+Quick reference for the Scene JSON v2 contract and engine subsystems in `packages/scene-engine`.
 
 ---
 
@@ -8,17 +8,21 @@ Quick reference for the scene JSON contract and engine subsystems in `packages/s
 
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
-| `id` | `string` | yes | `nanoid()` unique identifier |
+| `id` | `string` | yes | Unique identifier |
 | `title` | `string` | yes | Display title |
 | `type` | `SceneType` | yes | Mode enum |
 | `layout` | `SceneLayout` | yes | Which layout shell to use |
-| `visuals` | `Visual[]` | yes | Canvas objects |
+| `canvas` | `CanvasVisual[]` | yes | Visual data structures to render |
+| `activeText` | `{ initialValue: string }` | no | Narration badge (replaces `text-badge` visual) |
+| `hud` | `HudItem[]` | no | Stat counters — max 3 (replaces `counter` visuals) |
 | `steps` | `Step[]` | yes | State-mutation sequence |
 | `controls` | `Control[]` | yes | Interactive toggles/sliders/buttons |
-| `explanation` | `ExplanationSection[]` | yes | Narrative panels |
-| `popups` | `Popup[]` | yes | Inline per-visual callouts |
+| `popups` | `Popup[]` | yes | Per-visual callout bubbles |
 | `challenges` | `Challenge[]` | no | Quiz questions |
-| `code` | `CodeBlock` | no | DSA code block with highlight map |
+| `code` | `SceneCode` | no | DSA code block with highlight map |
+| `description` | `string` | no | Short description |
+| `category` | `string` | no | Explore category |
+| `complexity` | `{ time?, space? }` | no | Big-O annotations |
 
 ---
 
@@ -28,8 +32,8 @@ Quick reference for the scene JSON contract and engine subsystems in `packages/s
 | --- | --- |
 | `SceneType` | `concept`, `dsa-trace`, `lld`, `hld` |
 | `SceneLayout` | `canvas-only`, `code-left-canvas-right`, `text-left-canvas-right` |
-| `VisualType` | `array`, `hashmap`, `linked-list`, `tree`, `graph`, `stack`, `queue`, `dp-table`, `recursion-tree`, `system-diagram`, `text-badge`, `counter`, `grid`, `bezier-connector`, `straight-arrow`, `data-flow-dot` |
-| `ControlType` | `slider`, `toggle`, `input`, `button`, `toggle-group` |
+| `VisualType` | `array`, `hashmap`, `linked-list`, `tree`, `graph`, `stack`, `queue`, `dp-table`, `recursion-tree`, `system-diagram`, `grid` |
+| `ControlType` | `slider`, `toggle`, `button`, `toggle-group` |
 
 ### LayoutHint
 
@@ -41,31 +45,94 @@ Quick reference for the scene JSON contract and engine subsystems in `packages/s
 | `tree-RT` | d3-hierarchy radial | Recursion trees |
 | `linear-H` | Horizontal arithmetic | Arrays, queues |
 | `linear-V` | Vertical arithmetic | Stacks |
-| `grid-2d` | Grid arithmetic | DP tables |
+| `grid-2d` | Grid arithmetic | DP tables, grids |
 | `hashmap-buckets` | Bucket arithmetic | HashMaps |
 | `radial` | Radial arithmetic | Concept webs |
 
-### SlotPosition
+---
 
-`top-left`, `top-center`, `top-right`, `center-left`, `center`, `center-right`, `bottom-left`, `bottom-center`, `bottom-right`, `canvas-left`, `canvas-right`
+## Canvas Visuals
+
+Each entry in `canvas[]` has `{ id, type, layoutHint, label?, initialState }`.
+
+`initialState` shape per type:
+
+| Type | State shape |
+| --- | --- |
+| `array` | `{ items: [{ value, id?, highlight? }] }` |
+| `hashmap` | `{ entries: [{ id, key, value, highlight? }] }` |
+| `stack` | `{ items: [{ id, value, highlight? }] }` |
+| `queue` | `{ items: [{ id, value, highlight? }] }` |
+| `linked-list` | `{ nodes: [{ id, value, highlight? }] }` |
+| `tree` | `{ root: TreeNode \| null }` (recursive: `{ id, value, highlight?, left?, right? }`) |
+| `recursion-tree` | `{ root: RecursionNode \| null }` (recursive: `{ id, value, highlight?, children[] }`) |
+| `graph` | `{ nodes: [{ id, label, highlight? }], edges: [{ id, from, to, label?, highlight? }] }` |
+| `dp-table` | `{ cells: [[{ id, value, highlight? }]] }` (2-D) |
+| `system-diagram` | `{ components: [{ id, label, icon, status, sublabel? }], connections: [{ from, to, active, label?, style? }] }` |
+| `grid` | `{ cells: [[{ id, value, highlight? }]] }` (2-D) |
 
 ---
 
-## Step Actions
+## Steps
 
-Actions live in `Step.actions[]` as `{ target: visualId, params: Record<string, unknown> }`.
+```json
+{
+  "index": 1,
+  "explanation": { "heading": "...", "body": "...", "callout"?: "..." },
+  "activeText": "New narration text",
+  "hud": { "my-counter": 5 },
+  "canvas": { "my-array": { "items": [...] } }
+}
+```
 
-The step engine (`applyStepActionsUpTo`) replays actions from step 0 through the current step:
+- `index` starts at 1 (step 0 is implicit — the `initialState` of each visual).
+- `canvas` maps visual IDs to **full state snapshots** (last write wins per step).
+- `activeText` and `hud` updates are also last-write-wins per step.
+- `explanation` is optional; for `canvas-only` scenes it appears as a floating card overlay.
 
-| Action | Effect |
-| --- | --- |
-| `set` | Shallow merge `params` into visual state |
-| `set-value` | Set a single named field |
-| `push` | Append to array field |
-| `pop` | Remove last element from array field |
-| `highlight` | Set `highlighted` indices/IDs |
+---
 
-Unknown action keys fall through to shallow-merge (safe degradation).
+## HudItem
+
+```json
+{ "id": "my-counter", "label": "Comparisons", "initialValue": 0 }
+```
+
+Step updates: `"hud": { "my-counter": 5 }` sets the value at that step.
+
+---
+
+## Popups
+
+```json
+{
+  "id": "pop-1",
+  "attachTo": "my-array",
+  "text": "Pivot chosen here",
+  "showAtStep": 2,
+  "hideAtStep": 5,
+  "style": "info"
+}
+```
+
+`style` values: `info`, `warning`, `success`, `insight`.
+
+`showAtStep` and `hideAtStep` are both required (≥ 1).
+
+---
+
+## Step Engine
+
+```typescript
+import { applyStepActionsUpTo, applyOverlaysAtStep } from '@insyte/scene-engine'
+
+// Canvas state at a given step:
+const stateMap = applyStepActionsUpTo(scene.canvas, scene.steps, stepIndex)
+// Returns Map<visualId, state>
+
+// activeText + hud values at a given step:
+const { activeText, hud } = applyOverlaysAtStep(scene, stepIndex)
+```
 
 ---
 
@@ -77,20 +144,34 @@ Unknown action keys fall through to shallow-merge (safe degradation).
 
 ---
 
-## Scene Graph Diff
+## Scene Graph
 
-`diffSceneGraphs(prev, next)` compares successive snapshots and returns:
+`computeSceneGraphAtStep(scene, stepIndex)` returns a `SceneGraph`:
 
-| Diff type | Framer Motion animation |
-| --- | --- |
-| Added node | `scale` from 0 |
-| Removed node | `scale` to 0 |
-| Changed state | `backgroundColor` transition |
-| Moved position | `x`/`y` spring |
-| Edge added | `pathLength` draw-in |
+```typescript
+interface SceneGraph {
+  nodes: Map<string, SceneNode>
+  edges: Map<string, SceneEdge>
+  groups: Map<string, SceneGroup>  // keyed by canvas visual ID
+  stepIndex: number
+}
+```
+
+`SceneGroup.isHud` is always `false` (text-badge/counter no longer in canvas).
+
+---
+
+## JSON Schema
+
+The JSON Schema for validating scene files is generated at `public/scene-schema.json`:
+
+```
+pnpm --filter web export-schema
+```
 
 ---
 
 ## LRU Cache
 
-50-entry cache in `runtime/cache.ts` memoizing `SceneGraph` computations. Key: `sceneId + stepIndex + containerW + containerH`. Cleared on `setScene`. Prefetches steps ±1 from current on play start.
+50-entry cache in `runtime/cache.ts` memoizing `SceneGraph` computations.
+Cleared on `setScene`. Prefetches steps ±1 from current on play start.
