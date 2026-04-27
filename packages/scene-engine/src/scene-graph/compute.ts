@@ -6,19 +6,15 @@ import { computeLayout } from '../layout'
 /**
  * Compute the full scene graph at a given step index.
  * Pure and synchronous — no side effects, no caching.
- * Caching is handled by Scene Runtime (Phase 23).
  */
 export function computeSceneGraphAtStep(
   scene: Scene,
   stepIndex: number,
   containerWidth = 800,
-  containerHeight = 600
+  containerHeight = 600,
 ): SceneGraph {
-  // 1. Which visuals exist at this step?
-  const activeVisuals = computeTopologyAtStep(scene.visuals, scene.steps, stepIndex)
-
-  // 2. What is each visual's state at this step?
-  const stateMap = applyStepActionsUpTo(scene.visuals, scene.steps, stepIndex)
+  const activeVisuals = computeTopologyAtStep(scene.canvas, scene.steps, stepIndex)
+  const stateMap = applyStepActionsUpTo(scene.canvas, scene.steps, stepIndex)
 
   const nodes = new Map<string, SceneNode>()
   const edges = new Map<string, SceneEdge>()
@@ -27,13 +23,12 @@ export function computeSceneGraphAtStep(
   for (const visual of activeVisuals) {
     const state = stateMap.get(visual.id) ?? (visual.initialState as Record<string, unknown>)
 
-    // 3. Compute layout for this visual (synchronous)
     const layoutResult = computeLayout(visual, state, containerWidth, containerHeight)
 
-    // 4. Register positioned nodes
     for (const posNode of layoutResult.nodes) {
-      nodes.set(posNode.id, {
-        id: posNode.id,
+      const globalId = `${visual.id}_${posNode.id}`
+      nodes.set(globalId, {
+        id: globalId,
         type: visual.type,
         groupId: visual.id,
         x: posNode.x,
@@ -45,24 +40,21 @@ export function computeSceneGraphAtStep(
       })
     }
 
-    // 5. Register routed edges
     for (const posEdge of layoutResult.edges) {
-      edges.set(posEdge.id, {
-        id: posEdge.id,
-        from: posEdge.from,
-        to: posEdge.to,
+      const globalId = `${visual.id}_${posEdge.id}`
+      edges.set(globalId, {
+        id: globalId,
+        from: `${visual.id}_${posEdge.from}`,
+        to: `${visual.id}_${posEdge.to}`,
         label: posEdge.label,
         waypoints: posEdge.waypoints,
       })
     }
 
-    // 6. Register group with bounding box
-    // LayoutResult.boundingBox is { minX, minY, maxX, maxY }
-    // SceneGroup.bbox is { x, y, width, height } for CSS absolute positioning
     const bb = layoutResult.boundingBox
     groups.set(visual.id, {
       id: visual.id,
-      nodeIds: layoutResult.nodes.map(n => n.id),
+      nodeIds: layoutResult.nodes.map(n => `${visual.id}_${n.id}`),
       bbox: {
         x: bb.minX,
         y: bb.minY,
@@ -70,9 +62,10 @@ export function computeSceneGraphAtStep(
         height: bb.maxY - bb.minY,
       },
       label: visual.label,
-      isHud: visual.type === 'text-badge' || visual.type === 'counter',
+      isHud: false,
       visualType: visual.type,
-      showWhen: visual.showWhen,
+      state,
+      visual,
     })
   }
 

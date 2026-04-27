@@ -1,9 +1,9 @@
-import type { VisualType, Condition } from '../types'
+import type { VisualType, CanvasVisual } from '../types'
 
 export interface SceneNode {
   id: string
   type: VisualType
-  groupId: string              // parent visual ID
+  groupId: string              // parent canvas visual ID
   x: number                   // center X (from layout engine)
   y: number                   // center Y (from layout engine)
   width: number
@@ -17,19 +17,18 @@ export interface SceneEdge {
   from: string                 // source node ID
   to: string                   // target node ID
   label?: string
-  waypoints?: { x: number; y: number }[]  // routing points; populated by ELK in Phase 28
+  waypoints?: { x: number; y: number }[]
 }
 
 export interface SceneGroup {
-  id: string                   // = visual ID
+  id: string                   // = canvas visual ID
   nodeIds: string[]
   bbox: { x: number; y: number; width: number; height: number }
-  // Display metadata — lifted from scene.visuals so renderers need no raw Scene access
   label?: string               // visual.label
-  isHud: boolean               // true for text-badge / counter (renders in HUD zone)
-  visualType: VisualType       // primitive type — for PrimitiveRegistry lookup
-  // Visibility — control-toggle is true in step engine; renderer layer filters on this
-  showWhen?: Condition
+  isHud: false                 // always false — text-badge/counter removed from canvas
+  visualType: VisualType       // primitive type for PrimitiveRegistry lookup
+  state?: Record<string, unknown> // full visual state at this step
+  visual?: CanvasVisual        // the original visual definition
 }
 
 export interface SceneGraph {
@@ -43,7 +42,7 @@ export interface SceneGraphDiff {
   added: SceneNode[]
   removed: SceneNode[]
   moved: Array<{ prev: SceneNode; next: SceneNode }>
-  changed: Array<{ prev: SceneNode; next: SceneNode }>   // state changed, not position
+  changed: Array<{ prev: SceneNode; next: SceneNode }>
   addedEdges: SceneEdge[]
   removedEdges: SceneEdge[]
 }

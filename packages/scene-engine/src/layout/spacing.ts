@@ -15,10 +15,13 @@ export const PRIMITIVE_SIZING = {
   linkedList:    { nodeWidth: 64,  nodeHeight: 40, gap: 32 },  // 32 for arrow room
   tree:          { nodeSize: [80, 60] as [number, number] },   // d3.tree().nodeSize
   recursionTree: { nodeSize: [72, 56] as [number, number] },
+  trie:          { nodeSize: [96, 64] as [number, number] },   // wider than tree for edge labels
   graph:         { nodeWidth: 100, nodeHeight: 40, nodesep: 40, ranksep: 60 },
+  weightedGraph: { nodeWidth: 100, nodeHeight: 40, nodesep: 60, ranksep: 80 },
   systemDiagram: { nodeWidth: 120, nodeHeight: 48, nodesep: 60, ranksep: 80 },
-  hashmap:       { bucketHeight: 40, keyWidth: 80, valueWidth: 80, rowGap: 4 },
+  map:           { bucketHeight: 40, keyWidth: 80, valueWidth: 80, rowGap: 4 },
   dpTable:       { cellWidth: 48, cellHeight: 48, gap: 2 },
+  barChart:      { barWidth: 40, barGap: 8, maxBarHeight: 200 },
   counter:       { width: 80,  height: 48 },
   textBadge:     { maxWidth: 200, padding: 12 },
 } as const

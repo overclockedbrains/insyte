@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { applyLinearLayout, applyStackLayout, applyRadialLayout, applySlotLayout } from './arithmetic'
+import { applyLinearLayout, applyStackLayout, applyRadialLayout, applyBarChartLayout, applyRingLayout } from './arithmetic'
 import type { LayoutInput } from '../types'
 import { PRIMITIVE_SIZING } from '../spacing'
 
@@ -7,33 +7,30 @@ describe('arithmetic layouts', () => {
   describe('applyLinearLayout', () => {
     it('horizontally aligns array cells', () => {
       const input: LayoutInput = {
-        visual: { id: 'viz-1', type: 'array', initialState: {} },
-        state: { cells: [{ value: 10 }, { value: 20 }] }
+        visual: { id: 'viz-1', type: 'linear', variant: 'array', layoutHint: 'linear-H', initialState: { items: [] } },
+        state: { items: [{ value: 10 }, { value: 20 }] },
       }
-      
+
       const result = applyLinearLayout(input)
       const sz = PRIMITIVE_SIZING.array
-      
+
       expect(result.nodes.length).toBe(2)
-      
-      // Node 1
+
       expect(result.nodes[0]!.x).toBe(0 + sz.cellWidth / 2)
       expect(result.nodes[0]!.y).toBe(sz.cellHeight / 2)
-      
-      // Node 2 (offsets by width + gap)
+
       const step = sz.cellWidth + sz.gap
       expect(result.nodes[1]!.x).toBe(step + sz.cellWidth / 2)
     })
 
     it('adds pointer edges for linked-list', () => {
       const input: LayoutInput = {
-        visual: { id: 'viz-1', type: 'linked-list', initialState: {} },
-        state: { nodes: [{ id: 'n1' }, { id: 'n2' }, { id: 'n3' }] }
+        visual: { id: 'viz-1', type: 'linear', variant: 'linked-list', layoutHint: 'linear-H', initialState: { items: [] } },
+        state: { items: [{ id: 'n1', value: 1 }, { id: 'n2', value: 2 }, { id: 'n3', value: 3 }] },
       }
-      
+
       const result = applyLinearLayout(input)
-      
-      // 3 nodes = 2 connecting edges
+
       expect(result.edges.length).toBe(2)
       expect(result.edges[0]!.from).toBe('n1')
       expect(result.edges[0]!.to).toBe('n2')
@@ -45,55 +42,91 @@ describe('arithmetic layouts', () => {
   describe('applyStackLayout', () => {
     it('stacks items bottom-to-top rendering wise', () => {
       const input: LayoutInput = {
-        visual: { id: 'viz-1', type: 'stack', initialState: {} },
-        state: { items: [{ id: 'bottom' }, { id: 'top' }] }
+        visual: { id: 'viz-1', type: 'linear', variant: 'stack', layoutHint: 'linear-V', initialState: { items: [] } },
+        state: { items: [{ id: 'bottom', value: 'A' }, { id: 'top', value: 'B' }] },
       }
-      
+
       const result = applyStackLayout(input)
       expect(result.nodes.length).toBe(2)
-      
-      // Last item in array becomes index 0 in the reversed mapping
-      expect(result.nodes[0]!.state.id).toBe('top')
-      
-      // Top item should have lower Y value (rendered higher visually on screen if offset normally)
-      // wait, logic reverses array so index 0 = TOP = y is 0. 
-      // index 1 = BOTTOM = y is greater.
-      expect(result.nodes[0]!.y).toBeLessThan(result.nodes[1]!.y)
-    })
-  })
 
-  describe('applySlotLayout', () => {
-    it('places node at top-right by default', () => {
-      const input: LayoutInput = {
-        visual: { id: 'viz-badge', type: 'text-badge', initialState: {} },
-        state: {}
-      }
-      
-      // W = 1000, H = 1000
-      const result = applySlotLayout(input, 1000, 1000)
-      
-      expect(result.nodes.length).toBe(1)
-      expect(result.nodes[0]!.x).toBe(900) // 0.9 * 1000
-      expect(result.nodes[0]!.y).toBe(50)  // 0.05 * 1000
+      expect(result.nodes[0]!.state.id).toBe('top')
+      expect(result.nodes[0]!.y).toBeLessThan(result.nodes[1]!.y)
     })
   })
 
   describe('applyRadialLayout', () => {
     it('distributes nodes evenly in a circle', () => {
       const input: LayoutInput = {
-        visual: { id: 'viz-radial', type: 'graph', initialState: {} },
-        state: { nodes: [{ id: 'A' }, { id: 'B' }, { id: 'C' }, { id: 'D' }] }
+        visual: { id: 'viz-radial', type: 'graph', layoutHint: 'radial', initialState: { nodes: [], edges: [] } },
+        state: { nodes: [{ id: 'A', label: 'A' }, { id: 'B', label: 'B' }, { id: 'C', label: 'C' }, { id: 'D', label: 'D' }] },
       }
-      
+
       const result = applyRadialLayout(input)
-      
       expect(result.nodes.length).toBe(4)
-      
-      // Calculate distances from center to ensure perfect circle
-      const cx = result.nodes[0]!.x
-      const initialRadiusX = result.nodes[0]!.x
-      
-      // At least verify bounding box computations ran
+      expect(result.viewBox).toBeDefined()
+    })
+  })
+
+  describe('applyBarChartLayout', () => {
+    it('produces 5 nodes for 5 bars with increasing x-positions', () => {
+      const input: LayoutInput = {
+        visual: { id: 'bars', type: 'chart', variant: 'bar', layoutHint: 'chart-bar', initialState: { bars: [] } },
+        state: { bars: [
+          { id: 'b0', value: 3 },
+          { id: 'b1', value: 7 },
+          { id: 'b2', value: 2 },
+          { id: 'b3', value: 9 },
+          { id: 'b4', value: 5 },
+        ]},
+      }
+
+      const result = applyBarChartLayout(input)
+      expect(result.nodes.length).toBe(5)
+      // x-positions increase left to right
+      for (let i = 1; i < result.nodes.length; i++) {
+        expect(result.nodes[i]!.x).toBeGreaterThan(result.nodes[i - 1]!.x)
+      }
+      expect(result.edges.length).toBe(0)
+    })
+
+    it('produces empty layout for 0 bars without crashing', () => {
+      const input: LayoutInput = {
+        visual: { id: 'bars', type: 'chart', variant: 'bar', layoutHint: 'chart-bar', initialState: { bars: [] } },
+        state: { bars: [] },
+      }
+
+      const result = applyBarChartLayout(input)
+      expect(result.nodes.length).toBe(0)
+      expect(result.edges.length).toBe(0)
+      expect(result.viewBox).toBeDefined()
+    })
+  })
+
+  describe('applyRingLayout', () => {
+    it('places 6 components in a circle with no two at the same position', () => {
+      const components = ['n0','n1','n2','n3','n4','n5'].map(id => ({ id, label: id, icon: 'server', status: 'normal' }))
+      const input: LayoutInput = {
+        visual: { id: 'ring', type: 'system-diagram', layoutHint: 'ring', initialState: { components: [], connections: [] } },
+        state: { components, connections: [] },
+      }
+
+      const result = applyRingLayout(input)
+      expect(result.nodes.length).toBe(6)
+
+      // No two nodes at the same (x, y)
+      const positions = result.nodes.map(n => `${Math.round(n.x)},${Math.round(n.y)}`)
+      const unique = new Set(positions)
+      expect(unique.size).toBe(6)
+    })
+
+    it('produces empty layout for 0 components without crashing', () => {
+      const input: LayoutInput = {
+        visual: { id: 'ring', type: 'system-diagram', layoutHint: 'ring', initialState: { components: [], connections: [] } },
+        state: { components: [], connections: [] },
+      }
+
+      const result = applyRingLayout(input)
+      expect(result.nodes.length).toBe(0)
       expect(result.viewBox).toBeDefined()
     })
   })

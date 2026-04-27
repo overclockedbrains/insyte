@@ -32,6 +32,6 @@ export interface LayoutResult {
 }
 
 export interface LayoutInput {
-  visual: import('../types').Visual
+  visual: import('../types').CanvasVisual
   state: Record<string, unknown>  // current visual state (step-specific)
 }

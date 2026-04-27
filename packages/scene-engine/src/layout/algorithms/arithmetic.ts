@@ -3,24 +3,25 @@ import { computeLayoutResult } from '../utils'
 import type { LayoutInput, LayoutResult } from '../types'
 
 export function applyLinearLayout(input: LayoutInput): LayoutResult {
-  // array, linked-list, queue — horizontal
-  const type = input.visual.type  // 'array' | 'linked-list' | 'queue'
+  // linear type — horizontal; variant drives sizing
+  const variant = (input.visual as any).variant as string | undefined
 
   const sz = (() => {
-    if (type === 'array') {
-      const s = PRIMITIVE_SIZING.array
-      return { cellW: s.cellWidth, cellH: s.cellHeight, gap: s.gap }
-    }
-    if (type === 'linked-list') {
+    if (variant === 'linked-list') {
       const s = PRIMITIVE_SIZING.linkedList
       return { cellW: s.nodeWidth, cellH: s.nodeHeight, gap: s.gap }
     }
-    const s = PRIMITIVE_SIZING.queue
-    return { cellW: s.itemWidth, cellH: s.itemHeight, gap: s.gap }
+    if (variant === 'queue') {
+      const s = PRIMITIVE_SIZING.queue
+      return { cellW: s.itemWidth, cellH: s.itemHeight, gap: s.gap }
+    }
+    // array + fallback
+    const s = PRIMITIVE_SIZING.array
+    return { cellW: s.cellWidth, cellH: s.cellHeight, gap: s.gap }
   })()
 
-  const state = input.state as { cells?: any[]; items?: any[]; nodes?: any[] }
-  const items = state.cells ?? state.items ?? state.nodes ?? []
+  const state = input.state as { items?: any[] }
+  const items = state.items ?? []
 
   const nodes = items.map((item: any, i: number) => ({
     id: item.id ?? `cell-${i}`,
@@ -32,8 +33,8 @@ export function applyLinearLayout(input: LayoutInput): LayoutResult {
     state: item as Record<string, unknown>,
   }))
 
-  // Linked-list: add pointer edges between adjacent nodes
-  const edges = type === 'linked-list'
+  // linked-list: add pointer edges between adjacent nodes
+  const edges = variant === 'linked-list'
     ? nodes.slice(0, -1).map((n, i) => ({
         id: `ll-edge-${i}`,
         from: n.id,
@@ -89,7 +90,7 @@ export function applyGridLayout(input: LayoutInput): LayoutResult {
 }
 
 export function applyHashmapLayout(input: LayoutInput): LayoutResult {
-  const s = PRIMITIVE_SIZING.hashmap
+  const s = PRIMITIVE_SIZING.map
   const state = input.state as { buckets?: any[][]; entries?: any[] }
 
   // Normalize: entries may be flat or per-bucket
@@ -110,46 +111,70 @@ export function applyHashmapLayout(input: LayoutInput): LayoutResult {
   return computeLayoutResult(nodes, [])
 }
 
-export function applySlotLayout(
-  input: LayoutInput,
-  containerWidth = 800,
-  containerHeight = 600
-): LayoutResult {
-  // text-badge, counter — named slot positions
-  const SLOT_POSITIONS: Record<string, { x: number; y: number }> = {
-    'top-left':       { x: 0.1, y: 0.05 },
-    'top-center':     { x: 0.5, y: 0.05 },
-    'top-right':      { x: 0.9, y: 0.05 },
-    'bottom-left':    { x: 0.1, y: 0.95 },
-    'bottom-center':  { x: 0.5, y: 0.95 },
-    'bottom-right':   { x: 0.9, y: 0.95 },
-    'left-center':    { x: 0.1, y: 0.5 },
-    'right-center':   { x: 0.9, y: 0.5 },
-    'overlay-top':    { x: 0.5, y: 0.1 },
-    'overlay-bottom': { x: 0.5, y: 0.9 },
-    'center':         { x: 0.5, y: 0.5 },
+
+export function applyBarChartLayout(input: LayoutInput): LayoutResult {
+  const s = PRIMITIVE_SIZING.barChart
+  const state = input.state as { bars?: any[] }
+  const bars = state.bars ?? []
+
+  if (bars.length === 0) {
+    return { nodes: [], edges: [], boundingBox: { minX: 0, minY: 0, maxX: 400, maxY: s.maxBarHeight + SPACING.xxl * 2 }, viewBox: `0 0 400 ${s.maxBarHeight + SPACING.xxl * 2}` }
   }
 
-  const slot = input.visual.slot ?? 'top-right'
-  const pct = SLOT_POSITIONS[slot] ?? SLOT_POSITIONS['top-right']!
-  const s = input.visual.type === 'counter' ? PRIMITIVE_SIZING.counter : PRIMITIVE_SIZING.textBadge
-  const w = 'width' in s ? s.width : s.maxWidth
-  const h = 'height' in s ? s.height : 32
+  const nodes = bars.map((bar: any, i: number) => ({
+    id:     bar.id ?? `bar-${i}`,
+    x:      i * (s.barWidth + s.barGap) + s.barWidth / 2,
+    y:      s.maxBarHeight / 2,
+    width:  s.barWidth,
+    height: s.maxBarHeight,
+    type:   input.visual.type,
+    state:  bar as Record<string, unknown>,
+  }))
 
-  return {
-    nodes: [{
-      id: input.visual.id,
-      x: pct!.x * containerWidth,
-      y: pct!.y * containerHeight,
-      width: w,
-      height: h,
-      type: input.visual.type,
-      state: input.state,
-    }],
-    edges: [],
-    boundingBox: { minX: 0, minY: 0, maxX: containerWidth, maxY: containerHeight },
-    viewBox: `0 0 ${containerWidth} ${containerHeight}`,
-  }
+  return computeLayoutResult(nodes, [])
+}
+
+export function applyRingLayout(input: LayoutInput): LayoutResult {
+  const s = { nodeW: 120, nodeH: 48 }
+  const state = input.state as { components?: any[]; connections?: any[] }
+  const components = state.components ?? []
+  const connections = state.connections ?? []
+
+  const n = components.length
+  if (n === 0) return { nodes: [], edges: [], boundingBox: { minX: 0, minY: 0, maxX: 400, maxY: 300 }, viewBox: '0 0 400 300' }
+
+  const radius = Math.max(150, n * 40)
+  const cx = radius + s.nodeW / 2 + SPACING.xxl
+  const cy = radius + s.nodeH / 2 + SPACING.xxl
+
+  const nodes = components.map((comp: any, i: number) => {
+    const angle = (2 * Math.PI * i) / n - Math.PI / 2
+    return {
+      id:     comp.id,
+      x:      cx + radius * Math.cos(angle),
+      y:      cy + radius * Math.sin(angle),
+      width:  s.nodeW,
+      height: s.nodeH,
+      type:   input.visual.type,
+      state:  comp as Record<string, unknown>,
+    }
+  })
+
+  const nodeById = new Map(nodes.map(nd => [nd.id, nd]))
+  const edges = connections.map((conn: any, i: number) => ({
+    id:    conn.id ?? `ring-edge-${i}`,
+    from:  conn.from,
+    to:    conn.to,
+    label: conn.label,
+    waypoints: (() => {
+      const src = nodeById.get(conn.from)
+      const dst = nodeById.get(conn.to)
+      if (!src || !dst) return []
+      return [{ x: src.x, y: src.y }, { x: dst.x, y: dst.y }]
+    })(),
+  }))
+
+  return computeLayoutResult(nodes, edges)
 }
 
 export function applyRadialLayout(input: LayoutInput): LayoutResult {
