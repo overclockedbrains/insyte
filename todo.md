@@ -26,6 +26,8 @@
 - String / Text-Stream Visualizer
 - Improve WASM initialization times by caching Pyodide via a `CacheFirst` strategy using `@serwist/next`, which is currently uninstalled
 - Multiple themes (light, dark, high contrast, etc.)
+- New premitive : Terminal to show logs - a glassmorphic card
+- Have hud elements as canvas elements not seperate upper part and removing the active text and combine it in hud, generated when required.
 
 ## ❓ Questions / Blockers
 - Will we be able to optimize token consumptions ?
