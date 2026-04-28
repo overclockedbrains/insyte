@@ -4,9 +4,8 @@ import type { ResolvedPopup } from '@/src/components/renderers/types'
 
 /**
  * Resolves the active popups for the current step.
- *
- * Phase 34: Popup.anchor and Popup.showWhen were removed from the schema.
- * Filtering is now purely step-range based (showAtStep / hideAtStep).
+ * Filtering is step-range based (showAtStep / hideAtStep).
+ * attachTo is carried through so the renderer can derive a DOM anchor.
  */
 export function useResolvedPopups(scene: Scene, step: number): ResolvedPopup[] {
   return useMemo(() => {
@@ -16,6 +15,7 @@ export function useResolvedPopups(scene: Scene, step: number): ResolvedPopup[] {
         id: p.id,
         text: p.text,
         style: p.style,
+        attachTo: p.attachTo,
       }))
   }, [scene, step])
 }

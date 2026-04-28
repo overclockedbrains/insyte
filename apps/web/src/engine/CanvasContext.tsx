@@ -72,7 +72,7 @@ export const CanvasContextProvider = ({
 
   return (
     <CanvasContext.Provider value={{ width, height, toPx }}>
-      <Component className={className} ref={ref}>
+      <Component className={className} ref={ref} data-canvas-root="true">
         {children}
       </Component>
     </CanvasContext.Provider>

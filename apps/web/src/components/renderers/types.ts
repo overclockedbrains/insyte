@@ -30,6 +30,8 @@ export interface ResolvedPopup {
   style?: 'info' | 'success' | 'warning' | 'insight'
   /** Anchor in 0-100 % canvas-space. Renderer converts to px via containerWidth/Height. */
   anchor?: { x: number; y: number }
+  /** Canvas visual ID this popup is attached to. Renderer derives px position from the DOM element. */
+  attachTo?: string
 }
 
 // --- SceneRendererProps -------------------------------------------------------

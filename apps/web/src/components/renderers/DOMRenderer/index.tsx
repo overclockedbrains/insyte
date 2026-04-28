@@ -5,13 +5,13 @@ import { AnimatePresence } from 'framer-motion'
 import type { SceneRendererProps } from '../types'
 import { CanvasGroup } from './CanvasGroup'
 import { PopupsLayer } from './PopupsLayer'
-import { useEdgeAnimations } from './useEdgeAnimations'
 
 /**
  * DOMRenderer — React + Framer Motion implementation of SceneRendererProps.
  *
  * Thin orchestrator: classifies groups, composes the groups layer and popups
- * layer, and delegates edge draw-on animation to useEdgeAnimations.
+ * layer. Edge draw-on animations are handled locally by each primitive via
+ * Framer Motion's key-based remount (initial/animate on motion.path).
  *
  * The SceneGraph is the boundary. Everything above (layout engine,
  * step engine, Zustand) is renderer-agnostic. Everything below is owned here.
@@ -28,7 +28,6 @@ import { useEdgeAnimations } from './useEdgeAnimations'
  *   - Popup resolution (useResolvedPopups in CanvasCard)
  */
 export function DOMRenderer({ sceneGraph, resolvedPopups, step, speed }: SceneRendererProps) {
-  useEdgeAnimations(sceneGraph, speed)
 
   const canvasGroups = [...sceneGraph.groups.values()].filter(g => !g.isHud)
 
