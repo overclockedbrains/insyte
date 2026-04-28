@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server'
 import { redirect } from 'next/navigation'
-import { createClient } from '@supabase/supabase-js'
+import { sanitizeNextPath } from '@/lib/redirect'
 
 // ─── GET /auth/callback ───────────────────────────────────────────────────────
 // Handles the OAuth code exchange after Google sign-in.
@@ -10,24 +10,13 @@ export async function GET(req: NextRequest) {
   const { searchParams, origin } = new URL(req.url)
   const code = searchParams.get('code')
   // Optional next param — where to redirect after successful auth
-  const next = searchParams.get('next') ?? '/'
+  const next = sanitizeNextPath(searchParams.get('next'))
 
   if (code) {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-    if (supabaseUrl && supabaseAnonKey) {
-      const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-        auth: { persistSession: false },
-      })
-
-      const { error } = await supabase.auth.exchangeCodeForSession(code)
-
-      if (!error) {
-        // Successful auth — redirect to the intended destination
-        return redirect(`${origin}${next}`)
-      }
-    }
+    const url = new URL('/', origin)
+    url.searchParams.set('auth_code', code)
+    url.searchParams.set('auth_next', next)
+    return redirect(url.toString())
   }
 
   // Error or missing code — redirect to home with error indicator
