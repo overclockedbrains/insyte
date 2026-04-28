@@ -4,9 +4,9 @@
 export const SITE = {
   name: 'insyte',
   tagline: 'See how it works.',
-  title: 'insyte - See how it works.',
+  title: 'insyte — Interactive Visualizer for Algorithms, DSA & System Design',
   description:
-    'AI-powered platform that turns any tech concept into a live, interactive simulation you can play with.',
+    'Turn any algorithm, data structure, or system design concept into a live interactive simulation. Free. No login required.',
   url: process.env.NEXT_PUBLIC_APP_URL ?? 'https://insyte.amanarya.com',
 } as const
 

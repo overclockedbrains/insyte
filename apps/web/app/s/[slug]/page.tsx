@@ -3,6 +3,7 @@ import { getAllStaticSlugs, loadStaticScene } from '@/src/lib/scene-loader'
 import { extractTopicFromSlug } from '@/src/lib/slug'
 import { SITE } from '@/src/lib/config'
 import { getCachedScene, incrementHitCount } from '@/lib/supabase'
+import { getTopicBySlug } from '@/src/content/topic-index'
 import { ScenePageClient } from './ScenePageClient'
 
 export function generateStaticParams() {
@@ -48,24 +49,24 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
       scene.description ||
       `Interactive ${scene.type} simulation: ${scene.title}.`
 
-    const ogImage = `${SITE.url}/logo.png`
     const canonicalUrl = `${SITE.url}/s/${slug}`
 
     return {
-      title: `${scene.title} - insyte`,
+      title: scene.title,
       description,
+      alternates: {
+        canonical: canonicalUrl,
+      },
       openGraph: {
-        title: `${scene.title} - insyte`,
+        title: `${scene.title} — insyte`,
         description,
         type: 'website',
         url: canonicalUrl,
-        images: [ogImage],
       },
       twitter: {
         card: 'summary_large_image',
-        title: `${scene.title} - insyte`,
+        title: `${scene.title} — insyte`,
         description,
-        images: [ogImage],
       },
     }
   }
@@ -74,18 +75,19 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   const canonicalUrl = `${SITE.url}/s/${slug}`
 
   return {
-    title: `${topic} - insyte`,
+    title: topic,
     description: `AI-generated interactive simulation for "${topic}" on insyte.`,
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
-      title: `${topic} - insyte`,
+      title: `${topic} — insyte`,
       type: 'website',
       url: canonicalUrl,
-      images: [`${SITE.url}/logo.png`],
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${topic} - insyte`,
-      images: [`${SITE.url}/logo.png`],
+      title: `${topic} — insyte`,
     },
   }
 }
@@ -95,30 +97,80 @@ export default async function SimulationPage({ params, searchParams }: Props) {
   const { topic: topicParam, mode, lang } = await searchParams
 
   const staticScene = await loadStaticScene(slug)
+  const cachedScene = staticScene ? null : await getCachedScene(slug)
+  const scene = staticScene ?? cachedScene ?? null
+  const topic = getTopicBySlug(slug)
+
+  const learningResourceJsonLd =
+    scene || topic
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'LearningResource',
+          name: scene?.title ?? topic?.title ?? slug,
+          description: scene?.description ?? topic?.description,
+          url: `${SITE.url}/s/${slug}`,
+          isAccessibleForFree: true,
+          learningResourceType: 'Interactive Simulation',
+          educationalLevel: 'Intermediate',
+          teaches: scene?.title ?? topic?.title,
+          provider: {
+            '@type': 'Organization',
+            name: 'insyte',
+            url: SITE.url,
+          },
+        }
+      : null
+
+  const jsonLdScript = learningResourceJsonLd ? (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify(learningResourceJsonLd).replace(/</g, '\\u003c'),
+      }}
+    />
+  ) : null
+
   if (staticScene) {
     incrementHitCount(slug)
-    return <ScenePageClient scene={staticScene} slug={slug} />
+    return (
+      <>
+        {jsonLdScript}
+        <ScenePageClient scene={staticScene} slug={slug} />
+      </>
+    )
   }
 
-  const cachedScene = await getCachedScene(slug)
   if (cachedScene) {
     incrementHitCount(slug)
-    return <ScenePageClient scene={cachedScene} slug={slug} />
+    return (
+      <>
+        {jsonLdScript}
+        <ScenePageClient scene={cachedScene} slug={slug} />
+      </>
+    )
   }
 
   if (mode === 'dsa') {
     const dsaLanguage: 'python' | 'javascript' =
       lang === 'javascript' ? 'javascript' : 'python'
     return (
-      <ScenePageClient
-        scene={null}
-        slug={slug}
-        isDSAMode
-        dsaLanguage={dsaLanguage}
-      />
+      <>
+        {jsonLdScript}
+        <ScenePageClient
+          scene={null}
+          slug={slug}
+          isDSAMode
+          dsaLanguage={dsaLanguage}
+        />
+      </>
     )
   }
 
-  const topic = topicParam?.trim() || extractTopicFromSlug(slug)
-  return <ScenePageClient scene={null} topic={topic} slug={slug} />
+  const topicName = topicParam?.trim() || extractTopicFromSlug(slug)
+  return (
+    <>
+      {jsonLdScript}
+      <ScenePageClient scene={null} topic={topicName} slug={slug} />
+    </>
+  )
 }

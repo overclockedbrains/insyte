@@ -2,8 +2,12 @@ import type { Metadata } from 'next'
 import { ProfilePageClient } from './ProfilePageClient'
 
 export const metadata: Metadata = {
-  title: 'Profile — insyte',
+  title: 'Profile',
   description: 'Your saved simulations and generation history on insyte.',
+  robots: {
+    index: false,
+    follow: false,
+  },
 }
 
 // ─── Profile page (Server Component shell) ───────────────────────────────────

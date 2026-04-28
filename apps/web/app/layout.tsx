@@ -38,21 +38,47 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
-  title: SITE.title,
+  title: {
+    template: '%s — insyte',
+    default: SITE.title,
+  },
   description: SITE.description,
+  verification: {
+    google: 'GOOGLE_VERIFICATION_CODE_HERE',
+  },
   openGraph: {
     title: SITE.title,
     description: SITE.description,
     type: 'website',
     url: SITE.url,
-    images: [`${SITE.url}/logo.png`],
+    siteName: 'insyte',
   },
   twitter: {
     card: 'summary_large_image',
     title: SITE.title,
     description: SITE.description,
-    images: [`${SITE.url}/logo.png`],
   },
+}
+
+const webApplicationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'insyte',
+  url: SITE.url,
+  description: SITE.description,
+  applicationCategory: 'EducationalApplication',
+  operatingSystem: 'Web',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+  featureList: [
+    'Interactive algorithm visualizations',
+    'DSA step-by-step simulations',
+    'System design diagrams',
+    'AI-generated custom simulations',
+  ],
 }
 
 export default function RootLayout({
@@ -71,6 +97,13 @@ export default function RootLayout({
       )}
     >
       <body className="min-h-screen flex flex-col bg-background text-on-surface font-body antialiased relative">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(webApplicationJsonLd).replace(/</g, '\\u003c'),
+          }}
+        />
+
         {/* Background layers */}
         <GlowEffect />
         <DotGridBackground opacity={0.4} />

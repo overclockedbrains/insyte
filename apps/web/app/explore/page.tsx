@@ -3,13 +3,17 @@ import { GlowEffect } from '@/components/layout/GlowEffect'
 import { SearchBar } from '@/components/explore/SearchBar'
 import { TopicRow } from '@/components/explore/TopicRow'
 import { getFeaturedTopics, getTopicsByCategory, topicIndex } from '@/src/content/topic-index'
+import { SITE } from '@/src/lib/config'
 import Link from 'next/link'
 
 const totalCount = topicIndex.length
 
 export const metadata: Metadata = {
-  title: 'Explore - insyte',
-  description: `Browse ${totalCount} interactive simulations covering Data Structures, System Design, Networking, and more.`,
+  title: 'Explore Algorithm & DSA Simulations',
+  description: `Browse ${totalCount} interactive simulations — Binary Search, Merge Sort, Hash Tables, System Design, and more. Play with algorithms instead of reading about them.`,
+  alternates: {
+    canonical: `${SITE.url}/explore`,
+  },
 }
 
 type ExploreSearchParams = {
@@ -43,7 +47,29 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
   const selectedRow = activeRow ? rows.find((row) => row.key === activeRow) : null
   const rowsToRender = selectedRow ? [selectedRow] : rows
 
+  const indexableTopics = topicIndex.filter((t) => t.slug !== 'test')
+  const itemListJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'insyte Interactive Simulations',
+    description: 'Interactive algorithm and system design simulations',
+    numberOfItems: indexableTopics.length,
+    itemListElement: indexableTopics.map((topic, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: topic.title,
+      url: `${SITE.url}/s/${topic.slug}`,
+    })),
+  }
+
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(itemListJsonLd).replace(/</g, '\\u003c'),
+        }}
+      />
     <div className="relative min-h-screen">
       <GlowEffect intensity="subtle" className="fixed" />
 
@@ -93,5 +119,6 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
         ))}
       </div>
     </div>
+    </>
   )
 }

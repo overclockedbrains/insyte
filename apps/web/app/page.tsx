@@ -8,19 +8,23 @@ import { PopularChips } from '@/components/landing/PopularChips'
 import { LiveDemoLoader } from '@/components/landing/LiveDemoLoader'
 
 export const metadata: Metadata = {
-  title: SITE.title,
-  description: `${SITE.description} Not a video. Not text. A playground.`,
+  title: 'Interactive Visualizer for Algorithms, DSA & System Design',
+  description:
+    'Turn any algorithm, data structure, or system design concept into a live interactive simulation. Play with Binary Search, Hash Tables, DNS, Git, and 20+ more — free.',
+  alternates: {
+    canonical: SITE.url,
+  },
   openGraph: {
     title: SITE.title,
-    description: 'Turn any tech concept into an interactive simulation you can play with.',
+    description:
+      'Turn any algorithm or system design concept into a live interactive simulation you can play with.',
     type: 'website',
-    images: [`${SITE.url}/logo.png`],
+    url: SITE.url,
   },
   twitter: {
     card: 'summary_large_image',
     title: SITE.title,
-    description: 'Turn any tech concept into an interactive simulation.',
-    images: [`${SITE.url}/logo.png`],
+    description: 'Turn any algorithm or system design concept into a live interactive simulation.',
   },
 }
 

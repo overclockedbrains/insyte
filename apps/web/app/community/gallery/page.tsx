@@ -8,11 +8,14 @@ import type { CommunityScene } from '@/app/api/community/gallery/route'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Community Gallery - insyte',
-  description: 'Browse AI-generated simulations created by the insyte community.',
+  title: 'Community Gallery',
+  description: 'Browse AI-generated interactive simulations created by the insyte community.',
+  alternates: {
+    canonical: 'https://insyte.amanarya.com/community/gallery',
+  },
   openGraph: {
-    title: 'Community Gallery - insyte',
-    description: 'Browse AI-generated simulations created by the insyte community.',
+    title: 'Community Gallery — insyte',
+    description: 'Browse AI-generated interactive simulations created by the insyte community.',
   },
 }
 
