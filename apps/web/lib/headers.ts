@@ -10,7 +10,7 @@ export interface AIHeaderSettings {
   ollamaBaseURL?: string
   customBaseURL?: string
   customApiKey?: string
-  userId?: string | null
+  accessToken?: string | null
 }
 
 /**
@@ -18,7 +18,7 @@ export interface AIHeaderSettings {
  * Single source of truth — covers all provider variants (standard, Ollama, Custom).
  */
 export function buildAIHeaders(settings: AIHeaderSettings): Record<string, string> {
-  const { provider, model, apiKeys, ollamaBaseURL, customBaseURL, customApiKey, userId } = settings
+  const { provider, model, apiKeys, ollamaBaseURL, customBaseURL, customApiKey, accessToken } = settings
   const key = apiKeys[provider]
   const headers: Record<string, string> = {}
 
@@ -37,7 +37,7 @@ export function buildAIHeaders(settings: AIHeaderSettings): Record<string, strin
     headers['x-model'] = model
   }
 
-  if (userId) headers['x-user-id'] = userId
+  if (accessToken) headers.authorization = `Bearer ${accessToken}`
 
   return headers
 }
@@ -49,7 +49,6 @@ export interface ByokHeaders {
   byokProvider: Provider | null
   byokModel: string | null
   byokBaseURL: string | null
-  userId: string | null
 }
 
 /**
@@ -62,6 +61,5 @@ export function extractByokHeaders(req: NextRequest): ByokHeaders {
     byokProvider: req.headers.get('x-provider') as Provider | null,
     byokModel: req.headers.get('x-model'),
     byokBaseURL: req.headers.get('x-base-url'),
-    userId: req.headers.get('x-user-id'),
   }
 }

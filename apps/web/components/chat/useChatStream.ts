@@ -41,12 +41,14 @@ export function useChatStream() {
   const provider = useBoundStore((s) => s.provider)
   const model = useBoundStore((s) => s.model)
   const apiKeys = useBoundStore((s) => s.apiKeys)
+  const session = useBoundStore((s) => s.session)
 
   const sendMessage = useCallback(
     async (text: string) => {
       if (!text.trim() || !activeScene) return
 
       // 1. Push user message and empty assistant placeholder
+      const history = messages
       addUserMessage(text)
       addAssistantMessage('')
       setLoading(true)
@@ -61,10 +63,12 @@ export function useChatStream() {
       // Build scene context (minimal — no full JSON)
       const sceneContext = buildSceneContext(activeScene, currentStep)
 
-      // Build history snapshot BEFORE the new user message (exclude the two we just pushed)
-      const history = messages.slice(0, -2)
-
-      const extraHeaders = buildAIHeaders({ provider, model, apiKeys })
+      const extraHeaders = buildAIHeaders({
+        provider,
+        model,
+        apiKeys,
+        accessToken: session?.access_token ?? null,
+      })
 
       try {
         const response = await fetch('/api/chat', {
@@ -174,6 +178,7 @@ export function useChatStream() {
       provider,
       model,
       apiKeys,
+      session,
       addUserMessage,
       addAssistantMessage,
       appendToLastMessage,
