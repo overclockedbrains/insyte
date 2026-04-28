@@ -43,9 +43,6 @@ export const metadata: Metadata = {
     default: SITE.title,
   },
   description: SITE.description,
-  verification: {
-    google: 'GOOGLE_VERIFICATION_CODE_HERE',
-  },
   openGraph: {
     title: SITE.title,
     description: SITE.description,
