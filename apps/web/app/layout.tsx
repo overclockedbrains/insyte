@@ -9,6 +9,7 @@ import { GlowEffect } from '@/components/layout/GlowEffect'
 import { DotGridBackground } from '@/components/layout/DotGridBackground'
 import { AuthProvider } from '@/components/auth/AuthProvider'
 import { AuthModal } from '@/components/auth/AuthModal'
+import { DevBanner } from '@/components/layout/DevBanner'
 import './globals.css'
 
 const manrope = Manrope({
@@ -116,6 +117,7 @@ export default function RootLayout({
 
           {/* Global auth modal — triggered from anywhere via openAuthModal() */}
           <AuthModal />
+          <DevBanner />
         </AuthProvider>
         <Analytics />
       </body>
