@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Manrope, Inter, JetBrains_Mono } from 'next/font/google'
+import { Manrope, Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { cn } from '@/lib/utils'
 import { SITE } from '@/src/lib/config'
@@ -18,7 +18,7 @@ const manrope = Manrope({
   display: 'swap',
 })
 
-const inter = Inter({
+const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
   weight: ['400', '500', '600'],
   variable: '--font-body',
@@ -66,7 +66,7 @@ export default function RootLayout({
       className={cn(
         'dark',
         manrope.variable,
-        inter.variable,
+        plusJakartaSans.variable,
         jetbrainsMono.variable,
       )}
     >
