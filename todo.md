@@ -28,6 +28,8 @@
 - Multiple themes (light, dark, high contrast, etc.)
 - New premitive : Terminal to show logs - a glassmorphic card
 - Have hud elements as canvas elements not seperate upper part and removing the active text and combine it in hud, generated when required.
+- Make the explaination easier in general !
+- User selectable step counts range and explanation difficulty level and some clearifying questions.
 
 ## ❓ Questions / Blockers
 - Will we be able to optimize token consumptions ?
