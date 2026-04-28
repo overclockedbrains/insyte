@@ -2,6 +2,7 @@ import type React from 'react'
 import type { SceneRendererProps } from './types'
 import { DOMRenderer } from './DOMRenderer'
 import { CanvasRenderer } from './CanvasRenderer'
+import { TextRenderer } from './TextRenderer'
 
 /**
  * Renderer registry — maps NEXT_PUBLIC_RENDERER values to implementations.
@@ -15,6 +16,7 @@ import { CanvasRenderer } from './CanvasRenderer'
 const RENDERERS: Record<string, React.ComponentType<SceneRendererProps>> = {
   dom: DOMRenderer,
   canvas: CanvasRenderer,
+  text: TextRenderer,
 }
 
 export const ActiveRenderer: React.ComponentType<SceneRendererProps> =
