@@ -9,16 +9,19 @@ const SESSION_KEY = 'insyte_dev_notice_v2'
 type State = 'hidden' | 'card' | 'fab'
 
 export function DevBanner() {
-  const [state, setState] = useState<State>('hidden')
+  const [state, setState] = useState<State>(() => {
+    if (typeof window !== 'undefined' && sessionStorage.getItem(SESSION_KEY)) {
+      return 'fab'
+    }
+    return 'hidden'
+  })
 
   useEffect(() => {
-    if (sessionStorage.getItem(SESSION_KEY)) {
-      setState('fab')
-    } else {
+    if (state === 'hidden') {
       const t = setTimeout(() => setState('card'), 900)
       return () => clearTimeout(t)
     }
-  }, [])
+  }, [state])
 
   function dismiss() {
     sessionStorage.setItem(SESSION_KEY, '1')

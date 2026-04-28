@@ -11,11 +11,10 @@
 - Can I build a playground for users to be able to generate the visuals manually without using AI ?
 
 ## 🚀 Active Focus (What I'm working on right now)
-- [ ] Fix broken generation pipeline
+- [ ] Fix broken dsa generation pipeline
 - [ ] Fix broken positioning system
 
 ## 💡 Ideas / Future Enhancements
-- Better server for handling ai requests
 - Better observability for ai generation
 - Interactive Mode — Button-Triggered Visual Mutations
 - Hover Tooltips and Right-Click Context Menu on Canvas Elements
@@ -38,5 +37,4 @@
 - Remove explore page and just have gallery?
 
 ## ❓ Questions / Blockers
-- Will we be able to optimize token consumptions ?
-- Should we optimize scene json more to be focused more on differences and other optimization ?
+- Will we be able to optimize token consumptions ? - cost estimation ?
