@@ -47,11 +47,10 @@ function getWorkspaceVersion(): string {
 }
 
 const nextConfig: NextConfig = {
-  experimental: {
-    outputFileTracingIncludes: {
-      '/api/**': ['./src/ai/prompts/**/*.md'],
-    },
+  outputFileTracingIncludes: {
+    '/api/**': ['./src/ai/prompts/**/*.md'],
   },
+  turbopack: {},
   env: {
     NEXT_PUBLIC_APP_VERSION: getWorkspaceVersion(),
   },
