@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useSettings } from '@/src/stores/hooks'
 import { REGISTRY } from '@/src/ai/registry'
 import type { Provider } from '@/src/ai/registry'
+import { ConnectionTestButton } from '@/components/settings/ConnectionTestButton'
 
 interface RateLimitStatus {
   remaining: number
@@ -58,7 +59,7 @@ export function ActiveProviderStatus() {
         ].join(' ')}
       />
 
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 overflow-hidden">
         {hasByok ? (
           <p className="text-sm text-on-surface">
             Using your{' '}
@@ -103,6 +104,8 @@ export function ActiveProviderStatus() {
           </p>
         )}
       </div>
+
+      <ConnectionTestButton />
     </div>
   )
 }
