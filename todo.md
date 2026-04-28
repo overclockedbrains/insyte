@@ -30,6 +30,9 @@
 - Have hud elements as canvas elements not seperate upper part and removing the active text and combine it in hud, generated when required.
 - Make the explaination easier in general !
 - User selectable step counts range and explanation difficulty level and some clearifying questions.
+- Remove manual selection for which mode etc should be all derived by ai and the quesitons be asked from user.
+- Improve DSA Pipeline now
+- All scenes needs to be regenerated using ai pipeline
 
 ## ❓ Questions / Blockers
 - Will we be able to optimize token consumptions ?
