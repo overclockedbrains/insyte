@@ -38,3 +38,4 @@
 
 ## ❓ Questions / Blockers
 - Will we be able to optimize token consumptions ? - cost estimation ?
+- Something is broken now with the animations colors are not getting applied properly do debug phase 37, 38 - broke in phase 37 ?

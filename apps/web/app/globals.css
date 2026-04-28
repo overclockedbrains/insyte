@@ -54,56 +54,77 @@
 /* ─── Shadcn CSS variable values (dark-only; both :root and .dark are dark) ── */
 
 :root {
-  --background: #0e0e13;
-  --foreground: #f9f5fd;
-  --card: #19191f;
-  --card-foreground: #f9f5fd;
-  --popover: #19191f;
-  --popover-foreground: #f9f5fd;
-  --primary: #b79fff;
-  --primary-foreground: #361083;
-  --secondary: #3adffa;
-  --secondary-foreground: #004b56;
-  --muted: #25252d;
-  --muted-foreground: #acaab1;
-  --accent: #25252d;
-  --accent-foreground: #f9f5fd;
-  --destructive: #ff6e84;
-  --border: rgba(72, 71, 77, 0.4);
-  --input: rgba(72, 71, 77, 0.3);
-  --ring: rgba(183, 159, 255, 0.4);
-  --chart-1: #b79fff;
-  --chart-2: #3adffa;
+  /* ── Reference palette — the ONLY place raw color values are defined ─────── */
+  /* To create a new theme, override this block in a [data-theme="x"] class.   */
+  --ref-primary:        #b79fff;   /* lavender purple */
+  --ref-primary-rgb:    183, 159, 255;
+  --ref-secondary:      #3adffa;   /* bright cyan */
+  --ref-secondary-rgb:  58, 223, 250;
+  --ref-background:     #0e0e13;
+  --ref-card:           #19191f;
+  --ref-card-mid:       #25252d;
+  --ref-outline:        #76747b;
+  --ref-outline-dim:    #48474d;
+  --ref-on-surface:     #f9f5fd;
+  --ref-on-surface-dim: #acaab1;
+  --ref-error:          #ff6e84;
+  --ref-amber:          #f59e0b;
+  --ref-on-primary:     #361083;
+  --ref-on-secondary:   #004b56;
+  --ref-surface-low:    #131319;   /* sidebar / chat panel level */
+  --ref-success:        #22c55e;   /* semantic state: found / inserted / complete */
+
+  --background: var(--ref-background);
+  --foreground: var(--ref-on-surface);
+  --card: var(--ref-card);
+  --card-foreground: var(--ref-on-surface);
+  --popover: var(--ref-card);
+  --popover-foreground: var(--ref-on-surface);
+  --primary: var(--ref-primary);
+  --primary-foreground: var(--ref-on-primary);
+  --secondary: var(--ref-secondary);
+  --secondary-foreground: var(--ref-on-secondary);
+  --muted: var(--ref-card-mid);
+  --muted-foreground: var(--ref-on-surface-dim);
+  --accent: var(--ref-card-mid);
+  --accent-foreground: var(--ref-on-surface);
+  --destructive: var(--ref-error);
+  --border: color-mix(in srgb, var(--ref-outline-dim) 40%, transparent);
+  --input: color-mix(in srgb, var(--ref-outline-dim) 30%, transparent);
+  --ring: color-mix(in srgb, var(--ref-primary) 40%, transparent);
+  --chart-1: var(--ref-primary);
+  --chart-2: var(--ref-secondary);
   --chart-3: #919bff;
   --chart-4: #a88cfb;
   --chart-5: #1ad0eb;
   --radius: 1rem;
-  --sidebar: #131319;
-  --sidebar-foreground: #f9f5fd;
-  --sidebar-primary: #b79fff;
-  --sidebar-primary-foreground: #361083;
-  --sidebar-accent: #19191f;
-  --sidebar-accent-foreground: #f9f5fd;
-  --sidebar-border: rgba(72, 71, 77, 0.4);
-  --sidebar-ring: rgba(183, 159, 255, 0.4);
+  --sidebar: var(--ref-surface-low);
+  --sidebar-foreground: var(--ref-on-surface);
+  --sidebar-primary: var(--ref-primary);
+  --sidebar-primary-foreground: var(--ref-on-primary);
+  --sidebar-accent: var(--ref-card);
+  --sidebar-accent-foreground: var(--ref-on-surface);
+  --sidebar-border: color-mix(in srgb, var(--ref-outline-dim) 40%, transparent);
+  --sidebar-ring: color-mix(in srgb, var(--ref-primary) 40%, transparent);
+
   /* ── Primary alpha aliases ─────────────────────────────────────────────────── */
-  --color-primary-alpha-08: rgba(183, 159, 255, 0.08);
-  --color-primary-alpha-10: rgba(183, 159, 255, 0.10);
-  --color-primary-alpha-12: rgba(183, 159, 255, 0.12);
-  --color-primary-alpha-15: rgba(183, 159, 255, 0.15);
-  --color-primary-alpha-16: rgba(183, 159, 255, 0.16);
-  --color-primary-alpha-25: rgba(183, 159, 255, 0.25);
-  --color-primary-alpha-28: rgba(183, 159, 255, 0.28);
-  --color-primary-alpha-30: rgba(183, 159, 255, 0.30);
-  --color-primary-alpha-60: rgba(183, 159, 255, 0.60);
+  --color-primary-alpha-08: color-mix(in srgb, var(--ref-primary)  8%, transparent);
+  --color-primary-alpha-10: color-mix(in srgb, var(--ref-primary) 10%, transparent);
+  --color-primary-alpha-12: color-mix(in srgb, var(--ref-primary) 12%, transparent);
+  --color-primary-alpha-15: color-mix(in srgb, var(--ref-primary) 15%, transparent);
+  --color-primary-alpha-16: color-mix(in srgb, var(--ref-primary) 16%, transparent);
+  --color-primary-alpha-25: color-mix(in srgb, var(--ref-primary) 25%, transparent);
+  --color-primary-alpha-28: color-mix(in srgb, var(--ref-primary) 28%, transparent);
+  --color-primary-alpha-30: color-mix(in srgb, var(--ref-primary) 30%, transparent);
+  --color-primary-alpha-60: color-mix(in srgb, var(--ref-primary) 60%, transparent);
 
   /* ── Secondary alpha aliases ─────────────────────────────────────────────── */
-  --color-secondary-alpha-10: rgba(58, 223, 250, 0.10);
-  --color-secondary-alpha-11: rgba(58, 223, 250, 0.11);
-  --color-secondary-alpha-12: rgba(58, 223, 250, 0.12);
-  --color-secondary-alpha-15: rgba(58, 223, 250, 0.15);
-  --color-secondary-alpha-18: rgba(58, 223, 250, 0.18);
-  --color-secondary-alpha-24: rgba(58, 223, 250, 0.24);
+  --color-secondary-alpha-10: color-mix(in srgb, var(--ref-secondary) 10%, transparent);
+  --color-secondary-alpha-11: color-mix(in srgb, var(--ref-secondary) 11%, transparent);
+  --color-secondary-alpha-12: color-mix(in srgb, var(--ref-secondary) 12%, transparent);
+  --color-secondary-alpha-15: color-mix(in srgb, var(--ref-secondary) 15%, transparent);
+  --color-secondary-alpha-18: color-mix(in srgb, var(--ref-secondary) 18%, transparent);
+  --color-secondary-alpha-24: color-mix(in srgb, var(--ref-secondary) 24%, transparent);
 
   /* ── Black/shadow alpha aliases ──────────────────────────────────────────── */
   --color-black-alpha-15: rgba(0, 0, 0, 0.15);
@@ -111,7 +132,14 @@
   --color-black-alpha-75: rgba(0, 0, 0, 0.75);
 
   /* ── Outline variant alpha ────────────────────────────────────────────────── */
-  --color-outline-variant-60: rgba(72, 71, 77, 0.60);
+  --color-outline-variant-60: color-mix(in srgb, var(--ref-outline-dim) 60%, transparent);
+
+  /* ── Semantic state highlight backgrounds ────────────────────────────────── */
+  /* Override these in [data-theme="x"] to tune highlight visibility per theme. */
+  --color-highlight-active-bg:  color-mix(in srgb, var(--ref-secondary) 10%, transparent);
+  --color-highlight-success-bg: color-mix(in srgb, var(--ref-success)   10%, transparent);
+  --color-highlight-danger-bg:  color-mix(in srgb, var(--ref-error)     10%, transparent);
+  --color-highlight-amber-bg:   color-mix(in srgb, var(--ref-amber)     10%, transparent);
 
   /* ── macOS window control colors ────────────────────────────────────────── */
   --color-mac-close:        #ff5f57;
@@ -126,64 +154,30 @@
   --color-mac-maximize-10:  rgba(40, 200, 64, 0.10);
 
   /* ── Surface/bg aliases ──────────────────────────────────────────────────── */
-  --color-chat-bg:            rgba(19, 19, 25, 0.92);
-  --color-search-dropdown-bg: rgba(25, 25, 31, 0.95);
+  --color-chat-bg:            color-mix(in srgb, var(--ref-surface-low) 92%, transparent);
+  --color-search-dropdown-bg: color-mix(in srgb, var(--ref-card) 95%, transparent);
   --color-dev-banner-bg:      #0c0c11;
   --color-dev-panel-bg:       #0d1117;
   --color-dev-input-text:     #e2e8f0;
   --color-dev-input-focus-bg: rgba(255, 255, 255, 0.02);
 
   /* ── Brand gradients ─────────────────────────────────────────────────────── */
-  --gradient-brand:          linear-gradient(90deg, #b79fff 0%, #3adffa 100%);
-  --gradient-brand-border:   linear-gradient(135deg, #b79fff 0%, #919bff 45%, #3adffa 100%);
-  --gradient-brand-explore:  linear-gradient(135deg, #b79fff 0%, #ab8ffe 100%);
-  --gradient-secondary:      linear-gradient(135deg, #3adffa 0%, #1ad0eb 100%);
-  --gradient-brand-divider:  linear-gradient(90deg, rgba(183, 159, 255, 0.25) 0%, rgba(58, 223, 250, 0.15) 60%, transparent 100%);
-  --gradient-primary-radial: radial-gradient(circle, rgba(183, 159, 255, 0.16) 0%, transparent 68%);
-  --gradient-secondary-radial: radial-gradient(circle, rgba(58, 223, 250, 0.11) 0%, transparent 68%);
-  --pattern-streaming-dots:  radial-gradient(circle, rgba(183, 159, 255, 0.15) 1px, transparent 1px);
+  --gradient-brand:            linear-gradient(90deg, var(--ref-primary) 0%, var(--ref-secondary) 100%);
+  --gradient-brand-border:     linear-gradient(135deg, var(--ref-primary) 0%, #919bff 45%, var(--ref-secondary) 100%);
+  --gradient-brand-explore:    linear-gradient(135deg, var(--ref-primary) 0%, #ab8ffe 100%);
+  --gradient-secondary:        linear-gradient(135deg, var(--ref-secondary) 0%, #1ad0eb 100%);
+  --gradient-brand-divider:    linear-gradient(90deg, color-mix(in srgb, var(--ref-primary) 25%, transparent) 0%, color-mix(in srgb, var(--ref-secondary) 15%, transparent) 60%, transparent 100%);
+  --gradient-primary-radial:   radial-gradient(circle, color-mix(in srgb, var(--ref-primary) 16%, transparent) 0%, transparent 68%);
+  --gradient-secondary-radial: radial-gradient(circle, color-mix(in srgb, var(--ref-secondary) 11%, transparent) 0%, transparent 68%);
+  --pattern-streaming-dots:    radial-gradient(circle, color-mix(in srgb, var(--ref-primary) 15%, transparent) 1px, transparent 1px);
 
   /* ── Glow shadow tokens (for Tailwind arbitrary shadow classes) ───────────── */
-  --glow-primary-10:    rgba(183, 159, 255, 0.10);
-  --glow-primary-12:    rgba(183, 159, 255, 0.12);
-  --glow-primary-30:    rgba(183, 159, 255, 0.30);
+  --glow-primary-10:    color-mix(in srgb, var(--ref-primary)  10%, transparent);
+  --glow-primary-12:    color-mix(in srgb, var(--ref-primary)  12%, transparent);
+  --glow-primary-30:    color-mix(in srgb, var(--ref-primary)  30%, transparent);
   --glow-secondary-10:  rgba(103, 232, 249, 0.10);
   --glow-surface-05:    rgba(255, 255, 255, 0.05);
   --glow-tertiary-10:   rgba(167, 243, 208, 0.10);
-}
-
-.dark {
-  --background: #0e0e13;
-  --foreground: #f9f5fd;
-  --card: #19191f;
-  --card-foreground: #f9f5fd;
-  --popover: #19191f;
-  --popover-foreground: #f9f5fd;
-  --primary: #b79fff;
-  --primary-foreground: #361083;
-  --secondary: #3adffa;
-  --secondary-foreground: #004b56;
-  --muted: #25252d;
-  --muted-foreground: #acaab1;
-  --accent: #25252d;
-  --accent-foreground: #f9f5fd;
-  --destructive: #ff6e84;
-  --border: rgba(72, 71, 77, 0.4);
-  --input: rgba(72, 71, 77, 0.3);
-  --ring: rgba(183, 159, 255, 0.4);
-  --chart-1: #b79fff;
-  --chart-2: #3adffa;
-  --chart-3: #919bff;
-  --chart-4: #a88cfb;
-  --chart-5: #1ad0eb;
-  --sidebar: #131319;
-  --sidebar-foreground: #f9f5fd;
-  --sidebar-primary: #b79fff;
-  --sidebar-primary-foreground: #361083;
-  --sidebar-accent: #19191f;
-  --sidebar-accent-foreground: #f9f5fd;
-  --sidebar-border: rgba(72, 71, 77, 0.4);
-  --sidebar-ring: rgba(183, 159, 255, 0.4);
 }
 
 /* ─── insyte Design Tokens ──────────────────────────────────────────────────── */
@@ -203,68 +197,68 @@
   /* ─── Color Tokens ──────────────────────────────────────────────────────── */
 
   /* Background & Surfaces */
-  --color-background: #0e0e13;
-  --color-surface: #0e0e13;
-  --color-surface-dim: #0e0e13;
-  --color-surface-container-lowest: #000000;
-  --color-surface-container-low: #131319;
-  --color-surface-container: #19191f;
-  --color-surface-container-high: #1f1f26;
-  --color-surface-container-highest: #25252d;
-  --color-surface-bright: #2c2b33;
-  --color-surface-variant: #25252d;
+  --color-background:                var(--ref-background);
+  --color-surface:                   var(--ref-background);
+  --color-surface-dim:               var(--ref-background);
+  --color-surface-container-lowest:  #000000;
+  --color-surface-container-low:     var(--ref-surface-low);
+  --color-surface-container:         var(--ref-card);
+  --color-surface-container-high:    #1f1f26;
+  --color-surface-container-highest: var(--ref-card-mid);
+  --color-surface-bright:            #2c2b33;
+  --color-surface-variant:           var(--ref-card-mid);
 
   /* Text */
-  --color-on-surface: #f9f5fd;
-  --color-on-surface-variant: #acaab1;
-  --color-on-background: #f9f5fd;
-  --color-inverse-surface: #fcf8ff;
+  --color-on-surface:         var(--ref-on-surface);
+  --color-on-surface-variant: var(--ref-on-surface-dim);
+  --color-on-background:      var(--ref-on-surface);
+  --color-inverse-surface:    #fcf8ff;
   --color-inverse-on-surface: #55545b;
 
   /* Primary (Lavender Purple) */
-  --color-primary: #b79fff;
-  --color-primary-dim: #a88cfb;
-  --color-primary-fixed: #ab8ffe;
-  --color-primary-fixed-dim: #9d81f0;
-  --color-primary-container: #ab8ffe;
-  --color-on-primary: #361083;
-  --color-on-primary-container: #290070;
-  --color-on-primary-fixed: #000000;
-  --color-on-primary-fixed-variant: #330b80;
-  --color-inverse-primary: #684cb6;
-  --color-surface-tint: #b79fff;
+  --color-primary:                   var(--ref-primary);
+  --color-primary-dim:               #a88cfb;
+  --color-primary-fixed:             #ab8ffe;
+  --color-primary-fixed-dim:         #9d81f0;
+  --color-primary-container:         #ab8ffe;
+  --color-on-primary:                var(--ref-on-primary);
+  --color-on-primary-container:      #290070;
+  --color-on-primary-fixed:          #000000;
+  --color-on-primary-fixed-variant:  #330b80;
+  --color-inverse-primary:           #684cb6;
+  --color-surface-tint:              var(--ref-primary);
 
   /* Secondary (Bright Cyan) */
-  --color-secondary: #3adffa;
-  --color-secondary-dim: #1ad0eb;
-  --color-secondary-fixed: #48e4ff;
-  --color-secondary-fixed-dim: #29d6f1;
-  --color-secondary-container: #006877;
-  --color-on-secondary: #004b56;
-  --color-on-secondary-container: #eafbff;
-  --color-on-secondary-fixed: #003a43;
+  --color-secondary:                  var(--ref-secondary);
+  --color-secondary-dim:              #1ad0eb;
+  --color-secondary-fixed:            #48e4ff;
+  --color-secondary-fixed-dim:        #29d6f1;
+  --color-secondary-container:        #006877;
+  --color-on-secondary:               var(--ref-on-secondary);
+  --color-on-secondary-container:     #eafbff;
+  --color-on-secondary-fixed:         #003a43;
   --color-on-secondary-fixed-variant: #005966;
 
   /* Tertiary (Periwinkle Blue) */
-  --color-tertiary: #919bff;
-  --color-tertiary-dim: #8a95ff;
-  --color-tertiary-fixed: #a2aaff;
-  --color-tertiary-fixed-dim: #919bff;
-  --color-tertiary-container: #818cf8;
-  --color-on-tertiary: #000b83;
-  --color-on-tertiary-container: #00055a;
-  --color-on-tertiary-fixed: #00055d;
+  --color-tertiary:                  #919bff;
+  --color-tertiary-dim:              #8a95ff;
+  --color-tertiary-fixed:            #a2aaff;
+  --color-tertiary-fixed-dim:        #919bff;
+  --color-tertiary-container:        #818cf8;
+  --color-on-tertiary:               #000b83;
+  --color-on-tertiary-container:     #00055a;
+  --color-on-tertiary-fixed:         #00055d;
   --color-on-tertiary-fixed-variant: #1f2a95;
 
   /* Outline */
-  --color-outline: #76747b;
-  --color-outline-variant: #48474d;
+  --color-outline:         var(--ref-outline);
+  --color-outline-variant: var(--ref-outline-dim);
 
   /* Error */
-  --color-error: #ff6e84;
-  --color-error-dim: #d73357;
-  --color-error-container: #a70138;
-  --color-on-error: #490013;
+  --color-error:              var(--ref-error);
+  --color-error-dim:          #d73357;
+  --color-error-container:    #a70138;
+  --color-on-error:           #490013;
   --color-on-error-container: #ffb2b9;
 }
 
@@ -275,8 +269,8 @@ html {
 }
 
 body {
-  background-color: #0e0e13;
-  color: #f9f5fd;
+  background-color: var(--color-background);
+  color: var(--color-on-surface);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -290,7 +284,7 @@ body {
 
 :where(a, button, input, textarea, select, [role='button'], [tabindex]):focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(183, 159, 255, 0.95), 0 0 0 4px rgba(183, 159, 255, 0.25);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ref-primary) 95%, transparent), 0 0 0 4px color-mix(in srgb, var(--ref-primary) 25%, transparent);
 }
 
 input.searchbar-input-no-ring:focus,
@@ -308,8 +302,8 @@ textarea.landing-no-focus-ring:focus-visible {
 /* ─── Selection Color ───────────────────────────────────────────────────────── */
 
 ::selection {
-  background-color: #b79fff;
-  color: #361083;
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
 }
 
 /* ─── Scrollbar ─────────────────────────────────────────────────────────────── */
@@ -320,22 +314,22 @@ textarea.landing-no-focus-ring:focus-visible {
 }
 
 ::-webkit-scrollbar-track {
-  background: #0e0e13;
+  background: var(--color-background);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #48474d;
+  background: var(--color-outline-variant);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #76747b;
+  background: var(--color-outline);
 }
 
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #48474d #0e0e13;
+  scrollbar-color: var(--color-outline-variant) var(--color-background);
 }
 
 /* ─── Reusable Utility Classes ──────────────────────────────────────────────── */
@@ -357,7 +351,7 @@ textarea.landing-no-focus-ring:focus-visible {
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #b79fff 0%, #3adffa 100%);
+  background: var(--gradient-brand);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -379,30 +373,26 @@ textarea.landing-no-focus-ring:focus-visible {
 }
 
 .neon-gradient {
-  background: linear-gradient(135deg, #b79fff 0%, #ab8ffe 100%);
+  background: var(--gradient-brand-explore);
 }
 
 /* Bezier connector SVG styles (apply to <path> elements) */
 .bezier-inactive {
-  stroke: #48474d;
+  stroke: var(--color-outline-variant);
   stroke-width: 2;
   fill: none;
 }
 
 .bezier-active {
-  stroke: #3adffa;
+  stroke: var(--color-secondary);
   stroke-width: 2;
   fill: none;
-  filter: drop-shadow(0 0 8px #3adffa);
+  filter: drop-shadow(0 0 8px var(--color-secondary));
 }
 
 /* Dot grid background pattern */
 .dot-grid {
-  background-image: radial-gradient(
-    circle,
-    rgba(183, 159, 255, 0.15) 1px,
-    transparent 1px
-  );
+  background-image: var(--pattern-streaming-dots);
   background-size: 24px 24px;
 }
 

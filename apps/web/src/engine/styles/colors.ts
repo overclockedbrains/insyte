@@ -17,49 +17,58 @@
 // original design). Borders are full-opacity accent. Text is white (#e2e8f0)
 // when the value itself is the focus; accent color when the state is the message.
 
+// ── State palette — mirrors --ref-secondary, --ref-success, --ref-error, --ref-amber ──
+// Framer Motion animate targets cannot resolve CSS vars at runtime, so these
+// module-private constants are the JS source of truth for all viz state colors.
+// Update these four to retheme every highlight and grid-cell state in one edit.
+const STATE_ACTIVE  = { hex: '#3adffa', rgb: '58, 223, 250'  } as const
+const STATE_SUCCESS = { hex: '#22c55e', rgb: '34, 197, 94'   } as const
+const STATE_DANGER  = { hex: '#ff6e84', rgb: '255, 110, 132' } as const
+const STATE_AMBER   = { hex: '#f59e0b', rgb: '245, 158, 11'  } as const
+
 export const HIGHLIGHT_COLORS = {
   /** Resting state */
-  default:    { bg: '#19191f',                   border: '#48474d', text: '#e2e8f0' },
+  default:    { bg: '#19191f',                              border: '#48474d',        text: '#e2e8f0' },
 
   // ── CYAN — informational / active ────────────────────────────────────────────
   /** Currently being examined / visited */
-  active:     { bg: 'rgba(58, 223, 250, 0.10)',  border: '#3adffa', text: '#e2e8f0' },
+  active:     { bg: `rgba(${STATE_ACTIVE.rgb}, 0.10)`,     border: STATE_ACTIVE.hex,  text: '#e2e8f0' },
   /** Current DP cell being computed */
-  current:    { bg: 'rgba(58, 223, 250, 0.10)',  border: '#3adffa', text: '#3adffa' },
+  current:    { bg: `rgba(${STATE_ACTIVE.rgb}, 0.10)`,     border: STATE_ACTIVE.hex,  text: STATE_ACTIVE.hex },
   /** Element being compared (e.g. pivot comparison) */
-  compare:    { bg: 'rgba(58, 223, 250, 0.10)',  border: '#3adffa', text: '#3adffa' },
+  compare:    { bg: `rgba(${STATE_ACTIVE.rgb}, 0.10)`,     border: STATE_ACTIVE.hex,  text: STATE_ACTIVE.hex },
   /** Secondary / dependency reference */
-  dependency: { bg: 'rgba(58, 223, 250, 0.10)',  border: '#3adffa', text: '#3adffa' },
+  dependency: { bg: `rgba(${STATE_ACTIVE.rgb}, 0.10)`,     border: STATE_ACTIVE.hex,  text: STATE_ACTIVE.hex },
   /** Least recently used — next to be evicted (informational warning) */
-  lru:        { bg: 'rgba(58, 223, 250, 0.10)',  border: '#3adffa', text: '#3adffa' },
+  lru:        { bg: `rgba(${STATE_ACTIVE.rgb}, 0.10)`,     border: STATE_ACTIVE.hex,  text: STATE_ACTIVE.hex },
 
   // ── GREEN — success / found / inserted / complete ─────────────────────────────
   /** Being inserted / added to the structure */
-  insert:     { bg: 'rgba(34, 197, 94, 0.10)',   border: '#22c55e', text: '#e2e8f0' },
+  insert:     { bg: `rgba(${STATE_SUCCESS.rgb}, 0.10)`,    border: STATE_SUCCESS.hex, text: '#e2e8f0' },
   /** Cache / lookup hit — element found */
-  hit:        { bg: 'rgba(34, 197, 94, 0.10)',   border: '#22c55e', text: '#22c55e' },
+  hit:        { bg: `rgba(${STATE_SUCCESS.rgb}, 0.10)`,    border: STATE_SUCCESS.hex, text: STATE_SUCCESS.hex },
   /** Element found / search complete */
-  found:      { bg: 'rgba(34, 197, 94, 0.10)',   border: '#22c55e', text: '#22c55e' },
+  found:      { bg: `rgba(${STATE_SUCCESS.rgb}, 0.10)`,    border: STATE_SUCCESS.hex, text: STATE_SUCCESS.hex },
   /** Most recently used — safe in cache */
-  mru:        { bg: 'rgba(34, 197, 94, 0.10)',   border: '#22c55e', text: '#22c55e' },
+  mru:        { bg: `rgba(${STATE_SUCCESS.rgb}, 0.10)`,    border: STATE_SUCCESS.hex, text: STATE_SUCCESS.hex },
   /** Completed / filled DP cell */
-  filled:     { bg: 'rgba(34, 197, 94, 0.10)',   border: '#22c55e', text: '#22c55e' },
+  filled:     { bg: `rgba(${STATE_SUCCESS.rgb}, 0.10)`,    border: STATE_SUCCESS.hex, text: STATE_SUCCESS.hex },
 
   // ── RED — danger / error / miss / removed ─────────────────────────────────────
   /** Being deleted / removed from the structure */
-  remove:     { bg: 'rgba(255, 110, 132, 0.10)', border: '#ff6e84', text: '#e2e8f0' },
+  remove:     { bg: `rgba(${STATE_DANGER.rgb}, 0.10)`,     border: STATE_DANGER.hex,  text: '#e2e8f0' },
   /** Cache / lookup miss — element not found */
-  miss:       { bg: 'rgba(255, 110, 132, 0.10)', border: '#ff6e84', text: '#ff6e84' },
+  miss:       { bg: `rgba(${STATE_DANGER.rgb}, 0.10)`,     border: STATE_DANGER.hex,  text: STATE_DANGER.hex },
   /** Error / invalid state */
-  error:      { bg: 'rgba(255, 110, 132, 0.10)', border: '#ff6e84', text: '#ff6e84' },
+  error:      { bg: `rgba(${STATE_DANGER.rgb}, 0.10)`,     border: STATE_DANGER.hex,  text: STATE_DANGER.hex },
   /** Deleted element */
-  delete:     { bg: 'rgba(255, 110, 132, 0.10)', border: '#ff6e84', text: '#ff6e84' },
+  delete:     { bg: `rgba(${STATE_DANGER.rgb}, 0.10)`,     border: STATE_DANGER.hex,  text: STATE_DANGER.hex },
   /** Hash collision */
-  collision:  { bg: 'rgba(255, 110, 132, 0.10)', border: '#ff6e84', text: '#ff6e84' },
+  collision:  { bg: `rgba(${STATE_DANGER.rgb}, 0.10)`,     border: STATE_DANGER.hex,  text: STATE_DANGER.hex },
 
   // ── AMBER — special / pivot (neutral marker, neither success nor failure) ─────
   /** Comparison pivot / special marker */
-  pivot:      { bg: 'rgba(245, 158, 11, 0.10)',  border: '#f59e0b', text: '#f59e0b' },
+  pivot:      { bg: `rgba(${STATE_AMBER.rgb}, 0.10)`,      border: STATE_AMBER.hex,   text: STATE_AMBER.hex },
 } as const
 
 export type HighlightColor = keyof typeof HIGHLIGHT_COLORS
@@ -75,29 +84,40 @@ export function resolveHighlight(h: string | undefined): (typeof HIGHLIGHT_COLOR
 // ── Primary palette constants — for JS contexts that cannot read CSS vars ────────
 // Used by: CodePanel, ExplanationPanel, CanvasCard, ArrayViz
 // Framer Motion animate targets and canvas fillStyle cannot resolve var(--...)
-// at runtime, so these mirror --primary (#b79fff) as JS-accessible constants.
+// at runtime, so these mirror --ref-primary-rgb (#b79fff) as JS-accessible constants.
+
+// Mirrors --ref-primary-rgb and --ref-secondary-rgb in globals.css.
+// Update these two lines to retheme all JS alpha constants in one edit.
+const PRIMARY_RGB   = '183, 159, 255'
+const SECONDARY_RGB = '58, 223, 250'
+
 export const PRIMARY = {
   hex:        '#b79fff',
-  alpha07:    'rgba(183, 159, 255, 0.07)',
-  alpha08:    'rgba(183, 159, 255, 0.08)',
-  alpha10:    'rgba(183, 159, 255, 0.10)',
-  alpha12:    'rgba(183, 159, 255, 0.12)',
-  alpha15:    'rgba(183, 159, 255, 0.15)',
-  alpha16:    'rgba(183, 159, 255, 0.16)',
-  alpha20:    'rgba(183, 159, 255, 0.20)',
-  alpha25:    'rgba(183, 159, 255, 0.25)',
-  alpha28:    'rgba(183, 159, 255, 0.28)',
-  alpha30:    'rgba(183, 159, 255, 0.30)',
-  alpha35:    'rgba(183, 159, 255, 0.35)',
-  alpha40:    'rgba(183, 159, 255, 0.40)',
-  alpha45:    'rgba(183, 159, 255, 0.45)',
-  alpha60:    'rgba(183, 159, 255, 0.60)',
-  alpha90:    'rgba(183, 159, 255, 0.90)',
-  glow0:      '0 0 0px rgba(183, 159, 255, 0)',
-  glowSubtle: '0 0 20px rgba(183, 159, 255, 0.10)',
-  glowBright: '0 0 40px rgba(183, 159, 255, 0.4), 0 0 80px rgba(183, 159, 255, 0.15)',
-  glowCard:   '0 0 60px rgba(183, 159, 255, 0.35)',
+  alpha07:    `rgba(${PRIMARY_RGB}, 0.07)`,
+  alpha08:    `rgba(${PRIMARY_RGB}, 0.08)`,
+  alpha10:    `rgba(${PRIMARY_RGB}, 0.10)`,
+  alpha12:    `rgba(${PRIMARY_RGB}, 0.12)`,
+  alpha15:    `rgba(${PRIMARY_RGB}, 0.15)`,
+  alpha16:    `rgba(${PRIMARY_RGB}, 0.16)`,
+  alpha20:    `rgba(${PRIMARY_RGB}, 0.20)`,
+  alpha25:    `rgba(${PRIMARY_RGB}, 0.25)`,
+  alpha28:    `rgba(${PRIMARY_RGB}, 0.28)`,
+  alpha30:    `rgba(${PRIMARY_RGB}, 0.30)`,
+  alpha35:    `rgba(${PRIMARY_RGB}, 0.35)`,
+  alpha40:    `rgba(${PRIMARY_RGB}, 0.40)`,
+  alpha45:    `rgba(${PRIMARY_RGB}, 0.45)`,
+  alpha60:    `rgba(${PRIMARY_RGB}, 0.60)`,
+  alpha90:    `rgba(${PRIMARY_RGB}, 0.90)`,
+  glow0:      `0 0 0px rgba(${PRIMARY_RGB}, 0)`,
+  glowSubtle: `0 0 20px rgba(${PRIMARY_RGB}, 0.10)`,
+  glowBright: `0 0 40px rgba(${PRIMARY_RGB}, 0.4), 0 0 80px rgba(${PRIMARY_RGB}, 0.15)`,
+  glowCard:   `0 0 60px rgba(${PRIMARY_RGB}, 0.35)`,
 } as const
+
+// CSS counterparts (globals.css --color-primary-alpha-*):
+//   08, 10, 12, 15, 16, 25, 28, 30, 60
+// TS-only (Framer Motion animate targets / canvas ctx — cannot resolve CSS vars):
+//   alpha07, alpha20, alpha35, alpha40, alpha45, alpha90
 
 
 // ── Popup accent colors — for StepPopup badge borders/text ───────────────────────
@@ -114,17 +134,18 @@ export type PopupAccentColor = keyof typeof POPUP_ACCENT_COLORS
 
 // ── Grid cell colors — for GridViz pathfinding variant ───────────────────────────
 // Used by: GridViz.tsx
-// Higher opacity than generic highlight overlays because multiple cells are visible
-// simultaneously and must remain distinguishable.
+// Values go into Framer Motion animate targets — CSS vars cannot be used here.
+// Higher opacity than HIGHLIGHT_COLORS because many cells are simultaneously
+// visible and must remain distinguishable at a glance.
 export const GRID_CELL_COLORS = {
-  default: { bg: '#19191f',                    border: '#48474d',  text: '#6b7280', shadow: 'none' },
-  wall:    { bg: '#0c0c14',                    border: '#1c1c26',  text: '#2a2a38', shadow: 'none' },
-  start:   { bg: 'rgba(34, 197, 94, 0.40)',    border: '#22c55e',  text: '#e2e8f0', shadow: '0 0 10px rgba(34,197,94,0.30)' },
-  visited: { bg: 'rgba(58, 223, 250, 0.22)',   border: '#3adffa',  text: '#3adffa', shadow: '0 0 8px rgba(58,223,250,0.20)' },
-  active:  { bg: 'rgba(58, 223, 250, 0.40)',   border: '#3adffa',  text: '#e2e8f0', shadow: '0 0 12px rgba(58,223,250,0.40)' },
-  path:    { bg: 'rgba(34, 197, 94, 0.55)',    border: '#22c55e',  text: '#e2e8f0', shadow: '0 0 12px rgba(34,197,94,0.45)' },
-  end:     { bg: 'rgba(245, 158, 11, 0.35)',   border: '#f59e0b',  text: '#f59e0b', shadow: '0 0 10px rgba(245,158,11,0.30)' },
-  pivot:   { bg: 'rgba(245, 158, 11, 0.35)',   border: '#f59e0b',  text: '#f59e0b', shadow: 'none' },
+  default: { bg: '#19191f',                              border: '#48474d',        text: '#6b7280',           shadow: 'none' },
+  wall:    { bg: '#0c0c14',                              border: '#1c1c26',        text: '#2a2a38',           shadow: 'none' },
+  start:   { bg: `rgba(${STATE_SUCCESS.rgb}, 0.40)`,    border: STATE_SUCCESS.hex, text: '#e2e8f0',           shadow: `0 0 10px rgba(${STATE_SUCCESS.rgb}, 0.30)` },
+  visited: { bg: `rgba(${STATE_ACTIVE.rgb}, 0.22)`,     border: STATE_ACTIVE.hex,  text: STATE_ACTIVE.hex,    shadow: `0 0 8px rgba(${STATE_ACTIVE.rgb}, 0.20)` },
+  active:  { bg: `rgba(${STATE_ACTIVE.rgb}, 0.40)`,     border: STATE_ACTIVE.hex,  text: '#e2e8f0',           shadow: `0 0 12px rgba(${STATE_ACTIVE.rgb}, 0.40)` },
+  path:    { bg: `rgba(${STATE_SUCCESS.rgb}, 0.55)`,    border: STATE_SUCCESS.hex, text: '#e2e8f0',           shadow: `0 0 12px rgba(${STATE_SUCCESS.rgb}, 0.45)` },
+  end:     { bg: `rgba(${STATE_AMBER.rgb}, 0.35)`,      border: STATE_AMBER.hex,   text: STATE_AMBER.hex,     shadow: `0 0 10px rgba(${STATE_AMBER.rgb}, 0.30)` },
+  pivot:   { bg: `rgba(${STATE_AMBER.rgb}, 0.35)`,      border: STATE_AMBER.hex,   text: STATE_AMBER.hex,     shadow: 'none' },
 } as const
 
 export type GridCellState = keyof typeof GRID_CELL_COLORS
@@ -142,11 +163,18 @@ export const VIZ_SURFACE = {
   popupBg:            'rgba(10, 10, 16, 0.6)',
   transparent:        'rgba(0, 0, 0, 0)',
   defaultBorderFaint: 'rgba(72, 71, 77, 0.19)',
-  nodeShadow:         '0 0 15px rgba(0, 0, 0, 0.5)',
-  chatShadow:         '0 0 1px hsl(240deg 20% 3% / 0.6), 0 0 4px hsl(240deg 20% 3% / 0.45), 0 0 10px hsl(240deg 20% 3% / 0.35), 0 0 20px hsl(240deg 20% 3% / 0.2)',
-  tooltipShadow:      '0 0 8px hsl(240deg 20% 3% / 0.5)',
-  challengeShadow:    '0 2px 12px rgba(0, 0, 0, 0.15)',
-  topicRowShadow:     '0 0 10px rgba(0, 0, 0, 0.25)',
+} as const
+
+// ── Visualization shadow strings — separated from surface colors ──────────────────
+// Used by: ChatCard.tsx, LinkedListViz.tsx
+// Shadow strings are logically distinct from color values and live here to keep
+// VIZ_SURFACE focused on bg/border colors.
+export const VIZ_SHADOWS = {
+  node:      '0 0 15px rgba(0, 0, 0, 0.5)',
+  chat:      '0 0 1px hsl(240deg 20% 3% / 0.6), 0 0 4px hsl(240deg 20% 3% / 0.45), 0 0 10px hsl(240deg 20% 3% / 0.35), 0 0 20px hsl(240deg 20% 3% / 0.2)',
+  tooltip:   '0 0 8px hsl(240deg 20% 3% / 0.5)',
+  challenge: '0 2px 12px rgba(0, 0, 0, 0.15)',
+  topicRow:  '0 0 10px rgba(0, 0, 0, 0.25)',
 } as const
 
 
@@ -154,14 +182,19 @@ export const VIZ_SURFACE = {
 // Used by: HeroLoop, HowItWorks, UnifiedInput
 export const SECONDARY = {
   hex:     '#3adffa',
-  alpha10: 'rgba(58, 223, 250, 0.10)',
-  alpha11: 'rgba(58, 223, 250, 0.11)',
-  alpha12: 'rgba(58, 223, 250, 0.12)',
-  alpha15: 'rgba(58, 223, 250, 0.15)',
-  alpha18: 'rgba(58, 223, 250, 0.18)',
-  alpha24: 'rgba(58, 223, 250, 0.24)',
-  alpha55: 'rgba(58, 223, 250, 0.55)',
+  alpha10: `rgba(${SECONDARY_RGB}, 0.10)`,
+  alpha11: `rgba(${SECONDARY_RGB}, 0.11)`,
+  alpha12: `rgba(${SECONDARY_RGB}, 0.12)`,
+  alpha15: `rgba(${SECONDARY_RGB}, 0.15)`,
+  alpha18: `rgba(${SECONDARY_RGB}, 0.18)`,
+  alpha24: `rgba(${SECONDARY_RGB}, 0.24)`,
+  alpha55: `rgba(${SECONDARY_RGB}, 0.55)`,
 } as const
+
+// CSS counterparts (globals.css --color-secondary-alpha-*):
+//   10, 11, 12, 15, 18, 24
+// TS-only (Framer Motion animate targets / canvas ctx — cannot resolve CSS vars):
+//   alpha55
 
 
 // ── macOS-style window control colors ────────────────────────────────────────────

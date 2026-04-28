@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import type { PrimitiveProps } from '.'
-import { resolveHighlight, VIZ_SURFACE } from '../styles/colors'
+import { resolveHighlight, VIZ_SHADOWS } from '../styles/colors'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface LinkedListNode {
@@ -67,7 +67,7 @@ export function LinkedListViz({ state }: PrimitiveProps) {
                     animate={{
                       borderColor: isHighlighted ? colors.border : 'var(--color-outline-variant)',
                       backgroundColor: isHighlighted ? colors.bg : 'var(--color-surface-container)',
-                      boxShadow: isHighlighted ? `0 0 12px ${colors.border}50` : VIZ_SURFACE.nodeShadow,
+                      boxShadow: isHighlighted ? `0 0 12px ${colors.border}50` : VIZ_SHADOWS.node,
                     }}
                     transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                   >

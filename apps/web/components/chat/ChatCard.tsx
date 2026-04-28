@@ -3,7 +3,7 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { VIZ_SURFACE } from '@/src/engine/styles/colors'
+import { VIZ_SHADOWS } from '@/src/engine/styles/colors'
 import { Send, ArrowRight, X, Minus, Maximize2 } from 'lucide-react'
 import { useIsMobile } from '@/components/hooks/useMediaQuery'
 import { useBoundStore } from '@/src/stores/store'
@@ -254,7 +254,7 @@ function WindowControls({ onClose }: { onClose: () => void }) {
                 'bg-surface-container-highest border border-[var(--color-mac-close-20)]',
                 'text-[11px] text-on-surface leading-tight pointer-events-none',
               ].join(' ')}
-              style={{ boxShadow: VIZ_SURFACE.tooltipShadow }}
+              style={{ boxShadow: VIZ_SHADOWS.tooltip }}
             >
               <span className="font-semibold" style={{ color: 'var(--color-mac-close)' }}>Clears history.</span>
               {' '}Click again to confirm.
@@ -336,7 +336,7 @@ function CardBody({
         // Uniform elevation — 0 0 offsets so shadow spreads equally on all sides.
         // Blur doubles each layer; opacity decreases so the outer layers are ambient,
         // not glowing. Dark navy hue matches the page background.
-        boxShadow: VIZ_SURFACE.chatShadow,
+        boxShadow: VIZ_SHADOWS.chat,
       }}
     >
       <CardHeader onClose={onClose} />
