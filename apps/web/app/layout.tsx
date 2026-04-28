@@ -45,13 +45,13 @@ export const metadata: Metadata = {
     description: SITE.description,
     type: 'website',
     url: SITE.url,
-    images: [`${SITE.url}/og-image.png`],
+    images: [`${SITE.url}/logo.png`],
   },
   twitter: {
     card: 'summary_large_image',
     title: SITE.title,
     description: SITE.description,
-    images: [`${SITE.url}/og-image.png`],
+    images: [`${SITE.url}/logo.png`],
   },
 }
 

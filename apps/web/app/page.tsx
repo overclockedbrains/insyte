@@ -14,13 +14,13 @@ export const metadata: Metadata = {
     title: SITE.title,
     description: 'Turn any tech concept into an interactive simulation you can play with.',
     type: 'website',
-    images: [`${SITE.url}/og-image.png`],
+    images: [`${SITE.url}/logo.png`],
   },
   twitter: {
     card: 'summary_large_image',
     title: SITE.title,
     description: 'Turn any tech concept into an interactive simulation.',
-    images: [`${SITE.url}/og-image.png`],
+    images: [`${SITE.url}/logo.png`],
   },
 }
 

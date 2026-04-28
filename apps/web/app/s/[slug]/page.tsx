@@ -48,7 +48,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
       scene.description ||
       `Interactive ${scene.type} simulation: ${scene.title}.`
 
-    const ogImage = `${SITE.url}/og-image.png`
+    const ogImage = `${SITE.url}/logo.png`
     const canonicalUrl = `${SITE.url}/s/${slug}`
 
     return {
@@ -80,12 +80,12 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
       title: `${topic} - insyte`,
       type: 'website',
       url: canonicalUrl,
-      images: [`${SITE.url}/og-image.png`],
+      images: [`${SITE.url}/logo.png`],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${topic} - insyte`,
-      images: [`${SITE.url}/og-image.png`],
+      images: [`${SITE.url}/logo.png`],
     },
   }
 }
