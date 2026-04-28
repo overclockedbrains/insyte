@@ -42,12 +42,15 @@ export function TextLeftCanvasRight({ scene }: Props) {
               animate={{ width: isTablet ? '40%' : '35%', opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ type: 'spring', stiffness: 350, damping: 35 }}
-              className="flex-shrink-0 overflow-hidden border-r border-outline-variant/20 min-h-0"
+              className="flex-shrink-0 overflow-hidden border-r border-outline-variant/20 min-h-0 h-full"
             >
-              <ExplanationPanel
-                sections={explanationSections}
-                currentStep={currentStep}
-              />
+              <div className="h-full overflow-y-auto custom-scrollbar">
+                <ExplanationPanel
+                  sections={explanationSections}
+                  currentStep={currentStep}
+                  description={scene.description}
+                />
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

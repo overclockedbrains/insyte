@@ -55,7 +55,7 @@ export function CodeLeftCanvasRight({ scene, onRerunWithCustomInput = null }: Pr
                 )}
                 {explanationSections.length > 0 && (
                   <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
-                    <ExplanationPanel sections={explanationSections} currentStep={currentStep} />
+                    <ExplanationPanel sections={explanationSections} currentStep={currentStep} compact />
                   </div>
                 )}
                 {!scene.code && explanationSections.length === 0 && (
@@ -137,7 +137,7 @@ export function CodeLeftCanvasRight({ scene, onRerunWithCustomInput = null }: Pr
                     </div>
                     {explanationSections.length > 0 && (
                       <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
-                        <ExplanationPanel sections={explanationSections} currentStep={currentStep} />
+                        <ExplanationPanel sections={explanationSections} currentStep={currentStep} compact />
                       </div>
                     )}
                   </div>
