@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server'
 import { resolveModel } from '@/src/ai/providers'
 import { extractByokHeaders } from '@/lib/headers'
 import { jsonError } from '@/lib/responses'
+import { enforceFreeTierRateLimit } from '@/lib/server-auth'
 import { streamChatResponse } from '@/src/ai/liveChat'
 import type { SceneContext } from '@/src/ai/prompts/live-chat'
 import type { ChatMessage } from '@/src/stores/slices/chat-slice'
@@ -12,7 +13,7 @@ export const maxDuration = 60
 // ─── POST /api/chat ───────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
-  const { byokKey, byokProvider, byokModel } = extractByokHeaders(req)
+  const { byokKey, byokProvider, byokModel, byokBaseURL } = extractByokHeaders(req)
 
   // Parse body
   let message: string
@@ -40,7 +41,10 @@ export async function POST(req: NextRequest) {
     return new Response('sceneContext with title and type is required', { status: 400 })
   }
 
-  const model = resolveModel(byokProvider ?? 'gemini', byokModel, byokKey)
+  const rateLimitResponse = await enforceFreeTierRateLimit(req, Boolean(byokKey || byokBaseURL))
+  if (rateLimitResponse) return rateLimitResponse
+
+  const model = resolveModel(byokProvider ?? 'gemini', byokModel, byokKey, undefined, byokBaseURL)
 
   try {
     const result = streamChatResponse(message, sceneContext, history, model)

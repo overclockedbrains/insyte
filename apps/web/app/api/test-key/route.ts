@@ -1,6 +1,7 @@
 import { generateText } from 'ai'
 import type { NextRequest } from 'next/server'
 import { extractByokHeaders } from '@/lib/headers'
+import { enforceFreeTierRateLimit } from '@/lib/server-auth'
 import { resolveModel } from '@/src/ai/providers'
 import { REGISTRY, SERVER_PROVIDER } from '@/src/ai/registry'
 import type { Provider } from '@/src/ai/registry'
@@ -21,6 +22,8 @@ export async function GET(req: NextRequest) {
   const { byokKey, byokProvider, byokModel, byokBaseURL } = extractByokHeaders(req)
 
   const byok = !!(byokKey || byokBaseURL)
+  const rateLimitResponse = await enforceFreeTierRateLimit(req, byok)
+  if (rateLimitResponse) return rateLimitResponse
 
   // Derive the effective provider + model for the response payload
   const effectiveProvider: Provider = byok

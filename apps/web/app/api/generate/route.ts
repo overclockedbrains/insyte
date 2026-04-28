@@ -8,7 +8,6 @@ import { generateScene } from '@/src/ai/pipeline'
 import type { ModelConfig } from '@/src/ai/client'
 import type { SceneType } from '@insyte/scene-engine'
 import {
-  checkAndIncrementRateLimit,
   saveScene,
   getCachedSlugForQuery,
   saveQueryHash,
@@ -17,7 +16,7 @@ import {
 import { generateSlug } from '@/src/lib/slug'
 import { aiLog } from '@/lib/ai-logger'
 import { extractByokHeaders } from '@/lib/headers'
-import { jsonError } from '@/lib/responses'
+import { enforceFreeTierRateLimit, getAuthenticatedUserId, getRequestIp } from '@/lib/server-auth'
 
 // Allow streaming for up to 5 minutes
 export const maxDuration = 300
@@ -35,7 +34,7 @@ const longRunningFetch = (url: any, options?: any) =>
 // ─── POST /api/generate ───────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
-  const { byokKey, byokProvider, byokModel, byokBaseURL, userId } = extractByokHeaders(req)
+  const { byokKey, byokProvider, byokModel, byokBaseURL } = extractByokHeaders(req)
 
   // Parse body
   let topic: string
@@ -60,26 +59,11 @@ export async function POST(req: NextRequest) {
 
   // ── Query deduplication: skip AI if this exact query was generated before ──
   // Only for free-tier (our server key) — BYOK / local-model users want fresh generation.
-  if (!byokKey && !byokBaseURL) {
-    const existingSlug = await getCachedSlugForQuery(topic)
-    if (existingSlug) {
-      return Response.json(
-        { cached: true, slug: existingSlug },
-        { status: 200, headers: { 'X-Cache': 'HIT' } },
-      )
-    }
-  }
-
-  // Rate limit only applies to the free tier (our server key).
-  if (!byokKey && !byokBaseURL) {
-    const ip =
-      req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
-    const allowed = await checkAndIncrementRateLimit(ip)
-    aiLog.server.rateLimit(ip, allowed)
-    if (!allowed) {
-      return jsonError('Rate limit exceeded. Try again later.', 429)
-    }
-  }
+  const isByok = Boolean(byokKey || byokBaseURL)
+  const ip = getRequestIp(req)
+  const rateLimitResponse = await enforceFreeTierRateLimit(req, isByok)
+  aiLog.server.rateLimit(ip, rateLimitResponse == null)
+  if (rateLimitResponse) return rateLimitResponse
 
   const provider = (byokProvider ?? 'gemini') as Provider
   const languageModel = resolveModel(provider, byokModel, byokKey, longRunningFetch, byokBaseURL)
@@ -87,7 +71,7 @@ export async function POST(req: NextRequest) {
   // Free tier: no user API key and no custom base URL → per-stage Gemini routing applies.
   // Routed BYOK (Gemini/OpenAI/Anthropic/Groq): provider-aware tier routing per stage.
   // Unrouted BYOK (Ollama/Custom): user's configured model for all stages (no routing).
-  const isFreeTier = !byokKey && !byokBaseURL
+  const isFreeTier = !isByok
   const isRoutedBYOK = Boolean(byokKey) && !['ollama', 'custom'].includes(provider)
 
   const modelConfig: ModelConfig = {
@@ -119,12 +103,24 @@ export async function POST(req: NextRequest) {
   // ── SSE stream from async generator ──────────────────────────────────────
   const encoder = new TextEncoder()
   const saveSlug = slug ?? generateSlug(topic)
+  const authenticatedUserId = await getAuthenticatedUserId(req)
 
   // 4.5 min — leaves headroom under maxDuration: 300 for graceful shutdown
   const PIPELINE_HARD_LIMIT_MS = 270_000
 
   const stream = new ReadableStream({
     async start(controller) {
+      if (isFreeTier) {
+        const existingSlug = await getCachedSlugForQuery(topic)
+        if (existingSlug) {
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify({ type: 'cached', slug: existingSlug })}\n\n`),
+          )
+          controller.close()
+          return
+        }
+      }
+
       // Keep-alive: SSE comment lines every 15 s prevent CDN/proxy idle timeouts
       // during the silent gaps between stages (up to 45 s for Stage 2).
       // readSSE in useStreamScene filters on "data: " prefix — comments are silently discarded.
@@ -158,8 +154,8 @@ export async function POST(req: NextRequest) {
               try {
                 await saveScene(saveSlug, event.scene)
                 saveQueryHash(topic, saveSlug)
-                if (userId) {
-                  recordUserGeneration(userId, topic, saveSlug)
+                if (authenticatedUserId) {
+                  recordUserGeneration(authenticatedUserId, topic, saveSlug)
                 }
                 aiLog.server.cache('saved', saveSlug)
               } catch (err) {

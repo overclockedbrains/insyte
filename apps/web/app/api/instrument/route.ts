@@ -3,6 +3,7 @@ import { instrumentCode } from '@/src/ai/instrumentCode'
 import { resolveModel } from '@/src/ai/providers'
 import { extractByokHeaders } from '@/lib/headers'
 import { jsonError } from '@/lib/responses'
+import { enforceFreeTierRateLimit } from '@/lib/server-auth'
 import { isValidLanguage } from '@/src/sandbox/types'
 
 function detectLanguage(code: string): 'python' | 'javascript' {
@@ -13,7 +14,7 @@ function detectLanguage(code: string): 'python' | 'javascript' {
 }
 
 export async function POST(req: NextRequest) {
-  const { byokKey, byokProvider, byokModel } = extractByokHeaders(req)
+  const { byokKey, byokProvider, byokModel, byokBaseURL } = extractByokHeaders(req)
 
   let code: string
   let language: 'python' | 'javascript'
@@ -34,8 +35,11 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    const rateLimitResponse = await enforceFreeTierRateLimit(req, Boolean(byokKey || byokBaseURL))
+    if (rateLimitResponse) return rateLimitResponse
+
     const provider = byokProvider ?? 'gemini'
-    const model = resolveModel(provider, byokModel, byokKey)
+    const model = resolveModel(provider, byokModel, byokKey, undefined, byokBaseURL)
     const instrumentedCode = await instrumentCode(code, language, problemStatement, {
       model,
       provider,
