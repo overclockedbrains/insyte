@@ -190,16 +190,24 @@ export function useStreamScene(): UseStreamSceneResult {
         provider,
         model,
         apiKeys,
-        user,
+        session,
         ollamaBaseURL,
         customBaseURL,
         customApiKey,
         detectedMode,
       } = useBoundStore.getState()
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-        ...buildAIHeaders({ provider, model, apiKeys, ollamaBaseURL, customBaseURL, customApiKey, userId: user?.id }),
-      }
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+          ...buildAIHeaders({
+            provider,
+            model,
+            apiKeys,
+            ollamaBaseURL,
+            customBaseURL,
+            customApiKey,
+            accessToken: session?.access_token ?? null,
+          }),
+        }
 
       // Fire the fetch and consume the SSE stream
       void (async () => {
@@ -226,6 +234,12 @@ export function useStreamScene(): UseStreamSceneResult {
             if (controller.signal.aborted) break
 
             switch (event.type) {
+              case 'cached':
+                setStreaming(false)
+                aiLog.store.setStreaming(false)
+                window.location.assign(`/s/${event.slug}`)
+                return
+
               case 'reasoning':
                 // Stage 0 free reasoning complete — show "Thinking..." text
                 setReasoningText(event.text)

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { experimental_useObject as useObject } from '@ai-sdk/react'
-import { SceneSchema } from '@insyte/scene-engine'
+import { SceneSchema, safeParseScene } from '@insyte/scene-engine'
 import type { Scene } from '@insyte/scene-engine'
 import { useBoundStore } from '@/src/stores/store'
 import { buildAIHeaders } from '@/lib/headers'
@@ -23,8 +23,16 @@ interface VisualizeAwaiter {
 }
 
 function buildClientHeaders(): Record<string, string> {
-  const { provider, model, apiKeys, ollamaBaseURL, customBaseURL, customApiKey } = useBoundStore.getState()
-  return buildAIHeaders({ provider, model, apiKeys, ollamaBaseURL, customBaseURL, customApiKey })
+  const { provider, model, apiKeys, ollamaBaseURL, customBaseURL, customApiKey, session } = useBoundStore.getState()
+  return buildAIHeaders({
+    provider,
+    model,
+    apiKeys,
+    ollamaBaseURL,
+    customBaseURL,
+    customApiKey,
+    accessToken: session?.access_token ?? null,
+  })
 }
 
 function customInputSuffix(language: 'python' | 'javascript', customInput?: string): string {
@@ -86,9 +94,15 @@ export function useDSAPipeline() {
         return
       }
 
-      const scene = object as Scene
+      const result = safeParseScene(object)
+      if (!result.success) {
+        visualizeAwaiterRef.current?.reject(new Error('DSA scene validation failed'))
+        visualizeAwaiterRef.current = null
+        return
+      }
+      const scene = result.scene
       setScene(scene)
-      setTotalSteps(scene.steps.length)
+      setTotalSteps(scene.steps.length + 1)
       resetPlayback()
       visualizeAwaiterRef.current?.resolve(scene)
       visualizeAwaiterRef.current = null

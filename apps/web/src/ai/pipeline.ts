@@ -41,6 +41,10 @@ import { aiLog } from '@/lib/ai-logger'
  */
 export type GenerationEvent =
   | {
+      type: 'cached'
+      slug: string
+    }
+  | {
       type: 'reasoning'
       text: string
     }
