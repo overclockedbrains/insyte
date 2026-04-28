@@ -1,72 +1,96 @@
 # How the AI Module Works
 
-> **Note (Phase 34 / April 2026):** The pipeline was rewritten to generate Scene JSON v2 directly (3-stage JSON pipeline) instead of ISCL. The stage names below are updated, but the overall assembly-line analogy still holds.
+When a user types "How does binary search work?" and hits enter, the AI module's job is to turn that text prompt into a structured **Scene JSON v2** — the data that drives everything the user sees on screen (the animated array, the pointers, the step-by-step explanations, the quiz questions).
 
-When a user types "How does binary search work?" and hits enter, the AI module's job is to turn that text prompt into a structured **Scene JSON** — the data that drives everything the user sees on screen (the animated array, the pointers, the step-by-step explanations, the quiz questions).
-
-The key insight: **it does NOT ask the AI to produce one giant JSON blob.** That approach hallucinates badly. Instead, it breaks the work into focused calls to the LLM — each one asking for a very specific piece, validated before moving on.
+The key insight: **it does NOT ask the AI to produce one giant JSON blob.** That approach hallucinates badly. Instead, it breaks the work into focused, sequential calls to the LLM — each asking for a specific piece, validated before moving on.
 
 ---
 
 ## The Stages — Like an Assembly Line
 
-Think of it like a factory assembly line building a car:
+Think of it like a factory assembly line building a car. There are 6 stages (Stage 0 through Stage 5).
 
-### Stage 1 — The Skeleton
+### Stage 0 — Free Reasoning
 
-**"Hey AI, produce the scene skeleton: canvas visuals, initial states, code block, and scene metadata."**
+**"Think out loud first."**
 
-The AI outputs a partial Scene JSON with `canvas[]`, `activeText`, `hud[]`, and `code` — but no steps yet. The canvas layout and visual types are decided here.
+Before touching any schema, the AI is given the prompt and asked to reason freely — no output constraints, no structure. It thinks through what the best visualization would look like, what visual types to use, how many steps make sense.
 
-**This is the most critical stage.** If this fails, everything stops. The AI never specifies pixel coordinates — just *what* to show. Positioning is computed later by the layout engine.
+The reasoning streams back to the client in real time as visible text. This stage primes the model's attention for the structured stages that follow.
 
-### Stage 2 — Steps
+This stage is **fatal** — if it fails, the pipeline stops.
 
-**"Given the skeleton, fill in steps[] with state updates at each step."**
+### Stage 1 — Scene Skeleton
 
-The AI produces `steps[]` with `canvas`, `activeText`, `hud`, and `explanation` updates per step. Validated against the canvas visual IDs from Stage 1.
+**"Now produce the canvas layout: visual types, IDs, initial states."**
 
-If this fails, the pipeline stops — there's no visualization without steps.
+The AI outputs the scene skeleton: `canvas[]` (the visual data structures to display), `activeText` (narration badge), `hud[]` (stat counters), `code` block, and scene metadata (title, type, layout). No steps yet.
 
-### Stage 3 — Popups + Challenges
+**This is the most critical schema-bound stage.** Canvas IDs are constrained to a regex. The AI never specifies pixel coordinates — just *what* to show and *what type* it is. The layout engine handles positioning.
 
-**"Add popups and quiz challenges."**
+Output is validated against `SceneSkeletonSchema` (Zod). Fatal.
 
-Popups are the little callout bubbles that appear on specific visuals at specific steps. Challenges are the quiz questions.
+### Stage 2 — Steps + Initial States
 
-Non-fatal — if it fails, you just get a visualization without callouts or quizzes.
+**"Given the skeleton, produce the step-by-step mutations."**
 
-### Stage 4 — Extras
+The AI fills in `steps[]` — each step has canvas state updates (`canvas`), narration updates (`activeText`, `hud`), and an explanation (`heading`, `body`, `callout`). Validated against a dynamically-built schema that constrains all canvas references to the IDs from Stage 1.
 
-**"Give me interactive controls."**
+This is the heaviest stage — it co-generates steps AND validates referential integrity (every step key must be a real canvas ID). Default retry budget: 2. Fatal.
 
-The "What's the time complexity?" multiple choice quiz, playback speed toggles, etc. Lowest priority — gets only 1 retry attempt instead of 2 to save tokens.
+### Stage 3 — Popups
 
-Non-fatal — if it fails, no quizzes, no big deal.
+**"Add callout bubbles to specific visuals at specific steps."**
 
-### Stage 5 — Assembly (No AI involved)
+Popups are the little annotation cards that appear on visuals at particular steps (e.g., "pivot chosen here" on an array element at step 3). Validated against a schema that constrains `attachTo` to valid canvas IDs.
 
-**Pure code, zero LLM calls.** Takes all the pieces from stages 1-4 and stitches them together into one `Scene` JSON object. Runs it through Zod schema validation. If the final object is invalid, everything fails.
+**Non-fatal** — if this fails, you just get a visualization without callout bubbles.
+
+### Stage 4 — Misc
+
+**"Add challenges and interactive controls."**
+
+Multiple-choice quiz questions, playback speed toggles, and other extras. Gets 1 retry attempt (instead of 2) to save tokens.
+
+**Non-fatal** — if this fails, no quizzes, no big deal.
+
+Stages 3 and 4 run **in parallel** after Stage 2 completes.
+
+### Stage 5 — Assembly (No AI Involved)
+
+**Pure deterministic code, zero LLM calls.**
+
+Takes all pieces from Stages 1–4 and stitches them into one `Scene` JSON object. Runs full Zod validation (`safeParseScene`) including cross-field semantic checks (popup `attachTo` vs canvas IDs, step canvas keys vs canvas IDs). If the final object is invalid, the pipeline fails. Fatal.
 
 ---
 
 ## How the Client Sees It
 
-The whole pipeline is an **async generator** — it `yield`s events as each stage completes:
+The whole pipeline is an **async generator** — it `yield`s `GenerationEvent` objects as each stage completes:
 
 ```
-User types → plan event (title + skeleton) → content (visuals + steps) → annotations → misc → complete (full Scene)
+User types prompt
+  → reasoning (Stage 0 chunks stream live)
+  → plan event (title + skeleton, Stage 1)
+  → content event (steps + states, Stage 2)
+  → annotations event (popups, Stage 3)
+  → misc event (challenges + controls, Stage 4)
+  → complete event (full validated Scene JSON, Stage 5)
 ```
 
-The frontend (`useStreamScene`) receives these over SSE (Server-Sent Events) and progressively updates the UI — the user sees a skeleton appear immediately after Stage 1, then the visualization fills in as each subsequent stage lands.
+The frontend (`useStreamScene`) consumes these over SSE and progressively updates the UI — the user sees the skeleton appear immediately after Stage 1, then the full visualization fills in as each subsequent stage lands.
 
 ---
 
 ## The Supporting Cast
 
-- **`client.ts`** — Single function `callLLM(prompt, config)`. Wraps the Vercel AI SDK. All 5 stages go through this.
-- **`registry.ts`** — The phone book of all providers (Gemini, OpenAI, Anthropic, Groq, Ollama, custom). Pure data, no logic — just model names, defaults, and configs.
-- **`providers/`** — One file per provider. Each exports a factory that creates the right SDK client from an API key.
-- **`validators/`** — One per stage (states, steps, annotations, misc). Each takes raw JSON + the Stage 1 blueprint and says "yes this is valid" or "no, here's why."
-- **`assembly.ts`** — The Stage 5 stitcher. Pure function, deterministic.
-- **`liveChat.ts`** — Completely separate system. Powers the chat sidebar. Streams a tutor response with minimal scene context (not the full JSON).
+- **`pipeline.ts`** — the main async generator. Orchestrates all stages, manages retry budgets, emits events.
+- **`client.ts`** — `callLLM(prompt, config)`. Single wrapper around the Vercel AI SDK. All stages call this.
+- **`model-routing.ts`** — decides which model/provider to use per stage. Free-tier path uses Gemini Flash; BYOK path uses the user's selected model.
+- **`registry.ts`** — the phone book of all providers (Gemini, OpenAI, Anthropic, Groq, Ollama, custom). Pure data — model names, defaults, configs.
+- **`providers/`** — one file per provider. Each exports a factory that creates the right SDK client from an API key.
+- **`prompts/builders.ts`** — builds stage-specific prompts. Stage 0 gets a reasoning-only prompt; later stages get the skeleton/steps output from prior stages injected as context.
+- **`schemas.ts`** — Zod schemas for each stage. Stages 2 and 3 use dynamic builders (`buildStepsSchema`, `buildPopupsSchema`) that embed the actual canvas IDs from Stage 1 as enum constraints.
+- **`validators/`** — one per stage. Semantic checks beyond what Zod can express (e.g., every step canvas key references a real canvas ID).
+- **`assembly.ts`** — Stage 5 stitcher. Pure function, deterministic merge of all stage outputs.
+- **`liveChat.ts`** — a completely separate system for the chat sidebar. Streams a tutor response using a minimal scene context block (not the full JSON). Powered by `streamText`.

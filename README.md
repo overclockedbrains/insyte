@@ -27,11 +27,12 @@
 ## Why insyte
 
 - **Prompt-first workflow** for concept explanations, DSA algorithm traces, and system design walkthroughs.
-- **5-stage AI pipeline** — ISCL grammar → parallel state/step generation → annotations → deterministic assembly. Per-stage retry, partial-success recovery, no monolithic JSON hallucination.
-- **ISCL (Insyte Scene Language)** — a purpose-built DSL the AI generates. No XY coordinates; the layout engine positions everything deterministically.
-- **Scene-based runtime**: step engine, layout engine (dagre / d3-hierarchy / arithmetic / radial), scene-graph diff, LRU cache, and targeted Framer Motion animations — all in `packages/scene-engine`.
-- **BYOK** for Gemini, OpenAI, Anthropic, Groq, Ollama (local), and any OpenAI-compatible endpoint.
-- **Static + Supabase-cached + AI-streamed** scene paths through one unified player.
+- **6-stage AI pipeline** — free reasoning → scene skeleton → steps + states → popups + misc (parallel) → deterministic assembly. Per-stage retry budget, partial-success recovery, no monolithic JSON hallucination.
+- **Scene Spec v2** — a strict JSON data contract separating AI-generated fields from deterministic derivations. No XY coordinates; the layout engine (dagre / d3-hierarchy / arithmetic) positions everything from structural hints alone.
+- **Topology-state split** — graph, tree, and system-diagram types carry sparse `nodeStates`/`edgeStates` overlays per step; sequential types carry full snapshots. Cuts average scene payload by ~60% with no change to the player API.
+- **Scene-based runtime** — step engine, pluggable layout engine, scene-graph diff, LRU cache, and targeted Framer Motion animations — all in `packages/scene-engine`.
+- **BYOK** for Gemini, OpenAI, Anthropic, Groq, Ollama (local), and any OpenAI-compatible endpoint. Keys live in browser `localStorage` only — never reach server logs.
+- **Three scene paths, one unified player** — static pre-built JSON, Supabase-cached AI output, and live AI-streamed generation.
 
 ## Quick Navigation
 
@@ -90,8 +91,8 @@ Copy-Item apps/web/.env.example apps/web/.env.local
 | `pnpm dev` | Start full Turborepo dev pipeline (packages watch + web dev server) |
 | `pnpm build` | Build all packages then the app |
 | `pnpm type-check` | TypeScript check across the entire workspace |
-| `pnpm test` | Run Vitest unit tests (ISCL parser, step engine, validators, assembly) |
-| `pnpm validate-scenes` | Validate all 24 production scene JSON files against `SceneSchema` |
+| `pnpm test` | Run Vitest unit tests (step engine, validators, assembly, scene-graph) |
+| `pnpm validate-scenes` | Validate all 26 production scene JSON files against `SceneSchema` |
 | `pnpm --filter web seed` | Seed topic index metadata to Supabase |
 | `pnpm --filter web seed-scenes` | Seed scene records to Supabase |
 
@@ -136,16 +137,40 @@ Copy-Item apps/web/.env.example apps/web/.env.local
 
 ## Architecture
 
-### Monorepo
+### Packages
 
-- `apps/web` — Next.js 16 app: App Router pages, API routes, AI module, simulation engine, Supabase integration.
-- `packages/scene-engine` — shared lib: types, Zod schema, ISCL parser, step engine, layout engine, scene graph, LRU cache.
+- `apps/web` — Next.js 16 app: App Router pages, API routes, 6-stage AI pipeline, simulation player, Supabase integration, Pyodide WASM sandbox.
+- `packages/scene-engine` — pure TypeScript runtime library: Scene Spec v2, Zod schema, step engine, layout engine (dagre / d3-hierarchy / arithmetic), scene-graph diff, LRU cache.
 - `packages/tsconfig` — shared TypeScript base configs.
-- `.planning/` — product roadmap (`PROJECT.md`), design system (`DESIGN.md`), per-phase PLANs.
+- `.planning/` — product roadmap (`PROJECT.md`), design system (`DESIGN.md`), per-phase plans.
+
+### Scene rendering flow
+
+```
+Prompt → /api/generate (SSE stream)
+           └─ AI Pipeline (Stages 0–5)
+                └─ Scene JSON v2 [Zod validated]
+                     └─ Zustand scene-slice
+                          └─ useSceneRuntime
+                               ├─ computeLayout()      → dagre / d3-hierarchy / arithmetic
+                               ├─ computeSceneGraph()  → nodes, edges, groups per step
+                               └─ LRU cache (memoized across step seeks)
+                                    └─ CanvasContext → Primitive renderers → Framer Motion
+```
 
 ## Documentation
 
 Full docs index: **[docs/README.md](docs/README.md)**
+
+| Doc | What it covers |
+| --- | --- |
+| [Platform Architecture](docs/architecture/tech-architecture.md) | Full system Mermaid diagram — browser, server, AI module, scene-engine, Supabase |
+| [AI Pipeline](docs/architecture/ai-pipeline.md) | Stage map, GenerationEvent protocol, schema flow, live chat |
+| [How the AI Module Works](docs/explained/ai-module.md) | Plain-English walkthrough of all 6 stages |
+| [Scene Engine Reference](docs/scene-engine/scene-engine.md) | Scene JSON v2 contract, enums, step engine API, layout hints, scene-graph |
+| [API Reference](docs/backend/api-reference.md) | All server endpoints — request/response shapes and status codes |
+| [Supabase Data Model](docs/backend/data-model.md) | Tables, privacy rules, runtime query patterns |
+| [Adding Scenes & Primitives](docs/guides/adding-scenes-and-primitives.md) | Step-by-step checklists for new scenes, visual types, controls, and providers |
 
 ## BYOK
 

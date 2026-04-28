@@ -1,7 +1,7 @@
 # API Reference
 
 Reference for all server routes in `apps/web/app/api/`.
-Updated April 2026 (R2 / Phase 27).
+Updated April 2026 (v2.4.0 / Phase 35).
 
 ---
 
@@ -21,7 +21,7 @@ If no BYOK key is provided, the server-side default path uses Gemini Flash (free
 
 ## `POST /api/generate`
 
-Runs the 5-stage AI pipeline for concept / LLD / HLD scene generation. Response is an **SSE stream of `GenerationEvent` objects**.
+Runs the 6-stage AI pipeline for concept / LLD / HLD scene generation. Response is an **SSE stream of `GenerationEvent` objects**.
 
 ### Request body
 
@@ -41,6 +41,7 @@ Runs the 5-stage AI pipeline for concept / LLD / HLD scene generation. Response 
 Each event is a JSON line prefixed `data: ` (SSE format):
 
 ```
+data: {"type":"reasoning","chunk":"...thinking..."}
 data: {"type":"plan","title":"How Hash Tables Work","visualCount":2,"stepCount":8,"layout":"text-left-canvas-right"}
 data: {"type":"content","states":{...},"steps":[...]}
 data: {"type":"annotations","explanation":[...],"popups":[...]}
@@ -147,6 +148,37 @@ Status codes: `200`, `400`, `500`.
 
 ---
 
+## `POST /api/test-key`
+
+Validates that a BYOK provider key works before the user saves it in settings.
+
+### Request body
+
+```json
+{
+  "provider": "openai",
+  "apiKey": "sk-...",
+  "model": "gpt-4o",
+  "baseUrl": "optional-for-custom-providers"
+}
+```
+
+### Response
+
+```json
+{ "ok": true }
+```
+
+Or on failure:
+
+```json
+{ "ok": false, "error": "Invalid API key" }
+```
+
+Status codes: `200` (always — check `ok` field for result).
+
+---
+
 ## `GET /api/rate-limit-status`
 
 Read-only free-tier quota check for the requester's hashed IP.
@@ -157,6 +189,26 @@ Read-only free-tier quota check for the requester's hashed IP.
 {
   "remaining": 7,
   "resetAt": "2026-04-13T11:00:00.000Z"
+}
+```
+
+---
+
+## `GET /api/providers`
+
+Returns the list of configured providers and their available models. Used by the settings UI model selector.
+
+### Response
+
+```json
+{
+  "providers": [
+    {
+      "id": "gemini",
+      "label": "Gemini",
+      "models": [{ "id": "gemini-2.5-flash", "label": "Gemini 2.5 Flash" }]
+    }
+  ]
 }
 ```
 
@@ -179,6 +231,32 @@ Server-side proxy for `GET {ollamaBaseURL}/api/tags`. Avoids CORS when the UI fe
   "models": [
     { "id": "llama3.2:latest", "label": "llama3.2:latest" }
   ]
+}
+```
+
+---
+
+## `GET /api/community/scenes`
+
+Returns paginated user-generated scenes for the community gallery.
+
+### Query params
+
+| Param | Required | Description |
+| --- | --- | --- |
+| `page` | No | Page number (default `1`) |
+| `limit` | No | Items per page (default `20`) |
+| `category` | No | Filter by scene type (`concept`, `dsa-trace`, `lld`, `hld`) |
+
+### Response
+
+```json
+{
+  "scenes": [
+    { "slug": "...", "title": "...", "type": "concept", "generated_at": "..." }
+  ],
+  "total": 42,
+  "page": 1
 }
 ```
 
