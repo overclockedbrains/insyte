@@ -35,7 +35,7 @@ function StaticScene({ scene }: { scene: Scene }) {
 
   useEffect(() => {
     setScene(scene)
-    setTotalSteps(scene.steps.length)
+    setTotalSteps(scene.steps.length + 1)
     reset()
     setExpanded(false)
 

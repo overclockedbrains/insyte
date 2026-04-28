@@ -38,7 +38,7 @@ export function StreamingView({ topic, slug }: StreamingViewProps) {
   // Sync step count to playback store whenever steps are promoted
   useEffect(() => {
     if (activeScene?.steps?.length) {
-      setTotalSteps(activeScene.steps.length)
+      setTotalSteps(activeScene.steps.length + 1)
       reset()
     }
   }, [activeScene?.steps?.length, setTotalSteps, reset])

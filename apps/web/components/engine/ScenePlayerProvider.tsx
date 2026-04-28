@@ -28,7 +28,7 @@ export function ScenePlayerProvider({ scene, children }: ScenePlayerProviderProp
   const [store] = useState<PlayerStoreApi>(() => {
     const s = createPlayerStore()
     s.getState().setScene(scene)
-    s.getState().setTotalSteps(scene.steps.length)
+    s.getState().setTotalSteps(scene.steps.length + 1)
     // Do NOT reset here — leave currentStep at 0 and isPlaying at false so
     // AutoPlayLoop.play() can start cleanly on mount.
     return s
@@ -42,7 +42,7 @@ export function ScenePlayerProvider({ scene, children }: ScenePlayerProviderProp
     }
 
     store.getState().setScene(scene)
-    store.getState().setTotalSteps(scene.steps.length)
+    store.getState().setTotalSteps(scene.steps.length + 1)
     store.getState().reset()
   }, [scene, store])
 

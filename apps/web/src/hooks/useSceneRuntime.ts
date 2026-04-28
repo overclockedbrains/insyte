@@ -42,7 +42,7 @@ export function useSceneRuntime(
     if (!scene) return
 
     const prefetch = (idx: number) => {
-      if (idx < 0 || idx >= scene.steps.length) return
+      if (idx < 0 || idx > scene.steps.length) return
       if (cache.has(idx)) return
       const graph = computeSceneGraphAtStep(scene, idx)
       cache.set(idx, graph)
