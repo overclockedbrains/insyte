@@ -33,6 +33,9 @@
 - Remove manual selection for which mode etc should be all derived by ai and the quesitons be asked from user.
 - Improve DSA Pipeline now
 - All scenes needs to be regenerated using ai pipeline
+- Handle errors better to show if failures from ai provider with specific human readable message and suggestion.
+- Suggest user by doing ANN search on already generated scenes to use them or generate new?
+- Remove explore page and just have gallery?
 
 ## ❓ Questions / Blockers
 - Will we be able to optimize token consumptions ?
