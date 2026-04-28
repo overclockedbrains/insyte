@@ -8,6 +8,7 @@
  */
 
 import { motion, AnimatePresence } from 'framer-motion'
+import { POPUP_ACCENT_COLORS, VIZ_SURFACE } from '@/src/engine/styles/colors'
 
 interface StepPopupProps {
   text: string
@@ -16,10 +17,10 @@ interface StepPopupProps {
 }
 
 export const popupAccentColor: Record<string, string> = {
-  info:    'rgba(140, 140, 160, 0.55)',
-  success: 'rgba(58, 223, 250, 0.55)',
-  warning: 'rgba(255, 110, 132, 0.55)',
-  insight: 'rgba(183, 159, 255, 0.55)',
+  info:    POPUP_ACCENT_COLORS.neutral,
+  success: POPUP_ACCENT_COLORS.cyan,
+  warning: POPUP_ACCENT_COLORS.red,
+  insight: POPUP_ACCENT_COLORS.purple,
 }
 
 export function StepPopup({ text, style = 'info', visible }: StepPopupProps) {
@@ -40,7 +41,7 @@ export function StepPopup({ text, style = 'info', visible }: StepPopupProps) {
             style={{
               color,
               borderLeft: `2px solid ${color}`,
-              background: 'rgba(10, 10, 16, 0.6)',
+              background: VIZ_SURFACE.popupBg,
             }}
           >
             {text}

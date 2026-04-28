@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import type { PrimitiveProps } from '.'
-import { resolveHighlight } from '../styles/colors'
+import { resolveHighlight, VIZ_SURFACE } from '../styles/colors'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface TextBadgeState {
@@ -29,8 +29,8 @@ export function TextBadgeViz({ state }: PrimitiveProps) {
   const colors = resolveHighlight(highlightToken)
   const isHighlighted = !!highlightToken
 
-  const bgColor     = isHighlighted ? colors.bg : 'rgba(25, 25, 31, 0.6)'
-  const borderColor = isHighlighted ? colors.border : 'rgba(72, 71, 77, 0.8)'
+  const bgColor     = isHighlighted ? colors.bg : VIZ_SURFACE.container
+  const borderColor = isHighlighted ? colors.border : VIZ_SURFACE.border
   const shadow      = isHighlighted ? `0 0 15px ${colors.border}50` : 'none'
 
   return (

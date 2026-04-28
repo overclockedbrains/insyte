@@ -34,7 +34,7 @@ export function StreamingError({ topic, error, onRetry }: StreamingErrorProps) {
         <button
           onClick={onRetry}
           className="px-5 py-2.5 rounded-xl text-sm font-semibold text-on-primary hover:opacity-90 transition-all duration-200"
-          style={{ background: 'linear-gradient(135deg, #b79fff 0%, #ab8ffe 100%)' }}
+          style={{ background: 'var(--gradient-brand-explore)' }}
         >
           Try again →
         </button>

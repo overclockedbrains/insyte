@@ -114,7 +114,7 @@ function GridDots() {
     <div
       className="absolute inset-0 opacity-30"
       style={{
-        backgroundImage: 'radial-gradient(circle, rgba(183,159,255,0.15) 1px, transparent 1px)',
+        backgroundImage: 'var(--pattern-streaming-dots)',
         backgroundSize: '24px 24px',
       }}
     />
@@ -133,7 +133,7 @@ function GeneratingLabel({ isStreaming, streamedFields }: { isStreaming: boolean
 
   return (
     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-surface-container/80 backdrop-blur-sm px-5 py-2.5 rounded-full border border-outline-variant/30 shadow-md">
-      <span className="flex h-2.5 w-2.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(183,159,255,0.6)]" />
+      <span className="flex h-2.5 w-2.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_var(--color-primary-alpha-60)]" />
       <span className="text-sm text-on-surface font-medium truncate max-w-[250px] sm:max-w-none">
         {text}
       </span>

@@ -9,19 +9,17 @@ const SESSION_KEY = 'insyte_dev_notice_v2'
 type State = 'hidden' | 'card' | 'fab'
 
 export function DevBanner() {
-  const [state, setState] = useState<State>(() => {
-    if (typeof window !== 'undefined' && sessionStorage.getItem(SESSION_KEY)) {
-      return 'fab'
-    }
-    return 'hidden'
-  })
+  const [state, setState] = useState<State>('hidden')
 
   useEffect(() => {
-    if (state === 'hidden') {
+    if (sessionStorage.getItem(SESSION_KEY)) {
+      const t = setTimeout(() => setState('fab'), 0)
+      return () => clearTimeout(t)
+    } else {
       const t = setTimeout(() => setState('card'), 900)
       return () => clearTimeout(t)
     }
-  }, [state])
+  }, [])
 
   function dismiss() {
     sessionStorage.setItem(SESSION_KEY, '1')
@@ -43,20 +41,20 @@ export function DevBanner() {
             <div
               className="rounded-2xl p-px"
               style={{
-                background: 'linear-gradient(135deg, #b79fff 0%, #919bff 45%, #3adffa 100%)',
+                background: 'var(--gradient-brand-border)',
                 boxShadow:
-                  '0 0 0 1px rgba(183,159,255,0.08), 0 0 55px -8px rgba(183,159,255,0.28), 0 0 28px -12px rgba(58,223,250,0.18), 0 28px 52px -16px rgba(0,0,0,0.75)',
+                  '0 0 0 1px var(--color-primary-alpha-08), 0 0 55px -8px var(--color-primary-alpha-28), 0 0 28px -12px var(--color-secondary-alpha-18), 0 28px 52px -16px var(--color-black-alpha-75)',
               }}
             >
-              <div className="rounded-2xl bg-[#0c0c11] backdrop-blur-2xl p-5 relative overflow-hidden">
+              <div className="rounded-2xl bg-[var(--color-dev-banner-bg)] backdrop-blur-2xl p-5 relative overflow-hidden">
 
                 <div
                   className="absolute -top-14 -left-14 h-40 w-40 rounded-full pointer-events-none"
-                  style={{ background: 'radial-gradient(circle, rgba(183,159,255,0.16) 0%, transparent 68%)' }}
+                  style={{ background: 'var(--gradient-primary-radial)' }}
                 />
                 <div
                   className="absolute -bottom-10 -right-10 h-32 w-32 rounded-full pointer-events-none"
-                  style={{ background: 'radial-gradient(circle, rgba(58,223,250,0.11) 0%, transparent 68%)' }}
+                  style={{ background: 'var(--gradient-secondary-radial)' }}
                 />
 
                 <button
@@ -84,7 +82,7 @@ export function DevBanner() {
                   Still baking,{' '}
                   <span
                     style={{
-                      background: 'linear-gradient(90deg, #b79fff 0%, #3adffa 100%)',
+                      background: 'var(--gradient-brand)',
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
                       backgroundClip: 'text',
@@ -101,8 +99,7 @@ export function DevBanner() {
                 <div
                   className="h-px mb-4"
                   style={{
-                    background:
-                      'linear-gradient(90deg, rgba(183,159,255,0.25) 0%, rgba(58,223,250,0.15) 60%, transparent 100%)',
+                    background: 'var(--gradient-brand-divider)',
                   }}
                 />
 
@@ -129,7 +126,7 @@ export function DevBanner() {
             onClick={() => setState('card')}
             title="About this build"
             aria-label="About this build"
-            className="fixed bottom-6 left-6 z-[90] h-9 w-9 rounded-full bg-[#0c0c11] border border-white/[0.08] flex items-center justify-center text-white/25 hover:text-white/55 hover:border-white/15 transition-colors duration-200"
+            className="fixed bottom-6 left-6 z-[90] h-9 w-9 rounded-full bg-[var(--color-dev-banner-bg)] border border-white/[0.08] flex items-center justify-center text-white/25 hover:text-white/55 hover:border-white/15 transition-colors duration-200"
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.5 }}

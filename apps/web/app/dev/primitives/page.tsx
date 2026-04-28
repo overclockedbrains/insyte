@@ -283,7 +283,7 @@ function ShowcaseCard({ item, index }: { item: (typeof showcaseDataDOM)[number],
           </CanvasContextProvider>
         </div>
 
-        <div className="w-full lg:w-[450px] flex flex-col bg-[#0d1117] border-l border-outline-variant/10">
+        <div className="w-full lg:w-[450px] flex flex-col bg-[var(--color-dev-panel-bg)] border-l border-outline-variant/10">
           <div className="px-5 py-3 bg-black/40 flex items-center justify-between border-b border-white/10">
             <div className="flex items-center gap-4">
               <span className="text-xs font-mono font-bold text-outline-variant/80 uppercase tracking-wider">State Editor (Live)</span>
@@ -299,7 +299,7 @@ function ShowcaseCard({ item, index }: { item: (typeof showcaseDataDOM)[number],
             {error && <span className="text-[10px] font-mono font-bold text-error truncate max-w-[200px] bg-error/10 px-2 py-1 rounded" title={error}>Invalid JSON</span>}
           </div>
           <textarea
-            className="flex-1 w-full bg-transparent text-[#e2e8f0] font-mono text-sm p-5 outline-none resize-none focus:bg-[#ffffff05] transition-colors leading-relaxed"
+            className="flex-1 w-full bg-transparent text-[var(--color-dev-input-text)] font-mono text-sm p-5 outline-none resize-none focus:bg-[var(--color-dev-input-focus-bg)] transition-colors leading-relaxed"
             spellCheck={false}
             value={jsonText}
             onChange={e => setJsonText(e.target.value)}

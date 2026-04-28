@@ -53,8 +53,8 @@ export function CodePanel({ code, currentStep }: CodePanelProps) {
       })
       if (lines[activeLine]) {
         const activeNode = lines[activeLine] as HTMLElement
-        activeNode.style.backgroundColor = 'rgba(183, 159, 255, 0.1)'
-        activeNode.style.boxShadow = 'inset 2px 0 0 #b79fff'
+        activeNode.style.backgroundColor = 'var(--color-primary-alpha-10)'
+        activeNode.style.boxShadow = 'inset 2px 0 0 var(--color-primary)'
         activeNode.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
       }
     }

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import type { PrimitiveProps } from '.'
-import { resolveHighlight } from '../styles/colors'
+import { resolveHighlight, PRIMARY } from '../styles/colors'
 
 // ─── State ────────────────────────────────────────────────────────────────────
 interface LinearItem {
@@ -86,8 +86,8 @@ export function ArrayViz({ id, state }: PrimitiveProps) {
             <motion.div
               className="absolute rounded-2xl border-2 pointer-events-none"
               style={{
-                borderColor: 'rgba(183, 159, 255, 0.45)',
-                backgroundColor: 'rgba(183, 159, 255, 0.07)',
+                borderColor: PRIMARY.alpha45,
+                backgroundColor: PRIMARY.alpha07,
                 top: '-6px',
                 bottom: '-6px',
                 zIndex: 0,

@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import { VIZ_SURFACE } from '@/src/engine/styles/colors'
 import { Send, ArrowRight, X, Minus, Maximize2 } from 'lucide-react'
 import { useIsMobile } from '@/components/hooks/useMediaQuery'
 import { useBoundStore } from '@/src/stores/store'
@@ -230,13 +231,13 @@ function WindowControls({ onClose }: { onClose: () => void }) {
             'w-[18px] h-[18px] rounded-full flex items-center justify-center',
             'transition-all duration-150 cursor-pointer',
             confirmingClose
-              ? 'bg-[#ff5f57]/30 ring-2 ring-[#ff5f57]/50'
-              : 'bg-[#ff5f57]/20 hover:bg-[#ff5f57]/35',
+              ? 'bg-[var(--color-mac-close-30)] ring-2 ring-[var(--color-mac-close-50)]'
+              : 'bg-[var(--color-mac-close-20)] hover:bg-[var(--color-mac-close-35)]',
           ].join(' ')}
           aria-label="Close and clear chat"
           title={confirmingClose ? 'Click again to confirm — clears history' : 'Close (clears history)'}
         >
-          <X className="w-2.5 h-2.5" style={{ color: '#ff5f57' }} strokeWidth={2.5} />
+          <X className="w-2.5 h-2.5" style={{ color: 'var(--color-mac-close)' }} strokeWidth={2.5} />
         </button>
 
         {/* Warning tooltip */}
@@ -250,12 +251,12 @@ function WindowControls({ onClose }: { onClose: () => void }) {
               className={[
                 'absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-10',
                 'whitespace-nowrap px-2.5 py-1.5 rounded-lg',
-                'bg-surface-container-highest border border-[#ff5f57]/20',
+                'bg-surface-container-highest border border-[var(--color-mac-close-20)]',
                 'text-[11px] text-on-surface leading-tight pointer-events-none',
               ].join(' ')}
-              style={{ boxShadow: '0 0 8px hsl(240deg 20% 3% / 0.5)' }}
+              style={{ boxShadow: VIZ_SURFACE.tooltipShadow }}
             >
-              <span className="font-semibold" style={{ color: '#ff5f57' }}>Clears history.</span>
+              <span className="font-semibold" style={{ color: 'var(--color-mac-close)' }}>Clears history.</span>
               {' '}Click again to confirm.
               <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-surface-container-highest" />
             </motion.div>
@@ -266,21 +267,21 @@ function WindowControls({ onClose }: { onClose: () => void }) {
       {/* ── Minimize — amber ── */}
       <button
         onClick={minimizeChat}
-        className="w-[18px] h-[18px] rounded-full flex items-center justify-center bg-[#febc2e]/20 hover:bg-[#febc2e]/35 transition-all duration-150 cursor-pointer"
+        className="w-[18px] h-[18px] rounded-full flex items-center justify-center bg-[var(--color-mac-minimize-20)] hover:bg-[var(--color-mac-minimize-35)] transition-all duration-150 cursor-pointer"
         aria-label="Minimize chat"
         title="Minimize"
       >
-        <Minus className="w-2.5 h-2.5" style={{ color: '#febc2e' }} strokeWidth={2.5} />
+        <Minus className="w-2.5 h-2.5" style={{ color: 'var(--color-mac-minimize)' }} strokeWidth={2.5} />
       </button>
 
       {/* ── Expand — green, disabled in R1 ── */}
       <button
-        className="w-[18px] h-[18px] rounded-full flex items-center justify-center bg-[#28c840]/10 opacity-35 cursor-not-allowed"
+        className="w-[18px] h-[18px] rounded-full flex items-center justify-center bg-[var(--color-mac-maximize-10)] opacity-35 cursor-not-allowed"
         aria-label="Expand (coming soon)"
         title="Expand (coming soon)"
         disabled
       >
-        <Maximize2 className="w-2 h-2" style={{ color: '#28c840' }} strokeWidth={2.5} />
+        <Maximize2 className="w-2 h-2" style={{ color: 'var(--color-mac-maximize)' }} strokeWidth={2.5} />
       </button>
 
     </div>
@@ -327,7 +328,7 @@ function CardBody({
       ref={cardRef}
       className={[
         'flex flex-col h-full',
-        'bg-[rgba(19,19,25,0.92)] backdrop-blur-xl',
+        'bg-[var(--color-chat-bg)] backdrop-blur-xl',
         'border border-outline-variant/20',
         isMobile ? 'rounded-t-3xl rounded-b-none' : 'rounded-2xl',
       ].join(' ')}
@@ -335,12 +336,7 @@ function CardBody({
         // Uniform elevation — 0 0 offsets so shadow spreads equally on all sides.
         // Blur doubles each layer; opacity decreases so the outer layers are ambient,
         // not glowing. Dark navy hue matches the page background.
-        boxShadow: [
-          '0 0 1px  hsl(240deg 20% 3% / 0.6)',
-          '0 0 4px  hsl(240deg 20% 3% / 0.45)',
-          '0 0 10px hsl(240deg 20% 3% / 0.35)',
-          '0 0 20px hsl(240deg 20% 3% / 0.2)',
-        ].join(', '),
+        boxShadow: VIZ_SURFACE.chatShadow,
       }}
     >
       <CardHeader onClose={onClose} />

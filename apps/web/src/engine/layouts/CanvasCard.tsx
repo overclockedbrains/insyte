@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import type { Scene } from '@insyte/scene-engine'
 import { applyOverlaysAtStep } from '@insyte/scene-engine'
 import { useBoundStore } from '@/src/stores/store'
+import { PRIMARY } from '@/src/engine/styles/colors'
 import { DotGridBackground } from '@/components/layout/DotGridBackground'
 import { PlaybackControls } from '../controls/PlaybackControls'
 import { ControlBar } from '../controls/ControlBar'
@@ -97,7 +98,7 @@ function FloatingExplanationCard({ scene, step }: { scene: Scene, step: number }
         >
           <div
             className="glass-panel rounded-2xl border border-primary/15 px-4 py-3 shadow-lg"
-            style={{ boxShadow: '0 0 20px rgba(183,159,255,0.10)' }}
+            style={{ boxShadow: PRIMARY.glowSubtle }}
           >
             <p className="text-[11px] font-semibold text-primary mb-1 uppercase tracking-widest">
               {floatingExplanation.heading}
@@ -240,9 +241,7 @@ export function CanvasCard({ scene, onRerunWithCustomInput = null }: CanvasCardP
         ].join(' ')}
         aria-hidden={isExpanded}
         animate={{
-          boxShadow: isPatchGlowing
-            ? '0 0 40px rgba(183,159,255,0.4), 0 0 80px rgba(183,159,255,0.15)'
-            : '0 0 0px rgba(183,159,255,0)',
+          boxShadow: isPatchGlowing ? PRIMARY.glowBright : PRIMARY.glow0,
         }}
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       >
@@ -260,9 +259,7 @@ export function CanvasCard({ scene, onRerunWithCustomInput = null }: CanvasCardP
                 animate={{
                   opacity: 1,
                   scale: 1,
-                  boxShadow: isPatchGlowing
-                    ? '0 0 60px rgba(183,159,255,0.35)'
-                    : '0 0 0px rgba(183,159,255,0)',
+                  boxShadow: isPatchGlowing ? PRIMARY.glowCard : PRIMARY.glow0,
                 }}
                 exit={{ opacity: 0, scale: 0.97 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 35 }}

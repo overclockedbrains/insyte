@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import type { PrimitiveProps } from '.'
 import { computeLayout } from '@insyte/scene-engine'
 import { useCanvas } from '../CanvasContext'
-import { resolveHighlight } from '../styles/colors'
+import { resolveHighlight, VIZ_SURFACE, HIGHLIGHT_COLORS } from '../styles/colors'
 
 interface WeightedGraphNode {
   id: string
@@ -45,15 +45,15 @@ function edgeColor(highlight: string | undefined): string {
     case 'relaxed':
     case 'min-edge': return 'var(--color-secondary)'
     case 'in-tree':  return 'var(--color-primary)'
-    case 'rejected': return 'var(--color-error, #ff6e84)'
+    case 'rejected': return `var(--color-error, ${HIGHLIGHT_COLORS.error.border})`
     default:         return 'var(--color-outline-variant)'
   }
 }
 
 function nodeColors(highlight: string | undefined) {
   switch (highlight) {
-    case 'source':  return { bg: 'rgba(103,80,164,0.18)', border: 'var(--color-primary)', text: '#e2e8f0' }
-    case 'settled': return { bg: 'rgba(255,255,255,0.05)', border: 'var(--color-outline-variant)', text: 'var(--color-outline-variant)' }
+    case 'source':  return { bg: VIZ_SURFACE.graphSource,  border: 'var(--color-primary)',         text: HIGHLIGHT_COLORS.default.text }
+    case 'settled': return { bg: VIZ_SURFACE.graphSettled, border: 'var(--color-outline-variant)', text: 'var(--color-outline-variant)' }
     default:        return resolveHighlight(highlight)
   }
 }
@@ -148,7 +148,7 @@ export function WeightedGraphViz({ id, state, visual }: PrimitiveProps) {
                     x={mid.x - 14} y={mid.y - 10}
                     width={28} height={20}
                     rx={4}
-                    fill={isActive ? 'var(--color-secondary-container, rgba(58,223,250,0.15))' : 'var(--color-surface-container)'}
+                    fill={isActive ? `var(--color-secondary-container, ${VIZ_SURFACE.graphActiveFill})` : 'var(--color-surface-container)'}
                     stroke={color}
                     strokeWidth={1}
                   />

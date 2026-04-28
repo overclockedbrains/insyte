@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import type { PrimitiveProps } from '.'
-import { resolveHighlight } from '../styles/colors'
+import { resolveHighlight, VIZ_SURFACE } from '../styles/colors'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface MapEntry {
@@ -51,7 +51,7 @@ export function MapViz({ id, state }: PrimitiveProps) {
 
                 const bgColor = isHighlighted
                   ? `${colors.bg}`
-                  : i % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0)'
+                  : i % 2 === 0 ? VIZ_SURFACE.zebraStripe : VIZ_SURFACE.transparent
 
                 const borderLeft = isHighlighted
                   ? `3px solid ${colors.border}`

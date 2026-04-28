@@ -43,7 +43,7 @@ export function PyodideLoader({ active }: PyodideLoaderProps) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.25 }}
-          className="rounded-2xl border border-outline-variant/30 bg-surface-container-low/90 px-4 py-3 shadow-[0_0_20px_rgba(183,159,255,0.12)]"
+          className="rounded-2xl border border-outline-variant/30 bg-surface-container-low/90 px-4 py-3 shadow-[0_0_20px_var(--glow-primary-12)]"
         >
           <div className="flex items-center justify-between gap-4 text-xs">
             <span className="font-semibold text-on-surface">Initializing Python runtime... (~10MB)</span>

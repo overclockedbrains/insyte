@@ -47,7 +47,7 @@ function ScrollArrow({
       aria-label={isLeft ? 'Scroll left' : 'Scroll right'}
       onClick={onClick}
       className={[
-        'absolute top-1/2 z-20 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-outline-variant/35 bg-surface-container-high/90 text-on-surface shadow-[0_0_10px_rgba(0,0,0,0.25)] transition-all duration-200 lg:flex',
+        'absolute top-1/2 z-20 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-outline-variant/35 bg-surface-container-high/90 text-on-surface shadow-[0_0_10px_var(--color-black-alpha-25)] transition-all duration-200 lg:flex',
         'opacity-0 group-hover/row:opacity-100',
         isLeft ? 'left-3' : 'right-3',
         'pointer-events-auto',

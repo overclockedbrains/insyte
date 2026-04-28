@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { PRIMARY } from '@/src/engine/styles/colors'
 import { SectionHeader } from '@/components/landing/SectionHeader'
 
 // ─── FeatureCards — 3 feature highlight cards ─────────────────────────────────
@@ -83,7 +84,7 @@ export function FeatureCards() {
           <motion.div
             key={feat.title}
             className="group relative overflow-hidden rounded-2xl border border-outline-variant/20 bg-surface-container-low p-5 transition-[border-color,box-shadow] duration-200 hover:border-primary/30"
-            whileHover={{ scale: 1.01, boxShadow: '0 0 18px rgba(183,159,255,0.12)' }}
+            whileHover={{ scale: 1.01, boxShadow: `0 0 18px ${PRIMARY.alpha12}` }}
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
           >
             {/* Gradient tint on hover */}

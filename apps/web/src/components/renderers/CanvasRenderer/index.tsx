@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 import type { SceneRendererProps } from '../types'
 import { useCanvas } from '@/src/engine/CanvasContext'
+import { CANVAS_PANEL } from '@/src/engine/styles/colors'
 
 /**
  * CanvasRenderer — stub implementation of SceneRendererProps.
@@ -46,28 +47,28 @@ export function CanvasRenderer({
 
     // Panel background + border
     roundRect(ctx, px, py, panelW, panelH, 16)
-    ctx.fillStyle = 'rgba(255,255,255,0.04)'
+    ctx.fillStyle = CANVAS_PANEL.bg
     ctx.fill()
-    ctx.strokeStyle = 'rgba(183,159,255,0.2)'
+    ctx.strokeStyle = CANVAS_PANEL.border
     ctx.lineWidth = 1
     ctx.stroke()
 
     // Title
     ctx.font = '600 10px monospace'
     ctx.textAlign = 'center'
-    ctx.fillStyle = 'rgba(183,159,255,0.9)'
+    ctx.fillStyle = CANVAS_PANEL.titleText
     ctx.fillText('CANVAS RENDERER', cx, py + 26)
 
     // Subtitle
     ctx.font = '10px monospace'
-    ctx.fillStyle = 'rgba(255,255,255,0.35)'
+    ctx.fillStyle = CANVAS_PANEL.subtitleText
     ctx.fillText('stub only — not yet implemented', cx, py + 42)
 
     // Divider
     ctx.beginPath()
     ctx.moveTo(px + 16, py + 54)
     ctx.lineTo(px + panelW - 16, py + 54)
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)'
+    ctx.strokeStyle = CANVAS_PANEL.divider
     ctx.stroke()
 
     // Stats
@@ -84,9 +85,9 @@ export function CanvasRenderer({
     ]
     stats.forEach(([label, value], i) => {
       const y = py + 70 + i * 15
-      ctx.fillStyle = 'rgba(255,255,255,0.55)'
+      ctx.fillStyle = CANVAS_PANEL.statLabel
       ctx.fillText(label, px + 20, y)
-      ctx.fillStyle = 'rgba(255,255,255,0.3)'
+      ctx.fillStyle = CANVAS_PANEL.statValue
       ctx.fillText(value, px + 90, y)
     })
 
@@ -94,12 +95,12 @@ export function CanvasRenderer({
     ctx.beginPath()
     ctx.moveTo(px + 16, py + 178)
     ctx.lineTo(px + panelW - 16, py + 178)
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)'
+    ctx.strokeStyle = CANVAS_PANEL.divider
     ctx.stroke()
 
     // Footer hint
     ctx.textAlign = 'center'
-    ctx.fillStyle = 'rgba(255,255,255,0.2)'
+    ctx.fillStyle = CANVAS_PANEL.footerText
     ctx.font = '9px monospace'
     ctx.fillText('NEXT_PUBLIC_RENDERER=dom to switch back', cx, py + 194)
   }, [width, height, sceneGraph, resolvedPopups, step, speed])

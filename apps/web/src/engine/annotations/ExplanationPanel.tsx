@@ -67,10 +67,9 @@ export function ExplanationPanel({ sections, currentStep, description, compact =
                   <div
                     className={[
                       'w-2 h-2 rounded-full flex-shrink-0 transition-all duration-500',
-                      isActive
-                        ? 'bg-primary shadow-[0_0_8px_rgba(183,159,255,0.6)]'
-                        : 'bg-outline-variant/50',
+                      isActive ? 'bg-primary' : 'bg-outline-variant/50',
                     ].join(' ')}
+                    style={isActive ? { boxShadow: '0 0 8px var(--color-primary-alpha-60)' } : undefined}
                   />
                   {!isLast && (
                     <div className="w-px flex-1 min-h-[20px] mt-1.5 bg-outline-variant/25" />

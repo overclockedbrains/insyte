@@ -107,14 +107,14 @@ export function HowItWorks() {
                 <path
                   d={pathD}
                   fill="none"
-                  stroke="rgba(72,71,77,0.6)"
+                  stroke="var(--color-outline-variant-60)"
                   strokeWidth="1.25"
                   strokeDasharray="6 5"
                 />
                 <path
                   d={pathD}
                   fill="none"
-                  stroke="#3adffa"
+                  stroke="var(--secondary)"
                   strokeWidth="1.25"
                   strokeDasharray="6 5"
                   opacity="0.22"
@@ -130,7 +130,7 @@ export function HowItWorks() {
                   left: 0,
                   marginLeft: '-6px',
                   marginTop: '0px',
-                  filter: 'drop-shadow(0 0 5px #3adffa)',
+                  filter: 'drop-shadow(0 0 5px var(--secondary))',
                 } as CSSProperties}
                 animate={{ offsetDistance: ['0%', '100%'] }}
                 transition={{

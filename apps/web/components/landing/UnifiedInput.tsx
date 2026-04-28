@@ -201,7 +201,7 @@ export function UnifiedInput({ fillRef }: UnifiedInputProps) {
             isFocused
               ? {
                   boxShadow:
-                    '0 0 0 1px rgba(58,223,250,0.24), 0 0 14px rgba(58,223,250,0.12), 0 0 22px rgba(183,159,255,0.1)',
+                    '0 0 0 1px var(--color-secondary-alpha-24), 0 0 14px var(--color-secondary-alpha-12), 0 0 22px var(--color-primary-alpha-10)',
                 }
               : undefined
           }
@@ -260,7 +260,7 @@ export function UnifiedInput({ fillRef }: UnifiedInputProps) {
             ].join(' ')}
             style={
               canSubmit
-                ? { background: 'linear-gradient(135deg, #b79fff 0%, #ab8ffe 100%)' }
+                ? { background: 'var(--gradient-brand-explore)' }
                 : undefined
             }
             aria-label="Explore this concept"
@@ -295,7 +295,7 @@ export function UnifiedInput({ fillRef }: UnifiedInputProps) {
               onClick={handleDSAConfirm}
               className="px-4 py-2 rounded-xl text-sm font-semibold text-on-primary hover:opacity-90 transition-all duration-200"
               style={{
-                background: 'linear-gradient(135deg, #3adffa 0%, #1ad0eb 100%)',
+                background: 'var(--gradient-secondary)',
               }}
             >
               Visualize {'->'}

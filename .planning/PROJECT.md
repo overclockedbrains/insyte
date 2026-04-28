@@ -23,7 +23,7 @@
 
 ## Progress Tracker
 
-R1 released on 8 April 2026. R2 released on 14 April 2026. R3 in progress.
+R1 released on 8 April 2026. R2 released on 14 April 2026. R3 in progress (latest: Phase 37 complete April 29, 2026). Phase 38 planned April 29, 2026.
 
 ### Release 1 (R1) - Core Platform
 
@@ -76,6 +76,8 @@ R1 released on 8 April 2026. R2 released on 14 April 2026. R3 in progress.
 | **Phase 34** | ✅ | Scene Spec v2 — Canonical `SCENE_SPEC` as single source of truth: `spec.ts` (pure data contract) + `spec.build.ts` (derives Zod schema, AI prompt guide, JSON Schema). Restructures `visuals[]` into `canvas[]` + `activeText` + `hud[]`. Eliminates two-dialect drift, removes dead fields (`duration`, `tags`, `popup.anchor`), enforces discriminated union per visual type. Two-phase: spec-in-isolation first, full integration second. Functionally complete ~April 23, 2026. Known bugs deferred to resolve alongside Phase 35 changes. |
 | **Phase 35** | ✅ | Scene JSON Payload Optimization — Topology-state split for identity-based types (`graph`, `tree`, `system-diagram`): `initialState` declares full topology once; steps use sparse overlays (`nodeStates`/`edgeStates`/`componentStates`/`connectionStates`). Sequential types (`linear`, `map`, `grid`, `chart`) keep full snapshots. All 26 pre-built JSONs migrated. Step-engine merge layer, per-visual-type Zod schemas in `buildStepsSchema(skeleton)`, semantic validators (Checks 7+8), and AI prompts (`stage0-reasoning.md`, `stage2-steps.md`, live-chat) all updated. 202 tests passing. Completed April 27, 2026. |
 | **Phase 36** | ✅ | SEO Infrastructure — sitemap.xml, robots.txt, JSON-LD structured data (WebApplication + LearningResource + ItemList), dynamic OG images per simulation (1200×630 via next/og), canonical URLs on all pages, noindex guards on private pages (/profile, /settings, /dev/*), keyword-optimised titles, title template ('%s — insyte'). GSC verified, 28 pages discovered, sitemap submitted. Fully live April 28, 2026. |
+| **Phase 37** | ✅ | Theme Centralization — Two-file color rule enforced across entire monorepo. All raw hex/rgba/hsl eliminated from 30 component files; everything routes through `globals.css` (CSS vars) or `colors.ts` (JS constants). Added 7 new exports to `colors.ts`, 40+ CSS variable aliases to `globals.css`. Visually verified with no regressions. Completed April 29, 2026. |
+| **Phase 38** | ⬜ | Color Architecture Hardening — Reference palette layer (`--ref-*` vars, MD3 tier naming) in `globals.css` as single source of truth; `color-mix()` for all alpha aliases; delete dead `.dark {}` block; wire base styles (body, selection, scrollbar, utility classes) to CSS vars; `PRIMARY_RGB`/`SECONDARY_RGB` composition constants in `colors.ts`; split `VIZ_SURFACE` into `VIZ_SURFACE` + `VIZ_SHADOWS`. After this phase, a new theme = one CSS class + two TS constants. Planned April 29, 2026. |
 
 ---
 
@@ -801,6 +803,89 @@ visual state by merging `initialState` topology with the sparse step overlay.
 **Context:** [→ phases/phase-35/CONTEXT.md](phases/phase-35/CONTEXT.md)
 
 **Plan:** [→ phases/phase-35/PLAN.md](phases/phase-35/PLAN.md) *(not yet written)*
+
+---
+
+### Phase 37 — Theme Centralization
+
+**Goal:** Enforce the two-file color rule across the entire monorepo. After this phase,
+changing the theme requires editing exactly two files — `globals.css` and `colors.ts`.
+No raw hex, rgba, or hsl values anywhere else in source files.
+
+**Status:** Completed April 29, 2026. Visually verified — no regressions.
+
+**Prerequisite:** Phase 36 ✅
+
+**Two-file rule:**
+- `apps/web/app/globals.css` — CSS variables, for browser-rendered styles (Tailwind utilities, `style={}` CSS var references, SVG attributes)
+- `apps/web/src/engine/styles/colors.ts` — JS constants, for programmatic colors (Framer Motion `animate` targets, canvas `ctx.fillStyle`, JS lookup objects)
+
+**Scope:** Original audit identified 12 files. Full monorepo grep revealed 85+ color leak hits across 25+ files. Fixed everything.
+
+**What was added to `colors.ts`:**
+- Expanded `PRIMARY` — new alpha variants (`alpha08`, `alpha12`, `alpha16`, `alpha20`, `alpha25`, `alpha28`, `alpha30`, `alpha90`)
+- `POPUP_ACCENT_COLORS` — 4 popup badge accent tones
+- `GRID_CELL_COLORS` + `GridCellState` — 12 values for GridViz pathfinding cells (lifted from local object)
+- Expanded `VIZ_SURFACE` — `popupBg`, `transparent`, `defaultBorderFaint`, `nodeShadow`, `chatShadow`, `tooltipShadow`, `challengeShadow`, `topicRowShadow`
+- `SECONDARY` — secondary palette JS constants for Framer/canvas contexts
+- `MAC_CONTROLS` — macOS traffic-light button colors
+- `HERO_COLORS` — 30 illustration-specific values for `HeroLoop.tsx` (Framer animate targets, SVG strokes/fills, stage pills, gradients, outer shadow)
+- `CANVAS_PANEL` — 9 canvas 2D context colors for `CanvasRenderer`
+
+**What was added to `globals.css`:**
+- Primary alpha aliases (`--color-primary-alpha-08` through `-60`)
+- Secondary alpha aliases (`--color-secondary-alpha-10` through `-24`)
+- Black/shadow aliases (`--color-black-alpha-15`, `-25`, `-75`)
+- Outline variant alias (`--color-outline-variant-60`)
+- macOS control colors with pre-computed alpha variants (13 vars)
+- Surface/bg aliases — chat, search dropdown, dev panel/banner/input (6 vars)
+- Brand gradient vars — `--gradient-brand`, `--gradient-brand-border`, `--gradient-brand-explore`, `--gradient-secondary`, `--gradient-brand-divider`, `--gradient-primary-radial`, `--gradient-secondary-radial`, `--pattern-streaming-dots`
+- Glow shadow tokens for Tailwind arbitrary classes — `--glow-primary-10/12/30`, `--glow-secondary-10`, `--glow-surface-05`, `--glow-tertiary-10`
+
+**30 files fixed** across: annotation components, layout components, all primitive visualizations, community, auth, chat, explore, landing, layout, simulation, and dev tooling.
+
+**Legitimate exemptions (raw colors remain by design):**
+- `app/layout.tsx` — browser `<meta name="theme-color">` API
+- OG image files — Satori Edge renderer, no CSS var support
+- `AuthModal.tsx` SVG fills — Google brand logo canonical colors
+- `lib/ai-logger.ts` — `console.log('%c')` DevTools API
+
+**Plan:** [→ phases/phase-37/PLAN.md](phases/phase-37/PLAN.md)
+
+---
+
+### Phase 38 — Color Architecture Hardening
+
+**Goal:** Restructure `globals.css` and `colors.ts` so adding a new theme requires editing
+exactly one CSS class and two TS constants. No color values change — only architecture.
+
+**Status:** Planned April 29, 2026.
+
+**Prerequisite:** Phase 37 ✅ — two-file rule already enforced, clean starting point.
+
+**Key changes:**
+
+- **Reference palette layer** — `--ref-primary`, `--ref-secondary`, `--ref-background`, etc.
+  (MD3 tier naming, consistent with existing `--color-*` namespace). Every semantic token
+  and alpha alias references these. A new theme class only needs to override the `--ref-*` block.
+- **`color-mix()` for alpha aliases** — all `--color-primary-alpha-*` and
+  `--color-secondary-alpha-*` computed via `color-mix(in srgb, var(--ref-primary) X%, transparent)`
+  so they follow the palette variable automatically.
+- **Delete `.dark {}` block** — 33 lines of dead code (identical to `:root`). Light
+  theme will use `[data-theme="light"]` when implemented, not this block.
+- **Wire base styles to CSS vars** — `body`, `::selection`, scrollbar selectors, and
+  `.bezier-*` classes use semantic vars instead of hardcoded hex.
+- **Wire three utility classes** — `.gradient-text`, `.neon-gradient`, `.dot-grid`
+  already have their exact values as CSS vars from Phase 37 — wire them up.
+- **RGB composition in `colors.ts`** — `PRIMARY_RGB = '183, 159, 255'` and
+  `SECONDARY_RGB = '58, 223, 250'` module-private constants mirroring `--ref-primary-rgb`;
+  all `PRIMARY.*` and `SECONDARY.*` alpha strings compose from these. Color change = 1-line edit.
+- **Split `VIZ_SURFACE`** — extract shadow strings into new `VIZ_SHADOWS` export;
+  update 5 consumer files.
+- **Document alpha list split** — comments on `PRIMARY` and `SECONDARY` explaining which
+  alphas exist in CSS (Tailwind/inline) vs. TS-only (Framer Motion / canvas).
+
+**Plan:** [→ phases/phase-38/PLAN.md](phases/phase-38/PLAN.md)
 
 ---
 

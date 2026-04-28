@@ -143,7 +143,7 @@ export function SearchBar() {
             transition={{ duration: 0.15 }}
             className="absolute top-full left-0 right-0 mt-2 z-50 rounded-2xl border border-outline-variant/30 overflow-hidden shadow-2xl"
             style={{
-              background: 'rgba(25,25,31,0.95)',
+              background: 'var(--color-search-dropdown-bg)',
               backdropFilter: 'blur(20px)',
               WebkitBackdropFilter: 'blur(20px)',
             }}

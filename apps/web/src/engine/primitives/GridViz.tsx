@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion'
 import type { PrimitiveProps } from '.'
 import { DPTableViz } from './DPTableViz'
+import { GRID_CELL_COLORS, type GridCellState } from '../styles/colors'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
-type PathfindingHighlight = 'default' | 'active' | 'visited' | 'wall' | 'path' | 'start' | 'end'
 
 interface GridCell {
   highlight?: string
@@ -17,26 +17,8 @@ interface GridState {
   currentCell?: { row: number; col: number }
 }
 
-// ─── Grid-specific cell colors ────────────────────────────────────────────────
-//
-// Grid cells represent PERSISTENT structural data states — they need much
-// higher contrast than transient highlight overlays (which use 0.10 opacity
-// for brief flashes). Using resolveHighlight() here makes land/water
-// indistinguishable, so we maintain a dedicated color table at appropriate
-// opacity levels.
-
-const GRID_CELL_COLORS: Record<PathfindingHighlight, { bg: string; border: string; text: string; shadow: string }> = {
-  default: { bg: '#19191f',                    border: '#48474d',  text: '#6b7280', shadow: 'none' },
-  wall:    { bg: '#0c0c14',                    border: '#1c1c26',  text: '#2a2a38', shadow: 'none' },
-  start:   { bg: 'rgba(34, 197, 94, 0.40)',    border: '#22c55e',  text: '#e2e8f0', shadow: '0 0 10px rgba(34,197,94,0.30)' },
-  visited: { bg: 'rgba(58, 223, 250, 0.22)',   border: '#3adffa',  text: '#3adffa', shadow: '0 0 8px rgba(58,223,250,0.20)' },
-  active:  { bg: 'rgba(58, 223, 250, 0.40)',   border: '#3adffa',  text: '#e2e8f0', shadow: '0 0 12px rgba(58,223,250,0.40)' },
-  path:    { bg: 'rgba(34, 197, 94, 0.55)',    border: '#22c55e',  text: '#e2e8f0', shadow: '0 0 12px rgba(34,197,94,0.45)' },
-  end:     { bg: 'rgba(245, 158, 11, 0.35)',   border: '#f59e0b',  text: '#f59e0b', shadow: '0 0 10px rgba(245,158,11,0.30)' },
-}
-
 function resolveCellColors(highlight: string | undefined): { bg: string; border: string; text: string; shadow: string } {
-  return GRID_CELL_COLORS[(highlight as PathfindingHighlight) ?? 'default'] ?? GRID_CELL_COLORS.default
+  return GRID_CELL_COLORS[(highlight as GridCellState) ?? 'default'] ?? GRID_CELL_COLORS.default
 }
 
 // ─── GridViz ───────────────────────────────────────────────────────────────────
@@ -54,7 +36,7 @@ function PathfindingGridViz({ id, state }: PrimitiveProps) {
 
   return (
     <div className="relative flex flex-col items-center justify-center p-8 w-full overflow-auto max-h-[600px]">
-      {/* Container: bg-surface-container-low (#131319) — NOT lowest (#000000 pure black) */}
+      {/* Container: bg-surface-container-low — NOT lowest (pure black) */}
       <div className="relative inline-flex flex-col gap-1.5 p-3 bg-surface-container-low rounded-[12px] border border-outline-variant/30">
         {Array.from({ length: rows }).map((_, rIdx) => (
           <div key={`gr-${rIdx}`} className="flex gap-1.5">

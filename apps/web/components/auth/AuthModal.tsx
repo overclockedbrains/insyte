@@ -103,7 +103,7 @@ export function AuthModal() {
             <motion.div
               ref={modalRef}
               className="w-full h-full sm:h-auto sm:max-w-md rounded-none sm:rounded-2xl border border-outline-variant/30 bg-surface-container-low/90 backdrop-blur-2xl p-5 sm:p-6 relative overflow-y-auto"
-              style={{ boxShadow: '0 0 40px rgba(183,159,255,0.12), 0 0 0 1px rgba(183,159,255,0.08)' }}
+              style={{ boxShadow: '0 0 40px var(--color-primary-alpha-12), 0 0 0 1px var(--color-primary-alpha-08)' }}
               initial={{ scale: 0.98, y: 16 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.98, y: 16 }}

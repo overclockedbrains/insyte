@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import type { PrimitiveProps } from '.'
-import { resolveHighlight } from '../styles/colors'
+import { resolveHighlight, VIZ_SURFACE } from '../styles/colors'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface QueueItem {
@@ -71,7 +71,7 @@ export function QueueViz({ id, state }: PrimitiveProps) {
                     // Top accent stripe mirrors StackViz's left stripe convention
                     boxShadow: isHighlighted
                       ? `inset 0 3px 0 ${colors.border}, 0 0 8px ${colors.border}20`
-                      : 'inset 0 3px 0 #48474d30',
+                      : `inset 0 3px 0 ${VIZ_SURFACE.defaultBorderFaint}`,
                   }}
                   exit={{ opacity: 0, x: -32, scaleX: 0.5, transition: { duration: 0.15 } }}
                   transition={{ type: 'spring', stiffness: 320, damping: 28 }}

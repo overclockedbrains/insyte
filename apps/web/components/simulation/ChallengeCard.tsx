@@ -31,7 +31,7 @@ export function ChallengeCard({ challenge, onTry, className }: ChallengeCardProp
         'min-w-[240px] max-w-[300px] shrink-0', // for horizontal scroll on desktop
         className ?? '',
       ].join(' ')}
-      style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.15)' }}
+      style={{ boxShadow: '0 2px 12px var(--color-black-alpha-15)' }}
     >
       {/* Type badge */}
       <span

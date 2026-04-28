@@ -12,9 +12,9 @@
  *   const [scope, animateStep] = useAnimateStep()
  *   // Attach `scope` ref to the container element
  *   await animateStep([
- *     { phase: 'prepare', targets: '.node-3', props: { boxShadow: '0 0 12px #7c3aed' }, duration: 100 },
- *     { phase: 'act',     targets: '.node-3', props: { backgroundColor: '#2d1b69' }, duration: 300 },
- *     { phase: 'settle',  targets: '.node-3', props: { border: '1px solid #10b981' }, duration: 200 },
+ *     { phase: 'prepare', targets: '.node-3', props: { boxShadow: PRIMARY.glowSubtle }, duration: 100 },
+ *     { phase: 'act',     targets: '.node-3', props: { backgroundColor: HIGHLIGHT_COLORS.active.bg }, duration: 300 },
+ *     { phase: 'settle',  targets: '.node-3', props: { borderColor: HIGHLIGHT_COLORS.found.border }, duration: 200 },
  *   ])
  */
 

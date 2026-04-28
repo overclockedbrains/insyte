@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect, useId, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { DotGridBackground } from '@/components/layout/DotGridBackground'
+import { HERO_COLORS } from '@/src/engine/styles/colors'
 
 const STAGES = [
   {
@@ -125,8 +126,8 @@ function CodeScene() {
             key={line}
             className="mt-1.5 flex items-start gap-2 rounded-2xl px-2.5 py-2 font-mono text-[10px] leading-snug sm:text-[11px]"
             animate={{
-              backgroundColor: index === 2 ? 'rgba(163,172,188,0.08)' : 'rgba(0,0,0,0)',
-              borderColor: index === 2 ? 'rgba(156,169,187,0.18)' : 'rgba(0,0,0,0)',
+              backgroundColor: index === 2 ? HERO_COLORS.codeLineActive.bg : HERO_COLORS.codeLineOff.bg,
+              borderColor: index === 2 ? HERO_COLORS.codeLineActive.border : HERO_COLORS.codeLineOff.border,
             }}
             style={{ borderWidth: 1 }}
           >
@@ -159,9 +160,9 @@ function CodeScene() {
                           key={`${step.label}-${value}`}
                           className="rounded-xl border px-2 py-1 text-[10px] font-mono"
                           animate={{
-                            borderColor: isActive ? 'rgba(105,172,196,0.42)' : 'rgba(87,90,98,0.2)',
-                            backgroundColor: isActive ? 'rgba(255,255,255,0.03)' : 'rgba(32,33,39,0.72)',
-                            color: isActive ? 'rgba(248,246,250,0.98)' : 'rgba(197,195,201,0.82)',
+                            borderColor: isActive ? HERO_COLORS.codeActive.border : HERO_COLORS.codeDim.border,
+                            backgroundColor: isActive ? HERO_COLORS.codeActive.bg : HERO_COLORS.codeDim.bg,
+                            color: isActive ? HERO_COLORS.codeActive.text : HERO_COLORS.codeDim.text,
                           }}
                         >
                           {value}
@@ -203,8 +204,8 @@ function NetworkCard({
         className,
       ].join(' ')}
       animate={{
-        borderColor: active ? 'rgba(105,172,196,0.42)' : 'rgba(85,88,96,0.22)',
-        backgroundColor: active ? 'rgba(34,38,44,0.92)' : 'rgba(29,31,36,0.88)',
+        borderColor: active ? HERO_COLORS.networkActive.border : HERO_COLORS.networkDim.border,
+        backgroundColor: active ? HERO_COLORS.networkActive.bg : HERO_COLORS.networkDim.bg,
       }}
       transition={{ duration: 0.25 }}
     >
@@ -228,49 +229,49 @@ function NetworkScene({ compact }: { compact: boolean }) {
         <path
           d="M18 26 L47 26"
           fill="none"
-          stroke="rgba(112,130,154,0.42)"
+          stroke={HERO_COLORS.connectorStrong}
           strokeLinecap="round"
           strokeWidth="1"
         />
         <path
           d="M53 26 L78 26"
           fill="none"
-          stroke="rgba(112,130,154,0.42)"
+          stroke={HERO_COLORS.connectorStrong}
           strokeLinecap="round"
           strokeWidth="1"
         />
         <path
           d="M18 33 L18 47"
           fill="none"
-          stroke="rgba(112,130,154,0.28)"
+          stroke={HERO_COLORS.connectorFaint}
           strokeLinecap="round"
           strokeWidth="1"
         />
         <path
           d="M50 33 L50 47"
           fill="none"
-          stroke="rgba(112,130,154,0.28)"
+          stroke={HERO_COLORS.connectorFaint}
           strokeLinecap="round"
           strokeWidth="1"
         />
         <path
           d="M78 33 L78 47"
           fill="none"
-          stroke="rgba(112,130,154,0.28)"
+          stroke={HERO_COLORS.connectorFaint}
           strokeLinecap="round"
           strokeWidth="1"
         />
-        <circle cx="18" cy="26" r="0.9" fill="rgba(88,196,217,0.9)">
+        <circle cx="18" cy="26" r="0.9" fill={HERO_COLORS.packetDot}>
           <animate attributeName="cx" values="18;47;18" dur="1.7s" repeatCount="indefinite" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" />
           <animate attributeName="opacity" values="0;1;0" dur="1.7s" repeatCount="indefinite" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" />
         </circle>
-        <circle cx="53" cy="26" r="0.9" fill="rgba(88,196,217,0.9)">
+        <circle cx="53" cy="26" r="0.9" fill={HERO_COLORS.packetDot}>
           <animate attributeName="cx" values="53;78;53" dur="1.7s" begin="0.25s" repeatCount="indefinite" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" />
           <animate attributeName="opacity" values="0;1;0" dur="1.7s" begin="0.25s" repeatCount="indefinite" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" />
         </circle>
-        <circle cx="18" cy="33" r="0.55" fill="rgba(150,163,182,0.55)" />
-        <circle cx="50" cy="33" r="0.55" fill="rgba(150,163,182,0.55)" />
-        <circle cx="78" cy="33" r="0.55" fill="rgba(150,163,182,0.55)" />
+        <circle cx="18" cy="33" r="0.55" fill={HERO_COLORS.junctionDot} />
+        <circle cx="50" cy="33" r="0.55" fill={HERO_COLORS.junctionDot} />
+        <circle cx="78" cy="33" r="0.55" fill={HERO_COLORS.junctionDot} />
       </svg>
 
       <div className="relative z-10 flex h-full min-h-0 flex-col">
@@ -320,13 +321,13 @@ function SystemScene() {
       >
         <defs>
           <linearGradient id={mainGradientId} x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="rgba(92,177,199,0.18)" />
-            <stop offset="50%" stopColor="rgba(92,177,199,0.8)" />
-            <stop offset="100%" stopColor="rgba(128,150,192,0.22)" />
+            <stop offset="0%" stopColor={HERO_COLORS.gradientMainA} />
+            <stop offset="50%" stopColor={HERO_COLORS.gradientMainB} />
+            <stop offset="100%" stopColor={HERO_COLORS.gradientMainC} />
           </linearGradient>
           <linearGradient id={sideGradientId} x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="rgba(128,150,192,0.36)" />
-            <stop offset="100%" stopColor="rgba(128,150,192,0.08)" />
+            <stop offset="0%" stopColor={HERO_COLORS.gradientSideA} />
+            <stop offset="100%" stopColor={HERO_COLORS.gradientSideB} />
           </linearGradient>
         </defs>
         <motion.path
@@ -443,7 +444,7 @@ export function HeroLoop({ compact = false }: { compact?: boolean }) {
       className="relative w-full overflow-hidden rounded-[32px] border border-primary/20 bg-surface-container"
       style={{
         aspectRatio: compact ? '16 / 13.1' : '16 / 11',
-        boxShadow: '0 18px 36px rgba(0,0,0,0.18)',
+        boxShadow: HERO_COLORS.outerShadow,
       }}
     >
       <div className="absolute inset-0 pointer-events-none">
@@ -465,11 +466,9 @@ export function HeroLoop({ compact = false }: { compact?: boolean }) {
                 key={item.id}
                 className="rounded-full border px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.2em]"
                 style={{
-                  borderColor:
-                    itemIndex === index ? 'rgba(58,223,250,0.55)' : 'rgba(118,116,123,0.28)',
-                  background:
-                    itemIndex === index ? 'rgba(58,223,250,0.12)' : 'rgba(25,25,31,0.45)',
-                  color: itemIndex === index ? '#f9f5fd' : 'rgba(172,170,177,0.88)',
+                  borderColor: itemIndex === index ? HERO_COLORS.stageActive.border : HERO_COLORS.stageDim.border,
+                  background:  itemIndex === index ? HERO_COLORS.stageActive.bg    : HERO_COLORS.stageDim.bg,
+                  color:       itemIndex === index ? HERO_COLORS.stageActive.text  : HERO_COLORS.stageDim.text,
                 }}
               >
                 {item.label}

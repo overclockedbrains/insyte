@@ -74,7 +74,7 @@ export function TopicCard({ topic }: TopicCardProps) {
       href={`/s/${topic.slug}`}
       className="block h-full shrink-0 w-[min(240px,70vw)] min-w-[160px] md:w-full md:min-w-0 lg:w-[240px] lg:min-w-[240px] focus:outline-none"
     >
-      <article className="h-full rounded-2xl overflow-hidden border border-outline-variant/20 bg-surface-container-low hover:border-primary/35 hover:shadow-[0_0_18px_rgba(183,159,255,0.10)] transition-[box-shadow,border-color] duration-250 cursor-pointer group flex flex-col transform-gpu">
+      <article className="h-full rounded-2xl overflow-hidden border border-outline-variant/20 bg-surface-container-low hover:border-primary/35 hover:shadow-[0_0_18px_var(--glow-primary-10)] transition-[box-shadow,border-color] duration-250 cursor-pointer group flex flex-col transform-gpu">
 
         {/* ── Thumbnail ── */}
         <div className="relative w-full aspect-video bg-surface-container-high overflow-hidden">
@@ -98,7 +98,7 @@ export function TopicCard({ topic }: TopicCardProps) {
 
           {/* Play button — centered, fades in on hover */}
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <div className="h-10 w-10 rounded-full bg-surface-container-highest/80 border border-primary/40 backdrop-blur-sm flex items-center justify-center shadow-[0_0_16px_rgba(183,159,255,0.3)]">
+            <div className="h-10 w-10 rounded-full bg-surface-container-highest/80 border border-primary/40 backdrop-blur-sm flex items-center justify-center shadow-[0_0_16px_var(--glow-primary-30)]">
               <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" className="text-primary ml-0.5">
                 <polygon points="2,1 11,6 2,11" />
               </svg>
