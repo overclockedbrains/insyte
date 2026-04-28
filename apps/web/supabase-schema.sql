@@ -30,6 +30,28 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE FUNCTION check_and_increment_rate_limit(
+  ip_hash TEXT,
+  window_start_arg TIMESTAMPTZ,
+  limit_max INTEGER
+)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  next_count INTEGER;
+BEGIN
+  INSERT INTO rate_limits (ip, window_start, count)
+  VALUES (ip_hash, window_start_arg, 1)
+  ON CONFLICT (ip, window_start)
+  DO UPDATE SET count = rate_limits.count + 1
+  WHERE rate_limits.count < limit_max
+  RETURNING count INTO next_count;
+
+  RETURN next_count IS NOT NULL;
+END;
+$$;
+
 -- ── IP-based rate limiting ────────────────────────────────────────────────────
 -- 15 AI generation requests per IP per hour (free tier).
 CREATE TABLE IF NOT EXISTS rate_limits (

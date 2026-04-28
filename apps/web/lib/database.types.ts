@@ -192,6 +192,14 @@ export interface Database {
         }
         Returns: number
       }
+      check_and_increment_rate_limit: {
+        Args: {
+          ip_hash: string
+          window_start_arg: string
+          limit_max: number
+        }
+        Returns: boolean
+      }
     }
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>

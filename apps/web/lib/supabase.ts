@@ -17,7 +17,7 @@ export interface DatabaseSchemaSnapshot {
           slug: string
           title: string
           type: string
-          scene_json: unknown
+          scene_json: Json
           hit_count: number
           created_at: string
         }
@@ -26,7 +26,7 @@ export interface DatabaseSchemaSnapshot {
           slug: string
           title: string
           type: string
-          scene_json: unknown
+          scene_json: Json
           hit_count?: number
           created_at?: string
         }
@@ -35,7 +35,7 @@ export interface DatabaseSchemaSnapshot {
           slug?: string
           title?: string
           type?: string
-          scene_json?: unknown
+          scene_json?: Json
           hit_count?: number
           created_at?: string
         }
@@ -295,7 +295,7 @@ export async function saveScene(slug: string, scene: Scene): Promise<void> {
       slug,
       title: scene.title,
       type: scene.type,
-      scene_json: scene as unknown as Json,
+      scene_json: scene as Json,
       created_at: new Date().toISOString(),
     })
   } catch (err) {
@@ -312,16 +312,7 @@ export function incrementHitCount(slug: string): void {
   if (!supabase) return
 
   void (async () => {
-    const { data } = await supabase
-      .from('scenes')
-      .select('hit_count')
-      .eq('slug', slug)
-      .single()
-    if (data == null) return
-    await supabase
-      .from('scenes')
-      .update({ hit_count: (data.hit_count ?? 0) + 1 })
-      .eq('slug', slug)
+    await supabase.rpc('increment_hit_count', { slug_arg: slug })
   })()
 }
 
@@ -427,24 +418,14 @@ export async function checkAndIncrementRateLimit(ip: string): Promise<boolean> {
   const windowStart = getCurrentWindowStart()
 
   try {
-    const { data } = await supabase
-      .from('rate_limits')
-      .select('count')
-      .eq('ip', ipHash)
-      .eq('window_start', windowStart)
-      .maybeSingle()
-
-    const currentCount = data?.count ?? 0
-
-    if (currentCount >= RATE_LIMIT_MAX) return false
-
-    await supabase.from('rate_limits').upsert({
-      ip: ipHash,
-      window_start: windowStart,
-      count: currentCount + 1,
+    const { data, error } = await supabase.rpc('check_and_increment_rate_limit', {
+      ip_hash: ipHash,
+      window_start_arg: windowStart,
+      limit_max: RATE_LIMIT_MAX,
     })
 
-    return true
+    if (error) return true
+    return data ?? true
   } catch {
     // Table not created yet — allow request
     return true
