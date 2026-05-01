@@ -244,16 +244,15 @@ export async function getCachedSlugForQuery(query: string): Promise<string | nul
 
 /**
  * Persists a query → slug mapping for future deduplication.
- * Fire-and-forget — does not throw.
  */
-export function saveQueryHash(query: string, slug: string): void {
+export async function saveQueryHash(query: string, slug: string): Promise<void> {
   const supabase = getServerSupabase()
   if (!supabase) return
 
   const normalized = normalizeQuery(query)
   const hash = hashQuery(normalized)
 
-  void supabase.from('query_hashes').upsert({ hash, normalized_query: normalized, scene_slug: slug })
+  await supabase.from('query_hashes').upsert({ hash, normalized_query: normalized, scene_slug: slug })
 }
 
 // ─── Scene caching ────────────────────────────────────────────────────────────
@@ -305,30 +304,28 @@ export async function saveScene(slug: string, scene: Scene): Promise<void> {
 
 /**
  * Increments the hit counter for a scene slug.
- * Fire-and-forget — does not await.
  */
-export function incrementHitCount(slug: string): void {
+export async function incrementHitCount(slug: string): Promise<void> {
   const supabase = getServerSupabase()
   if (!supabase) return
 
-  void (async () => {
-    await supabase.rpc('increment_hit_count', { slug_arg: slug })
-  })()
+  await supabase.rpc('increment_hit_count', { slug_arg: slug })
 }
 
 // ─── User history ─────────────────────────────────────────────────────────────
 
 /**
  * Records a user-generated scene in user_generated_scenes.
- * Fire-and-forget — service role can write regardless of RLS.
+ * Service role can write regardless of RLS.
  */
-export function recordUserGeneration(userId: string, query: string, slug: string): void {
+export async function recordUserGeneration(userId: string, query: string, slug: string): Promise<void> {
   const supabase = getServerSupabase()
   if (!supabase) return
 
-  void supabase.from('user_generated_scenes')
+  const { error } = await supabase
+    .from('user_generated_scenes')
     .insert({ user_id: userId, scene_slug: slug, query })
-    .then(({ error }) => { if (error) console.error('[supabase] recordUserGeneration failed:', error) })
+  if (error) console.error('[supabase] recordUserGeneration failed:', error)
 }
 
 // ─── Saved scenes (bookmarks) ─────────────────────────────────────────────────

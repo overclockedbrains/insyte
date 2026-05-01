@@ -131,7 +131,7 @@ export default async function SimulationPage({ params, searchParams }: Props) {
   ) : null
 
   if (staticScene) {
-    incrementHitCount(slug)
+    await incrementHitCount(slug)
     return (
       <>
         {jsonLdScript}
@@ -141,7 +141,7 @@ export default async function SimulationPage({ params, searchParams }: Props) {
   }
 
   if (cachedScene) {
-    incrementHitCount(slug)
+    await incrementHitCount(slug)
     return (
       <>
         {jsonLdScript}

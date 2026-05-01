@@ -12,6 +12,7 @@ import {
   getCachedSlugForQuery,
   saveQueryHash,
   recordUserGeneration,
+  incrementHitCount,
 } from '@/lib/supabase'
 import { generateSlug } from '@/src/lib/slug'
 import { aiLog } from '@/lib/ai-logger'
@@ -153,10 +154,11 @@ export async function POST(req: NextRequest) {
             void (async () => {
               try {
                 await saveScene(saveSlug, event.scene)
-                saveQueryHash(topic, saveSlug)
+                await saveQueryHash(topic, saveSlug)
                 if (authenticatedUserId) {
-                  recordUserGeneration(authenticatedUserId, topic, saveSlug)
+                  await recordUserGeneration(authenticatedUserId, topic, saveSlug)
                 }
+                await incrementHitCount(saveSlug)
                 aiLog.server.cache('saved', saveSlug)
               } catch (err) {
                 aiLog.server.cache('failed', err instanceof Error ? err.message : err)
