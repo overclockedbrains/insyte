@@ -343,9 +343,7 @@ export function Navbar() {
 
               {/* Bookmark */}
               {currentSlug && (
-                <div className="hidden sm:flex">
-                  <BookmarkButton slug={currentSlug} />
-                </div>
+                <BookmarkButton slug={currentSlug} />
               )}
 
               <SettingsLink className="hidden sm:flex items-center px-2.5 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-150" />

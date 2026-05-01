@@ -81,7 +81,7 @@ const TYPE_TOKENS: Record<string, HighlightColor[]> = {
   'chart:bar': ['active', 'comparing', 'sorted', 'pivot'],
 }
 
-function deriveTokens(canvas: CanvasVisual[]): HighlightColor[] {
+export function deriveTokens(canvas: CanvasVisual[]): HighlightColor[] {
   const seen = new Set<HighlightColor>()
   for (const visual of canvas) {
     const key = `${visual.type}:${(visual as { variant?: string }).variant ?? ''}`

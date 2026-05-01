@@ -19,7 +19,7 @@ import { useResolvedPopups } from '@/src/hooks/useResolvedPopups'
 import { ActiveRenderer } from '@/src/components/renderers/registry'
 import { TextBadgeViz } from '@/src/engine/primitives/TextBadgeViz'
 import { CounterViz } from '@/src/engine/primitives/CounterViz'
-import { ColorLegend } from '@/src/engine/controls/ColorLegend'
+import { ColorLegend, deriveTokens } from '@/src/engine/controls/ColorLegend'
 
 // ─── CanvasCard ────────────────────────────────────────────────────────────────
 // The dark card container that wraps the simulation canvas visuals.
@@ -41,8 +41,9 @@ function HudZone({ scene, step }: { scene: Scene, step: number }) {
   const { activeText, hud } = applyOverlaysAtStep(scene, step)
   const hasActiveText = scene.activeText !== undefined
   const hasHudItems = scene.hud != null && scene.hud.length > 0
+  const hasColorLegend = deriveTokens(scene.canvas).length > 0
 
-  if (!hasActiveText && !hasHudItems) return null
+  if (!hasActiveText && !hasHudItems && !hasColorLegend) return null
 
   return (
     <>
