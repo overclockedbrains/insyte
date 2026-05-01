@@ -48,7 +48,7 @@ Rules:
 - graph initialState: every node needs id+label; every edge needs id+from+to
 - graph/weighted initialState: edges[].weight (number) REQUIRED on every edge in initialStates (not in steps)
 - graph/weighted nodes[].distance: optional string in initialStates only ("∞" for unreached nodes)
-- tree initialState: every node needs id+value+children (children:[] for leaves); rootId must match a node id
+- tree initialState: nodes[] must be NON-EMPTY — declare every node (id+value+children, children:[] for leaves); rootId must match a declared node id
 - Trie nodes use isEnd: true/false (boolean) to mark word boundaries; root node has value: ""
 - system-diagram initialState: every component needs id+label+icon; every connection needs id+from+to
 - system-diagram with layoutHint "ring" uses the same state format as all other system-diagrams
@@ -178,6 +178,76 @@ Teaching moments:
             "b": {"highlight": "active"},
             "c": {"highlight": "queued"}
           }
+        }
+      }
+    }
+  ]
+}
+</example>
+
+<example>
+EXAMPLE 3 — Identity-based primitive (tree sparse overlay pattern)
+Topic: "Binary Search Tree insertion"
+Canvas visuals: bst (tree, variant: binary)
+
+Key rules demonstrated:
+- initialStates["bst"].nodes is NON-EMPTY — all nodes declared upfront with stable IDs
+- Node value is always a STRING — stringify numbers ("5", not 5)
+- Every node has id + value (string) + children (children:[] for leaves)
+- rootId matches a declared node id
+- Step canvas uses nodeStates for highlight changes (sparse — only changed nodes)
+- newNodes adds a new node; updateNodes rewires the parent's children array
+- Highlight on a newNode is set via nodeStates (newNodes always reset to highlight:"default")
+
+Teaching moments:
+1. Start at root, compare insert value 6 > 5, go right
+2. At node 7: 6 < 7, insert as left child — wire parent + highlight new node
+
+{
+  "initialStates": {
+    "bst": {
+      "nodes": [
+        {"id": "n1", "value": "5", "children": ["n2","n3"]},
+        {"id": "n2", "value": "3", "children": []},
+        {"id": "n3", "value": "7", "children": []}
+      ],
+      "rootId": "n1"
+    }
+  },
+  "steps": [
+    {
+      "index": 1,
+      "explanation": {
+        "heading": "Compare at Root",
+        "body": "Insert 6 — compare with root 5. Since 6 > 5, descend into the right subtree.",
+        "callout": "Each comparison halves the remaining search space."
+      },
+      "activeText": "insert 6 → 6 > 5, go right",
+      "canvas": {
+        "bst": {
+          "nodeStates": {
+            "n1": {"highlight": "active"}
+          }
+        }
+      }
+    },
+    {
+      "index": 2,
+      "explanation": {
+        "heading": "Insert as Left Child of 7",
+        "body": "At node 7, 6 < 7 — insert 6 as its left child. newNodes declares the node; updateNodes rewires 7's children array.",
+        "callout": "Insertion always fills an empty child slot — no existing node is displaced."
+      },
+      "activeText": "6 < 7 → insert left of 7",
+      "canvas": {
+        "bst": {
+          "nodeStates": {
+            "n1": {"highlight": "visited"},
+            "n3": {"highlight": "active"},
+            "n4": {"highlight": "insert"}
+          },
+          "newNodes": [{"id": "n4", "value": "6", "children": []}],
+          "updateNodes": [{"id": "n3", "children": ["n4"]}]
         }
       }
     }
