@@ -37,18 +37,40 @@ export const HIGHLIGHT_COLORS = {
   current:    { bg: `rgba(${STATE_ACTIVE.rgb}, 0.10)`,     border: STATE_ACTIVE.hex,  text: STATE_ACTIVE.hex },
   /** Element being compared (e.g. pivot comparison) */
   compare:    { bg: `rgba(${STATE_ACTIVE.rgb}, 0.10)`,     border: STATE_ACTIVE.hex,  text: STATE_ACTIVE.hex },
+  /** Element actively being compared — chart/sort variant of compare */
+  comparing:  { bg: `rgba(${STATE_ACTIVE.rgb}, 0.10)`,     border: STATE_ACTIVE.hex,  text: STATE_ACTIVE.hex },
   /** Secondary / dependency reference */
   dependency: { bg: `rgba(${STATE_ACTIVE.rgb}, 0.10)`,     border: STATE_ACTIVE.hex,  text: STATE_ACTIVE.hex },
+  /** Reference cell being read from (e.g. diagonal in DP, source node in graph) */
+  source:     { bg: `rgba(${STATE_ACTIVE.rgb}, 0.10)`,     border: STATE_ACTIVE.hex,  text: STATE_ACTIVE.hex },
+  /** Node visited during traversal (tree / graph) */
+  visited:    { bg: `rgba(${STATE_ACTIVE.rgb}, 0.10)`,     border: STATE_ACTIVE.hex,  text: STATE_ACTIVE.hex },
+  /** Graph edge being relaxed (shortest-path algorithms) */
+  relaxed:    { bg: `rgba(${STATE_ACTIVE.rgb}, 0.10)`,     border: STATE_ACTIVE.hex,  text: STATE_ACTIVE.hex },
   /** Least recently used — next to be evicted (informational warning) */
   lru:        { bg: `rgba(${STATE_ACTIVE.rgb}, 0.10)`,     border: STATE_ACTIVE.hex,  text: STATE_ACTIVE.hex },
 
   // ── GREEN — success / found / inserted / complete ─────────────────────────────
   /** Being inserted / added to the structure */
   insert:     { bg: `rgba(${STATE_SUCCESS.rgb}, 0.10)`,    border: STATE_SUCCESS.hex, text: '#e2e8f0' },
+  /** Element pushed onto stack */
+  push:       { bg: `rgba(${STATE_SUCCESS.rgb}, 0.10)`,    border: STATE_SUCCESS.hex, text: '#e2e8f0' },
+  /** Element enqueued */
+  enqueue:    { bg: `rgba(${STATE_SUCCESS.rgb}, 0.10)`,    border: STATE_SUCCESS.hex, text: '#e2e8f0' },
   /** Cache / lookup hit — element found */
   hit:        { bg: `rgba(${STATE_SUCCESS.rgb}, 0.10)`,    border: STATE_SUCCESS.hex, text: STATE_SUCCESS.hex },
   /** Element found / search complete */
   found:      { bg: `rgba(${STATE_SUCCESS.rgb}, 0.10)`,    border: STATE_SUCCESS.hex, text: STATE_SUCCESS.hex },
+  /** Recursion call returning a value */
+  returned:   { bg: `rgba(${STATE_SUCCESS.rgb}, 0.10)`,    border: STATE_SUCCESS.hex, text: STATE_SUCCESS.hex },
+  /** Memoized / cached result reused */
+  memoized:   { bg: `rgba(${STATE_SUCCESS.rgb}, 0.10)`,    border: STATE_SUCCESS.hex, text: STATE_SUCCESS.hex },
+  /** Element included in spanning tree (graph) */
+  'in-tree':  { bg: `rgba(${STATE_SUCCESS.rgb}, 0.10)`,    border: STATE_SUCCESS.hex, text: STATE_SUCCESS.hex },
+  /** Minimum-weight edge selected (graph) */
+  'min-edge': { bg: `rgba(${STATE_SUCCESS.rgb}, 0.10)`,    border: STATE_SUCCESS.hex, text: STATE_SUCCESS.hex },
+  /** Element sorted / in final position */
+  sorted:     { bg: `rgba(${STATE_SUCCESS.rgb}, 0.10)`,    border: STATE_SUCCESS.hex, text: STATE_SUCCESS.hex },
   /** Most recently used — safe in cache */
   mru:        { bg: `rgba(${STATE_SUCCESS.rgb}, 0.10)`,    border: STATE_SUCCESS.hex, text: STATE_SUCCESS.hex },
   /** Completed / filled DP cell */
@@ -57,12 +79,18 @@ export const HIGHLIGHT_COLORS = {
   // ── RED — danger / error / miss / removed ─────────────────────────────────────
   /** Being deleted / removed from the structure */
   remove:     { bg: `rgba(${STATE_DANGER.rgb}, 0.10)`,     border: STATE_DANGER.hex,  text: '#e2e8f0' },
+  /** Element popped from stack */
+  pop:        { bg: `rgba(${STATE_DANGER.rgb}, 0.10)`,     border: STATE_DANGER.hex,  text: '#e2e8f0' },
+  /** Element dequeued */
+  dequeue:    { bg: `rgba(${STATE_DANGER.rgb}, 0.10)`,     border: STATE_DANGER.hex,  text: '#e2e8f0' },
   /** Cache / lookup miss — element not found */
   miss:       { bg: `rgba(${STATE_DANGER.rgb}, 0.10)`,     border: STATE_DANGER.hex,  text: STATE_DANGER.hex },
   /** Error / invalid state */
   error:      { bg: `rgba(${STATE_DANGER.rgb}, 0.10)`,     border: STATE_DANGER.hex,  text: STATE_DANGER.hex },
   /** Deleted element */
   delete:     { bg: `rgba(${STATE_DANGER.rgb}, 0.10)`,     border: STATE_DANGER.hex,  text: STATE_DANGER.hex },
+  /** Graph edge rejected from spanning tree */
+  rejected:   { bg: `rgba(${STATE_DANGER.rgb}, 0.10)`,     border: STATE_DANGER.hex,  text: STATE_DANGER.hex },
   /** Hash collision */
   collision:  { bg: `rgba(${STATE_DANGER.rgb}, 0.10)`,     border: STATE_DANGER.hex,  text: STATE_DANGER.hex },
 
