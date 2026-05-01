@@ -35,6 +35,7 @@
 - Handle errors better to show if failures from ai provider with specific human readable message and suggestion.
 - Suggest user by doing ANN search on already generated scenes to use them or generate new?
 - Remove explore page and just have gallery?
+- Do not pass retry-message in retry if stage failed due to gemini not available due to high demand and do not retry if rate limit exceeded.
 
 ## ❓ Questions / Blockers
 - Will we be able to optimize token consumptions ? - cost estimation ?
