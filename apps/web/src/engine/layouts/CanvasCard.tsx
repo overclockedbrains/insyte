@@ -19,6 +19,7 @@ import { useResolvedPopups } from '@/src/hooks/useResolvedPopups'
 import { ActiveRenderer } from '@/src/components/renderers/registry'
 import { TextBadgeViz } from '@/src/engine/primitives/TextBadgeViz'
 import { CounterViz } from '@/src/engine/primitives/CounterViz'
+import { ColorLegend } from '@/src/engine/controls/ColorLegend'
 
 // ─── CanvasCard ────────────────────────────────────────────────────────────────
 // The dark card container that wraps the simulation canvas visuals.
@@ -35,7 +36,7 @@ interface CanvasCardProps {
   onRerunWithCustomInput?: (() => void) | null
 }
 
-// ─── HUD zone: activeText + hud items ────────────────────────────────────────
+// ─── HUD zone: activeText + hud items + color legend ─────────────────────────
 function HudZone({ scene, step }: { scene: Scene, step: number }) {
   const { activeText, hud } = applyOverlaysAtStep(scene, step)
   const hasActiveText = scene.activeText !== undefined
@@ -49,26 +50,23 @@ function HudZone({ scene, step }: { scene: Scene, step: number }) {
         {hasActiveText && activeText !== undefined && (
           <TextBadgeViz id="active-text" state={{ text: activeText }} step={step} />
         )}
-        {hasHudItems && (
-          <div className="flex items-center gap-4 flex-shrink-0 ml-auto">
-            {scene.hud!.map(hudItem => (
-              <CounterViz
-                key={hudItem.id}
-                id={hudItem.id}
-                state={{
-                  value: hud[hudItem.id] ?? hudItem.initialValue,
-                  label: hudItem.label,
-                }}
-                step={step}
-                label={hudItem.label}
-              />
-            ))}
-          </div>
-        )}
+        <div className="flex items-center gap-3 flex-shrink-0 ml-auto">
+          {hasHudItems && scene.hud!.map(hudItem => (
+            <CounterViz
+              key={hudItem.id}
+              id={hudItem.id}
+              state={{
+                value: hud[hudItem.id] ?? hudItem.initialValue,
+                label: hudItem.label,
+              }}
+              step={step}
+              label={hudItem.label}
+            />
+          ))}
+          <ColorLegend canvas={scene.canvas} />
+        </div>
       </div>
-      <div className="relative z-20 flex-shrink-0">
-        <div className="h-px bg-outline-variant/20" />
-      </div>
+      <div className="h-px bg-outline-variant/20 flex-shrink-0" />
     </>
   )
 }
