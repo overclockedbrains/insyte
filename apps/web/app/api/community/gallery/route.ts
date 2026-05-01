@@ -45,6 +45,8 @@ export async function GET(req: NextRequest) {
     return Response.json({ scenes: [], hasMore: false }, { status: 500 })
   }
 
+  const rawLength = (data ?? []).length
+
   const scenes: CommunityScene[] = (data ?? [])
     .filter((row) => row.scene_slug && row.scenes)
     .map((row) => {
@@ -59,5 +61,5 @@ export async function GET(req: NextRequest) {
       }
     })
 
-  return Response.json({ scenes, hasMore: scenes.length === PAGE_SIZE })
+  return Response.json({ scenes, hasMore: rawLength === PAGE_SIZE })
 }

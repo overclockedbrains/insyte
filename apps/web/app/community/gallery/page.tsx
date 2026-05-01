@@ -44,6 +44,8 @@ async function fetchInitialScenes(): Promise<{
 
   if (pageResult.error) return { scenes: [], hasMore: false, totalCount: 0 }
 
+  const rawLength = pageResult.data?.length ?? 0
+
   const scenes: CommunityScene[] = (pageResult.data ?? [])
     .filter((row) => row.scene_slug && row.scenes)
     .map((row) => {
@@ -60,7 +62,7 @@ async function fetchInitialScenes(): Promise<{
 
   return {
     scenes,
-    hasMore: scenes.length === 20,
+    hasMore: rawLength === 20,
     totalCount: countResult.count ?? 0,
   }
 }
