@@ -171,6 +171,7 @@ Full docs index: **[docs/README.md](docs/README.md)**
 | [API Reference](docs/backend/api-reference.md) | All server endpoints — request/response shapes and status codes |
 | [Supabase Data Model](docs/backend/data-model.md) | Tables, privacy rules, runtime query patterns |
 | [Adding Scenes & Primitives](docs/guides/adding-scenes-and-primitives.md) | Step-by-step checklists for new scenes, visual types, controls, and providers |
+| [Gemini Server Key Cost Analysis](.planning/analysis/GEMINI_COST_ANALYSIS.md) | Per-scene cost breakdown for all 5 scene types in server key mode — USD + INR, stage-by-stage token estimates, at-scale projections |
 
 ## BYOK
 
@@ -184,6 +185,8 @@ insyte supports Bring Your Own Key for all providers from the Settings page:
 | Groq | Cloud | BYOK only. Key stored client-side. |
 | Ollama | Local | No key required. Set base URL to your Ollama instance. Requires `OLLAMA_ORIGINS=https://insyte.amanarya.com` when starting Ollama. |
 | Custom | Any OpenAI-compatible | Provide base URL + optional key. Covers LM Studio, vLLM, Together.ai, etc. |
+
+> **Server key cost (Gemini, free tier):** generating a scene via insyte's `GEMINI_API_KEY` costs approximately **$0.07–$0.15 per scene (₹6.93–₹14.43)** depending on scene type and topic complexity, billed to the server Gemini key. See [Gemini Server Key Cost Analysis](.planning/analysis/GEMINI_COST_ANALYSIS.md) for a full per-stage breakdown, at-scale projections, and INR equivalents as of May 2026.
 
 - Keys are stored in browser `localStorage` only — never sent to or logged by the insyte server.
 - Keys are forwarded per request in request headers (`x-api-key`, `x-provider`, `x-model`, `x-base-url`).
