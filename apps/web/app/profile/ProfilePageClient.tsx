@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -17,6 +17,7 @@ import type { User } from '@supabase/supabase-js'
 interface SavedScene {
   scene_slug: string
   saved_at: string
+  scenes: { title: string } | null
 }
 
 interface GeneratedScene {
@@ -37,6 +38,10 @@ export function ProfilePageClient() {
   const [savedScenes, setSavedScenes] = useState<SavedScene[]>([])
   const [generatedScenes, setGeneratedScenes] = useState<GeneratedScene[]>([])
   const [dataLoading, setDataLoading] = useState(true)
+  const [generatedHasMore, setGeneratedHasMore] = useState(false)
+  const [generatedLoadingMore, setGeneratedLoadingMore] = useState(false)
+
+  const GENERATED_PAGE_SIZE = 20
 
   // Auth guard: redirect to home with modal if not signed in
   useEffect(() => {
@@ -63,7 +68,7 @@ export function ProfilePageClient() {
         const [savedRes, generatedRes] = await Promise.all([
           supabase
             .from('saved_scenes')
-            .select('scene_slug, saved_at')
+            .select('scene_slug, saved_at, scenes(title)')
             .eq('user_id', user.id)
             .order('saved_at', { ascending: false }),
           supabase
@@ -71,11 +76,13 @@ export function ProfilePageClient() {
             .select('id, scene_slug, query, generated_at')
             .eq('user_id', user.id)
             .order('generated_at', { ascending: false })
-            .limit(20),
+            .range(0, GENERATED_PAGE_SIZE - 1),
         ])
 
+        const generatedData = generatedRes.data ?? []
         setSavedScenes(savedRes.data ?? [])
-        setGeneratedScenes(generatedRes.data ?? [])
+        setGeneratedScenes(generatedData)
+        setGeneratedHasMore(generatedData.length === GENERATED_PAGE_SIZE)
       } finally {
         setDataLoading(false)
       }
@@ -83,6 +90,29 @@ export function ProfilePageClient() {
 
     void fetchData()
   }, [user])
+
+  const loadMoreGenerated = useCallback(async () => {
+    if (!user || generatedLoadingMore) return
+    const supabase = getBrowserSupabase()
+    if (!supabase) return
+
+    setGeneratedLoadingMore(true)
+    try {
+      const from = generatedScenes.length
+      const { data } = await supabase
+        .from('user_generated_scenes')
+        .select('id, scene_slug, query, generated_at')
+        .eq('user_id', user.id)
+        .order('generated_at', { ascending: false })
+        .range(from, from + GENERATED_PAGE_SIZE - 1)
+
+      const newRows = data ?? []
+      setGeneratedScenes((prev) => [...prev, ...newRows])
+      setGeneratedHasMore(newRows.length === GENERATED_PAGE_SIZE)
+    } finally {
+      setGeneratedLoadingMore(false)
+    }
+  }, [user, generatedScenes.length, generatedLoadingMore])
 
   // Loading state while auth is resolving
   if (authLoading) {
@@ -123,7 +153,12 @@ export function ProfilePageClient() {
                 variants={{ visible: { transition: { staggerChildren: 0.05 } } }}
             >
               {savedScenes.map((s) => (
-                <SavedCard key={s.scene_slug} slug={s.scene_slug} savedAt={s.saved_at} />
+                <SavedCard
+                  key={s.scene_slug}
+                  slug={s.scene_slug}
+                  savedAt={s.saved_at}
+                  title={Array.isArray(s.scenes) ? (s.scenes[0]?.title ?? null) : (s.scenes?.title ?? null)}
+                />
               ))}
             </motion.div>
           )}
@@ -151,6 +186,19 @@ export function ProfilePageClient() {
                 <GeneratedRow key={g.id} item={g} />
               ))}
             </motion.div>
+          )}
+
+          {generatedHasMore && !dataLoading && (
+            <div className="flex justify-center mt-4">
+              <button
+                type="button"
+                onClick={() => void loadMoreGenerated()}
+                disabled={generatedLoadingMore}
+                className="px-6 py-2 rounded-xl border border-outline-variant/30 bg-surface-container-low text-sm font-medium text-on-surface-variant hover:text-on-surface hover:border-primary/30 hover:bg-surface-container disabled:opacity-50 transition-all duration-200"
+              >
+                {generatedLoadingMore ? 'Loading…' : 'Load more'}
+              </button>
+            </div>
           )}
         </section>
       </div>
@@ -215,12 +263,12 @@ function SectionHeader({
   )
 }
 
-function SavedCard({ slug, savedAt }: { slug: string; savedAt: string }) {
+function SavedCard({ slug, savedAt, title: sceneTitle }: { slug: string; savedAt: string; title: string | null }) {
   const date = new Date(savedAt).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
   })
-  const title = slug
+  const title = sceneTitle ?? slug
     .split('-')
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(' ')
