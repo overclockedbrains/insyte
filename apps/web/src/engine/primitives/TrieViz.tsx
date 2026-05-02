@@ -6,6 +6,7 @@ import type { PrimitiveProps } from '.'
 import { computeLayout } from '@insyte/scene-engine'
 import { useCanvas } from '../CanvasContext'
 import { resolveHighlight } from '../styles/colors'
+import { useThemeSync } from '../styles/useThemeSync'
 
 interface TrieNode {
   id: string
@@ -21,6 +22,7 @@ interface TrieState {
 }
 
 export function TrieViz({ id, state, visual }: PrimitiveProps) {
+  useThemeSync()
   const { width: canvasW, height: canvasH } = useCanvas()
   const { nodes = [], rootId } = state as TrieState
 

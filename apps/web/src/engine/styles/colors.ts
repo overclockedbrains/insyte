@@ -28,7 +28,7 @@ const STATE_AMBER   = { hex: '#f59e0b', rgb: '245, 158, 11'  } as const
 
 export const HIGHLIGHT_COLORS = {
   /** Resting state */
-  default:    { bg: '#19191f',                              border: '#48474d',        text: '#e2e8f0' },
+  default:    { bg: '#19191f',                              border: '#48474d',        text: '#f9f5fd' },
 
   // ── CYAN — informational / active ────────────────────────────────────────────
   /** Currently being examined / visited */
@@ -101,12 +101,40 @@ export const HIGHLIGHT_COLORS = {
 
 export type HighlightColor = keyof typeof HIGHLIGHT_COLORS
 
+// Categorise every token into its semantic state group so resolveHighlight
+// can build colors from live CSS vars rather than module-level constants.
+const ACTIVE_HIGHLIGHTS  = new Set(['active', 'current', 'compare', 'comparing', 'dependency', 'source', 'visited', 'relaxed', 'lru'])
+const SUCCESS_HIGHLIGHTS = new Set(['insert', 'push', 'enqueue', 'hit', 'found', 'returned', 'memoized', 'in-tree', 'min-edge', 'sorted', 'mru', 'filled'])
+const DANGER_HIGHLIGHTS  = new Set(['remove', 'pop', 'dequeue', 'miss', 'error', 'delete', 'rejected', 'collision'])
+const AMBER_HIGHLIGHTS   = new Set(['pivot'])
+// Mutation operations keep white text; state-indicator operations use accent text.
+const TEXT_WHITE_KEYS    = new Set(['active', 'insert', 'push', 'enqueue', 'remove', 'pop', 'dequeue'])
+
+function stateColor(hex: string, rgb: string, key: string): { bg: string; border: string; text: string } {
+  const onState = readCSSVar('--ref-on-state') || '#e2e8f0'
+  return { bg: `rgba(${rgb}, 0.10)`, border: hex, text: TEXT_WHITE_KEYS.has(key) ? onState : hex }
+}
+
 /**
- * Resolve a highlight token string from step state to color tokens.
- * Unknown tokens fall back to 'default' silently.
+ * Resolve a highlight token to theme-aware CSS color strings.
+ * Reads live CSS vars so all themes apply instantly — no re-import needed.
+ * Components must call useThemeSync() to trigger a re-render on theme change.
  */
-export function resolveHighlight(h: string | undefined): (typeof HIGHLIGHT_COLORS)[HighlightColor] {
-  return HIGHLIGHT_COLORS[(h as HighlightColor) ?? 'default'] ?? HIGHLIGHT_COLORS.default
+export function resolveHighlight(h: string | undefined): { bg: string; border: string; text: string } {
+  const key = (h as HighlightColor) ?? 'default'
+  if (key === 'default') {
+    return {
+      bg:     readCSSVar('--ref-card')        || HIGHLIGHT_COLORS.default.bg,
+      border: readCSSVar('--ref-outline-dim') || HIGHLIGHT_COLORS.default.border,
+      text:   readCSSVar('--ref-on-surface')  || HIGHLIGHT_COLORS.default.text,
+    }
+  }
+  const { active, success, danger, amber } = getThemeStateColors()
+  if (ACTIVE_HIGHLIGHTS.has(key))  return stateColor(active.hex,  active.rgb,  key)
+  if (SUCCESS_HIGHLIGHTS.has(key)) return stateColor(success.hex, success.rgb, key)
+  if (DANGER_HIGHLIGHTS.has(key))  return stateColor(danger.hex,  danger.rgb,  key)
+  if (AMBER_HIGHLIGHTS.has(key))   return stateColor(amber.hex,   amber.rgb,   key)
+  return HIGHLIGHT_COLORS[key as HighlightColor] ?? HIGHLIGHT_COLORS.default
 }
 
 // ── Primary palette constants — for JS contexts that cannot read CSS vars ────────
@@ -266,9 +294,182 @@ export const HERO_COLORS = {
 } as const
 
 
+// ── Runtime theme color reader — for canvas / Framer components ──────────────
+// Canvas 2D and Framer Motion animate targets cannot resolve CSS vars at runtime.
+// Call getThemeStateColors() at draw/animate time to get live theme-aware colors.
+// Canvas viz components that import HIGHLIGHT_COLORS or GRID_CELL_COLORS directly
+// should migrate to call getThemeStateColors() on each render for full live theming.
+
+function readCSSVar(name: string): string {
+  if (typeof window === 'undefined') return ''
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+}
+
+function hexToRgb(hex: string): string {
+  const clean = hex.replace('#', '')
+  const r = parseInt(clean.slice(0, 2), 16)
+  const g = parseInt(clean.slice(2, 4), 16)
+  const b = parseInt(clean.slice(4, 6), 16)
+  if (isNaN(r) || isNaN(g) || isNaN(b)) return ''
+  return `${r}, ${g}, ${b}`
+}
+
+export function getThemeStateColors() {
+  const aHex = readCSSVar('--ref-secondary') || STATE_ACTIVE.hex
+  const sHex = readCSSVar('--ref-success')   || STATE_SUCCESS.hex
+  const dHex = readCSSVar('--ref-error')     || STATE_DANGER.hex
+  const mHex = readCSSVar('--ref-amber')     || STATE_AMBER.hex
+
+  const active  = { hex: aHex, rgb: hexToRgb(aHex)  || STATE_ACTIVE.rgb  }
+  const success = { hex: sHex, rgb: hexToRgb(sHex)  || STATE_SUCCESS.rgb }
+  const danger  = { hex: dHex, rgb: hexToRgb(dHex)  || STATE_DANGER.rgb  }
+  const amber   = { hex: mHex, rgb: hexToRgb(mHex)  || STATE_AMBER.rgb   }
+
+  return { active, success, danger, amber }
+}
+
+export function getLivePrimary() {
+  const hex = readCSSVar('--ref-primary')     || PRIMARY.hex
+  const rgb = readCSSVar('--ref-primary-rgb') || PRIMARY_RGB
+  return {
+    hex,
+    alpha07:    `rgba(${rgb}, 0.07)`,
+    alpha08:    `rgba(${rgb}, 0.08)`,
+    alpha10:    `rgba(${rgb}, 0.10)`,
+    alpha12:    `rgba(${rgb}, 0.12)`,
+    alpha15:    `rgba(${rgb}, 0.15)`,
+    alpha16:    `rgba(${rgb}, 0.16)`,
+    alpha20:    `rgba(${rgb}, 0.20)`,
+    alpha25:    `rgba(${rgb}, 0.25)`,
+    alpha28:    `rgba(${rgb}, 0.28)`,
+    alpha30:    `rgba(${rgb}, 0.30)`,
+    alpha35:    `rgba(${rgb}, 0.35)`,
+    alpha40:    `rgba(${rgb}, 0.40)`,
+    alpha45:    `rgba(${rgb}, 0.45)`,
+    alpha60:    `rgba(${rgb}, 0.60)`,
+    alpha90:    `rgba(${rgb}, 0.90)`,
+    glow0:      `0 0 0px rgba(${rgb}, 0)`,
+    glowSubtle: `0 0 20px rgba(${rgb}, 0.10)`,
+    glowBright: `0 0 40px rgba(${rgb}, 0.4), 0 0 80px rgba(${rgb}, 0.15)`,
+    glowCard:   `0 0 60px rgba(${rgb}, 0.35)`,
+  }
+}
+
+export function getGridCellColors() {
+  const { active, success, amber } = getThemeStateColors()
+  const cardHex = readCSSVar('--ref-card')        || '#19191f'
+  const odHex   = readCSSVar('--ref-outline-dim') || '#48474d'
+  const bgHex   = readCSSVar('--ref-background')  || '#0e0e13'
+  const cardRgb = hexToRgb(cardHex) || '25, 25, 31'
+  return {
+    default: { bg: cardHex,                                      border: odHex,        text: '#6b7280',           shadow: 'none' },
+    wall:    { bg: bgHex,                                        border: cardHex,      text: `rgba(${cardRgb}, 0.8)`, shadow: 'none' },
+    start:   { bg: `rgba(${success.rgb}, 0.40)`,                 border: success.hex,  text: '#e2e8f0',           shadow: `0 0 10px rgba(${success.rgb}, 0.30)` },
+    visited: { bg: `rgba(${active.rgb},  0.22)`,                 border: active.hex,   text: active.hex,          shadow: `0 0 8px rgba(${active.rgb}, 0.20)` },
+    active:  { bg: `rgba(${active.rgb},  0.40)`,                 border: active.hex,   text: '#e2e8f0',           shadow: `0 0 12px rgba(${active.rgb}, 0.40)` },
+    path:    { bg: `rgba(${success.rgb}, 0.55)`,                 border: success.hex,  text: '#e2e8f0',           shadow: `0 0 12px rgba(${success.rgb}, 0.45)` },
+    end:     { bg: `rgba(${amber.rgb},   0.35)`,                 border: amber.hex,    text: amber.hex,           shadow: `0 0 10px rgba(${amber.rgb}, 0.30)` },
+    pivot:   { bg: `rgba(${amber.rgb},   0.35)`,                 border: amber.hex,    text: amber.hex,           shadow: 'none' },
+  }
+}
+
+export function getLiveVizSurface() {
+  const cardHex  = readCSSVar('--ref-card')        || '#19191f'
+  const secHex   = readCSSVar('--ref-secondary')   || '#3adffa'
+  const priHex   = readCSSVar('--ref-primary')     || '#b79fff'
+  const bgHex    = readCSSVar('--ref-background')  || '#0e0e13'
+  const outHex   = readCSSVar('--ref-outline')     || '#76747b'
+  const odHex    = readCSSVar('--ref-outline-dim') || '#48474d'
+  const onSurHex = readCSSVar('--ref-on-surface') || '#f9f5fd'
+  const cardRgb  = hexToRgb(cardHex)   || '25, 25, 31'
+  const secRgb   = hexToRgb(secHex)    || '58, 223, 250'
+  const priRgb   = hexToRgb(priHex)    || '183, 159, 255'
+  const bgRgb    = hexToRgb(bgHex)     || '14, 14, 19'
+  const outRgb   = hexToRgb(outHex)    || '118, 116, 123'
+  const odRgb    = hexToRgb(odHex)     || '72, 71, 77'
+  const onSurRgb = hexToRgb(onSurHex)  || '249, 245, 253'
+  return {
+    container:          `rgba(${cardRgb}, 0.6)`,
+    border:             `rgba(${outRgb}, 0.8)`,
+    zebraStripe:        `rgba(${onSurRgb}, 0.02)`,
+    graphSource:        `rgba(${priRgb}, 0.18)`,
+    graphSettled:       `rgba(${onSurRgb}, 0.05)`,
+    graphActiveFill:    `rgba(${secRgb}, 0.15)`,
+    popupBg:            `rgba(${bgRgb}, 0.6)`,
+    transparent:        'rgba(0, 0, 0, 0)',
+    defaultBorderFaint: `rgba(${odRgb}, 0.19)`,
+  }
+}
+
+export function getLivePopupAccentColors() {
+  const secHex = readCSSVar('--ref-secondary') || '#3adffa'
+  const errHex = readCSSVar('--ref-error')     || '#ff6e84'
+  const priHex = readCSSVar('--ref-primary')   || '#b79fff'
+  const secRgb = hexToRgb(secHex) || '58, 223, 250'
+  const errRgb = hexToRgb(errHex) || '255, 110, 132'
+  const priRgb = hexToRgb(priHex) || '183, 159, 255'
+  return {
+    neutral: 'rgba(140, 140, 160, 0.55)',
+    cyan:    `rgba(${secRgb}, 0.55)`,
+    red:     `rgba(${errRgb}, 0.55)`,
+    purple:  `rgba(${priRgb}, 0.55)`,
+  }
+}
+
 // ── Canvas panel colors — for CanvasRenderer stub (ctx.fillStyle / ctx.strokeStyle) ──
-// Used by: CanvasRenderer/index.tsx
-// Canvas 2D context cannot read CSS variables, so these must be JS constants.
+// Canvas 2D context cannot resolve CSS variables directly; call getLiveCanvasPanel()
+// at draw time (inside useEffect) to get current theme values.
+export function getLiveCanvasPanel() {
+  const priRgb   = readCSSVar('--ref-primary-rgb') || PRIMARY_RGB
+  const onSurHex = readCSSVar('--ref-on-surface')  || '#f9f5fd'
+  const onSurRgb = hexToRgb(onSurHex)              || '249, 245, 253'
+  return {
+    bg:           `rgba(${onSurRgb}, 0.04)`,
+    border:       `rgba(${priRgb}, 0.20)`,
+    titleText:    `rgba(${priRgb}, 0.90)`,
+    subtitleText: `rgba(${onSurRgb}, 0.35)`,
+    divider:      `rgba(${onSurRgb}, 0.08)`,
+    statLabel:    `rgba(${onSurRgb}, 0.55)`,
+    statValue:    `rgba(${onSurRgb}, 0.30)`,
+    footerText:   `rgba(${onSurRgb}, 0.20)`,
+  }
+}
+
+// ── Hero illustration colors — for HeroLoop landing component ─────────────────
+// Call getLiveHeroColors() inside a component that also calls useThemeSync(),
+// so the component re-renders and reads fresh CSS vars on every theme change.
+export function getLiveHeroColors() {
+  const secHex   = readCSSVar('--ref-secondary')  || '#3adffa'
+  const priHex   = readCSSVar('--ref-primary')    || '#b79fff'
+  const onSurHex = readCSSVar('--ref-on-surface') || '#f9f5fd'
+  const cardHex  = readCSSVar('--ref-card')       || '#17171f'
+  const secRgb   = hexToRgb(secHex)   || '58, 223, 250'
+  const priRgb   = hexToRgb(priHex)   || '183, 159, 255'
+  const onSurRgb = hexToRgb(onSurHex) || '249, 245, 253'
+  const cardRgb  = hexToRgb(cardHex)  || '23, 23, 31'
+  return {
+    codeActive:      { border: `rgba(${secRgb}, 0.40)`,   bg: `rgba(${secRgb}, 0.06)`,   text: onSurHex },
+    codeDim:         { border: `rgba(${onSurRgb}, 0.14)`, bg: `rgba(${cardRgb}, 0.72)`,  text: `rgba(${onSurRgb}, 0.72)` },
+    codeLineActive:  { bg: `rgba(${onSurRgb}, 0.06)`,     border: `rgba(${onSurRgb}, 0.14)` },
+    codeLineOff:     { bg: 'rgba(0,0,0,0)',                border: 'rgba(0,0,0,0)' },
+    networkActive:   { border: `rgba(${secRgb}, 0.42)`,   bg: `rgba(${cardRgb}, 0.92)` },
+    networkDim:      { border: `rgba(${onSurRgb}, 0.16)`, bg: `rgba(${cardRgb}, 0.88)` },
+    stageActive:     { border: `rgba(${secRgb}, 0.55)`,   bg: `rgba(${secRgb}, 0.12)`,   text: onSurHex },
+    stageDim:        { border: `rgba(${onSurRgb}, 0.22)`, bg: `rgba(${cardRgb}, 0.45)`,  text: `rgba(${onSurRgb}, 0.78)` },
+    connectorStrong: `rgba(${onSurRgb}, 0.28)`,
+    connectorFaint:  `rgba(${onSurRgb}, 0.18)`,
+    packetDot:       secHex,
+    junctionDot:     `rgba(${onSurRgb}, 0.45)`,
+    gradientMainA:   `rgba(${secRgb}, 0.18)`,
+    gradientMainB:   `rgba(${secRgb}, 0.65)`,
+    gradientMainC:   `rgba(${priRgb}, 0.22)`,
+    gradientSideA:   `rgba(${priRgb}, 0.36)`,
+    gradientSideB:   `rgba(${priRgb}, 0.08)`,
+    outerShadow:     '0 18px 36px rgba(0, 0, 0, 0.15)',
+  }
+}
+
+/** @deprecated Use getLiveCanvasPanel() for theme-aware colors */
 export const CANVAS_PANEL = {
   bg:          'rgba(255, 255, 255, 0.04)',
   border:      PRIMARY.alpha20,

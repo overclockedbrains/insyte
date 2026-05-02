@@ -3,7 +3,8 @@
 import { useEffect, useRef } from 'react'
 import type { SceneRendererProps } from '../types'
 import { useCanvas } from '@/src/engine/CanvasContext'
-import { CANVAS_PANEL } from '@/src/engine/styles/colors'
+import { getLiveCanvasPanel } from '@/src/engine/styles/colors'
+import { useThemeSync } from '@/src/engine/styles/useThemeSync'
 
 /**
  * CanvasRenderer — stub implementation of SceneRendererProps.
@@ -22,6 +23,7 @@ export function CanvasRenderer({
   speed,
 }: SceneRendererProps) {
   const { width, height } = useCanvas()
+  const theme = useThemeSync()
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -37,6 +39,8 @@ export function CanvasRenderer({
     ctx.scale(dpr, dpr)
     ctx.clearRect(0, 0, width, height)
 
+    const colors = getLiveCanvasPanel()
+
     // ── Stub panel ────────────────────────────────────────────────────────────
     const panelW = 240
     const panelH = 204
@@ -47,28 +51,28 @@ export function CanvasRenderer({
 
     // Panel background + border
     roundRect(ctx, px, py, panelW, panelH, 16)
-    ctx.fillStyle = CANVAS_PANEL.bg
+    ctx.fillStyle = colors.bg
     ctx.fill()
-    ctx.strokeStyle = CANVAS_PANEL.border
+    ctx.strokeStyle = colors.border
     ctx.lineWidth = 1
     ctx.stroke()
 
     // Title
     ctx.font = '600 10px monospace'
     ctx.textAlign = 'center'
-    ctx.fillStyle = CANVAS_PANEL.titleText
+    ctx.fillStyle = colors.titleText
     ctx.fillText('CANVAS RENDERER', cx, py + 26)
 
     // Subtitle
     ctx.font = '10px monospace'
-    ctx.fillStyle = CANVAS_PANEL.subtitleText
+    ctx.fillStyle = colors.subtitleText
     ctx.fillText('stub only — not yet implemented', cx, py + 42)
 
     // Divider
     ctx.beginPath()
     ctx.moveTo(px + 16, py + 54)
     ctx.lineTo(px + panelW - 16, py + 54)
-    ctx.strokeStyle = CANVAS_PANEL.divider
+    ctx.strokeStyle = colors.divider
     ctx.stroke()
 
     // Stats
@@ -85,9 +89,9 @@ export function CanvasRenderer({
     ]
     stats.forEach(([label, value], i) => {
       const y = py + 70 + i * 15
-      ctx.fillStyle = CANVAS_PANEL.statLabel
+      ctx.fillStyle = colors.statLabel
       ctx.fillText(label, px + 20, y)
-      ctx.fillStyle = CANVAS_PANEL.statValue
+      ctx.fillStyle = colors.statValue
       ctx.fillText(value, px + 90, y)
     })
 
@@ -95,15 +99,15 @@ export function CanvasRenderer({
     ctx.beginPath()
     ctx.moveTo(px + 16, py + 178)
     ctx.lineTo(px + panelW - 16, py + 178)
-    ctx.strokeStyle = CANVAS_PANEL.divider
+    ctx.strokeStyle = colors.divider
     ctx.stroke()
 
     // Footer hint
     ctx.textAlign = 'center'
-    ctx.fillStyle = CANVAS_PANEL.footerText
+    ctx.fillStyle = colors.footerText
     ctx.font = '9px monospace'
     ctx.fillText('NEXT_PUBLIC_RENDERER=dom to switch back', cx, py + 194)
-  }, [width, height, sceneGraph, resolvedPopups, step, speed])
+  }, [width, height, sceneGraph, resolvedPopups, step, speed, theme])
 
   return (
     <canvas

@@ -1,6 +1,9 @@
+'use client'
+
 import { motion } from 'framer-motion'
 import type { PrimitiveProps } from '.'
-import { resolveHighlight, PRIMARY } from '../styles/colors'
+import { resolveHighlight, getLivePrimary } from '../styles/colors'
+import { useThemeSync } from '../styles/useThemeSync'
 
 // ─── State ────────────────────────────────────────────────────────────────────
 interface LinearItem {
@@ -21,6 +24,8 @@ interface LinearState {
 // in-place (no remount). layoutId enables FLIP when the array grows/shrinks.
 
 export function ArrayViz({ id, state }: PrimitiveProps) {
+  useThemeSync()
+  const primary = getLivePrimary()
   const { items = [], pointers = [], windowHighlight } = state as LinearState
 
   const hasPointers = pointers.length > 0
@@ -86,8 +91,8 @@ export function ArrayViz({ id, state }: PrimitiveProps) {
             <motion.div
               className="absolute rounded-2xl border-2 pointer-events-none"
               style={{
-                borderColor: PRIMARY.alpha45,
-                backgroundColor: PRIMARY.alpha07,
+                borderColor: primary.alpha45,
+                backgroundColor: primary.alpha07,
                 top: '-6px',
                 bottom: '-6px',
                 zIndex: 0,

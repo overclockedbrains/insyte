@@ -1,5 +1,8 @@
+'use client'
+
 import { motion } from 'framer-motion'
 import { resolveHighlight } from '../styles/colors'
+import { useThemeSync } from '../styles/useThemeSync'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface BezierConnectorProps {
@@ -17,6 +20,7 @@ interface BezierConnectorProps {
 // Falls back to legacy `active` boolean → secondary / outline-variant.
 
 export function BezierConnector({ from, to, highlight, active }: BezierConnectorProps) {
+  useThemeSync()
   const dx = Math.abs(to.x - from.x)
   const cp1 = { x: from.x + dx / 2, y: from.y }
   const cp2 = { x: to.x - dx / 2, y: to.y }

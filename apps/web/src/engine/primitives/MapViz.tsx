@@ -1,6 +1,9 @@
+'use client'
+
 import { motion, AnimatePresence } from 'framer-motion'
 import type { PrimitiveProps } from '.'
-import { resolveHighlight, VIZ_SURFACE } from '../styles/colors'
+import { resolveHighlight, getLiveVizSurface } from '../styles/colors'
+import { useThemeSync } from '../styles/useThemeSync'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface MapEntry {
@@ -19,6 +22,8 @@ interface MapState {
 // Key-value map table. Stable animation key = entry.id.
 
 export function MapViz({ id, state }: PrimitiveProps) {
+  useThemeSync()
+  const viz = getLiveVizSurface()
   const { entries = [] } = state as MapState
 
   return (
@@ -51,7 +56,7 @@ export function MapViz({ id, state }: PrimitiveProps) {
 
                 const bgColor = isHighlighted
                   ? `${colors.bg}`
-                  : i % 2 === 0 ? VIZ_SURFACE.zebraStripe : VIZ_SURFACE.transparent
+                  : i % 2 === 0 ? viz.zebraStripe : viz.transparent
 
                 const borderLeft = isHighlighted
                   ? `3px solid ${colors.border}`

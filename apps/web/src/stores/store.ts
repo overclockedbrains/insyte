@@ -11,6 +11,7 @@ import { createSettingsSlice } from './slices/settings-slice'
 import { createChatSlice } from './slices/chat-slice'
 import { createDetectionSlice } from './slices/detection-slice'
 import { createAuthSlice } from './slices/auth-slice'
+import { createThemeSlice } from './slices/theme-slice'
 import { type BoundStore } from './types'
 
 export type { BoundStore }
@@ -27,6 +28,7 @@ export const useBoundStore: UseBoundStore<StoreApi<BoundStore>> = create<BoundSt
         ...createChatSlice(...a),
         ...createDetectionSlice(...a),
         ...createAuthSlice(...a),
+        ...createThemeSlice(...a),
       }),
       {
         name: 'insyte-settings',
@@ -39,6 +41,7 @@ export const useBoundStore: UseBoundStore<StoreApi<BoundStore>> = create<BoundSt
           customBaseURL: state.customBaseURL,
           customApiKey: state.customApiKey,
           customModelId: state.customModelId,
+          theme: state.theme,
         }),
       },
     ),

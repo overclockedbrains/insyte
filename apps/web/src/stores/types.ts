@@ -4,10 +4,12 @@ import type { SettingsSlice } from './slices/settings-slice'
 import type { ChatSlice } from './slices/chat-slice'
 import type { DetectionSlice } from './slices/detection-slice'
 import type { AuthSlice } from './slices/auth-slice'
+import type { ThemeSlice } from './slices/theme-slice'
 
 export type BoundStore = SceneSlice &
   PlaybackSlice &
   SettingsSlice &
   ChatSlice &
   DetectionSlice &
-  AuthSlice
+  AuthSlice &
+  ThemeSlice

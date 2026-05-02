@@ -4,7 +4,7 @@ import { GITHUB_URL, NAV_LINKS } from '@/src/lib/config'
 
 export function Footer() {
   return (
-    <footer className="border-t border-white/[0.06] bg-surface-container-low/20">
+    <footer className="border-t border-outline-variant/20 bg-surface-container-low/20">
       <div className="mx-auto max-w-screen-xl px-4 sm:px-6 py-12 sm:py-16">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
 

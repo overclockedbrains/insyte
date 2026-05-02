@@ -1,7 +1,10 @@
+'use client'
+
 import { motion } from 'framer-motion'
 import type { PrimitiveProps } from '.'
 import { DPTableViz } from './DPTableViz'
-import { GRID_CELL_COLORS, type GridCellState } from '../styles/colors'
+import { getGridCellColors, type GridCellState } from '../styles/colors'
+import { useThemeSync } from '../styles/useThemeSync'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -18,7 +21,8 @@ interface GridState {
 }
 
 function resolveCellColors(highlight: string | undefined): { bg: string; border: string; text: string; shadow: string } {
-  return GRID_CELL_COLORS[(highlight as GridCellState) ?? 'default'] ?? GRID_CELL_COLORS.default
+  const cells = getGridCellColors()
+  return cells[(highlight as GridCellState) ?? 'default'] ?? cells.default
 }
 
 // ─── GridViz ───────────────────────────────────────────────────────────────────
@@ -32,6 +36,7 @@ export function GridViz(props: PrimitiveProps) {
 }
 
 function PathfindingGridViz({ id, state }: PrimitiveProps) {
+  useThemeSync()
   const { rows, cols, cells = [], currentCell } = state as GridState
 
   return (

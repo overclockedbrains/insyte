@@ -1,7 +1,8 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { PRIMARY } from '@/src/engine/styles/colors'
+import { getLivePrimary } from '@/src/engine/styles/colors'
+import { useThemeSync } from '@/src/engine/styles/useThemeSync'
 import { SectionHeader } from '@/components/landing/SectionHeader'
 
 // ─── FeatureCards — 3 feature highlight cards ─────────────────────────────────
@@ -71,6 +72,8 @@ const FEATURES = [
 ]
 
 export function FeatureCards() {
+  useThemeSync()
+  const primary = getLivePrimary()
   return (
     <section className="w-full">
       <SectionHeader
@@ -84,7 +87,7 @@ export function FeatureCards() {
           <motion.div
             key={feat.title}
             className="group relative overflow-hidden rounded-2xl border border-outline-variant/20 bg-surface-container-low p-5 transition-[border-color,box-shadow] duration-200 hover:border-primary/30"
-            whileHover={{ scale: 1.01, boxShadow: `0 0 18px ${PRIMARY.alpha12}` }}
+            whileHover={{ scale: 1.01, boxShadow: `0 0 18px ${primary.alpha12}` }}
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
           >
             {/* Gradient tint on hover */}

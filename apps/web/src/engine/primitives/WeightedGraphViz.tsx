@@ -5,7 +5,8 @@ import { motion } from 'framer-motion'
 import type { PrimitiveProps } from '.'
 import { computeLayout } from '@insyte/scene-engine'
 import { useCanvas } from '../CanvasContext'
-import { resolveHighlight, VIZ_SURFACE, HIGHLIGHT_COLORS } from '../styles/colors'
+import { resolveHighlight, getLiveVizSurface } from '../styles/colors'
+import { useThemeSync } from '../styles/useThemeSync'
 
 interface WeightedGraphNode {
   id: string
@@ -45,20 +46,22 @@ function edgeColor(highlight: string | undefined): string {
     case 'relaxed':
     case 'min-edge': return 'var(--color-secondary)'
     case 'in-tree':  return 'var(--color-primary)'
-    case 'rejected': return `var(--color-error, ${HIGHLIGHT_COLORS.error.border})`
+    case 'rejected': return 'var(--ref-error)'
     default:         return 'var(--color-outline-variant)'
   }
 }
 
 function nodeColors(highlight: string | undefined) {
+  const viz = getLiveVizSurface()
   switch (highlight) {
-    case 'source':  return { bg: VIZ_SURFACE.graphSource,  border: 'var(--color-primary)',         text: HIGHLIGHT_COLORS.default.text }
-    case 'settled': return { bg: VIZ_SURFACE.graphSettled, border: 'var(--color-outline-variant)', text: 'var(--color-outline-variant)' }
+    case 'source':  return { bg: viz.graphSource,  border: 'var(--color-primary)',         text: resolveHighlight('default').text }
+    case 'settled': return { bg: viz.graphSettled, border: 'var(--color-outline-variant)', text: 'var(--color-outline-variant)' }
     default:        return resolveHighlight(highlight)
   }
 }
 
 export function WeightedGraphViz({ id, state, visual }: PrimitiveProps) {
+  useThemeSync()
   const { width: canvasW, height: canvasH } = useCanvas()
   const { nodes = [], edges = [] } = state as { nodes: WeightedGraphNode[]; edges: WeightedGraphEdge[] }
 
@@ -148,7 +151,7 @@ export function WeightedGraphViz({ id, state, visual }: PrimitiveProps) {
                     x={mid.x - 14} y={mid.y - 10}
                     width={28} height={20}
                     rx={4}
-                    fill={isActive ? `var(--color-secondary-container, ${VIZ_SURFACE.graphActiveFill})` : 'var(--color-surface-container)'}
+                    fill={isActive ? `var(--color-secondary-container, ${getLiveVizSurface().graphActiveFill})` : 'var(--color-surface-container)'}
                     stroke={color}
                     strokeWidth={1}
                   />

@@ -58,6 +58,7 @@
   /* To create a new theme, override this block in a [data-theme="x"] class.   */
   --ref-primary:        #b79fff;   /* lavender purple */
   --ref-primary-rgb:    183, 159, 255;
+  --ref-on-state:       #e2e8f0;   /* text on active/insert/remove viz nodes — override in light themes */
   --ref-secondary:      #3adffa;   /* bright cyan */
   --ref-secondary-rgb:  58, 223, 250;
   --ref-background:     #0e0e13;
@@ -180,6 +181,170 @@
   --glow-tertiary-10:   rgba(167, 243, 208, 0.10);
 }
 
+/* ─── Named themes — override only --ref-* vars that differ from dark default ─ */
+
+[data-theme="aurora"] {
+  /* ── Aurora: forest green + teal ───────────────────────────────────────────── */
+  --ref-primary:        #4ade80;
+  --ref-primary-rgb:    74, 222, 128;
+  --ref-secondary:      #22d3ee;
+  --ref-secondary-rgb:  34, 211, 238;
+  --ref-background:     #060d0b;
+  --ref-card:           #0d1a12;
+  --ref-card-mid:       #162a1e;
+  --ref-surface-low:    #091510;
+  --ref-outline:        #3d6b4f;
+  --ref-outline-dim:    #1e3a29;
+  --ref-on-surface:     #ecfdf5;
+  --ref-on-surface-dim: #86efac;
+  --ref-error:          #f87171;
+  --ref-success:        #34d399;
+  --ref-amber:          #fbbf24;
+  --ref-on-primary:     #052e16;
+  --ref-on-secondary:   #083344;
+}
+
+[data-theme="ember"] {
+  /* ── Ember: warm orange + rose ──────────────────────────────────────────────── */
+  --ref-primary:        #fb923c;
+  --ref-primary-rgb:    251, 146, 60;
+  --ref-secondary:      #f43f5e;
+  --ref-secondary-rgb:  244, 63, 94;
+  --ref-background:     #0e0804;
+  --ref-card:           #1c1009;
+  --ref-card-mid:       #2a1a10;
+  --ref-surface-low:    #140d06;
+  --ref-outline:        #6b3a1f;
+  --ref-outline-dim:    #3a1e0e;
+  --ref-on-surface:     #fff7ed;
+  --ref-on-surface-dim: #d1a07a;
+  --ref-error:          #ef4444;
+  --ref-success:        #22c55e;
+  --ref-amber:          #eab308;
+  --ref-on-primary:     #2c0e00;
+  --ref-on-secondary:   #3d0013;
+}
+
+[data-theme="ocean"] {
+  /* ── Ocean: sky blue + indigo ───────────────────────────────────────────────── */
+  --ref-primary:        #38bdf8;
+  --ref-primary-rgb:    56, 189, 248;
+  --ref-secondary:      #818cf8;
+  --ref-secondary-rgb:  129, 140, 248;
+  --ref-background:     #03080f;
+  --ref-card:           #071221;
+  --ref-card-mid:       #0e1f33;
+  --ref-surface-low:    #050d1a;
+  --ref-outline:        #1e3a5f;
+  --ref-outline-dim:    #0f2040;
+  --ref-on-surface:     #f0f9ff;
+  --ref-on-surface-dim: #7dd3fc;
+  --ref-error:          #f87171;
+  --ref-success:        #34d399;
+  --ref-amber:          #fbbf24;
+  --ref-on-primary:     #0c2340;
+  --ref-on-secondary:   #1e1b4b;
+}
+
+[data-theme="rose"] {
+  /* ── Rose: pink + purple ────────────────────────────────────────────────────── */
+  --ref-primary:        #f472b6;
+  --ref-primary-rgb:    244, 114, 182;
+  --ref-secondary:      #c084fc;
+  --ref-secondary-rgb:  192, 132, 252;
+  --ref-background:     #0e0612;
+  --ref-card:           #1a0d22;
+  --ref-card-mid:       #261535;
+  --ref-surface-low:    #140a1a;
+  --ref-outline:        #5b2167;
+  --ref-outline-dim:    #30123a;
+  --ref-on-surface:     #fdf4ff;
+  --ref-on-surface-dim: #e879f9;
+  --ref-error:          #fb7185;
+  --ref-success:        #4ade80;
+  --ref-amber:          #fbbf24;
+  --ref-on-primary:     #3d0030;
+  --ref-on-secondary:   #3b0764;
+}
+
+[data-theme="midnight"] {
+  /* ── Midnight: deep navy + indigo / violet ──────────────────────────────────── */
+  --ref-primary:        #818cf8;
+  --ref-primary-rgb:    129, 140, 248;
+  --ref-secondary:      #a78bfa;
+  --ref-secondary-rgb:  167, 139, 250;
+  --ref-background:     #060710;
+  --ref-card:           #0d0f1e;
+  --ref-card-mid:       #15172a;
+  --ref-surface-low:    #08091a;
+  --ref-outline:        #3f4470;
+  --ref-outline-dim:    #222440;
+  --ref-on-surface:     #e8e8ff;
+  --ref-on-surface-dim: #9090c0;
+  --ref-error:          #f87171;
+  --ref-success:        #34d399;
+  --ref-amber:          #fbbf24;
+  --ref-on-primary:     #1a1060;
+  --ref-on-secondary:   #2c1060;
+}
+
+[data-theme="forest"] {
+  /* ── Forest: deep earth green + warm amber ──────────────────────────────────── */
+  --ref-primary:        #6ee7b7;
+  --ref-primary-rgb:    110, 231, 183;
+  --ref-secondary:      #fb923c;
+  --ref-secondary-rgb:  251, 146, 60;
+  --ref-background:     #050e07;
+  --ref-card:           #0c1a0e;
+  --ref-card-mid:       #152615;
+  --ref-surface-low:    #09140a;
+  --ref-outline:        #3a5e35;
+  --ref-outline-dim:    #1e3318;
+  --ref-on-surface:     #edfaed;
+  --ref-on-surface-dim: #80c870;
+  --ref-error:          #f87171;
+  --ref-success:        #4ade80;
+  --ref-amber:          #fbbf24;
+  --ref-on-primary:     #042e16;
+  --ref-on-secondary:   #3d1a00;
+}
+
+[data-theme="light"] {
+  /* ── Light: clean white + deep violet / teal ────────────────────────────────── */
+  color-scheme: light;
+  --ref-on-state:       #17171f;   /* dark text on light-bg viz nodes */
+  --ref-primary:        #5b3fd8;
+  --ref-primary-rgb:    91, 63, 216;
+  --ref-secondary:      #0891b2;
+  --ref-secondary-rgb:  8, 145, 178;
+  --ref-background:     #f2f2f8;
+  --ref-card:           #ffffff;
+  --ref-card-mid:       #eeeef4;
+  --ref-surface-low:    #e8e8f0;
+  --ref-outline:        #9090a8;
+  --ref-outline-dim:    #c8c8d8;
+  --ref-on-surface:     #17171f;
+  --ref-on-surface-dim: #58586a;
+  --ref-error:          #dc2626;
+  --ref-amber:          #d97706;
+  --ref-success:        #16a34a;
+  --ref-on-primary:     #ffffff;
+  --ref-on-secondary:   #ffffff;
+  /* Fix hardcoded dark surface tokens in @theme block */
+  --color-surface-container-high:    #e0e0ea;
+  --color-surface-container-lowest:  #eaeaf2;
+  --color-surface-bright:            #f8f8ff;
+  --color-inverse-surface:           #2c2c38;
+  --color-inverse-on-surface:        #f4f4fa;
+  /* Dev-page panel colors */
+  --color-dev-banner-bg:      #e8e8f2;
+  --color-dev-panel-bg:       #ededf4;
+  --color-dev-input-text:     #17171f;
+  --color-dev-input-focus-bg: rgba(0, 0, 0, 0.015);
+  /* Glow: replace white shimmer with dark tint */
+  --glow-surface-05: rgba(0, 0, 0, 0.04);
+}
+
 /* ─── insyte Design Tokens ──────────────────────────────────────────────────── */
 /* Placed after @theme inline so these hardcoded values win.                     */
 
@@ -268,6 +433,10 @@ html {
   color-scheme: dark;
 }
 
+[data-theme="light"] {
+  color-scheme: light;
+}
+
 body {
   background-color: var(--color-background);
   color: var(--color-on-surface);
@@ -335,19 +504,19 @@ textarea.landing-no-focus-ring:focus-visible {
 /* ─── Reusable Utility Classes ──────────────────────────────────────────────── */
 
 .glass-panel {
-  background: rgba(25, 25, 31, 0.6);
+  background: color-mix(in srgb, var(--ref-card) 60%, transparent);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
 
 .glow-border {
-  box-shadow: 0 0 20px rgba(183, 159, 255, 0.15);
-  border: 1px solid rgba(183, 159, 255, 0.1);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--ref-primary) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ref-primary) 10%, transparent);
 }
 
 .glow-border-active {
-  box-shadow: 0 0 30px rgba(183, 159, 255, 0.35), 0 0 60px rgba(183, 159, 255, 0.15);
-  border: 1px solid rgba(183, 159, 255, 0.4);
+  box-shadow: 0 0 30px color-mix(in srgb, var(--ref-primary) 35%, transparent), 0 0 60px color-mix(in srgb, var(--ref-primary) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ref-primary) 40%, transparent);
 }
 
 .gradient-text {

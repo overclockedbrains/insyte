@@ -3,7 +3,7 @@
 import { type RefObject, useRef, useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Loader2 } from 'lucide-react'
+import { ArrowRight, Loader2 } from 'lucide-react'
 import { useIsMobile } from '@/components/hooks/useMediaQuery'
 import { useBoundStore } from '@/src/stores/store'
 import { detectMode } from '@/src/stores/slices/detection-slice'
@@ -265,8 +265,10 @@ export function UnifiedInput({ fillRef }: UnifiedInputProps) {
             }
             aria-label="Explore this concept"
           >
-            {isNavigating && <Loader2 className="h-4 w-4 animate-spin" />}
-            {isNavigating ? 'Loading...' : 'Explore ->'}
+            {isNavigating
+              ? <><Loader2 className="h-4 w-4 animate-spin" />Loading...</>
+              : <>Explore <ArrowRight className="h-3.5 w-3.5" /></>
+            }
           </motion.button>
         </div>
       </div>

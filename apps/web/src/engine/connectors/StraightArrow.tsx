@@ -1,5 +1,8 @@
+'use client'
+
 import { motion } from 'framer-motion'
 import { resolveHighlight } from '../styles/colors'
+import { useThemeSync } from '../styles/useThemeSync'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface StraightArrowProps {
@@ -27,6 +30,7 @@ export function StraightArrow({
   label,
   active,
 }: StraightArrowProps) {
+  useThemeSync()
   const dx = to.x - from.x
   const dy = to.y - from.y
   const angle    = Math.atan2(dy, dx) * (180 / Math.PI)

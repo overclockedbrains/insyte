@@ -1,4 +1,7 @@
+'use client'
+
 import { resolveHighlight } from '../styles/colors'
+import { useThemeSync } from '../styles/useThemeSync'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface DataFlowDotProps {
@@ -23,6 +26,7 @@ export function DataFlowDot({
   duration = 1.5,
   repeat = false,
 }: DataFlowDotProps) {
+  useThemeSync()
   // Resolve dot color: semantic token > legacy color
   const dotColor = highlight ? resolveHighlight(highlight).border : color
 

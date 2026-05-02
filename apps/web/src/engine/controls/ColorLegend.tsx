@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { HIGHLIGHT_COLORS, type HighlightColor } from '../styles/colors'
+import { resolveHighlight, getThemeStateColors, type HighlightColor } from '../styles/colors'
+import { useThemeSync } from '../styles/useThemeSync'
 import type { CanvasVisual } from '@insyte/scene-engine'
 
 // ── Token metadata ─────────────────────────────────────────────────────────────
@@ -49,18 +50,9 @@ const FAMILY_LABEL: Record<Family, string> = {
   amber: 'Special',
 }
 
-const FAMILY_COLOR: Record<Family, string> = {
-  cyan: '#3adffa',
-  green: '#22c55e',
-  red: '#ff6e84',
-  amber: '#f59e0b',
-}
-
-function tokenFamily(t: HighlightColor): Family | null {
-  for (const [family, members] of Object.entries(FAMILY_MEMBERS) as [Family, HighlightColor[]][]) {
-    if (members.includes(t)) return family
-  }
-  return null
+function getFamilyColors(): Record<Family, string> {
+  const { active, success, danger, amber } = getThemeStateColors()
+  return { cyan: active.hex, green: success.hex, red: danger.hex, amber: amber.hex }
 }
 
 // ── Token lookup per visual type+variant ──────────────────────────────────────
@@ -98,6 +90,7 @@ interface ColorLegendProps {
 }
 
 export function ColorLegend({ canvas }: ColorLegendProps) {
+  useThemeSync()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const tokens = deriveTokens(canvas)
@@ -120,6 +113,7 @@ export function ColorLegend({ canvas }: ColorLegendProps) {
 
   if (tokens.length === 0) return null
 
+  const FAMILY_COLOR = getFamilyColors()
   const groups = (Object.keys(FAMILY_MEMBERS) as Family[]).map(family => ({
     family,
     tokens: FAMILY_MEMBERS[family].filter(t => tokens.includes(t)),
@@ -177,7 +171,7 @@ export function ColorLegend({ canvas }: ColorLegendProps) {
                     {/* Items */}
                     <div className="space-y-1.5">
                       {familyTokens.map(token => {
-                        const colors = HIGHLIGHT_COLORS[token]
+                        const colors = resolveHighlight(token)
                         const label  = TOKEN_LABELS[token] ?? token
                         return (
                           <div key={token} className="flex items-center gap-2.5">

@@ -17,6 +17,7 @@ import type { PrimitiveProps } from '.'
 import { computeLayout } from '@insyte/scene-engine'
 import { useCanvas } from '../CanvasContext'
 import { resolveHighlight } from '../styles/colors'
+import { useThemeSync } from '../styles/useThemeSync'
 import { WeightedGraphViz } from './WeightedGraphViz'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
@@ -71,6 +72,7 @@ export function GraphViz(props: PrimitiveProps) {
 }
 
 function UnweightedGraphViz({ id, state, visual }: PrimitiveProps) {
+  useThemeSync()
   const { width: canvasW, height: canvasH } = useCanvas()
   const { nodes = [], edges = [] } = state as { nodes: GraphNode[]; edges: GraphEdge[] }
 

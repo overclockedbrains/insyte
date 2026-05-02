@@ -7,8 +7,11 @@
  * No coordinate math lives here.
  */
 
+'use client'
+
 import { motion, AnimatePresence } from 'framer-motion'
-import { POPUP_ACCENT_COLORS, VIZ_SURFACE } from '@/src/engine/styles/colors'
+import { getLivePopupAccentColors, getLiveVizSurface } from '@/src/engine/styles/colors'
+import { useThemeSync } from '@/src/engine/styles/useThemeSync'
 
 interface StepPopupProps {
   text: string
@@ -16,14 +19,16 @@ interface StepPopupProps {
   visible: boolean
 }
 
-export const popupAccentColor: Record<string, string> = {
-  info:    POPUP_ACCENT_COLORS.neutral,
-  success: POPUP_ACCENT_COLORS.cyan,
-  warning: POPUP_ACCENT_COLORS.red,
-  insight: POPUP_ACCENT_COLORS.purple,
-}
-
 export function StepPopup({ text, style = 'info', visible }: StepPopupProps) {
+  useThemeSync()
+  const accent = getLivePopupAccentColors()
+  const viz = getLiveVizSurface()
+  const popupAccentColor: Record<string, string> = {
+    info:    accent.neutral,
+    success: accent.cyan,
+    warning: accent.red,
+    insight: accent.purple,
+  }
   const color = popupAccentColor[style] ?? popupAccentColor.info
 
   return (
@@ -41,7 +46,7 @@ export function StepPopup({ text, style = 'info', visible }: StepPopupProps) {
             style={{
               color,
               borderLeft: `2px solid ${color}`,
-              background: VIZ_SURFACE.popupBg,
+              background: viz.popupBg,
             }}
           >
             {text}

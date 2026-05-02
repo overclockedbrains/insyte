@@ -13,6 +13,7 @@ import type { PrimitiveProps } from '.'
 import { computeLayout } from '@insyte/scene-engine'
 import { useCanvas } from '../CanvasContext'
 import { resolveHighlight } from '../styles/colors'
+import { useThemeSync } from '../styles/useThemeSync'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface RecursionNode {
@@ -30,6 +31,7 @@ interface RecursionTreeState {
 
 // ─── Component ─────────────────────────────────────────────────────────────────
 export function RecursionTreeViz({ id, state, visual }: PrimitiveProps) {
+  useThemeSync()
   const { width: canvasW, height: canvasH } = useCanvas()
   const { nodes = [], rootId } = state as RecursionTreeState
 

@@ -284,7 +284,7 @@ function ShowcaseCard({ item, index }: { item: (typeof showcaseDataDOM)[number],
         </div>
 
         <div className="w-full lg:w-[450px] flex flex-col bg-[var(--color-dev-panel-bg)] border-l border-outline-variant/10">
-          <div className="px-5 py-3 bg-black/40 flex items-center justify-between border-b border-white/10">
+          <div className="px-5 py-3 bg-surface-container/60 flex items-center justify-between border-b border-outline-variant/20">
             <div className="flex items-center gap-4">
               <span className="text-xs font-mono font-bold text-outline-variant/80 uppercase tracking-wider">State Editor (Live)</span>
               {isModified && (

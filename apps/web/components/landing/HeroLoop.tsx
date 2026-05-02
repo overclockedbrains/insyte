@@ -3,8 +3,12 @@
 import Link from 'next/link'
 import { useEffect, useId, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { ArrowRight } from 'lucide-react'
 import { DotGridBackground } from '@/components/layout/DotGridBackground'
-import { HERO_COLORS } from '@/src/engine/styles/colors'
+import { getLiveHeroColors } from '@/src/engine/styles/colors'
+import { useThemeSync } from '@/src/engine/styles/useThemeSync'
+
+type HeroColors = ReturnType<typeof getLiveHeroColors>
 
 const STAGES = [
   {
@@ -51,7 +55,7 @@ function PromptScene({ compact }: { compact: boolean }) {
     <div className="grid h-full min-h-0 grid-rows-[auto_1fr] gap-3 overflow-hidden">
       <div className="rounded-[20px] border border-outline-variant/18 bg-surface-container-low/88 p-3 sm:p-4">
         <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-secondary">Prompt Input</div>
-        <div className="mt-2 rounded-xl border border-outline-variant/18 bg-black/15 px-3 py-2.5 font-mono text-[11px] leading-snug text-on-surface sm:text-xs">
+        <div className="mt-2 rounded-xl border border-outline-variant/18 bg-on-surface/8 px-3 py-2.5 font-mono text-[11px] leading-snug text-on-surface sm:text-xs">
           explain cache miss traffic spike and visualize the fix
         </div>
       </div>
@@ -63,7 +67,7 @@ function PromptScene({ compact }: { compact: boolean }) {
             {parsedFields.map((field, index) => (
               <motion.div
                 key={field.key}
-                className="flex items-center justify-between gap-2 rounded-xl border border-outline-variant/16 bg-black/10 px-2.5 py-2"
+                className="flex items-center justify-between gap-2 rounded-xl border border-outline-variant/16 bg-on-surface/5 px-2.5 py-2"
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.06 }}
@@ -83,7 +87,7 @@ function PromptScene({ compact }: { compact: boolean }) {
             {stages.map((step, index) => (
               <motion.div
                 key={step}
-                className="flex items-center gap-2 rounded-xl border border-outline-variant/16 bg-black/10 px-2.5 py-2"
+                className="flex items-center gap-2 rounded-xl border border-outline-variant/16 bg-on-surface/5 px-2.5 py-2"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.07 }}
@@ -103,7 +107,7 @@ function PromptScene({ compact }: { compact: boolean }) {
   )
 }
 
-function CodeScene() {
+function CodeScene({ colors }: { colors: HeroColors }) {
   const lines = [
     'const nums=[12,7,19,4]',
     'nums.sort((x,y)=>x-y)',
@@ -126,8 +130,8 @@ function CodeScene() {
             key={line}
             className="mt-1.5 flex items-start gap-2 rounded-2xl px-2.5 py-2 font-mono text-[10px] leading-snug sm:text-[11px]"
             animate={{
-              backgroundColor: index === 2 ? HERO_COLORS.codeLineActive.bg : HERO_COLORS.codeLineOff.bg,
-              borderColor: index === 2 ? HERO_COLORS.codeLineActive.border : HERO_COLORS.codeLineOff.border,
+              backgroundColor: index === 2 ? colors.codeLineActive.bg : colors.codeLineOff.bg,
+              borderColor: index === 2 ? colors.codeLineActive.border : colors.codeLineOff.border,
             }}
             style={{ borderWidth: 1 }}
           >
@@ -150,7 +154,7 @@ function CodeScene() {
                 <div className="w-9 shrink-0 text-[9px] font-mono uppercase tracking-[0.18em] text-on-surface-variant/70">
                   {step.label}
                 </div>
-                <div className="min-w-0 flex-1 rounded-2xl border border-outline-variant/16 bg-black/10 px-2 py-2">
+                <div className="min-w-0 flex-1 rounded-2xl border border-outline-variant/16 bg-on-surface/5 px-2 py-2">
                   <div className="flex flex-wrap gap-1.5">
                     {step.values.map((value, valueIndex) => {
                       const isActive = step.active.includes(valueIndex)
@@ -160,9 +164,9 @@ function CodeScene() {
                           key={`${step.label}-${value}`}
                           className="rounded-xl border px-2 py-1 text-[10px] font-mono"
                           animate={{
-                            borderColor: isActive ? HERO_COLORS.codeActive.border : HERO_COLORS.codeDim.border,
-                            backgroundColor: isActive ? HERO_COLORS.codeActive.bg : HERO_COLORS.codeDim.bg,
-                            color: isActive ? HERO_COLORS.codeActive.text : HERO_COLORS.codeDim.text,
+                            borderColor: isActive ? colors.codeActive.border : colors.codeDim.border,
+                            backgroundColor: isActive ? colors.codeActive.bg : colors.codeDim.bg,
+                            color: isActive ? colors.codeActive.text : colors.codeDim.text,
                           }}
                         >
                           {value}
@@ -191,11 +195,13 @@ function NetworkCard({
   subtitle,
   active = false,
   className = '',
+  colors,
 }: {
   title: string
   subtitle: string
   active?: boolean
   className?: string
+  colors: HeroColors
 }) {
   return (
     <motion.div
@@ -204,8 +210,8 @@ function NetworkCard({
         className,
       ].join(' ')}
       animate={{
-        borderColor: active ? HERO_COLORS.networkActive.border : HERO_COLORS.networkDim.border,
-        backgroundColor: active ? HERO_COLORS.networkActive.bg : HERO_COLORS.networkDim.bg,
+        borderColor: active ? colors.networkActive.border : colors.networkDim.border,
+        backgroundColor: active ? colors.networkActive.bg : colors.networkDim.bg,
       }}
       transition={{ duration: 0.25 }}
     >
@@ -215,7 +221,7 @@ function NetworkCard({
   )
 }
 
-function NetworkScene({ compact }: { compact: boolean }) {
+function NetworkScene({ compact, colors }: { compact: boolean; colors: HeroColors }) {
   const pills = compact ? ['reroute', 'hit', '42ms'] : ['reroute', 'cache hit', '42ms recovery']
 
   return (
@@ -229,63 +235,63 @@ function NetworkScene({ compact }: { compact: boolean }) {
         <path
           d="M18 26 L47 26"
           fill="none"
-          stroke={HERO_COLORS.connectorStrong}
+          stroke={colors.connectorStrong}
           strokeLinecap="round"
           strokeWidth="1"
         />
         <path
           d="M53 26 L78 26"
           fill="none"
-          stroke={HERO_COLORS.connectorStrong}
+          stroke={colors.connectorStrong}
           strokeLinecap="round"
           strokeWidth="1"
         />
         <path
           d="M18 33 L18 47"
           fill="none"
-          stroke={HERO_COLORS.connectorFaint}
+          stroke={colors.connectorFaint}
           strokeLinecap="round"
           strokeWidth="1"
         />
         <path
           d="M50 33 L50 47"
           fill="none"
-          stroke={HERO_COLORS.connectorFaint}
+          stroke={colors.connectorFaint}
           strokeLinecap="round"
           strokeWidth="1"
         />
         <path
           d="M78 33 L78 47"
           fill="none"
-          stroke={HERO_COLORS.connectorFaint}
+          stroke={colors.connectorFaint}
           strokeLinecap="round"
           strokeWidth="1"
         />
-        <circle cx="18" cy="26" r="0.9" fill={HERO_COLORS.packetDot}>
+        <circle cx="18" cy="26" r="0.9" fill={colors.packetDot}>
           <animate attributeName="cx" values="18;47;18" dur="1.7s" repeatCount="indefinite" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" />
           <animate attributeName="opacity" values="0;1;0" dur="1.7s" repeatCount="indefinite" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" />
         </circle>
-        <circle cx="53" cy="26" r="0.9" fill={HERO_COLORS.packetDot}>
+        <circle cx="53" cy="26" r="0.9" fill={colors.packetDot}>
           <animate attributeName="cx" values="53;78;53" dur="1.7s" begin="0.25s" repeatCount="indefinite" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" />
           <animate attributeName="opacity" values="0;1;0" dur="1.7s" begin="0.25s" repeatCount="indefinite" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" />
         </circle>
-        <circle cx="18" cy="33" r="0.55" fill={HERO_COLORS.junctionDot} />
-        <circle cx="50" cy="33" r="0.55" fill={HERO_COLORS.junctionDot} />
-        <circle cx="78" cy="33" r="0.55" fill={HERO_COLORS.junctionDot} />
+        <circle cx="18" cy="33" r="0.55" fill={colors.junctionDot} />
+        <circle cx="50" cy="33" r="0.55" fill={colors.junctionDot} />
+        <circle cx="78" cy="33" r="0.55" fill={colors.junctionDot} />
       </svg>
 
       <div className="relative z-10 flex h-full min-h-0 flex-col">
         <div className="flex min-h-0 flex-1 flex-col justify-center gap-3">
           <div className="grid grid-cols-3 gap-2.5">
-            <NetworkCard title="Browser" subtitle="user request" active />
-            <NetworkCard title="Edge" subtitle="route + shield" active />
-            <NetworkCard title="Origin" subtitle="serve response" />
+            <NetworkCard title="Browser" subtitle="user request" active colors={colors} />
+            <NetworkCard title="Edge" subtitle="route + shield" active colors={colors} />
+            <NetworkCard title="Origin" subtitle="serve response" colors={colors} />
           </div>
 
           <div className="grid grid-cols-[0.9fr_1.1fr_0.9fr] gap-2.5">
-            <NetworkCard title="DNS" subtitle="lookup" className="mx-auto w-[82%]" />
-            <NetworkCard title="API" subtitle="miss -> fetch" active className="mx-auto w-[88%]" />
-            <NetworkCard title="Cache" subtitle="hot path" className="mx-auto w-[82%]" />
+            <NetworkCard title="DNS" subtitle="lookup" className="mx-auto w-[82%]" colors={colors} />
+            <NetworkCard title="API" subtitle="miss -> fetch" active className="mx-auto w-[88%]" colors={colors} />
+            <NetworkCard title="Cache" subtitle="hot path" className="mx-auto w-[82%]" colors={colors} />
           </div>
         </div>
 
@@ -306,7 +312,7 @@ function NetworkScene({ compact }: { compact: boolean }) {
   )
 }
 
-function SystemScene() {
+function SystemScene({ colors }: { colors: HeroColors }) {
   const gradientId = useId()
   const mainGradientId = `${gradientId}-main`
   const sideGradientId = `${gradientId}-side`
@@ -321,13 +327,13 @@ function SystemScene() {
       >
         <defs>
           <linearGradient id={mainGradientId} x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor={HERO_COLORS.gradientMainA} />
-            <stop offset="50%" stopColor={HERO_COLORS.gradientMainB} />
-            <stop offset="100%" stopColor={HERO_COLORS.gradientMainC} />
+            <stop offset="0%" stopColor={colors.gradientMainA} />
+            <stop offset="50%" stopColor={colors.gradientMainB} />
+            <stop offset="100%" stopColor={colors.gradientMainC} />
           </linearGradient>
           <linearGradient id={sideGradientId} x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor={HERO_COLORS.gradientSideA} />
-            <stop offset="100%" stopColor={HERO_COLORS.gradientSideB} />
+            <stop offset="0%" stopColor={colors.gradientSideA} />
+            <stop offset="100%" stopColor={colors.gradientSideB} />
           </linearGradient>
         </defs>
         <motion.path
@@ -382,6 +388,7 @@ function SystemScene() {
             subtitle="prompt"
             active
             className="w-full max-w-[136px] px-3 py-3"
+            colors={colors}
           />
         </div>
 
@@ -393,12 +400,12 @@ function SystemScene() {
             <div className="mt-1 text-[11px] leading-snug text-on-surface-variant/64">
               route request to scene workers
             </div>
-            <div className="mt-2 inline-flex rounded-full border border-outline-variant/18 bg-black/10 px-2 py-1 text-[9px] font-mono uppercase tracking-[0.16em] text-secondary">
+            <div className="mt-2 inline-flex rounded-full border border-outline-variant/18 bg-on-surface/5 px-2 py-1 text-[9px] font-mono uppercase tracking-[0.16em] text-secondary">
               least latency
             </div>
           </div>
 
-          <div className="rounded-[16px] border border-outline-variant/16 bg-black/10 px-3 py-2">
+          <div className="rounded-[16px] border border-outline-variant/16 bg-on-surface/5 px-3 py-2">
             <div className="text-[9px] font-mono uppercase tracking-[0.18em] text-on-surface-variant/60">
               health checks
             </div>
@@ -411,23 +418,26 @@ function SystemScene() {
         </div>
 
         <div className="flex min-h-0 flex-col justify-center gap-2">
-          <NetworkCard title="Scene Worker A" subtitle="generate" active />
-          <NetworkCard title="Scene Worker B" subtitle="patch + stream" />
-          <NetworkCard title="Share Renderer" subtitle="persist + og" />
+          <NetworkCard title="Scene Worker A" subtitle="generate" active colors={colors} />
+          <NetworkCard title="Scene Worker B" subtitle="patch + stream" colors={colors} />
+          <NetworkCard title="Share Renderer" subtitle="persist + og" colors={colors} />
         </div>
       </div>
     </div>
   )
 }
 
-function StageContent({ id, compact }: { id: string; compact: boolean }) {
+function StageContent({ id, compact, colors }: { id: string; compact: boolean; colors: HeroColors }) {
   if (id === 'prompt') return <PromptScene compact={compact} />
-  if (id === 'code') return <CodeScene />
-  if (id === 'network') return <NetworkScene compact={compact} />
-  return <SystemScene />
+  if (id === 'code') return <CodeScene colors={colors} />
+  if (id === 'network') return <NetworkScene compact={compact} colors={colors} />
+  return <SystemScene colors={colors} />
 }
 
 export function HeroLoop({ compact = false }: { compact?: boolean }) {
+  useThemeSync()
+  const colors = getLiveHeroColors()
+
   const [index, setIndex] = useState(0)
   const stage = STAGES[index] ?? STAGES[0]
 
@@ -444,7 +454,7 @@ export function HeroLoop({ compact = false }: { compact?: boolean }) {
       className="relative w-full overflow-hidden rounded-[32px] border border-primary/20 bg-surface-container"
       style={{
         aspectRatio: compact ? '16 / 13.1' : '16 / 11',
-        boxShadow: HERO_COLORS.outerShadow,
+        boxShadow: colors.outerShadow,
       }}
     >
       <div className="absolute inset-0 pointer-events-none">
@@ -461,23 +471,32 @@ export function HeroLoop({ compact = false }: { compact?: boolean }) {
           </span>
 
           <div className="flex max-w-[70%] flex-wrap justify-end gap-2 sm:max-w-none">
-            {STAGES.map((item, itemIndex) => (
-              <div
-                key={item.id}
-                className="rounded-full border px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.2em]"
-                style={{
-                  borderColor: itemIndex === index ? HERO_COLORS.stageActive.border : HERO_COLORS.stageDim.border,
-                  background:  itemIndex === index ? HERO_COLORS.stageActive.bg    : HERO_COLORS.stageDim.bg,
-                  color:       itemIndex === index ? HERO_COLORS.stageActive.text  : HERO_COLORS.stageDim.text,
-                }}
-              >
-                {item.label}
-              </div>
-            ))}
+            {STAGES.map((item, itemIndex) => {
+              const isActive = itemIndex === index
+              return (
+                <div
+                  key={item.id}
+                  className="rounded-full border px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.2em]"
+                  style={{
+                    borderColor: isActive
+                      ? 'color-mix(in srgb, var(--color-secondary) 55%, transparent)'
+                      : 'color-mix(in srgb, var(--color-on-surface) 22%, transparent)',
+                    background: isActive
+                      ? 'color-mix(in srgb, var(--color-secondary) 12%, transparent)'
+                      : 'color-mix(in srgb, var(--color-on-surface) 8%, transparent)',
+                    color: isActive
+                      ? 'var(--color-on-surface)'
+                      : 'color-mix(in srgb, var(--color-on-surface) 78%, transparent)',
+                  }}
+                >
+                  {item.label}
+                </div>
+              )
+            })}
           </div>
         </div>
 
-        <div className="mt-3 min-h-0 rounded-[28px] border border-outline-variant/12 bg-black/10 p-3 sm:p-4">
+        <div className="mt-3 min-h-0 rounded-[28px] border border-outline-variant/12 bg-on-surface/5 p-3 sm:p-4">
           <AnimatePresence mode="wait">
             <motion.div
               key={stage.id}
@@ -487,7 +506,7 @@ export function HeroLoop({ compact = false }: { compact?: boolean }) {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2, ease: 'easeInOut' }}
             >
-              <StageContent id={stage.id} compact={compact} />
+              <StageContent id={stage.id} compact={compact} colors={colors} />
             </motion.div>
           </AnimatePresence>
         </div>
@@ -506,9 +525,10 @@ export function HeroLoop({ compact = false }: { compact?: boolean }) {
 
           <Link
             href="/explore"
-            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-[20px] border border-primary/30 bg-surface-container-highest/90 px-3 py-2 text-[11px] font-semibold text-primary transition-all duration-150 hover:border-primary/55 hover:bg-primary/10 sm:text-xs"
+            className="group inline-flex shrink-0 items-center justify-center gap-1.5 rounded-[20px] border border-primary/30 bg-surface-container-highest/90 px-3 py-2 text-[11px] font-semibold text-primary transition-all duration-150 hover:border-primary/55 hover:bg-primary/10 sm:text-xs"
           >
-            Try it out →
+            Try it out
+            <ArrowRight className="h-3 w-3 transition-transform duration-150 group-hover:translate-x-0.5" />
           </Link>
         </div>
       </div>

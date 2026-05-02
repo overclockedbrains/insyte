@@ -61,7 +61,7 @@ export function DevBanner() {
                   type="button"
                   onClick={dismiss}
                   aria-label="Dismiss"
-                  className="absolute top-3.5 right-3.5 p-1.5 rounded-lg text-white/20 hover:text-white/50 hover:bg-white/[0.06] transition-colors"
+                  className="absolute top-3.5 right-3.5 p-1.5 rounded-lg text-on-surface/25 hover:text-on-surface/55 hover:bg-on-surface/[0.06] transition-colors"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -78,7 +78,7 @@ export function DevBanner() {
                   </div>
                 </div>
 
-                <p className="text-[15px] font-bold leading-snug mb-2 pr-5 text-white/90">
+                <p className="text-[15px] font-bold leading-snug mb-2 pr-5 text-on-surface/90">
                   Still baking,{' '}
                   <span
                     style={{
@@ -92,7 +92,7 @@ export function DevBanner() {
                   </span>
                 </p>
 
-                <p className="text-[12px] leading-relaxed text-white/35 mb-5">
+                <p className="text-[12px] leading-relaxed text-on-surface/45 mb-5">
                   Active dev territory — you might hit a rough edge. Every bug report genuinely helps shape this.
                 </p>
 
@@ -126,7 +126,7 @@ export function DevBanner() {
             onClick={() => setState('card')}
             title="About this build"
             aria-label="About this build"
-            className="fixed bottom-6 left-6 z-[90] h-9 w-9 rounded-full bg-[var(--color-dev-banner-bg)] border border-white/[0.08] flex items-center justify-center text-white/25 hover:text-white/55 hover:border-white/15 transition-colors duration-200"
+            className="fixed bottom-6 left-6 z-[90] h-9 w-9 rounded-full bg-[var(--color-dev-banner-bg)] border border-outline-variant/30 flex items-center justify-center text-on-surface/25 hover:text-on-surface/55 hover:border-outline-variant/50 transition-colors duration-200"
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.5 }}

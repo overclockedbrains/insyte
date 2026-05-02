@@ -28,6 +28,7 @@ import type { PrimitiveProps } from '.'
 import { computeLayout } from '@insyte/scene-engine'
 import { useCanvas } from '../CanvasContext'
 import { resolveHighlight } from '../styles/colors'
+import { useThemeSync } from '../styles/useThemeSync'
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 const NODE_W = 120
@@ -104,6 +105,7 @@ function sCurvePath(
 
 // ─── Component ─────────────────────────────────────────────────────────────────
 export function SystemDiagramViz({ id, state, visual }: PrimitiveProps) {
+  useThemeSync()
   const { width: canvasW, height: canvasH } = useCanvas()
   const { components = [], connections = [] } = state as SystemDiagramState
 

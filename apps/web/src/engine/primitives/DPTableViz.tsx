@@ -16,6 +16,7 @@ import { useEffect, useRef } from 'react'
 import { useAnimate } from 'framer-motion'
 import type { PrimitiveProps } from '.'
 import { resolveHighlight } from '../styles/colors'
+import { useThemeSync } from '../styles/useThemeSync'
 
 interface DPCell {
   value: string | number
@@ -31,6 +32,7 @@ interface DPTableState {
 }
 
 export function DPTableViz({ id, state }: PrimitiveProps) {
+  useThemeSync()
   const { rows, cols, cells = [], rowLabels, colLabels } = state as DPTableState
   const [scope, animate] = useAnimate()
 

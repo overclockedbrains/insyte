@@ -10,6 +10,7 @@ import { DotGridBackground } from '@/components/layout/DotGridBackground'
 import { AuthProvider } from '@/components/auth/AuthProvider'
 import { AuthModal } from '@/components/auth/AuthModal'
 import { DevBanner } from '@/components/layout/DevBanner'
+import { ThemeApplier } from '@/components/ThemeApplier'
 import './globals.css'
 
 const manrope = Manrope({
@@ -93,8 +94,15 @@ export default function RootLayout({
         plusJakartaSans.variable,
         jetbrainsMono.variable,
       )}
+      suppressHydrationWarning
     >
       <body className="min-h-screen flex flex-col bg-background text-on-surface font-body antialiased relative">
+        {/* Apply persisted theme before first paint to avoid flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var s=localStorage.getItem('insyte-settings');if(s){var t=JSON.parse(s)?.state?.theme;if(t&&t!=='default')document.documentElement.dataset.theme=t;}}catch(e){}})();`,
+          }}
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -105,6 +113,9 @@ export default function RootLayout({
         {/* Background layers */}
         <GlowEffect />
         <DotGridBackground opacity={0.4} />
+
+        {/* Sync Zustand theme → data-theme attribute on <html> */}
+        <ThemeApplier />
 
         {/* Auth provider — initialises session on mount */}
         <AuthProvider>

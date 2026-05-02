@@ -1,6 +1,9 @@
+'use client'
+
 import { motion, AnimatePresence } from 'framer-motion'
 import type { PrimitiveProps } from '.'
 import { resolveHighlight, VIZ_SHADOWS } from '../styles/colors'
+import { useThemeSync } from '../styles/useThemeSync'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface LinkedListNode {
@@ -21,6 +24,7 @@ interface LinkedListState {
 // pointers[] renders named cursors (prev, curr, next) above the list.
 
 export function LinkedListViz({ state }: PrimitiveProps) {
+  useThemeSync()
   const { items = [], pointers = [] } = state as LinkedListState
 
   return (

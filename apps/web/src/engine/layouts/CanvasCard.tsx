@@ -6,7 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import type { Scene } from '@insyte/scene-engine'
 import { applyOverlaysAtStep } from '@insyte/scene-engine'
 import { useBoundStore } from '@/src/stores/store'
-import { PRIMARY } from '@/src/engine/styles/colors'
+import { getLivePrimary } from '@/src/engine/styles/colors'
+import { useThemeSync } from '@/src/engine/styles/useThemeSync'
 import { DotGridBackground } from '@/components/layout/DotGridBackground'
 import { PlaybackControls } from '../controls/PlaybackControls'
 import { ControlBar } from '../controls/ControlBar'
@@ -75,6 +76,8 @@ function HudZone({ scene, step }: { scene: Scene, step: number }) {
 // ─── Floating explanation card ───────────────────────────────────────────────
 
 function FloatingExplanationCard({ scene, step }: { scene: Scene, step: number }) {
+  useThemeSync()
+  const primary = getLivePrimary()
   // For canvas-only scenes, show the most recent step explanation at or before current step.
   const floatingExplanation =
     scene.layout === 'canvas-only'
@@ -97,7 +100,7 @@ function FloatingExplanationCard({ scene, step }: { scene: Scene, step: number }
         >
           <div
             className="glass-panel rounded-2xl border border-primary/15 px-4 py-3 shadow-lg"
-            style={{ boxShadow: PRIMARY.glowSubtle }}
+            style={{ boxShadow: primary.glowSubtle }}
           >
             <p className="text-[11px] font-semibold text-primary mb-1 uppercase tracking-widest">
               {floatingExplanation.heading}
@@ -182,6 +185,8 @@ function CardContent({ scene, onRerunWithCustomInput }: { scene: Scene, onRerunW
 // ─── CanvasCard ────────────────────────────────────────────────────────────────
 
 export function CanvasCard({ scene, onRerunWithCustomInput = null }: CanvasCardProps) {
+  useThemeSync()
+  const primary = getLivePrimary()
   const isExpanded = useBoundStore((s) => s.isExpanded)
   const setExpanded = useBoundStore((s) => s.setExpanded)
   const isPatchGlowing = useBoundStore((s) => s.isPatchGlowing)
@@ -240,7 +245,7 @@ export function CanvasCard({ scene, onRerunWithCustomInput = null }: CanvasCardP
         ].join(' ')}
         aria-hidden={isExpanded}
         animate={{
-          boxShadow: isPatchGlowing ? PRIMARY.glowBright : PRIMARY.glow0,
+          boxShadow: isPatchGlowing ? primary.glowBright : primary.glow0,
         }}
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       >
@@ -258,7 +263,7 @@ export function CanvasCard({ scene, onRerunWithCustomInput = null }: CanvasCardP
                 animate={{
                   opacity: 1,
                   scale: 1,
-                  boxShadow: isPatchGlowing ? PRIMARY.glowCard : PRIMARY.glow0,
+                  boxShadow: isPatchGlowing ? primary.glowCard : primary.glow0,
                 }}
                 exit={{ opacity: 0, scale: 0.97 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 35 }}

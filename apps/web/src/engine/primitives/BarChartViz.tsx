@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import type { PrimitiveProps } from '.'
 import { resolveHighlight } from '../styles/colors'
+import { useThemeSync } from '../styles/useThemeSync'
 
 interface ChartBar {
   id: string
@@ -20,6 +21,7 @@ const BAR_WIDTH = 40
 const MAX_BAR_HEIGHT = 200
 
 export function BarChartViz({ state }: PrimitiveProps) {
+  useThemeSync()
   const { bars = [], maxValue } = state as ChartState
 
   if (bars.length === 0) {

@@ -1,6 +1,9 @@
+'use client'
+
 import { motion, AnimatePresence } from 'framer-motion'
 import type { PrimitiveProps } from '.'
-import { resolveHighlight, VIZ_SURFACE } from '../styles/colors'
+import { resolveHighlight, getLiveVizSurface } from '../styles/colors'
+import { useThemeSync } from '../styles/useThemeSync'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface StackItem {
@@ -20,6 +23,8 @@ interface StackState {
 // flex-col-reverse so pushed frames appear at the top of the container.
 
 export function StackViz({ id, state }: PrimitiveProps) {
+  useThemeSync()
+  const viz = getLiveVizSurface()
   const { items = [] } = state as StackState
 
   return (
@@ -69,7 +74,7 @@ export function StackViz({ id, state }: PrimitiveProps) {
                     backgroundColor: colors.bg,
                     boxShadow: isHighlighted
                       ? `inset 3px 0 0 ${colors.border}, 0 1px 0 ${colors.border}20`
-                      : `inset 3px 0 0 ${VIZ_SURFACE.defaultBorderFaint}`,
+                      : `inset 3px 0 0 ${viz.defaultBorderFaint}`,
                   }}
                   exit={{ opacity: 0, x: 32, scaleY: 0.5, transition: { duration: 0.15 } }}
                   transition={{ type: 'spring', stiffness: 320, damping: 28 }}

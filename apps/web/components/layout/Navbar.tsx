@@ -17,6 +17,7 @@ import { Pill } from '@/components/ui/Pill'
 import { GITHUB_URL, NAV_LINKS } from '@/src/lib/config'
 import { signOut, getUserInitials, getUserAvatarUrl } from '@/lib/auth'
 import { BookmarkButton } from '@/components/simulation/BookmarkButton'
+import { ThemeSwitcher } from '@/components/layout/ThemeSwitcher'
 
 // Provider indicator
 
@@ -206,7 +207,7 @@ export function Navbar() {
   const isDevPage = (pathname?.startsWith('/dev') ?? false) && Boolean(process.env.NEXT_PUBLIC_DEV_TOOLS)
 
   return (
-    <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-background/80 border-b border-white/[0.06]">
+    <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-background/80 border-b border-outline-variant/20">
       <nav className="mx-auto flex h-14 max-w-screen-2xl items-center justify-between px-4 sm:px-6 gap-3">
 
         {/* Logo */}
@@ -271,6 +272,7 @@ export function Navbar() {
                 Dev Only
               </span>
               <div className="hidden md:block h-4 w-px bg-outline-variant/20" />
+              <ThemeSwitcher className="flex items-center p-1.5 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-150" />
               <SettingsLink className="flex items-center p-1.5 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-150" />
               <UserMenu />
             </div>
@@ -346,6 +348,7 @@ export function Navbar() {
                 <BookmarkButton slug={currentSlug} />
               )}
 
+              <ThemeSwitcher className="hidden sm:flex items-center px-2.5 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-150" />
               <SettingsLink className="hidden sm:flex items-center px-2.5 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-150" />
 
               {/* Auth UI on scene page */}
@@ -395,6 +398,7 @@ export function Navbar() {
                 <Terminal className="h-3.5 w-3.5" />
                 Dev
               </Link>
+              <ThemeSwitcher className="flex items-center px-3 py-1.5 text-on-surface-variant hover:text-on-surface transition-colors rounded-md hover:bg-surface-container-high" />
               <SettingsLink
                 showLabel
                 className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors rounded-md hover:bg-surface-container-high"
@@ -459,6 +463,7 @@ export function Navbar() {
                       <Terminal className="h-4 w-4" />
                       Dev
                     </Link>
+                    <ThemeSwitcher className="flex items-center gap-2 px-3 py-2.5 text-on-surface-variant hover:text-on-surface rounded-md hover:bg-surface-container-high transition-colors" />
                     <SettingsLink
                       showLabel
                       onClick={() => setMobileOpen(false)}

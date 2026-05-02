@@ -15,6 +15,7 @@ import type { PrimitiveProps } from '.'
 import { computeLayout } from '@insyte/scene-engine'
 import { useCanvas } from '../CanvasContext'
 import { resolveHighlight } from '../styles/colors'
+import { useThemeSync } from '../styles/useThemeSync'
 import { RecursionTreeViz } from './RecursionTreeViz'
 import { TrieViz } from './TrieViz'
 
@@ -39,6 +40,7 @@ export function TreeViz(props: PrimitiveProps) {
 }
 
 function BinaryTreeViz({ id, state, visual }: PrimitiveProps) {
+  useThemeSync()
   const { width: canvasW, height: canvasH } = useCanvas()
   const { nodes = [], rootId } = state as TreeState
 

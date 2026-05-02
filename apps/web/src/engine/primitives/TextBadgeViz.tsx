@@ -1,6 +1,9 @@
+'use client'
+
 import { motion, AnimatePresence } from 'framer-motion'
 import type { PrimitiveProps } from '.'
-import { resolveHighlight, VIZ_SURFACE } from '../styles/colors'
+import { resolveHighlight, getLiveVizSurface } from '../styles/colors'
+import { useThemeSync } from '../styles/useThemeSync'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface TextBadgeState {
@@ -23,14 +26,16 @@ function styleToHighlight(style: TextBadgeState['style']): string | undefined {
 // Phase 27: resolveHighlight() + viz-popup-text typography class.
 
 export function TextBadgeViz({ state }: PrimitiveProps) {
+  useThemeSync()
   const { text, style = 'default' } = state as TextBadgeState
 
   const highlightToken = styleToHighlight(style)
   const colors = resolveHighlight(highlightToken)
+  const viz = getLiveVizSurface()
   const isHighlighted = !!highlightToken
 
-  const bgColor     = isHighlighted ? colors.bg : VIZ_SURFACE.container
-  const borderColor = isHighlighted ? colors.border : VIZ_SURFACE.border
+  const bgColor     = isHighlighted ? colors.bg : viz.container
+  const borderColor = isHighlighted ? colors.border : viz.border
   const shadow      = isHighlighted ? `0 0 15px ${colors.border}50` : 'none'
 
   return (
