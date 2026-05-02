@@ -1,12 +1,14 @@
 # Phase 29 — Zoom/Pan Viewport & Interactive Canvas
 
-**Goal:** Add zoom and pan to the canvas zone, enabling users to navigate large graphs, system diagrams, and recursion trees that exceed the visible area. Uses the React Flow approach: a CSS transform viewport that updates at native browser speed with zero React re-renders during pan/zoom. Includes zoom-to-fit on scene load and mobile pinch-to-zoom.
+> **Goal:** Add zoom and pan to the canvas zone, enabling users to navigate large graphs, system diagrams, and recursion trees that exceed the visible area. Uses the React Flow approach: a CSS transform viewport that updates at native browser speed with zero React re-renders during pan/zoom. Includes zoom-to-fit on scene load and mobile pinch-to-zoom.
 
-**Source research:** `canvas-libs-analysis.md` §2 (Zoom/Pan), `ARCHITECTURE_V3.md` Part 4 §4.4, `existing-tools-analysis.md` §2 (Excalidraw zoom) + §3 (React Flow viewport), `rendering-approach.md` §2
+> **Source research:** `canvas-libs-analysis.md` §2 (Zoom/Pan), `ARCHITECTURE_V3.md` Part 4 §4.4, `existing-tools-analysis.md` §2 (Excalidraw zoom) + §3 (React Flow viewport), `rendering-approach.md` §2
 
-**Estimated effort:** 4–5 days
+> **Estimated effort:** 4–5 days
 
-**Prerequisite:** Phase 22 (scene graph provides the bounding box for zoom-to-fit) + Phase 23 (`useCanvasDimensions` from Scene Runtime provides container dimensions)
+> **Prerequisite:** Phase 22 (scene graph provides the bounding box for zoom-to-fit) + Phase 23 (`useCanvasDimensions` from Scene Runtime provides container dimensions)
+
+> **Status**: 
 
 ---
 

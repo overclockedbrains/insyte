@@ -1,12 +1,14 @@
 # Phase 18 — Coordinate System Unification
 
-**Goal:** Eliminate the dual coordinate system bug that causes edges to never connect to node centers. Migrate graph/tree/system-diagram primitives from the broken (DOM % + SVG px) dual-system to a single unified SVG viewBox with `<foreignObject>` node bodies.
+> **Goal:** Eliminate the dual coordinate system bug that causes edges to never connect to node centers. Migrate graph/tree/system-diagram primitives from the broken (DOM % + SVG px) dual-system to a single unified SVG viewBox with `<foreignObject>` node bodies.
 
-**Source research:** `ARCHITECTURE_RECOMMENDATIONS.md` Phase B, `rendering-approach.md` §1 + §6, `ARCHITECTURE_V3.md` Part 4 §4.2, `canvas-libs-analysis.md` §5
+> **Source research:** `ARCHITECTURE_RECOMMENDATIONS.md` Phase B, `rendering-approach.md` §1 + §6, `ARCHITECTURE_V3.md` Part 4 §4.2, `canvas-libs-analysis.md` §5
 
-**Estimated effort:** 6–8 days
+> **Estimated effort:** 6–8 days
 
-**Prerequisite:** Phase 17 (Ollama + custom LLM support — no direct code dependency, ordering only)
+> **Prerequisite:** Phase 17 (Ollama + custom LLM support — no direct code dependency, ordering only)
+
+> **Status**: COMPLETE
 
 ---
 

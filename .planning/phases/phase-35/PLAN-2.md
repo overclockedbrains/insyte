@@ -1,6 +1,6 @@
 # Phase 35 — Plan 2: Primitive Expansion (4 Additions)
 
-> **Status**: Ready for implementation
+> **Status**: COMPLETE
 > **Date**: 2026-04-26
 > **Scope**: Add 3 new variants + 1 new top-level type. No existing scene migration needed.
 >

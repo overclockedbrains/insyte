@@ -1,12 +1,14 @@
 # Phase 25 — Multi-Stage AI Pipeline
 
-**Goal:** Replace the current single-call 10–20KB JSON generation with a 5-stage pipeline driven by ISCL. Each stage is small, independently validable, and targets a specific piece of the scene. Visual IDs and step count flow from Stage 1 as hard constraints into downstream stages — the LLM reads them from its prompt context, never from its generation history. Each stage retries up to 2× before yielding a typed `ValidationError`. Stage 2a/2b support partial-success recovery. Expected failure rate: 5–10% (down from 50–60%).
+> **Goal:** Replace the current single-call 10–20KB JSON generation with a 5-stage pipeline driven by ISCL. Each stage is small, independently validable, and targets a specific piece of the scene. Visual IDs and step count flow from Stage 1 as hard constraints into downstream stages — the LLM reads them from its prompt context, never from its generation history. Each stage retries up to 2× before yielding a typed `ValidationError`. Stage 2a/2b support partial-success recovery. Expected failure rate: 5–10% (down from 50–60%).
 
-**Source research:** `advanced-ai-pipeline.md` §2.7, `ai-pipeline.md` §6, `ARCHITECTURE_RECOMMENDATIONS.md` Phase D, `ARCHITECTURE_V3.md` Part 2 §2.5–2.6
+> **Source research:** `advanced-ai-pipeline.md` §2.7, `ai-pipeline.md` §6, `ARCHITECTURE_RECOMMENDATIONS.md` Phase D, `ARCHITECTURE_V3.md` Part 2 §2.5–2.6
 
-**Estimated effort:** 10–12 days
+> **Estimated effort:** 10–12 days
 
-**Prerequisite:** Phase 24 (ISCL parser must exist before Stage 1 can use it)
+> **Prerequisite:** Phase 24 (ISCL parser must exist before Stage 1 can use it)
+
+> **Status**: COMPLETE
 
 ---
 

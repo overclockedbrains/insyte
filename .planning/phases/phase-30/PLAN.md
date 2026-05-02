@@ -1,18 +1,22 @@
 # Phase 30 — AI Pipeline Redesign: Kill ISCL, Stage 0 Reasoning, Co-generated Steps + Explanations
 
 > **Revision 3 — April 14, 2026**  
+
 > Incorporates findings from 4 research documents: `byok-model-routing.md`, `prompt-engineering.md`, `ai-module-package.md`, `plan-audit.md`. 14 of 15 audit discrepancies resolved. BYOK model routing (discrepancy #1) deferred to Phase 31.
 
-**Goal:** Fix the root causes of insyte's generation quality problems — persistent ISCL hallucinations, visual-logic drift (steps and explanations out of sync), and blind retries — by replacing ISCL with native constrained decoding, introducing a free-text reasoning pass (Stage 0) that flows as shared context into all downstream stages, and co-generating explanation + actions per step so drift is structurally impossible.
+> **Goal:** Fix the root causes of insyte's generation quality problems — persistent ISCL hallucinations, visual-logic drift (steps and explanations out of sync), and blind retries — by replacing ISCL with native constrained decoding, introducing a free-text reasoning pass (Stage 0) that flows as shared context into all downstream stages, and co-generating explanation + actions per step so drift is structurally impossible.
 
-**Source research:** `.planning/research/ai-pipeline-redesign/README.md` + `sources-and-quotes.md`  
-**Additional research:** `byok-model-routing.md` · `prompt-engineering.md` · `ai-module-package.md` · `plan-audit.md`
+> **Source research:** `.planning/research/ai-pipeline-redesign/README.md` + `sources-and-quotes.md`  
 
-**Estimated effort:** 8–10 days
+> **Additional research:** `byok-model-routing.md` · `prompt-engineering.md` · `ai-module-package.md` · `plan-audit.md`
 
-**Prerequisite:** Phase 25 (5-stage pipeline and SSE infrastructure in place — this phase restructures it)
+> **Estimated effort:** 8–10 days
 
-**Scope:** Entire change is inside `apps/web/src/ai/`. Nothing in `packages/scene-engine`, the rendering engine, or layout engine changes. The `GenerationEvent` discriminated union gains one new variant (`reasoning`) — a minor frontend addition to show "Thinking..." during Stage 0.
+> **Prerequisite:** Phase 25 (5-stage pipeline and SSE infrastructure in place — this phase restructures it)
+
+> **Scope:** Entire change is inside `apps/web/src/ai/`. Nothing in `packages/scene-engine`, the rendering engine, or layout engine changes. The `GenerationEvent` discriminated union gains one new variant (`reasoning`) — a minor frontend addition to show "Thinking..." during Stage 0.
+
+> **Status**: COMPLETE
 
 ---
 

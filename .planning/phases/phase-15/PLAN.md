@@ -1,10 +1,10 @@
 # Phase 15 - R1 Fixes + UI Tweaks
 
-**Goal:** Clean up the rough R1 edges found immediately after launch, especially navigation confusion, landing-page polish, and high-visibility UI inconsistencies.
+> **Goal:** Clean up the rough R1 edges found immediately after launch, especially navigation confusion, landing-page polish, and high-visibility UI inconsistencies.
 
-**Entry criteria:** Phase 14 complete. Production is live and manual smoke checks are passing.
+> **Entry criteria:** Phase 14 complete. Production is live and manual smoke checks are passing.
 
-**Status:** Completed on April 10, 2026.
+> **Status:** Completed on April 10, 2026.
 
 ---
 

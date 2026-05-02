@@ -1,8 +1,10 @@
 # Phase 12 — DSA Pipeline
 
-**Goal:** Full DSA trace pipeline working end-to-end: paste code → Pyodide/Worker executes → AI generates Scene JSON. 10 pre-built DSA Scene JSONs authored. "Re-run with custom input" flow functional.
+> **Goal:** Full DSA trace pipeline working end-to-end: paste code → Pyodide/Worker executes → AI generates Scene JSON. 10 pre-built DSA Scene JSONs authored. "Re-run with custom input" flow functional.
 
-**Entry criteria:** Phase 11 complete. AI generation, scene-store, and simulation page all working.
+> **Entry criteria:** Phase 11 complete. AI generation, scene-store, and simulation page all working.
+
+> **Status**: COMPLETE
 
 ---
 

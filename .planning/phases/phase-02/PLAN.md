@@ -1,8 +1,10 @@
 # Phase 2 — Scene Engine Core
 
-**Goal:** Scene JSON types finalized in the shared package, all Zustand stores wired, `SceneRenderer` reads a JSON and renders the correct panel layout with playback controls.
+> **Goal:** Scene JSON types finalized in the shared package, all Zustand stores wired, `SceneRenderer` reads a JSON and renders the correct panel layout with playback controls.
 
-**Entry criteria:** Phase 1 complete. Design system and layout components working.
+> **Entry criteria:** Phase 1 complete. Design system and layout components working.
+
+> **Status**: COMPLETE
 
 ---
 

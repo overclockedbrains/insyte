@@ -1,12 +1,14 @@
 # Phase 22 — Scene Graph Architecture
 
-**Goal:** Build the `scene-graph/` module in `packages/scene-engine/`. This is the data layer that converts a `Scene` + step index into a fully positioned, diff-able `SceneGraph` — the structure that all renderers consume. Imports from Step Engine (Phase 21) and Layout Engine (Phase 20). Downstream: Scene Runtime (Phase 23) adds caching; ELK (Phase 28) adds async layout upgrade.
+> **Goal:** Build the `scene-graph/` module in `packages/scene-engine/`. This is the data layer that converts a `Scene` + step index into a fully positioned, diff-able `SceneGraph` — the structure that all renderers consume. Imports from Step Engine (Phase 21) and Layout Engine (Phase 20). Downstream: Scene Runtime (Phase 23) adds caching; ELK (Phase 28) adds async layout upgrade.
 
-**Source research:** `ARCHITECTURE_V3.md` Part 1 §1.3–1.5 (SceneGraph types, compute contract), Part 4 §4.2 (DOMRenderer consumes SceneGraph), Phase 20 (LayoutResult shape), Phase 21 (step-engine exports)
+> **Source research:** `ARCHITECTURE_V3.md` Part 1 §1.3–1.5 (SceneGraph types, compute contract), Part 4 §4.2 (DOMRenderer consumes SceneGraph), Phase 20 (LayoutResult shape), Phase 21 (step-engine exports)
 
-**Estimated effort:** 3–4 days
+> **Estimated effort:** 3–4 days
 
-**Prerequisite:** Phase 20 (layout engine — provides `computeLayout`, `LayoutResult`) + Phase 21 (step engine — provides `applyStepActionsUpTo`, `computeTopologyAtStep`)
+> **Prerequisite:** Phase 20 (layout engine — provides `computeLayout`, `LayoutResult`) + Phase 21 (step engine — provides `applyStepActionsUpTo`, `computeTopologyAtStep`)
+
+> **Status**: COMPLETE
 
 ---
 

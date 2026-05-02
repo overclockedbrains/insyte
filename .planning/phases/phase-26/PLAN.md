@@ -1,12 +1,14 @@
 # Phase 26 — Progressive Streaming Generation UX
 
-**Goal:** Expose the 5-stage pipeline as a first-class UX. The user sees a skeleton from Stage 1 (~1.5s), primitive nodes populate from Stage 2 (~5s), explanation panel fills in from Stage 3, and the complete scene is ready at ~8–10s. Each stage has a distinct visual state. Errors are stage-specific with useful messages keyed by the `stage` field from `ValidationError`. This transforms the current "wait 8 seconds then see everything" into a "see something in 1.5 seconds" progressive reveal.
+> **Goal:** Expose the 5-stage pipeline as a first-class UX. The user sees a skeleton from Stage 1 (~1.5s), primitive nodes populate from Stage 2 (~5s), explanation panel fills in from Stage 3, and the complete scene is ready at ~8–10s. Each stage has a distinct visual state. Errors are stage-specific with useful messages keyed by the `stage` field from `ValidationError`. This transforms the current "wait 8 seconds then see everything" into a "see something in 1.5 seconds" progressive reveal.
 
-**Source research:** `ARCHITECTURE_V3.md` Part 2 §2.6, `ARCHITECTURE_RECOMMENDATIONS.md` Phase D §19, `ai-pipeline.md` §9
+> **Source research:** `ARCHITECTURE_V3.md` Part 2 §2.6, `ARCHITECTURE_RECOMMENDATIONS.md` Phase D §19, `ai-pipeline.md` §9
 
-**Estimated effort:** 4–5 days
+> **Estimated effort:** 4–5 days
 
-**Prerequisite:** Phase 25 (async generator pipeline with typed `GenerationEvent` and `ValidationError`)
+> **Prerequisite:** Phase 25 (async generator pipeline with typed `GenerationEvent` and `ValidationError`)
+
+> **Status**: 
 
 ---
 

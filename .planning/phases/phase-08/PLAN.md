@@ -1,8 +1,10 @@
 # Phase 8 — AI Chat + Scene Patching
 
-**Goal:** Floating `💬` button → expandable glass morphism chat card with live streaming AI responses that can patch the active simulation.
+> **Goal:** Floating `💬` button → expandable glass morphism chat card with live streaming AI responses that can patch the active simulation.
 
-**Entry criteria:** Phase 7 complete. AI generation pipeline working. Active scene in scene-store.
+> **Entry criteria:** Phase 7 complete. AI generation pipeline working. Active scene in scene-store.
+
+> **Status**: COMPLETE
 
 ---
 

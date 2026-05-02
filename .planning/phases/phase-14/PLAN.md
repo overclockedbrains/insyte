@@ -1,10 +1,10 @@
 # Phase 14 — Complete Deploy
 
-**Goal:** Production deploy on Vercel, all environment variables live, README complete, all 24 scenes validated. Open source ready.
+> **Goal:** Production deploy on Vercel, all environment variables live, README complete, all 24 scenes validated. Open source ready.
 
-**Entry criteria:** Phase 13 complete. All features functional end-to-end.
+> **Entry criteria:** Phase 13 complete. All features functional end-to-end.
 
-**Status:** Completed on April 8, 2026.
+> **Status:** Completed on April 8, 2026.
 
 ---
 

@@ -1,8 +1,10 @@
 # Phase 4 — Simulation Page Layouts
 
-**Goal:** `/s/[slug]` route fully functional with all 3 layout variants, expand mode, challenges section, and correct mobile layout.
+> **Goal:** `/s/[slug]` route fully functional with all 3 layout variants, expand mode, challenges section, and correct mobile layout.
 
-**Entry criteria:** Phase 3 complete. All primitives and annotation components built.
+> **Entry criteria:** Phase 3 complete. All primitives and annotation components built.
+
+> **Status**: COMPLETE
 
 ---
 

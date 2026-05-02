@@ -2,13 +2,15 @@
 
 > **Revision 1 — April 17, 2026**
 
-**Goal:** Replace Phase 30's static BYOK behaviour (every stage gets the user's single selected model) with provider-aware tier routing — when a user brings their own API key for Gemini, OpenAI, Anthropic, or Groq, insyte routes each stage to the appropriate model tier within that provider's family. Ollama and Custom Endpoint are unrouted: they use the user's configured model for all stages (same as Phase 30, no change). The settings UI is simplified to match: routed providers no longer show a model selector.
+> **Goal:** Replace Phase 30's static BYOK behaviour (every stage gets the user's single selected model) with provider-aware tier routing — when a user brings their own API key for Gemini, OpenAI, Anthropic, or Groq, insyte routes each stage to the appropriate model tier within that provider's family. Ollama and Custom Endpoint are unrouted: they use the user's configured model for all stages (same as Phase 30, no change). The settings UI is simplified to match: routed providers no longer show a model selector.
 
-**Prerequisite:** Phase 30 ✅ — pipeline stable, `providerName` on `ModelConfig` (BUG-10), `resolveStageModel` in `model-routing.ts`.
+> **Prerequisite:** Phase 30 ✅ — pipeline stable, `providerName` on `ModelConfig` (BUG-10), `resolveStageModel` in `model-routing.ts`.
 
-**Research:** `.planning/research/ai-pipeline-redesign/byok-model-routing.md`
+> **Research:** `.planning/research/ai-pipeline-redesign/byok-model-routing.md`
 
-**Estimated effort:** 2–3 days
+> **Estimated effort:** 2–3 days
+
+> **Status**: COMPLETE
 
 ---
 

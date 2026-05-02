@@ -1,8 +1,10 @@
 # Phase 9 — Settings + BYOK
 
-**Goal:** `/settings` page fully functional. Users can add API keys for 4 providers, select models, and all AI calls use their key instead of the server default.
+> **Goal:** `/settings` page fully functional. Users can add API keys for 4 providers, select models, and all AI calls use their key instead of the server default.
 
-**Entry criteria:** Phase 8 complete. AI generation and chat working with server Gemini key.
+> **Entry criteria:** Phase 8 complete. AI generation and chat working with server Gemini key.
+
+> **Status**: COMPLETE
 
 ---
 

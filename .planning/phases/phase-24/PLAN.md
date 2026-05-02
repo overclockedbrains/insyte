@@ -1,14 +1,16 @@
 # Phase 24 — ISCL Grammar & Parser
 
-**Goal:** Design and implement the Insyte Scene Language (ISCL) — a purpose-built text DSL that AI generates instead of Scene JSON. A deterministic TypeScript parser converts ISCL to a structured parse result that downstream pipeline stages use as ground truth. The grammar physically cannot express XY coordinates, making broken layout structurally impossible. All cross-references are validated by the parser, not the LLM.
+> **Goal:** Design and implement the Insyte Scene Language (ISCL) — a purpose-built text DSL that AI generates instead of Scene JSON. A deterministic TypeScript parser converts ISCL to a structured parse result that downstream pipeline stages use as ground truth. The grammar physically cannot express XY coordinates, making broken layout structurally impossible. All cross-references are validated by the parser, not the LLM.
 
-**Source research:** `advanced-ai-pipeline.md` Part 2 (§2.3–2.7), `ARCHITECTURE_V3.md` Part 2 (§2.1–2.6), `ARCHITECTURE_RECOMMENDATIONS_V2.md` Track B §B2
+> **Source research:** `advanced-ai-pipeline.md` Part 2 (§2.3–2.7), `ARCHITECTURE_V3.md` Part 2 (§2.1–2.6), `ARCHITECTURE_RECOMMENDATIONS_V2.md` Track B §B2
 
-**Estimated effort:** 5–6 days
+> **Estimated effort:** 5–6 days
 
-**Prerequisite:** Phase 19 (schema types needed for ISCLParseResult)
+> **Prerequisite:** Phase 19 (schema types needed for ISCLParseResult)
 
-**Note:** This phase is independent of phases 20–23 (layout engine, scene graph, runtime) and can be developed in parallel.
+> **Note:** This phase is independent of phases 20–23 (layout engine, scene graph, runtime) and can be developed in parallel.
+
+> **Status**: COMPLETE
 
 ---
 

@@ -11,8 +11,7 @@
 - Can I build a playground for users to be able to generate the visuals manually without using AI ?
 
 ## 🚀 Active Focus (What I'm working on right now)
-- [ ] Fix broken dsa generation pipeline
-- [ ] Fix broken positioning system
+- [ ]
 
 ## 💡 Ideas / Future Enhancements
 - Better observability for ai generation
@@ -36,7 +35,7 @@
 - Suggest user by doing ANN search on already generated scenes to use them or generate new?
 - Remove explore page and just have gallery?
 - Do not pass retry-message in retry if stage failed due to gemini not available due to high demand and do not retry if rate limit exceeded.
+- DSA pipeline to be tested and fixed if off !
 
 ## ❓ Questions / Blockers
-- Will we be able to optimize token consumptions ? - cost estimation ?
-- Something is broken now with the animations colors are not getting applied properly do debug phase 37, 38 - broke in phase 37 ?
+-

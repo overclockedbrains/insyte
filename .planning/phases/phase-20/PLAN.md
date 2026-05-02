@@ -1,12 +1,14 @@
 # Phase 20 — Layout Engine
 
-**Goal:** Build the deterministic layout engine layer that computes pixel positions for every visual type. Positions are computed by the layout engine — never authored by AI or stored in Scene JSON. This phase makes broken layout structurally impossible by construction, matching the architecture used by Mermaid, DiagramGPT/Eraser, and React Flow.
+> **Goal:** Build the deterministic layout engine layer that computes pixel positions for every visual type. Positions are computed by the layout engine — never authored by AI or stored in Scene JSON. This phase makes broken layout structurally impossible by construction, matching the architecture used by Mermaid, DiagramGPT/Eraser, and React Flow.
 
-**Source research:** `ARCHITECTURE_RECOMMENDATIONS.md` Phase C §10–12, `layout-and-visualization.md` Parts 1–4, `ARCHITECTURE_V3.md` Part 3, `existing-tools-analysis.md` §4 (Mermaid) + §3 (React Flow)
+> **Source research:** `ARCHITECTURE_RECOMMENDATIONS.md` Phase C §10–12, `layout-and-visualization.md` Parts 1–4, `ARCHITECTURE_V3.md` Part 3, `existing-tools-analysis.md` §4 (Mermaid) + §3 (React Flow)
 
-**Estimated effort:** 6–8 days
+> **Estimated effort:** 6–8 days
 
-**Prerequisite:** Phase 19 (schema redesign removes XY from JSON; layout engine fills the gap)
+> **Prerequisite:** Phase 19 (schema redesign removes XY from JSON; layout engine fills the gap)
+
+> **Status**: COMPLETE
 
 ---
 

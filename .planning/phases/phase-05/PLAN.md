@@ -1,8 +1,10 @@
 # Phase 5 — 5 Concept Simulations (Hand-Crafted Scene JSONs)
 
-**Goal:** 5 fully interactive concept Scene JSONs hand-authored, loading correctly via `/s/[slug]`, all primitives animating as designed.
+> **Goal:** 5 fully interactive concept Scene JSONs hand-authored, loading correctly via `/s/[slug]`, all primitives animating as designed.
 
-**Entry criteria:** Phase 4 complete. Simulation page layouts working. At least ArrayViz, HashMapViz, StackViz, QueueViz, GraphViz, SystemDiagramViz, TextBadgeViz, CounterViz primitives functional.
+> **Entry criteria:** Phase 4 complete. Simulation page layouts working. At least ArrayViz, HashMapViz, StackViz, QueueViz, GraphViz, SystemDiagramViz, TextBadgeViz, CounterViz primitives functional.
+
+> **Status**: COMPLETE
 
 ---
 

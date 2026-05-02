@@ -1,6 +1,6 @@
 # Phase 35 — Plan 1: Primitive Consolidation (11 → 6 Types)
 
-> **Status**: Ready for implementation
+> **Status**: COMPLETE
 > **Date**: 2026-04-26
 > **Scope**: Consolidate 11 canvas visual types into 6. Standardise state vocabulary.
 > Does NOT include JSON payload optimisation (sparse overlays) — that is Plan 2.

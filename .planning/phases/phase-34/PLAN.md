@@ -1,7 +1,9 @@
 # Scene Spec v2 — Implementation Plan
 
 > Companion to: `SCENE_SPEC_V2_DESIGN.md`
-> Status: **Ready for implementation**
+
+> Status: **COMPLETE**
+
 > Two-phase execution. Phase 1 is fully isolated — zero integration. Phase 2 is full replacement.
 
 ---

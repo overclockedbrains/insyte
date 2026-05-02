@@ -1,8 +1,10 @@
 # Phase 11 — Supabase Integration + User Accounts
 
-**Goal:** Full Supabase backend live — scene caching, auth, user profiles, saved simulations, rate limiting, and OG images. Signed-in users get unlimited free-tier AI usage with BYOK.
+> **Goal:** Full Supabase backend live — scene caching, auth, user profiles, saved simulations, rate limiting, and OG images. Signed-in users get unlimited free-tier AI usage with BYOK.
 
-**Entry criteria:** Phase 10 complete. All 24 simulations working. Supabase project created.
+> **Entry criteria:** Phase 10 complete. All 24 simulations working. Supabase project created.
+
+> **Status**: COMPLETE
 
 ---
 

@@ -1,8 +1,10 @@
 # Phase 3 — Visual Primitives
 
-**Goal:** All 12 primitive components + 3 connectors + annotation system fully built, individually demonstrable, and registered in `PrimitiveRegistry`.
+> **Goal:** All 12 primitive components + 3 connectors + annotation system fully built, individually demonstrable, and registered in `PrimitiveRegistry`.
 
-**Entry criteria:** Phase 2 complete. `SceneRenderer`, Zustand stores, and engine hooks all working.
+> **Entry criteria:** Phase 2 complete. `SceneRenderer`, Zustand stores, and engine hooks all working.
+
+> **Status**: COMPLETE
 
 ---
 

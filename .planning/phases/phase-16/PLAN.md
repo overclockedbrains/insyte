@@ -1,10 +1,10 @@
 # Phase 16 - Core Correctness + Runtime Hardening
 
-**Goal:** Resolve the post-launch correctness, sandbox, state-management, and maintainability issues captured in `.planning/things_to_fix`, with concrete implementation steps tied to the actual repo layout.
+> **Goal:** Resolve the post-launch correctness, sandbox, state-management, and maintainability issues captured in `.planning/things_to_fix`, with concrete implementation steps tied to the actual repo layout.
 
-**Entry criteria:** Phase 15 closed. `.planning/things_to_fix` has been audited against the repo and translated into file-level work.
+> **Entry criteria:** Phase 15 closed. `.planning/things_to_fix` has been audited against the repo and translated into file-level work.
 
-**Status:** Planned as of April 10, 2026.
+> **Status:** COMPLETE
 
 ---
 

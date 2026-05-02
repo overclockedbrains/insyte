@@ -1,8 +1,10 @@
 # Phase 0 — Monorepo Setup
 
-**Goal:** Turborepo + pnpm monorepo fully wired, zero-config dev environment running.
+> **Goal:** Turborepo + pnpm monorepo fully wired, zero-config dev environment running.
 
-**Entry criteria:** Empty git repo at `c:/Aman/Coding-Bamzii/insyte`.
+> **Entry criteria:** Empty git repo at `c:/Aman/Coding-Bamzii/insyte`.
+
+> **Status**: COMPLETE
 
 ---
 

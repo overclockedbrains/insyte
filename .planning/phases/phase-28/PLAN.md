@@ -1,12 +1,14 @@
 # Phase 28 — ELK Integration & System Diagram Quality
 
-**Goal:** Upgrade `system-diagram` and complex `graph` layouts from dagre to ELK (Eclipse Layout Kernel) for orthogonal (Manhattan) edge routing, port constraints, and edge label positioning. ELK produces Lucidchart-quality layouts — right-angle connectors, clean hierarchical structure, no diagonal lines. Lazy-loaded in a Web Worker to avoid blocking the main thread with its 2MB WASM bundle. Phase 23's `useSceneRuntime` is extended to subscribe to the ELK ready signal and invalidate the scene graph cache when an upgraded layout is available.
+> **Goal:** Upgrade `system-diagram` and complex `graph` layouts from dagre to ELK (Eclipse Layout Kernel) for orthogonal (Manhattan) edge routing, port constraints, and edge label positioning. ELK produces Lucidchart-quality layouts — right-angle connectors, clean hierarchical structure, no diagonal lines. Lazy-loaded in a Web Worker to avoid blocking the main thread with its 2MB WASM bundle. Phase 23's `useSceneRuntime` is extended to subscribe to the ELK ready signal and invalidate the scene graph cache when an upgraded layout is available.
 
-**Source research:** `layout-and-visualization.md` §1.2 (ELK.js), §2.7 (System Diagram), §3.1 (Mermaid + ELK), `existing-tools-analysis.md` §3 (React Flow + ELK), `ARCHITECTURE_V3.md` Part 3 §3.2
+> **Source research:** `layout-and-visualization.md` §1.2 (ELK.js), §2.7 (System Diagram), §3.1 (Mermaid + ELK), `existing-tools-analysis.md` §3 (React Flow + ELK), `ARCHITECTURE_V3.md` Part 3 §3.2
 
-**Estimated effort:** 4–5 days
+> **Estimated effort:** 4–5 days
 
-**Prerequisite:** Phase 20 (layout engine — ELK replaces dagre for system-diagram type) + Phase 23 (Scene Runtime — ELK subscription wires into the cache invalidation path)
+> **Prerequisite:** Phase 20 (layout engine — ELK replaces dagre for system-diagram type) + Phase 23 (Scene Runtime — ELK subscription wires into the cache invalidation path)
+
+> **Status**: 
 
 ---
 

@@ -1,8 +1,10 @@
 # Phase 13 — Polish + Responsive
 
-**Goal:** Core product (concept + LLD/HLD + auth) is mobile-first, pixel-perfect, and production-quality. All loading/error states handled. DSA-specific polish is deferred to Phase 14.
+> **Goal:** Core product (concept + LLD/HLD + auth) is mobile-first, pixel-perfect, and production-quality. All loading/error states handled. DSA-specific polish is deferred to Phase 14.
 
-**Entry criteria:** Phase 12 complete. All core features (generation, chat, auth, profiles) functional.
+> **Entry criteria:** Phase 12 complete. All core features (generation, chat, auth, profiles) functional.
+
+> **Status**: COMPLETE
 
 ---
 

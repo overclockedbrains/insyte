@@ -1,12 +1,14 @@
 # Phase 21 — Step Engine
 
-**Goal:** Extract step execution into a clean, dedicated layer in `packages/scene-engine/src/step-engine/`. Provides the pure deterministic functions that compute visual state and topology at any step index. All downstream consumers (Scene Graph in Phase 22, Scene Runtime in Phase 23, animation system in Phase 27) build on this foundation.
+> **Goal:** Extract step execution into a clean, dedicated layer in `packages/scene-engine/src/step-engine/`. Provides the pure deterministic functions that compute visual state and topology at any step index. All downstream consumers (Scene Graph in Phase 22, Scene Runtime in Phase 23, animation system in Phase 27) build on this foundation.
 
-**Source research:** `ARCHITECTURE_V3.md` Part 1 §1.2–1.3 (step & state model, topology changes), Phase 22 (scene graph compute.ts defines these as internal functions — extracted here)
+> **Source research:** `ARCHITECTURE_V3.md` Part 1 §1.2–1.3 (step & state model, topology changes), Phase 22 (scene graph compute.ts defines these as internal functions — extracted here)
 
-**Estimated effort:** 3–4 days
+> **Estimated effort:** 3–4 days
 
-**Prerequisite:** Phase 19 (types: Visual, Step, Action, Condition must be finalized)
+> **Prerequisite:** Phase 19 (types: Visual, Step, Action, Condition must be finalized)
+
+> **Status**: COMPLETE
 
 ---
 

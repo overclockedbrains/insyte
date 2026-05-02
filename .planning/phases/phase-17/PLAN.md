@@ -1,8 +1,8 @@
 # Phase 17 — Local & Custom LLM Support
 
-**Goal:** Add Ollama (local) and custom OpenAI-compatible endpoint support with minimal changes — no pipeline changes, no streaming changes, no architecture changes. Plug new providers into the existing `resolveModel()` + `REGISTRY` system that already handles Gemini, OpenAI, Anthropic, and Groq.
+> **Goal:** Add Ollama (local) and custom OpenAI-compatible endpoint support with minimal changes — no pipeline changes, no streaming changes, no architecture changes. Plug new providers into the existing `resolveModel()` + `REGISTRY` system that already handles Gemini, OpenAI, Anthropic, and Groq.
 
-**Status:** Completed April 12, 2026.
+> **Status:** Completed April 12, 2026.
 
 ---
 

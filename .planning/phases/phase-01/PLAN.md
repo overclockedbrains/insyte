@@ -1,8 +1,10 @@
 # Phase 1 — Design System + Global Layout
 
-**Goal:** Every DESIGN.md token, utility, and layout component implemented. Landing at `/` shows correct dark theme with `Navbar` and `DotGridBackground`.
+> **Goal:** Every DESIGN.md token, utility, and layout component implemented. Landing at `/` shows correct dark theme with `Navbar` and `DotGridBackground`.
 
-**Entry criteria:** Phase 0 complete. `pnpm dev` runs, Tailwind color tokens configured.
+> **Entry criteria:** Phase 0 complete. `pnpm dev` runs, Tailwind color tokens configured.
+
+> **Status**: COMPLETE
 
 ---
 

@@ -1,12 +1,14 @@
 # Phase 23 — Scene Runtime & Caching
 
-**Goal:** Add a caching and coordination layer between the scene graph computation (Phase 22) and React. Introduces `LRUCache<K, V>`, a `useSceneRuntime()` hook that caches scene graphs per step with `requestIdleCallback` prefetch for adjacent steps, and `useCanvasDimensions()` for a stable canvas size reference. Prevents redundant `computeSceneGraphAtStep` calls on every render while keeping the step engine and scene graph layers pure.
+> **Goal:** Add a caching and coordination layer between the scene graph computation (Phase 22) and React. Introduces `LRUCache<K, V>`, a `useSceneRuntime()` hook that caches scene graphs per step with `requestIdleCallback` prefetch for adjacent steps, and `useCanvasDimensions()` for a stable canvas size reference. Prevents redundant `computeSceneGraphAtStep` calls on every render while keeping the step engine and scene graph layers pure.
 
-**Source research:** `ARCHITECTURE_V3.md` Part 1 §1.4 (caching strategy), Phase 22 (SceneGraph compute — pure sync function to wrap), Phase 26 (ELK subscription wires into this layer in Phase 28)
+> **Source research:** `ARCHITECTURE_V3.md` Part 1 §1.4 (caching strategy), Phase 22 (SceneGraph compute — pure sync function to wrap), Phase 26 (ELK subscription wires into this layer in Phase 28)
 
-**Estimated effort:** 2–3 days
+> **Estimated effort:** 2–3 days
 
-**Prerequisite:** Phase 22 (scene graph — `computeSceneGraphAtStep` must exist before runtime can cache it)
+> **Prerequisite:** Phase 22 (scene graph — `computeSceneGraphAtStep` must exist before runtime can cache it)
+
+> **Status**: COMPLETE
 
 ---
 

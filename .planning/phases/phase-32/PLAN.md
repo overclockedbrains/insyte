@@ -2,15 +2,17 @@
 
 > **Revision 1 — April 18, 2026**
 
-**Goal:** A dev-only tool for iterating on the AI pipeline without burning tokens on stages that already work. Two surfaces:
+> **Goal:** A dev-only tool for iterating on the AI pipeline without burning tokens on stages that already work. Two surfaces:
 - `/dev/pipeline` — run any stage in isolation, lock its output, edit the JSON, replay downstream stages
 - `/dev/scene` — paste any Scene JSON and see it rendered with full playback controls
 
-**Prerequisite:** Phase 30 ✅ + Phase 31 ✅ — pipeline architecture and model routing stable.
+> **Prerequisite:** Phase 30 ✅ + Phase 31 ✅ — pipeline architecture and model routing stable.
 
-**Estimated effort:** 1–2 days
+> **Estimated effort:** 1–2 days
 
-**Prod code changes: ZERO** — all new files. No modifications to `pipeline.ts`, `schemas.ts`, `assembly.ts`, or any existing route.
+> **Prod code changes: ZERO** — all new files. No modifications to `pipeline.ts`, `schemas.ts`, `assembly.ts`, or any existing route.
+
+> **Status**: COMPLETE
 
 ---
 

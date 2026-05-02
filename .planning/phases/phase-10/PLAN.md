@@ -1,8 +1,10 @@
 # Phase 10 — LLD + HLD Simulations
 
-**Goal:** All 9 remaining pre-built simulations (5 LLD + 4 HLD) authored and rendering correctly. `SystemDiagramViz` fully complete with interactive controls. HLD `canvas-only` layout fully functional.
+> **Goal:** All 9 remaining pre-built simulations (5 LLD + 4 HLD) authored and rendering correctly. `SystemDiagramViz` fully complete with interactive controls. HLD `canvas-only` layout fully functional.
 
-**Entry criteria:** Phase 9 complete. All primitives built. `SceneRenderer` handles all 3 layouts.
+> **Entry criteria:** Phase 9 complete. All primitives built. `SceneRenderer` handles all 3 layouts.
+
+> **Status**: COMPLETE
 
 ---
 
