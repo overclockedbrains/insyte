@@ -4,8 +4,9 @@ import { resolveModel } from '@/src/ai/providers'
 import { getGeminiProvider } from '@/src/ai/providers/gemini'
 import { REGISTRY } from '@/src/ai/registry'
 import type { Provider } from '@/src/ai/registry'
-import { generateScene } from '@/src/ai/pipeline'
-import type { ModelConfig } from '@/src/ai/client'
+import { generateScene } from '@/src/ai'
+import type { GenerationConfig } from '@/src/ai'
+import type { ModelConfig } from '@/src/ai'
 import type { SceneType } from '@insyte/scene-engine'
 import {
   saveScene,
@@ -41,11 +42,22 @@ export async function POST(req: NextRequest) {
   let topic: string
   let slug: string | undefined
   let mode: SceneType | undefined
+  let genConfig: GenerationConfig | undefined
   try {
     const body = await req.json()
     topic = body?.topic?.trim() ?? ''
     slug = body?.slug?.trim() || undefined
     mode = body?.mode ?? undefined
+    const depth = body?.depth
+    const familiarity = body?.familiarity
+    const answers = Array.isArray(body?.answers) ? body.answers.slice(0, 3) : []
+    if (depth || familiarity || answers.length) {
+      genConfig = {
+        depth: depth ?? 'standard',
+        familiarity: familiarity ?? 'basics',
+        answers,
+      }
+    }
   } catch {
     return new Response('Invalid JSON body', { status: 400 })
   }
@@ -138,12 +150,13 @@ export async function POST(req: NextRequest) {
           stage: 0,
           message: 'Pipeline timed out after 4.5 minutes — please try again',
           retryable: true,
+          errorCode: 'unknown',
         }
         try { controller.enqueue(encoder.encode(`data: ${JSON.stringify(timeoutEvent)}\n\n`)) } catch { /* stream closed */ }
       }, PIPELINE_HARD_LIMIT_MS)
 
       try {
-        for await (const event of generateScene(topic, mode, modelConfig)) {
+        for await (const event of generateScene(topic, mode, modelConfig, genConfig)) {
           if (pipelineTimedOut) break
 
           const line = `data: ${JSON.stringify(event)}\n\n`
@@ -177,6 +190,7 @@ export async function POST(req: NextRequest) {
           stage: 0,
           message: err instanceof Error ? err.message : 'Unexpected pipeline error',
           retryable: true,
+          errorCode: 'unknown',
         }
         controller.enqueue(encoder.encode(`data: ${JSON.stringify(errorEvent)}\n\n`))
         aiLog.server.error('pipeline', err)

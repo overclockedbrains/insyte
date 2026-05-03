@@ -6,11 +6,11 @@ import { safeParseScene } from '@insyte/scene-engine'
 import { useBoundStore } from '@/src/stores/store'
 import { aiLog } from '@/lib/ai-logger'
 import { analytics } from '@/src/lib/analytics'
-import type { GenerationEvent } from '@/src/ai/pipeline'
+import type { GenerationEvent, GenerationConfig } from '@/src/ai/pipeline'
 import { buildAIHeaders } from '@/lib/headers'
 
 // Re-export so consumers don't need to import from the AI module directly
-export type { GenerationEvent }
+export type { GenerationEvent, GenerationConfig }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -36,7 +36,8 @@ export interface UseStreamSceneResult {
   /** True after 30s of active streaming with no completion — show a patience message */
   isSlowGeneration: boolean
   error: string | null
-  startStreaming: (topic: string, slug?: string) => void
+  errorCode: 'rate_limit' | 'overloaded' | 'unknown' | null
+  startStreaming: (topic: string, slug?: string, config?: GenerationConfig) => void
   retry: () => void
   abort: () => void
 }
@@ -98,11 +99,13 @@ async function* readSSE(
  */
 export function useStreamScene(): UseStreamSceneResult {
   const [error, setError] = useState<string | null>(null)
+  const [errorCode, setErrorCode] = useState<'rate_limit' | 'overloaded' | 'unknown' | null>(null)
   const [reasoningText, setReasoningText] = useState<string | null>(null)
   const [isSlowGeneration, setIsSlowGeneration] = useState(false)
   const slowTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastTopicRef = useRef<string>('')
   const lastSlugRef = useRef<string | undefined>(undefined)
+  const lastConfigRef = useRef<GenerationConfig | undefined>(undefined)
   const retryCountRef = useRef(0)
   const abortControllerRef = useRef<AbortController | null>(null)
 
@@ -121,7 +124,7 @@ export function useStreamScene(): UseStreamSceneResult {
   }, [isStreaming])
 
   // Stable ref so retry callbacks always call the latest runStream
-  const runStreamRef = useRef<(topic: string, slug?: string) => void>(() => { })
+  const runStreamRef = useRef<(topic: string, slug?: string, config?: GenerationConfig) => void>(() => { })
 
   // ─── handleScene ─────────────────────────────────────────────────────────
 
@@ -171,9 +174,10 @@ export function useStreamScene(): UseStreamSceneResult {
   // ─── runStream ────────────────────────────────────────────────────────────
 
   const runStream = useCallback(
-    (topic: string, slug?: string) => {
+    (topic: string, slug?: string, config?: GenerationConfig) => {
       aiLog.stream.start(topic, slug)
       setError(null)
+      setErrorCode(null)
       setReasoningText(null)
       setIsSlowGeneration(false)
       if (slowTimerRef.current) clearTimeout(slowTimerRef.current)
@@ -194,7 +198,6 @@ export function useStreamScene(): UseStreamSceneResult {
         ollamaBaseURL,
         customBaseURL,
         customApiKey,
-        detectedMode,
       } = useBoundStore.getState()
         const headers: Record<string, string> = {
           'Content-Type': 'application/json',
@@ -215,7 +218,14 @@ export function useStreamScene(): UseStreamSceneResult {
           const response = await fetch('/api/generate', {
             method: 'POST',
             headers,
-            body: JSON.stringify({ topic, slug, mode: detectedMode ?? undefined }),
+            body: JSON.stringify({
+              topic,
+              slug,
+              mode: config?.mode,
+              depth: config?.depth,
+              familiarity: config?.familiarity,
+              answers: config?.answers,
+            }),
             signal: controller.signal,
           })
 
@@ -267,12 +277,16 @@ export function useStreamScene(): UseStreamSceneResult {
                 handleScene(event.scene, topic)
                 return  // stream done, handleScene manages setStreaming(false)
 
-              case 'error':
-                if (event.retryable && retryCountRef.current < CLIENT_MAX_RETRIES) {
+              case 'error': {
+                const shouldAutoRetry =
+                  event.retryable &&
+                  event.errorCode === 'unknown' &&
+                  retryCountRef.current < CLIENT_MAX_RETRIES
+                if (shouldAutoRetry) {
                   retryCountRef.current++
                   aiLog.stream.retry(retryCountRef.current, `stage-${event.stage}`)
                   setError(`Stage ${event.stage} failed — retrying...`)
-                  setTimeout(() => runStreamRef.current(topic, slug), 800)
+                  setTimeout(() => runStreamRef.current(topic, slug, config), 800)
                 } else {
                   retryCountRef.current = 0
                   setStreaming(false)
@@ -281,8 +295,10 @@ export function useStreamScene(): UseStreamSceneResult {
                   aiLog.store.clearScene()
                   aiLog.stream.error(event.message)
                   setError(event.message)
+                  setErrorCode(event.errorCode)
                 }
                 return
+              }
             }
           }
 
@@ -304,7 +320,7 @@ export function useStreamScene(): UseStreamSceneResult {
             retryCountRef.current++
             aiLog.stream.retry(retryCountRef.current, 'fetch-error')
             setError('Generation failed — retrying...')
-            setTimeout(() => runStreamRef.current(topic, slug), 800)
+            setTimeout(() => runStreamRef.current(topic, slug, config), 800)
           } else {
             retryCountRef.current = 0
             setStreaming(false)
@@ -326,11 +342,12 @@ export function useStreamScene(): UseStreamSceneResult {
   // ─── Public API ───────────────────────────────────────────────────────────
 
   const startStreaming = useCallback(
-    (topic: string, slug?: string) => {
+    (topic: string, slug?: string, config?: GenerationConfig) => {
       lastTopicRef.current = topic
       lastSlugRef.current = slug
+      lastConfigRef.current = config
       retryCountRef.current = 0
-      runStream(topic, slug)
+      runStream(topic, slug, config)
     },
     [runStream],
   )
@@ -338,7 +355,7 @@ export function useStreamScene(): UseStreamSceneResult {
   const retry = useCallback(() => {
     if (lastTopicRef.current) {
       retryCountRef.current = 0
-      runStream(lastTopicRef.current, lastSlugRef.current)
+      runStream(lastTopicRef.current, lastSlugRef.current, lastConfigRef.current)
     }
   }, [runStream])
 
@@ -349,5 +366,5 @@ export function useStreamScene(): UseStreamSceneResult {
     aiLog.store.setStreaming(false)
   }, [setStreaming])
 
-  return { isStreaming, streamedFields, reasoningText, isSlowGeneration, error, startStreaming, retry, abort }
+  return { isStreaming, streamedFields, reasoningText, isSlowGeneration, error, errorCode, startStreaming, retry, abort }
 }

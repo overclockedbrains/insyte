@@ -174,3 +174,12 @@ export const MiscSchema = z.object({
 })
 
 export type MiscParsed = z.infer<typeof MiscSchema>
+
+// ─── Pre-gen: mode classification + scoped questions ─────────────────────────
+
+export const PreGenSchema = z.object({
+  mode: z.enum(['concept', 'dsa-trace', 'lld', 'hld']),
+  questions: z.array(z.string()).max(3),
+})
+
+export type PreGenResult = z.infer<typeof PreGenSchema>

@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useBoundStore } from '@/src/stores/store'
 import { useStreamScene } from '@/src/engine/hooks/useStreamScene'
+import type { GenerationConfig } from '@/src/engine/hooks/useStreamScene'
 import { SimulationLayout } from '@/src/engine/SimulationLayout'
 import { StreamingError } from './StreamingError'
 import { StreamingSkeleton } from './StreamingSkeleton'
@@ -19,10 +20,11 @@ import { StreamingSkeleton } from './StreamingSkeleton'
 interface StreamingViewProps {
   topic: string
   slug: string
+  config?: GenerationConfig
 }
 
-export function StreamingView({ topic, slug }: StreamingViewProps) {
-  const { isStreaming, streamedFields, error, startStreaming, retry, abort } = useStreamScene()
+export function StreamingView({ topic, slug, config }: StreamingViewProps) {
+  const { isStreaming, streamedFields, error, errorCode, startStreaming, retry, abort } = useStreamScene()
   const activeScene = useBoundStore((s) => s.activeScene)
   const setTotalSteps = useBoundStore((s) => s.setTotalSteps)
   const reset = useBoundStore((s) => s.reset)
@@ -30,7 +32,7 @@ export function StreamingView({ topic, slug }: StreamingViewProps) {
   // Start streaming on mount; abort on unmount to prevent stale completions
   // from a cancelled stream (e.g. StrictMode double-invoke) calling setScene.
   useEffect(() => {
-    startStreaming(topic, slug)
+    startStreaming(topic, slug, config)
     return () => abort()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topic, slug])
@@ -44,7 +46,7 @@ export function StreamingView({ topic, slug }: StreamingViewProps) {
   }, [activeScene?.steps?.length, setTotalSteps, reset])
 
   if (error && !isStreaming && !activeScene) {
-    return <StreamingError topic={topic} error={error} onRetry={retry} />
+    return <StreamingError topic={topic} error={error} errorCode={errorCode} onRetry={retry} />
   }
 
   if (activeScene) {

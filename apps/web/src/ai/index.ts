@@ -6,8 +6,10 @@
 export { generateScene } from './pipeline'
 export { streamChatResponse, buildSceneContext } from './liveChat'
 export { streamTraceToScene } from './traceToScene'
+export { generatePreGen } from './pre-gen'
 
 // Types
-export type { GenerationEvent } from './pipeline'
+export type { GenerationEvent, GenerationConfig } from './pipeline'
 export type { ModelConfig } from './client'
 export type { ChatStreamResult, ChatRequestBody } from './liveChat'
+export type { PreGenResult } from './pre-gen'

@@ -78,6 +78,7 @@ R1 released April 8, 2026. R2 released April 14, 2026. R3 in progress (latest: P
 | 36 | ✅ | SEO Infrastructure — sitemap, robots, JSON-LD, OG images, GSC verified. Completed April 28, 2026. |
 | 37 | ✅ | Theme Centralization — two-file color rule, 30 files fixed. Completed April 29, 2026. |
 | 38 | ✅ | Color Architecture Hardening — `--ref-*` palette layer, `color-mix()` alpha aliases, `VIZ_SHADOWS` split. Completed April 29, 2026. |
+| 39 | ✅ | Smart Generation Flow — AI-derived mode + clarifying questions, depth presets, familiarity presets, typed pipeline error UX. Completed May 3, 2026. |
 
 > Phase details → `.planning/phases/phase-XX/PLAN.md`
 

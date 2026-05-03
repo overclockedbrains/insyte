@@ -2,6 +2,19 @@ import { loadPromptMarkdown } from './loadPrompt'
 import { buildPromptGuide } from '@insyte/scene-engine'
 import type { SceneSkeletonParsed, StepsParsed } from '../schemas'
 import type { SceneType, VisualType } from '@insyte/scene-engine'
+import type { GenerationConfig } from '../pipeline'
+
+const FAMILIARITY_INSTRUCTIONS: Record<NonNullable<GenerationConfig['familiarity']>, string> = {
+  new: 'Explain all concepts from first principles. Avoid jargon. Use simple analogies.',
+  basics: "Assume basic familiarity. Define technical terms but don't over-explain fundamentals.",
+  familiar: 'Assume solid prior knowledge. Focus on depth, edge cases, and nuance.',
+}
+
+const DEPTH_STEP_TARGETS: Record<NonNullable<GenerationConfig['depth']>, string> = {
+  quick: '6–8',
+  standard: '10–12',
+  deep: '15–18',
+}
 
 // ─── System prompts (one per structured stage) ───────────────────────────────
 
@@ -41,10 +54,18 @@ ${formatted}`
 
 // ─── Stage 0 ─────────────────────────────────────────────────────────────────
 
-export function buildStage0Prompt(topic: string, mode?: SceneType): string {
-  return loadPromptMarkdown('stage0-reasoning.md')
-    .replace('{topic}', topic)
+export function buildStage0Prompt(topic: string, mode?: SceneType, config?: GenerationConfig): string {
+  let enrichedTopic = topic
+  if (config?.answers?.length) {
+    enrichedTopic += '\n\nAdditional context from user:\n' + config.answers.map(a => `- ${a}`).join('\n')
+  }
+  let base = loadPromptMarkdown('stage0-reasoning.md')
+    .replace('{topic}', enrichedTopic)
     .replace('{mode}', mode ?? 'auto')
+  if (config?.familiarity) {
+    base += `\n\nFamiliarity: ${FAMILIARITY_INSTRUCTIONS[config.familiarity]}`
+  }
+  return base
 }
 
 // ─── Stage 1 ─────────────────────────────────────────────────────────────────
@@ -53,10 +74,14 @@ export function buildStage1Prompt(
   topic: string,
   reasoning: string,
   lastError?: string,
+  config?: GenerationConfig,
 ): string {
-  const base = loadPromptMarkdown('stage1-skeleton.md')
+  let base = loadPromptMarkdown('stage1-skeleton.md')
     .replace('{reasoning}', reasoning)
     .replace('{topic}', topic)
+  if (config?.depth) {
+    base += `\n\nTarget step count: ${DEPTH_STEP_TARGETS[config.depth]} steps.`
+  }
   return appendErrorGuidance(base, lastError)
 }
 
@@ -67,6 +92,7 @@ export function buildStage2Prompt(
   reasoning: string,
   skeleton: SceneSkeletonParsed,
   lastError?: string,
+  config?: GenerationConfig,
 ): string {
   const canvasIdsList = skeleton.canvas
     .map(v => `- ${v.id} (${v.type}${v.variant ? `, variant: ${v.variant}` : ''})`)
@@ -81,13 +107,16 @@ export function buildStage2Prompt(
   const hudItems = skeleton.hud ?? []
   const promptGuide = buildPromptGuide(canvasVisuals, hudItems)
 
-  const base = loadPromptMarkdown('stage2-steps.md')
+  let base = loadPromptMarkdown('stage2-steps.md')
     .replace('{canvasIdsList}', canvasIdsList)
     .replace('{skeletonJson}', skeletonJson)
     .replace('{reasoning}', reasoning)
     .replace('{stepCount}', String(skeleton.stepCount))
     .replace('{promptGuide}', promptGuide)
     .replace('{topic}', topic)
+  if (config?.familiarity) {
+    base += `\n\nFamiliarity: ${FAMILIARITY_INSTRUCTIONS[config.familiarity]}`
+  }
   return appendErrorGuidance(base, lastError)
 }
 

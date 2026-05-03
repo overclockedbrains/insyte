@@ -3,14 +3,33 @@
 // ─── StreamingError ───────────────────────────────────────────────────────────
 // Shown when generation fails and there is no activeScene to fall back on.
 
+type ErrorCode = 'rate_limit' | 'overloaded' | 'unknown'
+
 interface StreamingErrorProps {
   topic: string
   error: string
+  errorCode: ErrorCode | null
   onRetry: () => void
 }
 
-export function StreamingError({ topic, error, onRetry }: StreamingErrorProps) {
-  const isRateLimit = error.includes('Rate limit')
+const ERROR_CONTENT: Record<ErrorCode, { heading: string; suggestion: string }> = {
+  rate_limit: {
+    heading: 'Rate limit reached for this provider',
+    suggestion: 'Switch provider in Settings or add a BYOK key for unlimited access.',
+  },
+  overloaded: {
+    heading: 'Provider is handling too many requests right now',
+    suggestion: 'Try again in a moment.',
+  },
+  unknown: {
+    heading: 'Something went wrong during generation',
+    suggestion: 'Try again.',
+  },
+}
+
+export function StreamingError({ topic, errorCode, onRetry }: StreamingErrorProps) {
+  const code: ErrorCode = errorCode ?? 'unknown'
+  const { heading, suggestion } = ERROR_CONTENT[code]
 
   return (
     <div className="flex h-[calc(100vh-3.5rem)] items-center justify-center px-4">
@@ -24,11 +43,8 @@ export function StreamingError({ topic, error, onRetry }: StreamingErrorProps) {
           <p className="text-on-surface font-semibold">
             Could not generate simulation for &ldquo;{topic}&rdquo;
           </p>
-          <p className="text-on-surface-variant text-sm">
-            {isRateLimit
-              ? 'You have reached the free generation limit. Add a BYOK key in Settings for unlimited access.'
-              : 'The AI generation failed. This sometimes happens with complex topics.'}
-          </p>
+          <p className="text-on-surface-variant text-sm">{heading}</p>
+          <p className="text-on-surface-variant/70 text-xs">{suggestion}</p>
         </div>
 
         <button

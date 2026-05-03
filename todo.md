@@ -36,6 +36,7 @@
 - Remove explore page and just have gallery?
 - Do not pass retry-message in retry if stage failed due to gemini not available due to high demand and do not retry if rate limit exceeded.
 - DSA pipeline to be tested and fixed if off !
+- End user — a subtle live status feed during generation on /s/[slug] so they can see which stage is running / what happened
 
 ## ❓ Questions / Blockers
 -

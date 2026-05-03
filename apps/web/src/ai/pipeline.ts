@@ -73,7 +73,17 @@ export type GenerationEvent =
       stage: number
       message: string
       retryable: boolean
+      errorCode: 'rate_limit' | 'overloaded' | 'unknown'
     }
+
+// ─── GenerationConfig ─────────────────────────────────────────────────────────
+
+export interface GenerationConfig {
+  mode?: SceneType
+  depth: 'quick' | 'standard' | 'deep'
+  familiarity: 'new' | 'basics' | 'familiar'
+  answers: string[]
+}
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -105,6 +115,7 @@ export async function* generateScene(
   topic: string,
   mode: SceneType | undefined,
   modelConfig: ModelConfig,
+  config?: GenerationConfig,
 ): AsyncGenerator<GenerationEvent> {
 
   const byokModel = modelConfig.byokModel
@@ -141,7 +152,7 @@ export async function* generateScene(
     const stage0Cfg = stageConfig('stage0', 1.0)
     const { textStream } = streamText({
       model: stage0Cfg.model,
-      prompt: buildStage0Prompt(topic, mode),
+      prompt: buildStage0Prompt(topic, mode, config),
       providerOptions: stage0Cfg.providerOptions,
       temperature: 1.0,
       maxOutputTokens: 8192,
@@ -159,6 +170,7 @@ export async function* generateScene(
       stage: 0,
       message: `Stage 0 (reasoning) failed: ${err instanceof Error ? err.message : String(err)}`,
       retryable: true,
+      errorCode: classifyError(err),
     }
     return
   }
@@ -171,7 +183,7 @@ export async function* generateScene(
   try {
     skeleton = await retryStage(MAX_RETRIES, (lastError) =>
       generateObject(
-        buildStage1Prompt(topic, reasoning, lastError),
+        buildStage1Prompt(topic, reasoning, lastError, config),
         SceneSkeletonSchema,
         stageConfig('stage1', 0.1),
         STAGE1_SYSTEM,
@@ -187,6 +199,7 @@ export async function* generateScene(
       stage: 1,
       message: `Stage 1 (skeleton) failed after ${MAX_RETRIES} retries: ${err instanceof Error ? err.message : String(err)}`,
       retryable: true,
+      errorCode: classifyError(err),
     }
     return
   }
@@ -205,7 +218,7 @@ export async function* generateScene(
   try {
     const stepsRaw = await retryStage(MAX_RETRIES, async (lastError) => {
       const raw = await generateJson(
-        buildStage2Prompt(topic, reasoning, skeleton, lastError),
+        buildStage2Prompt(topic, reasoning, skeleton, lastError, config),
         buildStepsSchema(skeleton),
         stageConfig('stage2', 0.2),
         STAGE2_SYSTEM,
@@ -226,6 +239,7 @@ export async function* generateScene(
       stage: 2,
       message: `Stage 2 (steps) failed after ${MAX_RETRIES} retries: ${err instanceof Error ? err.message : String(err)}`,
       retryable: true,
+      errorCode: classifyError(err),
     }
     return
   }
@@ -304,6 +318,7 @@ export async function* generateScene(
       stage: 5,
       message: `Stage 5 (assembly) failed: ${assembled.errors!.join('; ')}`,
       retryable: false,
+      errorCode: 'unknown',
     }
     return
   }
@@ -315,6 +330,13 @@ export async function* generateScene(
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function classifyError(err: unknown): 'rate_limit' | 'overloaded' | 'unknown' {
+  const msg = err instanceof Error ? err.message : String(err)
+  if (/429|rate.?limit|quota/i.test(msg)) return 'rate_limit'
+  if (/503|overload|high.?demand|unavailable/i.test(msg)) return 'overloaded'
+  return 'unknown'
+}
 
 /**
  * Builds provider-specific thinking config for Stage 0.

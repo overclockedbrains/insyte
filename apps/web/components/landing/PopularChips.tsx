@@ -3,20 +3,18 @@
 import { type MutableRefObject, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { useBoundStore } from '@/src/stores/store'
-import type { DetectedMode } from '@/src/stores/slices/detection-slice'
 
 interface Chip {
   label: string
   query: string
-  mode: DetectedMode
 }
 
 const POPULAR_CHIPS: Chip[] = [
-  { label: 'Hash Tables', query: 'How does a hash table work?', mode: 'concept' },
-  { label: 'DNS Resolution', query: 'How does DNS resolution work?', mode: 'concept' },
-  { label: 'Two Sum', query: 'Two Sum problem', mode: 'dsa' },
-  { label: 'LRU Cache', query: 'Design an LRU Cache', mode: 'lld' },
-  { label: 'Twitter Feed', query: 'Design a Twitter feed system', mode: 'hld' },
+  { label: 'Hash Tables', query: 'How does a hash table work?' },
+  { label: 'DNS Resolution', query: 'How does DNS resolution work?' },
+  { label: 'Two Sum', query: 'Two Sum problem' },
+  { label: 'LRU Cache', query: 'Design an LRU Cache' },
+  { label: 'Twitter Feed', query: 'Design a Twitter feed system' },
 ]
 
 interface PopularChipsProps {
@@ -25,15 +23,13 @@ interface PopularChipsProps {
 
 export function PopularChips({ fillInputRef }: PopularChipsProps) {
   const setInput = useBoundStore((s) => s.setInput)
-  const setMode = useBoundStore((s) => s.setMode)
 
   const handleChip = useCallback(
     (chip: Chip) => {
       setInput(chip.query)
-      setMode(chip.mode)
       fillInputRef?.current?.(chip.query)
     },
-    [setInput, setMode, fillInputRef],
+    [setInput, fillInputRef],
   )
 
   return (
